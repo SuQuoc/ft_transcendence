@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -127,3 +126,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # setting to point to that routing object as your root application
 ASGI_APPLICATION = "game.asgi.application"
+
+#Change port
+#PORT = 8009

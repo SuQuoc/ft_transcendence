@@ -19,6 +19,19 @@ services:
       timeout: 5s
       retries: 4
 
+  game:
+    build: ./src/game
+    #command: scripts/entrypoint.sh
+    volumes:
+      - ./src/game:/game
+    expose:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+
   #web:
   #  build: ./srcs
   #  command: scripts/entrypoint.sh
@@ -32,13 +45,13 @@ services:
   #  env_file:
   #    - .env
 
-  #nginx:
-  #  build: ./nginx
-  #  ports:
-  #    - 8080:443
-  #  depends_on:
-  #    - web
-  #    - database
+  nginx:
+    build: ./src/nginx
+    ports:
+      - 8000:443
+    depends_on:
+      - game
+      - database
 
 volumes:
   postgres_data:
