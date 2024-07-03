@@ -19,12 +19,27 @@ services:
       timeout: 5s
       retries: 4
 
+  game:
+    build: ./src/game
+    #command: scripts/entrypoint.sh
+    volumes:
+      - ./src/game:/game
+    expose:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+
   user_management:
     build: ./src/user_management
     command: scripts/entrypoint.sh
     volumes:
       - ./src/user_management:/user_management
-    ports:
+    expose:
       - "8000:8000"
     depends_on:
       database:
@@ -35,8 +50,9 @@ services:
   nginx:
     build: ./src/nginx
     ports:
-      - 8080:443
+      - 8000:443
     depends_on:
+      - game
       - user_management
       - database
 
