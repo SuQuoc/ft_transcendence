@@ -1,17 +1,26 @@
+from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.http import Http404
-from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import CustomUser
 from .models import MatchRecord
 from .serializers import CustomUserSerializer
 
 # Create your views here.
+
+
+def profile(request):
+    return HttpResponse("This is the profile page")
+
+
+class ProfileDetailApiView(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
 
 
 class CustomUserProfile(generics.RetrieveAPIView):
@@ -33,10 +42,12 @@ class CustomUserProfileRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIVi
     def get_queryset(self):
         return CustomUser.objects.filter(id=self.request.user.id)
 
+
 class ProfileDetail(APIView):
     """
     Retrieve, update or delete a profile instance.
     """
+
     def get_object(self, pk):
         try:
             return CustomUser.objects.get(pk=pk)
