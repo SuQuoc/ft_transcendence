@@ -3,7 +3,7 @@
 import-order-style = google
 application-import-names = pong
 
-ignore = E501,F401
+ignore = E501,F401,F841
 #    */filepath/*: E501
 #    */filepath/file.py: E501
 
