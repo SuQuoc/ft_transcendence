@@ -1,5 +1,8 @@
 FROM nginx:1.27.0
 
+RUN mkdir -p /www/data
+#GRAND FOLDER TO NGINX USER ?
+COPY ./html/pong.html /www/data/pong.html
 
 RUN rm /etc/nginx/conf.d/default.conf
 

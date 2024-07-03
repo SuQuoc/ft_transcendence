@@ -25,7 +25,7 @@ services:
     volumes:
       - ./src/game:/game
     expose:
-      - "8000:8000"
+      - 8000
     environment:
       - PYTHONUNBUFFERED=1
     env_file:
@@ -40,7 +40,7 @@ services:
     volumes:
       - ./src/user_management:/user_management
     expose:
-      - "8000:8000"
+      - 8000
     depends_on:
       database:
         condition: service_healthy
