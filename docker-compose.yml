@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
-    expose:
+    ports:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -19,26 +19,26 @@ services:
       timeout: 5s
       retries: 4
 
-  #web:
-  #  build: ./srcs
-  #  command: scripts/entrypoint.sh
-  #  volumes:
-  #    - ./srcs:/transcendence
-  #  expose:
-  #    - "8000:8000"
-  #  depends_on:
-  #    database:
-  #      condition: service_healthy
-  #  env_file:
-  #    - .env
+  user_management:
+    build: ./src/user_management
+    command: scripts/entrypoint.sh
+    volumes:
+      - ./src/user_management:/user_management
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
 
-  #nginx:
-  #  build: ./nginx
-  #  ports:
-  #    - 8080:443
-  #  depends_on:
-  #    - web
-  #    - database
+  nginx:
+    build: ./src/nginx
+    ports:
+      - 8080:443
+    depends_on:
+      - user_management
+      - database
 
 volumes:
   postgres_data:
