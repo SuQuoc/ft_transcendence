@@ -26,11 +26,13 @@ services:
       - ./src/game:/game
     expose:
       - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
     depends_on:
       database:
         condition: service_healthy
-    env_file:
-      - .env
 
   #web:
   #  build: ./srcs
