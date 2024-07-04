@@ -1,7 +1,5 @@
 FROM python:3.10-slim-buster
 
-# Forces python to not buffer the output and print it directly 
-ENV PYTHONBUFFERED=1
 
 WORKDIR /user_management
 

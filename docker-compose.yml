@@ -44,6 +44,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    environment:
+      - PYTHONUNBUFFERED=1 #Forces python to not buffer the output and print it directly
     env_file:
       - .env
 
