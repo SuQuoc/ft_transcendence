@@ -2,7 +2,7 @@ FROM nginx:1.27.0
 
 RUN mkdir -p /www/data
 #GRAND FOLDER TO NGINX USER ?
-COPY ./html/pong.html /www/data/pong.html
+COPY ./static /www/data
 
 RUN rm /etc/nginx/conf.d/default.conf
 
@@ -22,5 +22,8 @@ RUN openssl req -newkey rsa:4096 \
             -keyout /etc/nginx/ssl/private/example.key
 
 COPY nginx.conf /etc/nginx/conf.d
+
+RUN chown -R nginx:nginx /www/data
+RUN chmod -R 755 /www/data
 
 CMD ["nginx", "-g", "daemon off;"]

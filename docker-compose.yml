@@ -23,7 +23,7 @@ services:
     build: ./src/game
     #command: scripts/entrypoint.sh
     volumes:
-      - ./src/game:/game
+      - ./src/game:/daphne
     expose:
       - 8000
     environment:
