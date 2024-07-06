@@ -33,13 +33,15 @@ ALLOWED_HOSTS = ['*']
 # add pong and daphne app
 INSTALLED_APPS = [
     'daphne',
-    'pong',
+#'pong',
+    'pong.apps.PongConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sslserver'
 ]
 
 MIDDLEWARE = [
@@ -131,3 +133,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # setting to point to that routing object as your root application
 ASGI_APPLICATION = "game.asgi.application"
+
+# Example routing for channels
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use appropriate layer backend
+    },
+}
