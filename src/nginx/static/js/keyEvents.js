@@ -2,6 +2,13 @@
 // function gets called from event listener in pong.js
 // write class or function both would work!
 
+function send_key_status(id, up_down)
+{
+    chatSocket.send(JSON.stringify({
+        "playerId": id, "up": up_down[0], "down": up_down[1],
+    }));
+}
+
 class key_event_handler
 {
     constructor(player1, player2)
@@ -17,61 +24,27 @@ class key_event_handler
     key_event()
     {
         let player1 = this.player1;
-        var down = this.down;
-        var up = this.up;
+        let up_down = [this.up, this.down];
 
         document.addEventListener("keydown", key_down)
         function key_down(e)
         {
             if(e.key === "w")
-            {
-                up = true;
-                down = false;
-            }
+                up_down = [true, false]
             if(e.key === "s")
-            {
-                up = false;
-                down = true;
-            }
-            chatSocket.send(JSON.stringify({
-                "playerId": player1.id, "up": up, "down": down,
-            }));
-            console.log(player1.id)
+                up_down = [false, true]
+            send_key_status(player1.id, up_down);
         }
+
         document.addEventListener("keyup", key_up)
         function key_up(e)
         {
             if(e.key === "w")
-                up = false;
+                up_down[0] = false;
             if(e.key === "s")
-                down = false;
-            chatSocket.send(JSON.stringify({
-                "playerId": player1.id, "up": up, "down": down,
-            }));
-
+                up_down[1] = false;
+            send_key_status(player1.id, up_down);
         }
     }
 
-    keyDown(e)
-    {
-        //var up = 1;
-        console.log(this.up)
-        if(e.code === "w")
-        {
-            this.up = "1";
-            this.down = "0";
-        }
-        if(e.code === "s")
-        {
-            this.up = "0";
-            this.down = "1";
-        }
-        chatSocket.send(JSON.stringify({
-            "up": this.player1
-        }));
-        console.log(this.player1, e)
-        //send from here to backend
-        //send every tick/refresh?
-        //we are fucked xD
-    }
 }

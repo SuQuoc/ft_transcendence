@@ -98,6 +98,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                     ball["x"] += newPlayerX
                     ball["y"] += newPlayerY
+                    ball["x"] = 25
+                    ball["y"] = 25
 
                     # set new player pos
                     if player["up"]:
