@@ -6,7 +6,7 @@ PYTHON = $(VENV)/bin/python
 PIP = $(VENV)/bin/pip
 
 
-.PHONY: all install clean-v run run-b stop rm-vol mm migrate shell
+.PHONY: all install clean-v run run-b stop rm-vol mm migrate shell reset
 
 all: prep run
 
@@ -33,14 +33,14 @@ clean-v:
 
 # Activate virtual environment
 # Run Django server
-run:
+run: prep
 	docker compose up
 
 # Other targets as needed
-run-b:
+run-b: prep
 	docker compose up --build
 
-run-no-cache:
+build-no-cache:
 	docker compose build --no-cache
 
 down:
@@ -51,10 +51,14 @@ rm-vol:
 	docker volume rm ft_transcendence_volume_game
 
 mm:
-	docker compose exec web python manage.py makemigrations
+	docker compose exec user_management python manage.py makemigrations
 
 migrate:
-	docker compose exec web python manage.py migrate
+	docker compose exec user_management python manage.py migrate
 
 shell:
 	docker compose exec web python manage.py shell
+
+reset: down
+	rm -r ~/transcendence_volumes
+	all
