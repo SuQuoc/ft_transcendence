@@ -1,20 +1,30 @@
 # Makefile
 
-# Define variables
+# Variables
 VENV = .venv
 PYTHON = $(VENV)/bin/python
 PIP = $(VENV)/bin/pip
 
+# Volume
+VOL_DIR = ~/transcendence_volumes
+VOL_PREFIX = ft_transcendence_volume_
 
-.PHONY: all install clean-v run run-b stop rm-vol mm migrate shell reset
+# Services
+S_REGI = registration
+S_USER = user_management
+S_GAME = game
 
-all: prep run
+
+.PHONY: all prep install clean-v up up-b stop rm-vol mm migrate shell
+
+
+all: prep up
 
 
 prep:
-	mkdir -p ~/transcendence_volumes/registration
-	mkdir -p ~/transcendence_volumes/user_management
-	mkdir -p ~/transcendence_volumes/game
+	mkdir -p $(VOL_DIR)/$(S_REGI)
+	mkdir -p $(VOL_DIR)/$(S_USER)
+	mkdir -p $(VOL_DIR)/$(S_GAME)
 #$(VENV):
 #	virtualenv $(VENV)
 
@@ -22,22 +32,16 @@ prep:
 #	# Activate virtual environment
 #	# Install dependencies
 #	. $(VENV)/bin/activate; \
-#	$(PIP) install -r srcs/requirements-dev.txt
+#	$(PIP) install -r srcs/user_management/requirements.txt
 
 # Target to clean up
 clean-v:
 	rm -rf $(VENV)
 
-
-# Target to run the project
-
-# Activate virtual environment
-# Run Django server
-run: prep
+up: prep
 	docker compose up
 
-# Other targets as needed
-run-b: prep
+up-b: prep
 	docker compose up --build
 
 build-no-cache:
@@ -47,18 +51,16 @@ down:
 	docker compose down
 
 rm-vol:
-	docker volume rm ft_transcendence_volume_user_management
-	docker volume rm ft_transcendence_volume_game
+	docker volume rm $(VOL_PREFIX)$(S_USER)
+	docker volume rm $(VOL_PREFIX)$(S_GAME)
+	rm -rf $(VOL_DIR)
 
+# Commands for user_management service
 mm:
-	docker compose exec user_management python manage.py makemigrations
+	docker compose exec $(S_USER) python manage.py makemigrations
 
 migrate:
-	docker compose exec user_management python manage.py migrate
+	docker compose exec $(S_USER) python manage.py migrate
 
 shell:
-	docker compose exec web python manage.py shell
-
-reset: down
-	rm -r ~/transcendence_volumes
-	all
+	docker compose exec $(S_USER) python manage.py shell
