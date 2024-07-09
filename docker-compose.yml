@@ -1,44 +1,119 @@
 services:
-  database:
-    # image to fetch from docker hub
+  #db_registration:
+  #  image: postgres:16
+  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
+  #  env_file:
+  #    - ./src/registration/.env
+  #  ports:
+  #    - "${DB_PORT}:${DB_PORT}"
+  #  volumes:
+  #    - volume_registration:/var/lib/postgresql/data
+  #  healthcheck:
+  #    test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+  #    interval: 10s
+  #    timeout: 5s
+  #    retries: 4
+
+  db_user_management:
     image: postgres:16
-    # Environment variables for startup script
-    # container will use these variables
-    # to start the container with these define variables.
-    environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - ./src/user_management/.env
     expose:
-      - "${DB_PORT}:${DB_PORT}"
+      - "5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - volume_user_management:/var/lib/postgresql/data
+      - ./src/db_user_management/init.sh:/docker-entrypoint-initdb.d/init.sh
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 4
 
-  #web:
-  #  build: ./srcs
-  #  command: scripts/entrypoint.sh
+  #db_game:
+  #  build: ./src/db_game
+  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
+  #  env_file:
+  #    - ./src/game/.env
+  #  expose:
+  #    - "${DB_PORT}"
   #  volumes:
-  #    - ./srcs:/transcendence
+  #    - volume_game:/var/lib/postgresql/data
+  #  healthcheck:
+  #    test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+  #    interval: 10s
+  #    timeout: 5s
+  #    retries: 4
+
+  #registration:
+  #  build: ./src/registration
+  #  #command: scripts/entrypoint.sh
+  #  volumes:
+  #    - ./src/registration:/registration
   #  expose:
   #    - "8000:8000"
+  #  environment:
+  #    - PYTHONUNBUFFERED=1 #Forces python to not buffer the output and print it directly
+  #  env_file:
+  #    - ./src/registration/.env
   #  depends_on:
-  #    database:
+  #    db_user_management:
   #      condition: service_healthy
+
+  user_management:
+    build: ./src/user_management
+    command: scripts/entrypoint.sh
+    volumes:
+      - ./src/user_management:/user_management
+    expose:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./src/user_management/.env
+    depends_on:
+      db_user_management:
+        condition: service_healthy
+
+  #game:
+  #  build: ./src/game
+  #  #command: scripts/entrypoint.sh
+  #  volumes:
+  #    - ./src/game:/game
+  #  expose:
+  #    - "8000:8000"
+  #  environment:
+  #    - PYTHONUNBUFFERED=1
   #  env_file:
   #    - .env
-
-  #nginx:
-  #  build: ./nginx
-  #  ports:
-  #    - 8080:443
   #  depends_on:
-  #    - web
-  #    - database
+  #    db_game:
+  #      condition: service_healthy
+
+  nginx:
+    build: ./src/nginx
+    ports:
+      - 8000:443
+    depends_on:
+    #  - registration
+      - user_management
+    #  - game
 
 volumes:
-  postgres_data:
+  volume_registration:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/transcendence_volumes/registration
+      o: bind
+  volume_user_management:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/transcendence_volumes/user_management
+      o: bind
+  volume_game:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/transcendence_volumes/game
+      o: bind
