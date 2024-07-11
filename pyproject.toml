@@ -8,5 +8,6 @@ use_parentheses = true
 ensure_newline_before_comments = true
 
 [tool.black]
+skip-string-normalization = true
 line-length = 88
 target-version = ['py38']  # Specify your Python version targets
