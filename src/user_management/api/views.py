@@ -2,6 +2,7 @@ from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework import mixins
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -18,34 +19,61 @@ def profile(request):
     return HttpResponse("This is the profile page")
 
 
-class ProfileDetailApiView(generics.RetrieveAPIView):
+class CustomUserList(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
 
-class CustomUserProfile(generics.RetrieveAPIView):
+class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
+
+
+# OLD APIS with mixins just for learning
+class UserListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        return self.request.user
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
-class CustomUserProfileRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+class UserDetailMixins(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
-    serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return CustomUser.objects.filter(id=self.request.user.id)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
-class ProfileDetail(APIView):
+# OLD APIS
+class UserListOld(APIView):
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = CustomUserSerializer(users, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = CustomUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailOLD(APIView):
     """
-    Retrieve, update or delete a profile instance.
+    Retrieve, update or delete a CustomUser instance.
+    ATM everyone can do this i think.
     """
 
     def get_object(self, pk):
@@ -56,12 +84,12 @@ class ProfileDetail(APIView):
 
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
-        serializer = CustomUserSerializer(CustomUser)
+        serializer = CustomUserSerializer(user)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
         user = self.get_object(pk)
-        serializer = CustomUserSerializer(CustomUser, data=request.data)
+        serializer = CustomUserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -69,5 +97,5 @@ class ProfileDetail(APIView):
 
     def delete(self, request, pk, format=None):
         user = self.get_object(pk)
-        CustomUser.delete()
+        user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

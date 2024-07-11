@@ -25,11 +25,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = (
-    os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
-    if "," in os.getenv("DJANGO_ALLOWED_HOSTS")
-    else [os.getenv("DJANGO_ALLOWED_HOSTS")]
-)
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",") if "," in os.getenv("DJANGO_ALLOWED_HOSTS") else [os.getenv("DJANGO_ALLOWED_HOSTS")]
 
 
 # Application definition
@@ -42,9 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api",
-    "django.contrib.sites",
     "allauth",
-    "allauth.account",
     "rest_framework",
 ]
 
@@ -129,7 +123,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -139,9 +133,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ADDED BY US--------------------------------------------- #
 CSRF_TRUSTED_ORIGINS = ["https://127.0.0.1:8000", "https://localhost:8000"]
-
-# Custom user model
-AUTH_USER_MODEL = "api.CustomUser"
 
 
 # Security settings for development
@@ -153,25 +144,23 @@ CSRF_COOKIE_SECURE = True  # Set to False for local development
 # Allauth settings
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-)
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
-LOGIN_REDIRECT_URL = "/"  # new line
-
-# Sites framework settings
-SITE_ID = 1
+# AUTHENTICATION_BACKENDS = (
+#    "django.contrib.auth.backends.ModelBackend",
+#    "allauth.account.auth_backends.AuthenticationBackend",
+# )
+#
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = True
+# LOGIN_REDIRECT_URL = "/"  # new line
+#
 
 
 # REST framework settings
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
+    # "DEFAULT_PERMISSION_CLASSES": [
+    #    "rest_framework.permissions.IsAuthenticated",
+    # ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],

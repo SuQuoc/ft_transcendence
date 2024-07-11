@@ -7,4 +7,4 @@ from .models import MatchRecord
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "online", "friends"]
+        fields = ["displayname", "online", "friends"]
