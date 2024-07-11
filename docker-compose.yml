@@ -125,7 +125,7 @@ services:
     env_file:
       - ./src/user_management/.env
     depends_on:
-      db_game:
+      db_user_management:
         condition: service_healthy
 
   nginx:
