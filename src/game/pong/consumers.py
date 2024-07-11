@@ -3,6 +3,8 @@ import json
 import uuid
 import asyncio
 import math
+from .ball import gameBall
+from .player import pong_player
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
@@ -22,6 +24,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # lock to get no data races
     update_lock = asyncio.Lock()
+
+    map_y = 600
+    map_x = 600
 
     async def connect(self):
         self.player_id = None
@@ -43,85 +48,61 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(
             text_data=json.dumps({"type": "playerId", "playerId": self.player_id})
         )
-
         # now lock and fill the players[id] dict
         async with self.update_lock:
 
             # dummy code for user manage t and match making logic #
             x = 0
             for player in self.players.values():
-                if player["x"] == 0:
+                if player.x == 0:
                     x = 600
 
             # x will never change in pong just left and right player
             # logic is we have a struct saved trow all instances of all socked/client connection
-            self.players[self.player_id] = {
-                "id": self.player_id,
-                "x": x,
-                "y": 0,
-                "width": 20,
-                "height": 200,
-                "up": False,
-                "down": False,
-                "task": None,
-            }
+            player = pong_player(self.player_id, x)
+
+            self.players[self.player_id] = player
         
         # now create a task if the Game has no task. Still need to improve the logic
         async with self.update_lock:
             #look if already run game task
             for player in self.players.values():
-                if player["task"] is not None:
+                if player.task is not None:
                     return
             # save task into player struct to close it later
-            self.players[self.player_id]["task"] = asyncio.create_task(self.game_loop())
-            if self.players[self.player_id]["task"] is None:
+            self.players[self.player_id].task = asyncio.create_task(self.game_loop())
+            if self.players[self.player_id].task is None:
                 print("[ERROR] Task creation failed")
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
-        ball = { "x": 0, "y": 0,
+        """ ball = { "x": 0, "y": 0,
                 "turnDirection": -1, #// -1 if left +1 if right
                 "walkDirection": -1, #// -1 if back +1 if front
                 "rotationAngle": math.pi / 2,
                 "moveSpeed": 0.1,
-                }
+                } """
+        ball = gameBall(x=25, y=25)
         while len(self.players) > 0:
             async with self.update_lock:
                 for player in self.players.values():
                     #ball["rotationAngle"] += ball["turnDirection"] * ball["rotationSpeed"]
-
-                    moveStep = ball["walkDirection"] * ball["moveSpeed"]
-                    newPlayerX = ball["x"] + moveStep * math.cos(ball["rotationAngle"])
-                    newPlayerY = ball["y"] + moveStep * math.sin(ball["rotationAngle"])
-
-                    # Do hit wall logic
-
-                    ball["x"] += newPlayerX
-                    ball["y"] += newPlayerY
-                    ball["x"] = 25
-                    ball["y"] = 25
+                    ball.move()
+                    ball.x = 25
+                    ball.y = 25
 
                     # set new player pos
-                    if player["up"]:
-                        player["y"] -= self.MOVE_SPEED
-                    elif player["down"]:
-                        player["y"] += self.MOVE_SPEED
-                    
-                    # out of map check
-                    if player["y"] < 0:
-                        player["y"] = 0
-                    if player["y"]  > 600:
-                        player["y"] = 600
+                    player.move(self.MOVE_SPEED, self.map_y, self.map_x)
 
                     # send to clients in django and then to JS
                     # update his game every 50 ms
                     await self.channel_layer.group_send(self.group_name,
                             {"type": "chat.message",
-                                "y": player["y"],
-                                "x": player["x"],
-                                "playerId": player["id"],
-                                "ball_x": ball["x"],
-                                "ball_y": ball["y"],
+                                "y": player.y,
+                                "x": player.x,
+                                "playerId": player.id,
+                                "ball_x": ball.x,
+                                "ball_y": ball.y,
                             })
                     """ await self.send(text_data=json.dumps({"type": "update",
                                                           "y": player["y"],
@@ -134,8 +115,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
         async with self.update_lock:
             if self.player_id in self.players:
-                if self.players[self.player_id]["task"] is not None:
-                    self.players[self.player_id]["task"].cancel()
+                if self.players[self.player_id].task is not None:
+                    self.players[self.player_id].task.cancel()
                 del self.players[self.player_id]
 
 
@@ -154,8 +135,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         async with self.update_lock:
-            player["up"] = text_data_json["up"]
-            player["down"] = text_data_json["down"]
+            player.up = text_data_json["up"]
+            player.down = text_data_json["down"]
 
     # Receive message from room group
     async def chat_message(self, e):
