@@ -6,30 +6,31 @@ class gameBall:
         self.y = y
         self.turnDirection = 1 #// -1 if left +1 if right
         self.walkDirection = 1 #// -1 if back +1 if front
-        self.rotationAngle = 1
-        self.moveSpeed = 20
-    def move(self):
-        self.rotationAngle *= self.turnDirection
+        self.rotationAngle = math.pi / 3
+        self.moveSpeed = 10
 
-        moveStep = self.walkDirection * self.moveSpeed
-        newPlayerX = self.x + moveStep * math.cos(self.rotationAngle)
-        newPlayerY = self.y + moveStep * math.sin(self.rotationAngle)
+    def move(self):
+
+        #self.rotationAngle *= self.turnDirection
+
+        moveStepX = self.walkDirection * self.moveSpeed
+        moveStepY = self.turnDirection * self.moveSpeed
+        newPlayerX = self.x + moveStepX * math.cos(self.rotationAngle)
+        newPlayerY = self.y + moveStepY * math.sin(self.rotationAngle)
 
         ##### do collisoins here
 
-        if(newPlayerX > 600):
-            self.walkDirection *= 1
-            #self.turnDirection *= -1
-        """ if(newPlayerX < 0):
-            self.walkDirection *= -1
-            self.turnDirection *= -1 """
-        if(newPlayerY > 600):
+        if newPlayerY > 600:
             self.turnDirection *= -1
-        """ if(newPlayerY < 0):
-            self.walkDirection *= -1 """
-
-        self.x = newPlayerX
-        self.y = newPlayerY
+        elif newPlayerY < 0:
+            self.turnDirection *= -1
+        elif newPlayerX > 600:
+            self.walkDirection *= -1
+        elif newPlayerX < 0:
+            self.walkDirection *= -1
+        else:
+            self.x = newPlayerX
+            self.y = newPlayerY
 
 
 import math
