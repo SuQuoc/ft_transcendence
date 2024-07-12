@@ -68,14 +68,14 @@ services:
     env_file:
       - ./src/game/.env
     expose:
-      - 5433
+      - 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     # RUN postgres on differnt port
-    command: ["postgres", "-p", "$${DB_PORT}"]
+    #command: ["postgres", "-p", "5433"]
     # Now we need add -p "db_port"to the healthckeck 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME} -p $${DB_PORT}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME} -p 5432"]
       interval: 10s
       timeout: 5s
       retries: 4

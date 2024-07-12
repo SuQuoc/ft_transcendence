@@ -88,8 +88,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 for player in self.players.values():
                     #ball["rotationAngle"] += ball["turnDirection"] * ball["rotationSpeed"]
                     ball.move()
-                    ball.x = 25
-                    ball.y = 25
 
                     # set new player pos
                     player.move(self.MOVE_SPEED, self.map_y, self.map_x)
