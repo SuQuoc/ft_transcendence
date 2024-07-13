@@ -64,3 +64,15 @@ migrate:
 
 shell:
 	docker compose exec $(S_USER) python manage.py shell
+
+
+###################### Annie #####################
+
+registration_up: 
+	@mkdir -p $(VOL_DIR)/$(S_REGI)
+	@docker compose -f ./registration.yml --profile registration build
+	@docker compose -f ./registration.yml --profile registration up
+
+registration_down:
+	@docker compose -f ./registration.yml --profile registration down
+	@sudo rm -rf $(VOL_DIR)/$(S_REGI)
