@@ -34,6 +34,8 @@ services:
       POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-my_default_POSTGRES_PASSWORD}"
       DB_HOST: "${DB_HOST_REG:-db_registration}"
       DB_PORT: "${DB_PORT_REG:-5432}"
+      SECRET_KEY: ${SECRET_KEY_REG:-django-insecure-6%14m=3l*0z5zus+vmp#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      DEBUG: ${DEBUG:-False}
     depends_on:
       db_registration:
         condition: service_healthy
