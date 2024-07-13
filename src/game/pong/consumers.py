@@ -3,8 +3,8 @@ import json
 import uuid
 import asyncio
 import math
-from .ball import gameBall
-from .player import pong_player
+from .game_code.ball import gameBall
+from .game_code.player import pong_player
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
