@@ -1,5 +1,6 @@
 asgiref==3.8.1
 channels[daphne]==4.1.0
+django-sslserver
 # For daphne
 
 Django==5.0.6
