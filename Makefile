@@ -39,16 +39,16 @@ clean-v:
 	rm -rf $(VENV)
 
 up: prep
-	docker compose up
+	docker compose --profile all up
 
 up-b: prep
-	docker compose up --build
+	docker compose --profile all up --build
 
 build-no-cache:
-	docker compose build --no-cache
+	docker compose --profile all build --no-cache
 
 down:
-	docker compose down
+	docker compose --profile all down
 
 rm-vol:
 	docker volume rm $(VOL_PREFIX)$(S_USER)
@@ -68,11 +68,23 @@ shell:
 
 ###################### Annie #####################
 
-registration_up: 
+registration_up:
 	@mkdir -p $(VOL_DIR)/$(S_REGI)
 	@docker compose -f ./registration.yml --profile registration build
 	@docker compose -f ./registration.yml --profile registration up
 
 registration_down:
 	@docker compose -f ./registration.yml --profile registration down
-	@sudo rm -rf $(VOL_DIR)/$(S_REGI)
+	@rm -rf $(VOL_DIR)/$(S_REGI)
+
+
+###################### Quocsu #####################
+
+user_management_up:
+	@mkdir -p $(VOL_DIR)/$(S_USER)
+	@docker compose -f ./user_management.yml --profile user_management build
+	@docker compose -f ./user_management.yml --profile user_management up
+
+user_management_down:
+	@docker compose -f ./user_management.yml --profile user_management down
+	@rm -rf $(VOL_DIR)/$(S_USER)

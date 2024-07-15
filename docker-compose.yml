@@ -1,68 +1,8 @@
+include:
+    - user_management.yml
+    - registration.yml
+
 services:
-  #db_registration:
-  #  image: postgres:16
-  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
-  #  env_file:
-  #    - ./src/registration/.env
-  #  ports:
-  #    - "${DB_PORT}:${DB_PORT}"
-  #  volumes:
-  #    - volume_registration:/var/lib/postgresql/data
-  #  healthcheck:
-  #    test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-  #    interval: 10s
-  #    timeout: 5s
-  #    retries: 4
-
-
-
-  db_user_management:
-    image: postgres:16
-    env_file:
-      - ./src/user_management/.env
-    expose:
-      - "5432"
-    volumes:
-      - volume_user_management:/var/lib/postgresql/data
-      - ./src/db_user_management/init.sh:/docker-entrypoint-initdb.d/init.sh
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 4
-    networks:
-     - network_user_management
-
-  #db_game:
-  #  build: ./src/db_game
-  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
-  #  env_file:
-  #    - ./src/game/.env
-  #  expose:
-  #    - "${DB_PORT}"
-  #  volumes:
-  #    - volume_game:/var/lib/postgresql/data
-  #  healthcheck:
-  #    test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-  #    interval: 10s
-  #    timeout: 5s
-  #    retries: 4
-
-  #registration:
-  #  build: ./src/registration
-  #  #command: scripts/entrypoint.sh
-  #  volumes:
-  #    - ./src/registration:/registration
-  #  expose:
-  #    - "8000:8000"
-  #  environment:
-  #    - PYTHONUNBUFFERED=1 #Forces python to not buffer the output and print it directly
-  #  env_file:
-  #    - ./src/registration/.env
-  #  depends_on:
-  #    db_user_management:
-  #      condition: service_healthy
-
   db_game:
     image: postgres:16
     env_file:
@@ -73,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     # RUN postgres on differnt port
     #command: ["postgres", "-p", "5433"]
-    # Now we need add -p "db_port"to the healthckeck 
+    # Now we need add -p "db_port"to the healthckeck
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME} -p 5432"]
       interval: 10s
@@ -81,7 +21,9 @@ services:
       retries: 4
     networks:
       - network_game
-  
+    profiles:
+      - all
+
   nginx:
     build: ./src/nginx
     volumes:
@@ -89,12 +31,15 @@ services:
     ports:
       - 8000:443
     depends_on:
-    #  - registration
+      - registration
       - user_management
       - game
     networks:
       - network_game
       - network_user_management
+      - network_registration
+    profiles:
+      - all
 
 
   game:
@@ -112,41 +57,11 @@ services:
         condition: service_healthy
     networks:
       - network_game
-
-  user_management:
-    build: ./src/user_management
-    command: scripts/entrypoint.sh
-    volumes:
-      - ./src/user_management:/user_management
-    expose:
-      - 8000
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - ./src/user_management/.env
-    depends_on:
-      db_user_management:
-        condition: service_healthy
-    networks:
-      - network_user_management
+    profiles:
+      - all
 
 volumes:
-
   postgres_data:
-
-  volume_registration:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/registration
-      o: bind
-
-  volume_user_management:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/user_management
-      o: bind
 
   volume_game:
     driver: local
@@ -157,6 +72,8 @@ volumes:
 
 networks:
   network_game:
+    driver: bridge
+  network_registration:
     driver: bridge
   network_user_management:
     driver: bridge
