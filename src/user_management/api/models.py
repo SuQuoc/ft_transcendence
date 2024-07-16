@@ -24,8 +24,11 @@ class CustomUser(models.Model):
 
 
 class FriendRequest(models.Model):
+    STATUS_CHOICES = [(0, 'Pending'), (1, 'Accepted'), (2, 'Declined')]
+
     from_user = models.ForeignKey(CustomUser, related_name='from_user', on_delete=models.CASCADE)
     to_user = models.ForeignKey(CustomUser, related_name='to_user', on_delete=models.CASCADE)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
 
 
 # all the records associated with the user: user.matchrecord_set.all()

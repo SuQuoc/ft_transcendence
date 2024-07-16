@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import CustomUser
-from .models import MatchRecord
+from .models import FriendRequest
 from .serializers import CustomUserSerializer
 
 # Create your views here.
@@ -29,7 +30,55 @@ class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomUserSerializer
 
 
-# OLD APIS with mixins just for learning
+# @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service
+# @permission_classes([IsAuthenticated])
+def sendFriendRequest(request, user_id):
+    from_user = request.user
+    try:
+        to_user = CustomUser.objects.get(pk=user_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("User not found")
+
+    if from_user == to_user:
+        return HttpResponse("You can't send a friend request to yourself")
+
+    friend_request, created = FriendRequest.objects.get_or_create(from_user=from_user, to_user=to_user, status=0)
+    if created:
+        return HttpResponse("friend request sent")
+    else:
+        return HttpResponse("friend request already sent, be patient")
+
+
+def acceptFriendRequest(request, friend_request_id):
+    try:
+        friend_request = FriendRequest.objects.get(id=friend_request_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Friend request not found")
+
+    if friend_request.to_user == request.user:
+        friend_request.to_user.friends.add(friend_request.from_user)
+        friend_request.from_user.friends.add(friend_request.to_user)
+        friend_request.status = 1  # accepted see FriendRequest model
+        friend_request.save()  # storing changes, so only status
+        # friend_request.delete() # i read that its better store all friend requests
+    else:
+        return HttpResponse("Friend request not for you")
+
+
+def declineFriendRequest(request, friend_request_id):
+    try:
+        friend_request = FriendRequest.objects.get(id=friend_request_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Friend request not found")
+
+    if friend_request.to_user == request.user:
+        friend_request.status = 2  # declined see FriendRequest model
+        friend_request.save()  # storing changes, so only status
+    else:
+        return HttpResponse("Friend request not for you")
+
+
+# OLD APIS with mixins just for learning -----------------------
 class UserListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer

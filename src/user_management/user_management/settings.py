@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",") if "," in os.getenv("DJANGO_ALLOWED_HOSTS") else [os.getenv("DJANGO_ALLOWED_HOSTS")]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
