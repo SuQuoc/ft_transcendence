@@ -21,8 +21,9 @@ services:
     restart: on-failure
     profiles:
       - registration
+      - all
 
-  back_registration:
+  registration:
     build: ./src/registration
     volumes:
       - ./src/registration:/app
@@ -42,20 +43,13 @@ services:
     restart: on-failure
     profiles:
       - registration
+      - all
 
   nginx_registration:
     build: ./src/registration_nginx
     ports:
       - 8000:443
     depends_on:
-      - back_registration
+      - registration
     profiles:
       - registration
-  
-volumes:
-  volume_registration:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/registration
-      o: bind
