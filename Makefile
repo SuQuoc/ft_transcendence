@@ -1,4 +1,4 @@
-.PHONY: all up build_up build_no_cache down rm_vol re
+.PHONY: all up build_up build_no_cache down rm_vol fclean re
 
 all: up
 
@@ -17,8 +17,10 @@ down:
 rm_vol:
 	docker volume prune -af
 
-re: down rm_vol
+fclean: down rm_vol
 	docker system prune -af
+
+re: fclean
 	docker compose --profile all up --build
 
 
