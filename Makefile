@@ -1,4 +1,4 @@
-.PHONY: all up build_up build_no_cache down rm_vol fclean re
+.PHONY: all up build_up build_no_cache down rm_vol clean fclean re
 
 all: up
 
@@ -16,6 +16,9 @@ down:
 
 rm_vol:
 	docker volume prune -af
+
+clean: down
+	docker system prune -f
 
 fclean: down rm_vol
 	docker system prune -af
