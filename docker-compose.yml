@@ -1,119 +1,75 @@
-services:
-  #db_registration:
-  #  image: postgres:16
-  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
-  #  env_file:
-  #    - ./src/registration/.env
-  #  ports:
-  #    - "${DB_PORT}:${DB_PORT}"
-  #  volumes:
-  #    - volume_registration:/var/lib/postgresql/data
-  #  healthcheck:
-  #    test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-  #    interval: 10s
-  #    timeout: 5s
-  #    retries: 4
+include:
+    - user_management.yml
+    - registration.yml
 
-  db_user_management:
+services:
+  db_game:
     image: postgres:16
     env_file:
-      - ./src/user_management/.env
+      - ./src/game/.env
     expose:
-      - "5432"
+      - 5432
     volumes:
-      - volume_user_management:/var/lib/postgresql/data
-      - ./src/db_user_management/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - postgres_data:/var/lib/postgresql/data
+    # RUN postgres on differnt port
+    #command: ["postgres", "-p", "5433"]
+    # Now we need add -p "db_port"to the healthckeck
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: [ "CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME} -p 5432"]
       interval: 10s
       timeout: 5s
       retries: 4
-
-  #db_game:
-  #  build: ./src/db_game
-  #  command: ["/docker-entrypoint-initdb.d/init.sh"]
-  #  env_file:
-  #    - ./src/game/.env
-  #  expose:
-  #    - "${DB_PORT}"
-  #  volumes:
-  #    - volume_game:/var/lib/postgresql/data
-  #  healthcheck:
-  #    test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-  #    interval: 10s
-  #    timeout: 5s
-  #    retries: 4
-
-  #registration:
-  #  build: ./src/registration
-  #  #command: scripts/entrypoint.sh
-  #  volumes:
-  #    - ./src/registration:/registration
-  #  expose:
-  #    - "8000:8000"
-  #  environment:
-  #    - PYTHONUNBUFFERED=1 #Forces python to not buffer the output and print it directly
-  #  env_file:
-  #    - ./src/registration/.env
-  #  depends_on:
-  #    db_user_management:
-  #      condition: service_healthy
-
-  user_management:
-    build: ./src/user_management
-    command: scripts/entrypoint.sh
-    volumes:
-      - ./src/user_management:/user_management
-    expose:
-      - "8000:8000"
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - ./src/user_management/.env
-    depends_on:
-      db_user_management:
-        condition: service_healthy
-
-  #game:
-  #  build: ./src/game
-  #  #command: scripts/entrypoint.sh
-  #  volumes:
-  #    - ./src/game:/game
-  #  expose:
-  #    - "8000:8000"
-  #  environment:
-  #    - PYTHONUNBUFFERED=1
-  #  env_file:
-  #    - .env
-  #  depends_on:
-  #    db_game:
-  #      condition: service_healthy
+    networks:
+      - network_game
+    profiles:
+      - all
 
   nginx:
     build: ./src/nginx
+    volumes:
+      - ./src/nginx/static:/www/data
     ports:
       - 8000:443
     depends_on:
-    #  - registration
+      - registration
       - user_management
-    #  - game
+      - game
+    networks:
+      - network_game
+      - network_user_management
+      - network_registration
+    profiles:
+      - all
+
+
+  game:
+    build: ./src/game
+    volumes:
+      - ./src/game:/daphne
+    expose:
+      - 8000
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./src/game/.env
+    depends_on:
+      db_game:
+        condition: service_healthy
+    networks:
+      - network_game
+    profiles:
+      - all
 
 volumes:
+  postgres_data:
+  volume_game: #for nikis db not in use yet
   volume_registration:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/registration
-      o: bind
   volume_user_management:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/user_management
-      o: bind
-  volume_game:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/game
-      o: bind
+
+networks:
+  network_game:
+    driver: bridge
+  network_registration:
+    driver: bridge
+  network_user_management:
+    driver: bridge

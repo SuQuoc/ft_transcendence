@@ -1,0 +1,55 @@
+services:
+
+  db_registration:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB_REG:-my_default_postgre_db}"
+      POSTGRES_USER: "${POSTGRES_USER_REG:-my_default_POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_REG:-my_default_POSTGRES_PASSWORD}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_REG:-my_default_POSTGRES_ACCESS_USER}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_REG:-my_default_POSTGRES_ACCESS_PASSWORD}"
+    expose:
+      - "${DB_PORT_REG:-5432}"
+    volumes:
+      - volume_registration:/var/lib/postgresql/data
+      - ./src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_REG:-my_default_POSTGRES_USER} -d ${POSTGRES_DB_REG:-my_default_postgre_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 4
+    restart: on-failure
+    profiles:
+      - registration
+      - all
+
+  registration:
+    build: ./src/registration
+    volumes:
+      - ./src/registration:/app
+    expose:
+      - "8000:8000"
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB_REG:-my_default_postgre_db}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-my_default_POSTGRES_USER}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-my_default_POSTGRES_PASSWORD}"
+      DB_HOST: "${DB_HOST_REG:-db_registration}"
+      DB_PORT: "${DB_PORT_REG:-5432}"
+      SECRET_KEY: ${SECRET_KEY_REG:-django-insecure-6%14m=3l*0z5zus+vmp#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      DEBUG: ${DEBUG:-False}
+    depends_on:
+      db_registration:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - registration
+      - all
+
+  nginx_registration:
+    build: ./src/registration_nginx
+    ports:
+      - 8000:443
+    depends_on:
+      - registration
+    profiles:
+      - registration
