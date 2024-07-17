@@ -53,11 +53,3 @@ services:
       - registration
     profiles:
       - registration
-
-volumes:
-  volume_registration:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/registration
-      o: bind

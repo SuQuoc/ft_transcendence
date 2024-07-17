@@ -51,11 +51,3 @@ services:
       - all
     networks:
       - network_user_management
-
-volumes:
-  volume_user_management:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/user_management
-      o: bind

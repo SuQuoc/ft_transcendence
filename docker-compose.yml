@@ -62,13 +62,9 @@ services:
 
 volumes:
   postgres_data:
-
-  volume_game:
-    driver: local
-    driver_opts:
-      type: none
-      device: ~/transcendence_volumes/game
-      o: bind
+  volume_game: #for nikis db not in use yet
+  volume_registration:
+  volume_user_management:
 
 networks:
   network_game:
