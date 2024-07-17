@@ -1,90 +1,56 @@
-# Makefile
+.PHONY: all up build_up build_no_cache down rm_vol re
 
-# Variables
-VENV = .venv
-PYTHON = $(VENV)/bin/python
-PIP = $(VENV)/bin/pip
+all: up
 
-# Volume
-VOL_DIR = ~/transcendence_volumes
-VOL_PREFIX = ft_transcendence_volume_
-
-# Services
-S_REGI = registration
-S_USER = user_management
-S_GAME = game
-
-
-.PHONY: all prep install clean-v up up-b stop rm-vol mm migrate shell
-
-
-all: prep up
-
-
-prep:
-	mkdir -p $(VOL_DIR)/$(S_REGI)
-	mkdir -p $(VOL_DIR)/$(S_USER)
-	mkdir -p $(VOL_DIR)/$(S_GAME)
-#$(VENV):
-#	virtualenv $(VENV)
-
-#install: $(VENV)
-#	# Activate virtual environment
-#	# Install dependencies
-#	. $(VENV)/bin/activate; \
-#	$(PIP) install -r srcs/user_management/requirements.txt
-
-# Target to clean up
-clean-v:
-	rm -rf $(VENV)
-
-up: prep
+up:
 	docker compose --profile all up
 
-up-b: prep
+build_up:
 	docker compose --profile all up --build
 
-build-no-cache:
+build_no_cache:
 	docker compose --profile all build --no-cache
 
 down:
 	docker compose --profile all down
 
-rm-vol:
-	docker volume rm $(VOL_PREFIX)$(S_USER)
-	docker volume rm $(VOL_PREFIX)$(S_GAME)
-	rm -rf $(VOL_DIR)
+rm_vol:
+	docker volume prune -af
 
-# Commands for user_management service
-mm:
-	docker compose exec $(S_USER) python manage.py makemigrations
-
-migrate:
-	docker compose exec $(S_USER) python manage.py migrate
-
-shell:
-	docker compose exec $(S_USER) python manage.py shell
+re: down rm_vol
+	docker system prune -af
+	docker compose --profile all up --build
 
 
-###################### Annie #####################
+
+###################### Registration #####################
+.PHONY: registration_up registration_down
 
 registration_up:
-	@mkdir -p $(VOL_DIR)/$(S_REGI)
-	@docker compose -f ./registration.yml --profile registration build
-	@docker compose -f ./registration.yml --profile registration up
+	@docker compose --profile registration build
+	@docker compose --profile registration up
 
 registration_down:
-	@docker compose -f ./registration.yml --profile registration down
-	@rm -rf $(VOL_DIR)/$(S_REGI)
+	@docker compose --profile registration down
 
 
-###################### Quocsu #####################
+
+###################### User Management #####################
+.PHONY: user_management_up user_management_down mm migrate shell
 
 user_management_up:
-	@mkdir -p $(VOL_DIR)/$(S_USER)
-	@docker compose -f ./user_management.yml --profile user_management build
-	@docker compose -f ./user_management.yml --profile user_management up
+	@docker compose --profile user_management build
+	@docker compose --profile user_management up
 
 user_management_down:
-	@docker compose -f ./user_management.yml --profile user_management down
-	@rm -rf $(VOL_DIR)/$(S_USER)
+	@docker compose --profile user_management down
+
+mm:
+	docker compose exec user_management python manage.py makemigrations
+
+migrate:
+	docker compose exec user_management python manage.py migrate
+
+shell:
+	docker compose exec user_management python manage.py shell
+
