@@ -48,6 +48,7 @@ def getJsonKey(request, key):
 # @permission_classes([IsAuthenticated])
 def sendFriendRequest(request):
     if request.method == 'POST':
+        return JsonResponse({"message": "JUST A TEST HEHEHE"}, status=201)
         from_user = request.user
         user_id, error = getJsonKey(request, "userId")
         if error:
