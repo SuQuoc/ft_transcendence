@@ -1,16 +1,15 @@
+import json
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import json
-from django.http import JsonResponse
-
 
 from .models import CustomUser
 from .models import FriendRequest
@@ -29,6 +28,7 @@ class CustomUserCreate(generics.CreateAPIView):
     serializer_class = CustomUserSerializer
 
     def create(self, request, *args, **kwargs):
+        print(f"QQQ path: {request.path}")
         displayname = request.data.get('displayname')
         id = request.data.get('id')
         if not displayname or not id:
@@ -69,7 +69,6 @@ def sendFriendRequest(request):
             to_user = CustomUser.objects.get(pk=user_id)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
-
 
         if from_user == to_user:
             return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
