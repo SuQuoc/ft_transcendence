@@ -1,22 +1,6 @@
 const login_form = document.querySelector('#loginForm'); // Select the form
 
-// const setError = (validateInputs = () => {
-// 	const emailElement = document.getElementById("inputEmail");
-// 	const passwordElement = document.getElementById("inputPassword");
-	
-// 	// Fetching values
-// 	const emailValue = emailElement.value.trim();
-// 	const passwordValue = passwordElement.value.trim();
-	
-// 	if (emailValue === "") {
-// 		console.log("Email is blank");
-// 	}
-	
-// 	if (passwordValue === "") {
-// 		console.log("Password is blank");
-// 	}
-// });
-
+// validates data from login form
 function validateInputs(login_form) {
 	const email = login_form.email.value;
 	const password = login_form.password.value;
@@ -32,8 +16,8 @@ function validateInputs(login_form) {
 	return true;
 };
 
-
-
+// Event listener when "Login" button is clicked
+// checks if form data is valid
 login_form.addEventListener("submit", e => {
 	e.preventDefault(); // Prevents the default action (in this case submitting the form)
 	
@@ -42,7 +26,7 @@ login_form.addEventListener("submit", e => {
 	if (validated === true) {
 		console.log("Form is valid");
 		alert("correct");
-		window.location.href = "template.html";
+		window.location.href = "template.html"; // TEMPORARY!!!
 	}
 	else if (!validated) {
 		console.log("Form is invalid");
