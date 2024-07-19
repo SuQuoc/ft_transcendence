@@ -21,6 +21,7 @@ services:
       - network_registration
     profiles:
       - all
+    restart: on-failure
 
 volumes:
   postgres_data:
