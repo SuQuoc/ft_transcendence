@@ -1,0 +1,62 @@
+services:
+  db_game:
+    image: postgres:16
+    environment:
+      PYTHONUNBUFFERED: 1
+      POSTGRES_DB: psqldb
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpass
+      POSTGRES_ACCESS_USER: accessuser
+      POSTGRES_ACCESS_PASSWORD: accessuserpw
+    expose:
+      - "${DB_PORT_GAME:-5432}"
+    volumes:
+      - volume_game:/var/lib/postgresql/data
+      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    # RUN postgres on differnt port
+    # command: ["postgres", "-p", "5433"]
+    # Now we need add -p "db_port"to the healthckeck
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_GAME:-dbuser} -d ${POSTGRES_DB_GAME:-psqldb}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 4
+    restart: on-failure
+    networks:
+      - network_game
+    profiles:
+      - all
+      - game
+
+  # TODO change the environment variables with env variables and default values
+  # also the django non admin user should be used - see the other .yml files
+  game:
+    build: ../src/game
+    volumes:
+      - ../src/game:/daphne
+    expose:
+      - 8000
+    environment:
+      PYTHONUNBUFFERED: 1
+      DJANGO_SECRET_KEY: 'django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn'
+      DJANGO_ALLOWED_HOSTS: "*" #change this line when deploying to production
+      ENGINE: django.db.backends.postgresql
+      POSTGRES_DB: psqldb
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpass
+      POSTGRES_ACCESS_USER: accessuser
+      POSTGRES_ACCESS_PASSWORD: accessuserpw
+      DB_NAME: psqldb
+      DB_USER: dbuser
+      DB_PASSWORD: dbpass
+      DB_HOST: db_game
+      DB_PORT: 5432
+    depends_on:
+      db_game:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - network_game
+    profiles:
+      - all
+      - game

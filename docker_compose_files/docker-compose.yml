@@ -1,0 +1,37 @@
+include:
+    - user_management.yml
+    - registration.yml
+    - game.yml
+
+services:
+
+  nginx:
+    build: ../src/nginx
+    volumes:
+      - ../src/nginx/static:/www/data
+    ports:
+      - 8000:443
+    depends_on:
+      - registration
+      - user_management
+      - game
+    networks:
+      - network_game
+      - network_user_management
+      - network_registration
+    profiles:
+      - all
+    restart: on-failure
+
+volumes:
+  volume_game:
+  volume_registration:
+  volume_user_management:
+
+networks:
+  network_game:
+    driver: bridge
+  network_registration:
+    driver: bridge
+  network_user_management:
+    driver: bridge
