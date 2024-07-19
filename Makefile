@@ -1,4 +1,4 @@
-.PHONY: all up build_up build_no_cache down rm_vol clean fclean re
+.PHONY: all up build_up build_no_cache down rm_vol clean fclean re new
 
 all: up
 
@@ -23,7 +23,9 @@ clean: down
 fclean: down rm_vol
 	docker system prune -af
 
-re: fclean
+re: down rm_vol build_up
+
+new: fclean
 	docker compose --profile all up --build
 
 
@@ -58,4 +60,16 @@ migrate:
 
 shell:
 	docker compose exec user_management python manage.py shell
+
+
+
+###################### Game #####################
+.PHONY: registration_up registration_down
+
+game_up:
+	@docker compose --profile game build
+	@docker compose --profile game up
+
+game_down:
+	@docker compose --profile game down
 

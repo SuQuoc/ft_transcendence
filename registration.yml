@@ -22,6 +22,8 @@ services:
     profiles:
       - registration
       - all
+    networks:
+      - network_registration
 
   registration:
     build: ./src/registration
@@ -44,6 +46,8 @@ services:
     profiles:
       - registration
       - all
+    networks:
+      - network_registration
 
   nginx_registration:
     build: ./src/registration_nginx
@@ -53,3 +57,5 @@ services:
       - registration
     profiles:
       - registration
+    networks: 
+      - network_registration
