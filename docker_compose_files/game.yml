@@ -12,7 +12,7 @@ services:
       - "${DB_PORT_GAME:-5432}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     # RUN postgres on differnt port
     # command: ["postgres", "-p", "5433"]
     # Now we need add -p "db_port"to the healthckeck
@@ -31,9 +31,9 @@ services:
   # TODO change the environment variables with env variables and default values
   # also the django non admin user should be used - see the other .yml files
   game:
-    build: ./src/game
+    build: ../src/game
     volumes:
-      - ./src/game:/daphne
+      - ../src/game:/daphne
     expose:
       - 8000
     environment:

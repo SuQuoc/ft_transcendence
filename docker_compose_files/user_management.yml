@@ -11,7 +11,7 @@ services:
       - "${DB_PORT_MANAGEMENT:-5432}"
     volumes:
       - volume_user_management:/var/lib/postgresql/data
-      - ./src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_MANAGEMENT:-my_default_POSTGRES_USER} -d ${POSTGRES_DB_MANAGEMENT:-my_default_postgre_db}"]
       interval: 10s
@@ -25,9 +25,9 @@ services:
       - network_user_management
 
   user_management:
-    build: ./src/user_management
+    build: ../src/user_management
     volumes:
-      - ./src/user_management:/app
+      - ../src/user_management:/app
     expose:
       - "8000:8000"
     environment:

@@ -6,9 +6,9 @@ include:
 services:
 
   nginx:
-    build: ./src/nginx
+    build: ../src/nginx
     volumes:
-      - ./src/nginx/static:/www/data
+      - ../src/nginx/static:/www/data
     ports:
       - 8000:443
     depends_on:
