@@ -12,7 +12,7 @@ services:
       - "${DB_PORT_REG:-5432}"
     volumes:
       - volume_registration:/var/lib/postgresql/data
-      - ./src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_REG:-my_default_POSTGRES_USER} -d ${POSTGRES_DB_REG:-my_default_postgre_db}"]
       interval: 10s
@@ -22,11 +22,13 @@ services:
     profiles:
       - registration
       - all
+    networks:
+      - network_registration
 
   registration:
-    build: ./src/registration
+    build: ../src/registration
     volumes:
-      - ./src/registration:/app
+      - ../src/registration:/app
     expose:
       - "8000:8000"
     environment:
@@ -44,12 +46,16 @@ services:
     profiles:
       - registration
       - all
+    networks:
+      - network_registration
 
   nginx_registration:
-    build: ./src/registration_nginx
+    build: ../src/registration_nginx
     ports:
       - 8000:443
     depends_on:
       - registration
     profiles:
       - registration
+    networks: 
+      - network_registration
