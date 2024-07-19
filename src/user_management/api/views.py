@@ -23,9 +23,21 @@ def profile(request):
     return HttpResponse("This is the profile page")
 
 
-class CustomUserList(generics.ListCreateAPIView):
+# generics.ListCreateAPIView # to view all users
+class CustomUserCreate(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        displayname = request.data.get('displayname')
+        id = request.data.get('id')
+        if not displayname or not id:
+            return Response({"error": "Both displayname and id must be provided"}, status=status.HTTP_400_BAD_REQUEST)
+        if CustomUser.objects.filter(displayname=displayname).exists():
+            return Response({"error": "User with this displayname already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if CustomUser.objects.filter(id=id).exists():
+            return Response({"error": "User with this id already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        return super().create(request, *args, **kwargs)
 
 
 class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -48,6 +60,7 @@ def getJsonKey(request, key):
 # @permission_classes([IsAuthenticated])
 def sendFriendRequest(request):
     if request.method == 'POST':
+        # return JsonResponse({"message": "JUST A TEST HEHEHE"}, status=201)
         from_user = request.user
         user_id, error = getJsonKey(request, "userId")
         if error:
