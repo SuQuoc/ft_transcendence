@@ -5,8 +5,8 @@ class pong_player:
         self.id = player_id
         self.x = x
         self.y = 0
-        self.width: 20
-        self.height = 200
+        self.width = 20
+        self.height = 100
         self.up = False
         self.down = False
         self.task = None

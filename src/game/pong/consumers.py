@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 # NEED TO FIX X !!!!!!!!!!!!!!!!!!
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    MOVE_SPEED = 6
+    MOVE_SPEED = 20
 
     game_group_name = "game_group"
 
@@ -82,14 +82,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "rotationAngle": math.pi / 2,
                 "moveSpeed": 0.1,
                 } """
-        ball = gameBall(x=25, y=25)
+        ball = gameBall(x=300, y=200)
         while len(self.players) > 0:
             async with self.update_lock:
                 for player in self.players.values():
                     #ball["rotationAngle"] += ball["turnDirection"] * ball["rotationSpeed"]
-                    ball.move()
 
                     # set new player pos
+                    ball.move(player)
                     player.move(self.MOVE_SPEED, self.map_y, self.map_x)
 
                     # send to clients in django and then to JS
