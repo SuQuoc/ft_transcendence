@@ -1,18 +1,22 @@
 
 import math
 from .player import pong_player
-
+from .storageClasses import slotXy
 
 class gameBall:
 
-    def __init__(self, x=300, y=300) -> None:
+    def __init__(self, map_size: slotXy, x=295, y=300) -> None:
         self.x = x # use game height / 2
         self.y = y # use game with / 2
-        self.turnDirection = 1 #// -1 if left +1 if right
-        self.walkDirection = 1 #// -1 if back +1 if front
+        self.width = 20
+        self.height = 20
+        self.map_size = map_size
         self.rotationAngle = self.degreeToRadiant(0)
         self.moveSpeed = 20
 
+        self.walkDirection = 1 #// -1 if back +1 if front
+        self.turnDirection = 1 #// -1 if left +1 if right
+    
     def move(self, player: pong_player):
         self.player = player
 
@@ -39,20 +43,20 @@ class gameBall:
     def hitPadel(self):
         if self.newBallX > self.hit_box_x:
             return False
-        if self.newBallY > self.player.y and self.newBallY < self.hit_box_y:
+        if self.newBallY >= self.player.y and self.newBallY < self.hit_box_y:
             return True
         return False
 
     def hitWall(self):
         #Checks if ball hits the outside wall and inverts his direction
-        if self.newBallY > (600 - 20):
+        if self.newBallY > (self.map_size.y - self.height):
             #self.turnDirection *= -1
-            self.y = 580
-            self.x = self.newBallX
             
             new_angele = self.overflowRadius(math.pi * 2 - self.rotationAngle)
             self.rotationAngle = new_angele
 
+            self.y = self.map_size.y - self.height
+            self.x = self.newBallX
             
         elif self.newBallY < 0:
             #self.turnDirection *= -1
@@ -62,12 +66,12 @@ class gameBall:
             self.y = 0
             self.x = self.newBallX
 
-        elif self.newBallX > (600 - 20):
+        elif self.newBallX > (self.map_size.x - self.width):
             #self.walkDirection *= -1
             new_angele = self.overflowRadius(math.pi - self.rotationAngle)
             self.rotationAngle = new_angele
             
-            self.x = 580
+            self.x = self.map_size.x - self.width
             self.Y = self.newBallY
 
         elif self.newBallX < 0:

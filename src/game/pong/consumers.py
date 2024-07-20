@@ -8,6 +8,7 @@ from .game_code.player import pong_player
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
+from .game_code.storageClasses import slotXy
 
 # need asgiref
 
@@ -25,8 +26,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # lock to get no data races
     update_lock = asyncio.Lock()
 
-    map_y = 600
-    map_x = 600
+    map_size = slotXy(800, 600)
 
     async def connect(self):
         self.player_id = None
@@ -55,11 +55,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             x = 0
             for player in self.players.values():
                 if player.x == 0:
-                    x = 600
+                    x = self.map_size.x
 
             # x will never change in pong just left and right player
             # logic is we have a struct saved trow all instances of all socked/client connection
-            player = pong_player(self.player_id, x)
+            player = pong_player(self.player_id, x, self.map_size)
 
             self.players[self.player_id] = player
         
@@ -82,7 +82,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "rotationAngle": math.pi / 2,
                 "moveSpeed": 0.1,
                 } """
-        ball = gameBall(x=300, y=200)
+        ball = gameBall(x=300, y=200, map_size=self.map_size)
+
+        # LOOOOOPPPPPPPP
         while len(self.players) > 0:
             async with self.update_lock:
                 for player in self.players.values():
@@ -90,7 +92,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                     # set new player pos
                     ball.move(player)
-                    player.move(self.MOVE_SPEED, self.map_y, self.map_x)
+                    player.move(self.MOVE_SPEED)
 
                     # send to clients in django and then to JS
                     # update his game every 50 ms
@@ -106,9 +108,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                                           "y": player["y"],
                                                           "x": player["x"],
                                                           "playerId": player["id"]})) """
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.04)
 
-    async def disconnect(self, close_code):
+    async def disconnect(self):
         if self.player_id is None:
             return
         async with self.update_lock:
