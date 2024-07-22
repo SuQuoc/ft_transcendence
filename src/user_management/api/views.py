@@ -46,6 +46,9 @@ class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 def getJsonKey(request, key):
+    """
+    Returns the corresponding python object from the request body with the given json key.
+    """
     try:
         data = json.loads(request.body)
         value = data.get(key)
