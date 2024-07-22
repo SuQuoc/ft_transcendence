@@ -1,32 +1,43 @@
 
-import math
-from .player import pong_player
 from .storageClasses import slotXy
+from .player import pong_player
+from .hit_padel import hitPadel
+import math
 
 class gameBall:
 
-    def __init__(self, map_size: slotXy, x=295, y=300) -> None:
+    def __init__(self, map_size: slotXy, x=295, y=300, width=10, height=10) -> None:
         self.x = x # use game height / 2
         self.y = y # use game with / 2
-        self.width = 20
-        self.height = 20
+        self.width = width
+        self.height = height
         self.map_size = map_size
         self.rotationAngle = self.degreeToRadiant(0)
-        self.moveSpeed = 20
+        self.moveSpeed = 10
 
         self.walkDirection = 1 #// -1 if back +1 if front
         self.turnDirection = 1 #// -1 if left +1 if right
     
-    def move(self, player: pong_player):
-        self.player = player
+    def move(self):
+        # player: pong_player
+        # self.player = player
 
-        self.newBallX = self.x + self.moveSpeed * math.cos(self.rotationAngle)
-        self.newBallY = self.y - self.moveSpeed * math.sin(self.rotationAngle)
+        self.x = self.x + self.moveSpeed * math.cos(self.rotationAngle)
+        self.y = self.y - self.moveSpeed * math.sin(self.rotationAngle)
+        #self.x += 1
+        #self.y += 1
+        #self.padelHitPhysic()
+        #self.hitWall()
 
-        self.padelHitPhysic()
-        self.hitWall()
-
-    def padelHitPhysic(self):
+    def padelHitPhysic(self, player: pong_player):
+        ballHitPadel = hitPadel(self.newBallY, self.newBallX, player)
+        if player.x == 0:
+            self.rotationAngle = ballHitPadel.left(self.rotationAngle)
+        else:
+            self.rotationAngle = ballHitPadel.right(self.rotationAngle)
+        """ if player.x > 0:
+            return """
+        """ self.player = player
         self.hit_box_x = self.player.x + self.player.width
         self.hit_box_y = self.player.y + self.player.height
         if self.hitPadel() is False:
@@ -36,19 +47,23 @@ class gameBall:
         maximum_angle = self.degreeToRadiant(75)
         hit_angle = padel_hit_point / half_player_height
         bounce_angle = maximum_angle * hit_angle
-        self.rotationAngle = bounce_angle
-        print(self.radiantToDegree(bounce_angle))
-        
+        self.rotationAngle = bounce_angle """
+        """ print("hit") """
+        #print(self.radiantToDegree(bounce_angle))
 
-    def hitPadel(self):
+    """ def hitPadel(self):
         if self.newBallX > self.hit_box_x:
             return False
         if self.newBallY >= self.player.y and self.newBallY < self.hit_box_y:
             return True
-        return False
+        return False """
 
     def hitWall(self):
         #Checks if ball hits the outside wall and inverts his direction
+
+        self.newBallX = self.x + self.moveSpeed * math.cos(self.rotationAngle)
+        self.newBallY = self.y - self.moveSpeed * math.sin(self.rotationAngle)
+
         if self.newBallY > (self.map_size.y - self.height):
             #self.turnDirection *= -1
             
@@ -68,11 +83,17 @@ class gameBall:
 
         elif self.newBallX > (self.map_size.x - self.width):
             #self.walkDirection *= -1
-            new_angele = self.overflowRadius(math.pi - self.rotationAngle)
+            """ new_angele = self.overflowRadius(math.pi - self.rotationAngle)
             self.rotationAngle = new_angele
             
             self.x = self.map_size.x - self.width
-            self.Y = self.newBallY
+            self.Y = self.newBallY """
+
+            self.x = self.map_size.x / 2
+            self.y = self.map_size.y / 2
+            self.rotationAngle = self.degreeToRadiant(0)
+
+            print("OUT RIGHT")
 
         elif self.newBallX < 0:
             #self.walkDirection *= -1
@@ -82,9 +103,9 @@ class gameBall:
             self.x = 0
             self.Y = self.newBallY """
 
-            self.x = 300
-            self.y = 300
-            self.rotationAngle = 0
+            self.x = self.map_size.x / 2
+            self.y = self.map_size.y / 2
+            self.rotationAngle = self.degreeToRadiant(0)
 
             print("OUT")
         

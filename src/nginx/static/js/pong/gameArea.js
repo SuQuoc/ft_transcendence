@@ -10,7 +10,7 @@ class GameArea {
     // use the start function
     // specify game area/canvas size
     // set the refresh rate. How often the game gets rebuild.
-    start(player1, player2, ball, width=800, height=600, refresh_rate=50)
+    start(player1, player2, ball, width=800, height=600, refresh_rate=30)
     {
         this.player1 = player1;
         this.player2 = player2;

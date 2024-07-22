@@ -28,8 +28,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     map_size = slotXy(800, 600)
 
+    ball_width = 10
+    ball_height = 10
+
     async def connect(self):
+
         self.player_id = None
+
         if len(self.players) > 2: # place holder for user logic
             return
 
@@ -55,7 +60,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             x = 0
             for player in self.players.values():
                 if player.x == 0:
-                    x = self.map_size.x
+                    x = self.map_size.x - 20
 
             # x will never change in pong just left and right player
             # logic is we have a struct saved trow all instances of all socked/client connection
@@ -76,24 +81,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
-        """ ball = { "x": 0, "y": 0,
-                "turnDirection": -1, #// -1 if left +1 if right
-                "walkDirection": -1, #// -1 if back +1 if front
-                "rotationAngle": math.pi / 2,
-                "moveSpeed": 0.1,
-                } """
-        ball = gameBall(x=300, y=200, map_size=self.map_size)
-
-        # LOOOOOPPPPPPPP
+        ball = gameBall(x=300, y=200, map_size=self.map_size, width=self.ball_width, height=self.ball_height)
         while len(self.players) > 0:
             async with self.update_lock:
+                ball.hitWall()
+                ball.move()
                 for player in self.players.values():
                     #ball["rotationAngle"] += ball["turnDirection"] * ball["rotationSpeed"]
 
                     # set new player pos
-                    ball.move(player)
                     player.move(self.MOVE_SPEED)
-
+                    ball.padelHitPhysic(player)
                     # send to clients in django and then to JS
                     # update his game every 50 ms
                     await self.channel_layer.group_send(self.group_name,
@@ -108,17 +106,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                                           "y": player["y"],
                                                           "x": player["x"],
                                                           "playerId": player["id"]})) """
-            await asyncio.sleep(0.04)
+            await asyncio.sleep(0.03)
 
-    async def disconnect(self):
+    async def disconnect(self, close_code):
+
         if self.player_id is None:
             return
+
         async with self.update_lock:
             if self.player_id in self.players:
                 if self.players[self.player_id].task is not None:
                     self.players[self.player_id].task.cancel()
                 del self.players[self.player_id]
-
 
         await self.channel_layer.group_discard(
             self.game_group_name, self.channel_name
