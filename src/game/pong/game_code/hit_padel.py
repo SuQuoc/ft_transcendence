@@ -1,8 +1,15 @@
 from .player import pong_player
 import math
-#from .ball import gameBall
+
+
+""" 
+    Class to do the hit paddle physic
+    - set maximum angle to in or decrease the bounce angle
+"""
+
 
 class hitPadel:
+
 
     def __init__(self, newBallY, newBallX, player: pong_player) -> None:
         self.maximum_angle = self.degreeToRadiant(75)
@@ -10,41 +17,51 @@ class hitPadel:
         self.newBallX = newBallX
         self.player = player
 
-    def hitPadel(self, hit_box_x, hit_box_y) -> bool:
-        if self.newBallX > hit_box_x:
-            return False
-        if self.newBallY >= self.player.y and self.newBallY < hit_box_y:
-            return True
-        return False
 
+    # LEFT PADDLE HIT LOGIC
     def left(self, rotationAngle):
+        """
+        When the ball hits the right paddle
+        - RETURNS the rotationAngle that it already had if no paddle hit
+        - player x y gives us just the the left upper point of the paddle need to calc the Hitbox 
+        """
         hit_box_x = self.player.x + self.player.width
         hit_box_y = self.player.y + self.player.height
+        
+        # Looks for Ball x or y not hit the paddle 
         if self.newBallX > hit_box_x:
             return rotationAngle
-
         if self.newBallY < self.player.y or self.newBallY > hit_box_y:
             return rotationAngle
-        half_player_height = self.player.height / 2
-        padel_hit_point = self.player.y + half_player_height - self.newBallY
-        hit_angle = padel_hit_point / half_player_height
-        bounce_angle = self.maximum_angle * hit_angle
-        return bounce_angle
+        return self.calcBounceAngle()
 
+
+    # RIGHT PADDLE HIT LOGIC
     def right(self, rotationAngle):
         hit_box_x = self.player.x - self.player.width
         hit_box_y = self.player.y + self.player.height
         if self.newBallX < hit_box_x:
             return rotationAngle
-
         if self.newBallY < self.player.y or self.newBallY > hit_box_y:
             return rotationAngle
+
+        # Here we invert the angle
+        return (math.pi - self.calcBounceAngle())
+
+
+    # Bounce angle is just the angle it bounces back from the paddle
+    def calcBounceAngle(self):
         half_player_height = self.player.height / 2
+
+        # Calc where the ball hits the paddle
         padel_hit_point = self.player.y + half_player_height - self.newBallY
+
+        # Now calc the hit angle
         hit_angle = padel_hit_point / half_player_height
-        bounce_angle = self.maximum_angle * hit_angle
-        bounce_angle = math.pi - bounce_angle
-        return bounce_angle
+
+        # Finally calc the rotations angle
+        return (self.maximum_angle * hit_angle)
+
 
     def degreeToRadiant(self, degree):
         return degree * (math.pi / 180)
