@@ -28,14 +28,13 @@ class CustomUserCreate(generics.CreateAPIView):
     serializer_class = CustomUserSerializer
 
     def create(self, request, *args, **kwargs):
-        print(f"QQQ path: {request.path}")
         displayname = request.data.get('displayname')
-        id = request.data.get('id')
+        id = request.data.get('user_id')
         if not displayname or not id:
             return Response({"error": "Both displayname and id must be provided"}, status=status.HTTP_400_BAD_REQUEST)
         if CustomUser.objects.filter(displayname=displayname).exists():
             return Response({"error": "User with this displayname already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        if CustomUser.objects.filter(id=id).exists():
+        if CustomUser.objects.filter(user_id=id).exists():
             return Response({"error": "User with this id already exists"}, status=status.HTTP_400_BAD_REQUEST)
         return super().create(request, *args, **kwargs)
 
