@@ -25,25 +25,41 @@
 				<h3 class="text-center text-white">Signup</h3>
 				<!-- Username -->
 				<label for="signupUser" class="form-label text-white-50">Username</label>
-				<input name="username" id="signupUser" type="text" class="form-control mb-3">
-				<!-- Nickname -->
-				<label for="signupNickname" class="form-label text-white-50">Nickname</label> <!-- not sure if needed -->
-				<input name="nickname" id="signupNickname" type="text" class="form-control mb-3">
+				<input name="username"
+					id="signupUser"
+					type="text"
+					class="form-control mb-3"
+				/>
 				<!-- Email -->
 				<label for="signupEmail" class="form-label text-white-50">Email adress</label>
-				<input name="email" id="signupEmail" type="email" class="form-control"
-					placeholder="name@example.com" aria-describedby="signupEmailHelp">
-				<div class="form-text text-white-50 mb-3" id="signupEmailHelp">We'll never share your email with a
-					third party .....probably</div>
+				<input name="email"
+					id="signupEmail"
+					type="email"
+					class="form-control"
+					placeholder="name@example.com"
+					aria-describedby="signupEmailHelp"
+				/>
+				<div class="form-text text-white-50 mb-3" id="signupEmailHelp">
+					We'll never share your email with a third party .....probably
+				</div>
 				<!-- first Password -->
 				<label for="signupPassword1" class="form-label text-white-50">Password</label>
-				<input name="password" id="signupPassword1" type="password" class="form-control mb-1">
+				<input name="password"
+					id="signupPassword1"
+					type="password"
+					class="form-control mb-1"
+				/>
 				<!-- second Password -->
 				<label for="signupPassword2" class="form-label text-white-50">Password again</label>
-				<input name="password2" id="signupPassword2" type="password" class="form-control mb-3">
+				<input name="password2"
+					id="signupPassword2"
+					type="password"
+					class="form-control mb-3"
+				/>
                 <!-- change to login page -->
 				<p class="text-white-50 small m-0">Already signed up? 
-					<a href="http://127.0.0.1:5500/src/nginx/static/fionas_pages/login_page.html" class="text-decoration-none">
+					<!-- the link may be wrong if the port changes. it also only works if the server is running -->
+					<a href="https://localhost:8000/fionas_pages/login_page.html" class="text-decoration-none">
 						<span class="text-white">Log in</span> 
 					</a>
 					here!

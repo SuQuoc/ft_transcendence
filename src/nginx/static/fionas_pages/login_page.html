@@ -25,18 +25,26 @@
 				<!-- Email -->
 				<h3 class="text-center text-white">Login</h3>
 				<label for="loginEmail" class="form-label text-white-50">Email adress</label>
-				<input name="email" id="loginEmail" type="email" class="form-control"
-					placeholder="name@example.com" aria-describedby="loginEmailHelp">
+				<input name="email"
+					id="loginEmail"
+					type="email"
+					class="form-control"
+					placeholder="name@example.com"
+					aria-describedby="loginEmailHelp">
 				<div class="form-text text-white-50 mb-3" id="loginEmailHelp">We'll never share your email with a
 					third party.....</div>
 				<!-- first Password -->
 				<label for="loginPassword" class="form-label text-white-50">Password</label>
-				<input name="password" id="loginPassword" type="password" class="form-control mb-3">
+				<input name="password"
+					id="loginPassword"
+					type="password"
+					class="form-control mb-3">
 				<!-- change to signup page -->
 				<p class="text-white-50 small m-0">No account yet? 
-				<a href="http://127.0.0.1:5500/src/nginx/static/fionas_pages/signup_page.html" class="text-decoration-none">
-					<span class="text-white">Sign up</span> 
-				</a>
+					<!-- the link may be wrong if the port changes. it also only works if the server is running -->
+					<a href="https://localhost:8000/fionas_pages/signup_page.html" class="text-decoration-none">
+						<span class="text-white">Sign up</span> 
+					</a>
 					here!
 				</p>
 				<button type="submit" class="btn btn-secondary w-100">Log in</button>
