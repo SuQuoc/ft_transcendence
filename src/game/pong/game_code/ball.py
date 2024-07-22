@@ -1,7 +1,7 @@
 
 from .storageClasses import slotXy
 from .player import pong_player
-from .hit_padel import hitPadel
+from .paddle_Physic import PaddlePhysic
 import math
 
 class gameBall:
@@ -29,34 +29,12 @@ class gameBall:
         #self.padelHitPhysic()
         #self.hitWall()
 
-    def padelHitPhysic(self, player: pong_player):
-        ballHitPadel = hitPadel(self.newBallY, self.newBallX, player)
+    def paddlesHit(self, player: pong_player):
+        paddle_physic = PaddlePhysic(self.newBallY, self.newBallX, player)
         if player.x == 0:
-            self.rotationAngle = ballHitPadel.left(self.rotationAngle)
+            self.rotationAngle = paddle_physic.left(self.rotationAngle)
         else:
-            self.rotationAngle = ballHitPadel.right(self.rotationAngle)
-        """ if player.x > 0:
-            return """
-        """ self.player = player
-        self.hit_box_x = self.player.x + self.player.width
-        self.hit_box_y = self.player.y + self.player.height
-        if self.hitPadel() is False:
-            return
-        half_player_height = self.player.height / 2
-        padel_hit_point = self.player.y + half_player_height - self.newBallY
-        maximum_angle = self.degreeToRadiant(75)
-        hit_angle = padel_hit_point / half_player_height
-        bounce_angle = maximum_angle * hit_angle
-        self.rotationAngle = bounce_angle """
-        """ print("hit") """
-        #print(self.radiantToDegree(bounce_angle))
-
-    """ def hitPadel(self):
-        if self.newBallX > self.hit_box_x:
-            return False
-        if self.newBallY >= self.player.y and self.newBallY < self.hit_box_y:
-            return True
-        return False """
+            self.rotationAngle = paddle_physic.right(self.rotationAngle)
 
     def hitWall(self):
         #Checks if ball hits the outside wall and inverts his direction

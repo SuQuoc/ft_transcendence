@@ -8,7 +8,7 @@ import math
 """
 
 
-class hitPadel:
+class PaddlePhysic:
 
 
     def __init__(self, newBallY, newBallX, player: pong_player) -> None:

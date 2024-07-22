@@ -2,7 +2,6 @@
 import json
 import uuid
 import asyncio
-import math
 from .game_code.ball import gameBall
 from .game_code.player import pong_player
 
@@ -11,7 +10,6 @@ from asgiref.sync import async_to_sync
 from .game_code.storageClasses import slotXy
 
 # need asgiref
-
 # NEED TO FIX X !!!!!!!!!!!!!!!!!!
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -21,7 +19,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # logic is we have a dict saved trow all instances of all socked/client connection
     # create a dict entry for every player
-    players = {}
+    players: dict[str, pong_player] = {}
 
     # lock to get no data races
     update_lock = asyncio.Lock()
@@ -34,40 +32,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
         self.player_id = None
-
         if len(self.players) > 2: # place holder for user logic
             return
-
+            
         # create a random id
         self.player_id = str(uuid.uuid4())
-
         # set up rooms
-        # need more research on this
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f"chat_{self.room_name}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         await self.accept()
-
         # send to client that he has been accepted
-        await self.send(
-            text_data=json.dumps({"type": "playerId", "playerId": self.player_id})
-        )
+        await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
-        async with self.update_lock:
 
+        async with self.update_lock:
             # dummy code for user manage t and match making logic #
             x = 0
             for player in self.players.values():
                 if player.x == 0:
                     x = self.map_size.x - 20
-
-            # x will never change in pong just left and right player
             # logic is we have a struct saved trow all instances of all socked/client connection
             player = pong_player(self.player_id, x, self.map_size)
-
             self.players[self.player_id] = player
-        
+
         # now create a task if the Game has no task. Still need to improve the logic
         async with self.update_lock:
             #look if already run game task
@@ -79,6 +68,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if self.players[self.player_id].task is None:
                 print("[ERROR] Task creation failed")
 
+
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
         ball = gameBall(x=300, y=200, map_size=self.map_size, width=self.ball_width, height=self.ball_height)
@@ -87,13 +77,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 ball.hitWall()
                 ball.move()
                 for player in self.players.values():
-                    #ball["rotationAngle"] += ball["turnDirection"] * ball["rotationSpeed"]
-
-                    # set new player pos
                     player.move(self.MOVE_SPEED)
-                    ball.padelHitPhysic(player)
+                    ball.paddlesHit(player)
                     # send to clients in django and then to JS
-                    # update his game every 50 ms
                     await self.channel_layer.group_send(self.group_name,
                             {"type": "chat.message",
                                 "y": player.y,
@@ -102,11 +88,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                 "ball_x": ball.x,
                                 "ball_y": ball.y,
                             })
-                    """ await self.send(text_data=json.dumps({"type": "update",
-                                                          "y": player["y"],
-                                                          "x": player["x"],
-                                                          "playerId": player["id"]})) """
             await asyncio.sleep(0.03)
+
 
     async def disconnect(self, close_code):
 
@@ -123,6 +106,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.game_group_name, self.channel_name
         )
 
+
     # Receive message from WebSocket
     # Receive key up {up=1}
     async def receive(self, text_data=None, bytes_data=None):
@@ -136,6 +120,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         async with self.update_lock:
             player.up = text_data_json["up"]
             player.down = text_data_json["down"]
+
 
     # Receive message from room group
     async def chat_message(self, e):
