@@ -17,7 +17,7 @@ function validateInputs(login_form) {
 };
 
 // Event listener when "Login" button is clicked
-// checks if form data is valid
+// checks if form data is valid (not yet implemented)
 login_form.addEventListener("submit", e => {
 	e.preventDefault(); // Prevents the default action (in this case submitting the form)
 	
@@ -27,6 +27,8 @@ login_form.addEventListener("submit", e => {
 		console.log("Form is valid");
 		alert("correct");
 		window.location.href = "template.html"; // TEMPORARY!!!
+		//history.pushState(null, '', '/fionas_pages/template.html');
+		//history.go(); //refreshes page
 	}
 	else if (!validated) {
 		console.log("Form is invalid");
