@@ -27,7 +27,7 @@ services:
   user_management:
     build: ../src/user_management
     volumes:
-      - ../src/user_management:/app
+      - ../src/user_management:/user_management
     expose:
       - "8000:8000"
     environment:
