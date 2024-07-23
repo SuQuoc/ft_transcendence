@@ -13,8 +13,8 @@ from .game_code.storageClasses import slotXy
 # NEED TO FIX X !!!!!!!!!!!!!!!!!!
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    MOVE_SPEED = 20
 
+    MOVE_SPEED = 20
     game_group_name = "game_group"
 
     # logic is we have a dict saved trow all instances of all socked/client connection
@@ -34,7 +34,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.player_id = None
         if len(self.players) > 2: # place holder for user logic
             return
-            
+
         # create a random id
         self.player_id = str(uuid.uuid4())
         # set up rooms
@@ -53,7 +53,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             for player in self.players.values():
                 if player.x == 0:
                     x = self.map_size.x - 20
-            # logic is we have a struct saved trow all instances of all socked/client connection
+            # logic is we have a struct saved all instances of all socked/client connection
             player = pong_player(self.player_id, x, self.map_size)
             self.players[self.player_id] = player
 
@@ -79,13 +79,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 for player in self.players.values():
                     player.move(self.MOVE_SPEED)
                     ball.paddlesHit(player)
-                    # send to clients in django and then to JS
+                    # Send to clients in django and then to JS
                     await self.channel_layer.group_send(self.group_name,
-                            {"type": "chat.message",
-                                "y": player.y,
+                            {
+                                "type": "chat.message", # Massage type so js knows what he has to do with this strings
+                                "y": player.y,          # This will tell js where to draw the player
                                 "x": player.x,
-                                "playerId": player.id,
-                                "ball_x": ball.x,
+                                "playerId": player.id,  # Will tell js if it is the active player
+                                "ball_x": ball.x,       # This will tell js where to draw the ball
                                 "ball_y": ball.y,
                             })
             await asyncio.sleep(0.03)
