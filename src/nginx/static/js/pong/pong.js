@@ -52,9 +52,10 @@ function update_game_data(player1, player2, ball, e)
 function updateGameArea(game_data)
 {
     game_data.clear();
-    game_data.player1.update(game_data);
-    game_data.player2.update(game_data);
-    game_data.ball.update(game_data);
+    game_data.draw_middle_line("black", 6, 30, 1.5)
+    game_data.player1.update(game_data, "black");
+    game_data.player2.update(game_data, "black");
+    game_data.ball.update(game_data, "black");
     //console.log(game_data.player1);
     //a.player.;
 }

@@ -35,4 +35,18 @@ class GameArea {
     {
         clearInterval(this.interval);
     }
+
+    draw_middle_line(color, line_width, line_height, space)
+    {
+        var y = 0;
+        var x = this.canvas.width / 2 - line_width / 2;
+
+        while(y < this.canvas.height)
+        {
+            let ctx = this.context;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, line_width, line_height);
+            y += line_height * space;
+        }
+    }
 }
