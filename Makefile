@@ -65,6 +65,8 @@ migrate:
 shell:
 	${DOCKER_COMPOSE} exec user_management python manage.py shell
 
+um_test:
+	${DOCKER_COMPOSE} exec user_management python manage.py test
 
 
 ###################### Game #####################
