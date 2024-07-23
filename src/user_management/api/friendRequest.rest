@@ -1,0 +1,26 @@
+
+# sending friend request
+
+###
+GET https://127.0.0.1:8000/profile/1/
+
+###
+
+POST https://127.0.0.1:8000/profile/send-friend-request/
+Content-Type: application/json
+
+{"userId": 1}
+
+###
+
+POST https://127.0.0.1:8000/profile/acc-friend-request/
+Content-Type: application/json
+
+{"friend": "zack", "password": "Pass1234!", "email": "zack@gmail.com"}
+
+###
+
+POST https://127.0.0.1:8000/profile/dec-friend-request
+Content-Type: application/json
+
+{}

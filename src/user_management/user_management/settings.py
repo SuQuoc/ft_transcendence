@@ -25,11 +25,7 @@ SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = (
-    os.getenv("DJ_ALLOWED_HOSTS").split(",")
-    if "," in os.getenv("DJ_ALLOWED_HOSTS")
-    else [os.getenv("DJ_ALLOWED_HOSTS")]
-)
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -42,9 +38,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api",
-    "django.contrib.sites",
-    "allauth",
-    "allauth.account",
     "rest_framework",
 ]
 
@@ -56,7 +49,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "user_management.urls"
@@ -129,7 +121,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "um/static/"  # had to add um/ before to have the browsable api from DRF to render the page correctly
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -139,9 +131,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ADDED BY US--------------------------------------------- #
 CSRF_TRUSTED_ORIGINS = ["https://127.0.0.1:8000", "https://localhost:8000"]
-
-# Custom user model
-AUTH_USER_MODEL = "api.CustomUser"
 
 
 # Security settings for development
@@ -153,29 +142,27 @@ CSRF_COOKIE_SECURE = True  # Set to False for local development
 # Allauth settings
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-)
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
-LOGIN_REDIRECT_URL = "/"  # new line
-
-# Sites framework settings
-SITE_ID = 1
+# AUTHENTICATION_BACKENDS = (
+#    "django.contrib.auth.backends.ModelBackend",
+#    "allauth.account.auth_backends.AuthenticationBackend",
+# )
+#
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = True
+# LOGIN_REDIRECT_URL = "/"  # new line
+#
 
 
 # REST framework settings
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
+    # "DEFAULT_PERMISSION_CLASSES": [
+    #    "rest_framework.permissions.IsAuthenticated",
+    # ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
-    # 'DEFAULT_RENDERER_CLASSES': [
-    #    'rest_framework.renderers.JSONRenderer',
-    # ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
