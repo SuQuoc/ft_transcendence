@@ -3,13 +3,14 @@
 
 // if daphne is separate how to connect?
 //window.location.host
-roomName = "1"
-let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + roomName + "/";
-let chatSocket = new WebSocket(ws_path);
 
 function startPong()
 {
+    roomName = "1"
+    let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + roomName + "/";
+    let chatSocket = new WebSocket(ws_path);
+
     refresh_rate = 10;   // set refresh rate of the game
     width = 800;         // set size of the game area
     height = 600;
@@ -26,7 +27,7 @@ function startPong()
     };
 
     game_area.start(player1, player2, ball);
-    let keys_handler = new key_event_handler(player1, player2);
+    let keys_handler = new key_event_handler(player1, player2, chatSocket);
     keys_handler.key_event();
     // if i recv message
 }

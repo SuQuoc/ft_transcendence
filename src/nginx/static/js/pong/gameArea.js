@@ -19,7 +19,9 @@ class GameArea {
         this.player1 = player1;
         this.player2 = player2;
         this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        let centerDiv = document.getElementById("Center_div");
+        centerDiv.appendChild(this.canvas)
+        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, this.refresh_rate, this);
     }
