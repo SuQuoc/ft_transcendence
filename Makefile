@@ -47,24 +47,26 @@ registration_down:
 
 
 ###################### User Management #####################
-.PHONY: user_management_up user_management_down mm migrate shell
+.PHONY: um_up um_down um_mm um_migrate um_shell
 
-user_management_up:
+um_up:
 	@${DOCKER_COMPOSE} --profile user_management build
 	@${DOCKER_COMPOSE} --profile user_management up
 
-user_management_down:
+um_down:
 	@${DOCKER_COMPOSE} --profile user_management down
 
-mm:
+um_mm:
 	${DOCKER_COMPOSE} exec user_management python manage.py makemigrations
 
-migrate:
+um_migrate:
 	${DOCKER_COMPOSE} exec user_management python manage.py migrate
 
-shell:
+um_shell:
 	${DOCKER_COMPOSE} exec user_management python manage.py shell
 
+um_test:
+	${DOCKER_COMPOSE} exec user_management python manage.py test
 
 
 ###################### Game #####################

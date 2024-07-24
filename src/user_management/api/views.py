@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
@@ -13,7 +14,8 @@ from rest_framework.views import APIView
 
 from .models import CustomUser
 from .models import FriendRequest
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserCreateSerializer
+from .serializers import CustomUserDetailSerializer
 
 # Create your views here.
 
@@ -25,24 +27,23 @@ def profile(request):
 # generics.ListCreateAPIView # to view all users
 class CustomUserCreate(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CustomUserCreateSerializer
 
-    def create(self, request, *args, **kwargs):
-        print(f"QQQ path: {request.path}")
-        displayname = request.data.get('displayname')
-        id = request.data.get('id')
-        if not displayname or not id:
-            return Response({"error": "Both displayname and id must be provided"}, status=status.HTTP_400_BAD_REQUEST)
-        if CustomUser.objects.filter(displayname=displayname).exists():
-            return Response({"error": "User with this displayname already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        if CustomUser.objects.filter(id=id).exists():
-            return Response({"error": "User with this id already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        return super().create(request, *args, **kwargs)
+    # def create(self, request, *args, **kwargs):
+    #    displayname = request.data.get('displayname')
+    #    user_id = request.data.get('user_id')
+    #    # if not displayname or not user_id:
+    #    #     return Response({"error": "Both displayname and id must be provided"}, status=status.HTTP_400_BAD_REQUEST)
+    #    # if CustomUser.objects.filter(displayname=displayname).exists():
+    #    #     return Response({"error": "User with this displayname already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    #    # if CustomUser.objects.filter(user_id=user_id).exists():
+    #    #     return Response({"error": "User with this id already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    #    return super().create(request, *args, **kwargs)
 
 
 class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CustomUserDetailSerializer
 
 
 def getJsonKey(request, key):
@@ -130,75 +131,3 @@ def declineFriendRequest(request):
             return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
     else:
         return JsonResponse({"error": "Invalid HTTP method"}, status=405)
-
-
-# OLD APIS with mixins just for learning -----------------------
-class UserListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
-class UserDetailMixins(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-
-# OLD APIS
-class UserListOld(APIView):
-    def get(self, request):
-        users = CustomUser.objects.all()
-        serializer = CustomUserSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = CustomUserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserDetailOLD(APIView):
-    """
-    Retrieve, update or delete a CustomUser instance.
-    ATM everyone can do this i think.
-    """
-
-    def get_object(self, pk):
-        try:
-            return CustomUser.objects.get(pk=pk)
-        except CustomUser.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = CustomUserSerializer(user)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = CustomUserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
