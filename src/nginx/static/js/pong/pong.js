@@ -8,10 +8,14 @@ let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + roomName + "/";
 let chatSocket = new WebSocket(ws_path);
 
-function startPong() 
+function startPong()
 {
-    game_area = new GameArea();
-    
+    refresh_rate = 10;   // set refresh rate of the game
+    width = 800;         // set size of the game area
+    height = 600;
+
+    game_area = new GameArea(width, height, refresh_rate);
+
     let player1 = new Player(id=0, y=300, x=0, width=20, height=100, "Lenox");
     let player2 = new Player(id=0, y=300, x=100, width=20, height=100, "Eule");
     let ball = new Player(id="ball", y=0, x=0, width=10, height=10, "Ball");

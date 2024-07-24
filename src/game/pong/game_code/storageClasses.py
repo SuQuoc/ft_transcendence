@@ -1,15 +1,15 @@
-
 """
 Why? Slot ????
 
 The short answer is slots are more efficient in terms of memory space and speed of access
-a bit safer than the default Python method of data access. 
+a bit safer than the default Python method of data access.
 
 https://wiki.python.org/moin/UsingSlots
 
 """
 
-class slotXy():
+
+class SlotXy:
 
     __slots__ = ("x", "y")
 
