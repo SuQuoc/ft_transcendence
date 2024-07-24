@@ -11,6 +11,7 @@ body {
 }
 
 /* center elements vertically and horizontally */
+/* still a problem when zooming in too much */
 .center-div {
 	display: flex;
 	justify-content: center;
