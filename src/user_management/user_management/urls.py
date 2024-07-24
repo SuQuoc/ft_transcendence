@@ -23,5 +23,6 @@ from django.urls import path
 urlpatterns = [
     path("um/profile/admin/", admin.site.urls),
     path("um/profile/", views.profile, name="profile"),
-    path("um/api/", include("api.urls")),  # discard when frontend is ready
+    path("um/api/", include("api.urls")),
+    path("um/api/friend-request/", include("friends.urls")),
 ]

@@ -62,7 +62,7 @@ class TestUserCreation(APITestCase):
         print(response.data)
 
     # Succesful api call
-    def test_default(self):
+    def test_success(self):
         # print(f"q: uuid: {self.user_id}, data.user_id {self.data['user_id']}")
         response = self.client.post(self.url, self.data, format="json", secure=True)
         # print(f"q: RESPONSE: {response.data}")
@@ -75,3 +75,13 @@ class TestUserCreation(APITestCase):
         self.data['iser_id'] = "unrequired_data"
         response = self.client.post(self.url, self.data, format="json", secure=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class TestFriendRequest(APITestCase):
+    def setUp(self):
+        self.user1 = CustomUser.objects.create_user(user_id=uuid.uuid4(), displayname='tester1')
+        self.user2 = CustomUser.objects.create_user(user_id=uuid.uuid4(), displayname='tester1')
+        self.data = {}
+
+    def test_success(self):
+        response = self.client.post(self.url, self.data, format="json", secure=True)
