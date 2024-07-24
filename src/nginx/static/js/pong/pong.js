@@ -39,6 +39,11 @@ function update_game_data(player1, player2, ball, e)
         player1.id = data.playerId;
         return ;
     }
+
+    ball.update_game_count(data.match_points_left,
+        data.match_points_right
+    ) // update the match points here and create the vars
+
     ball.y = data.ball_y;
     ball.x = data.ball_x;
     if(data.playerId === player1.id)
@@ -49,6 +54,7 @@ function update_game_data(player1, player2, ball, e)
     }
     player2.y = data.y;
     player2.x = data.x;
+
 }
 
 //clear the frame and update it
@@ -56,10 +62,11 @@ function update_game_data(player1, player2, ball, e)
 function updateGameArea(game_data)
 {
     game_data.clear();
-    game_data.draw_middle_line("black", 6, 30, 1.5)
+    game_data.draw_middle_line("black", 6, 30, 1.5);
     game_data.player1.update(game_data, "black");
     game_data.player2.update(game_data, "black");
     game_data.ball.update(game_data, "black");
+    game_data.draw_counter()
     //console.log(game_data.player1);
     //a.player.;
 }

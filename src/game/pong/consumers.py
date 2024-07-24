@@ -91,6 +91,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             "playerId": player.id,  # Will tell js if it is the active player
                             "ball_x": ball.x,  # This will tell js where to draw the ball
                             "ball_y": ball.y,
+                            "match_points_left": ball.match_points["left"],
+                            "match_points_right": ball.match_points["right"],
                         },
                     )
             await asyncio.sleep(self.delay)
@@ -133,6 +135,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "playerId": e["playerId"],
                     "ball_x": e["ball_x"],
                     "ball_y": e["ball_y"],
+                    "match_points_left": e["match_points_left"],
+                    "match_points_right": e["match_points_right"],
                 }
             )
         )

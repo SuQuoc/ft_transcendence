@@ -50,4 +50,12 @@ class GameArea {
             y += line_height * space;
         }
     }
+
+    draw_counter()
+    {
+        let ctx = this.context;
+        ctx.font = "900 50px sans-serif";
+        ctx.fillText(this.ball.match_count_left, this.canvas.width / 4 - 25, 50)
+        ctx.fillText(this.ball.match_count_right, this.canvas.width / 4 * 3 - 25, 50)
+    }
 }

@@ -1,3 +1,4 @@
+import asyncio
 import math
 
 from .paddlePhysic import PaddlePhysic
@@ -15,9 +16,7 @@ class GameBall:
         self.map_size = map_size
         self.rotationAngle = self.degreeToRadiant(0)
         self.moveSpeed = 5
-
-        self.walkDirection = 1  # // -1 if back +1 if front
-        self.turnDirection = 1  # // -1 if left +1 if right
+        self.match_points = {"left": 0, "right": 0}
 
     def move(self):
         # player: pong_player
@@ -30,7 +29,7 @@ class GameBall:
         # self.padelHitPhysic()
         # self.hitWall()
 
-    def paddlesHit(self, player: PongPlayer):
+    def paddlesHit(self, player: PongPlayer) -> str | None:
         paddle_physic = PaddlePhysic(self.newBallY, self.newBallX, player)
         if player.x == 0:
             self.rotationAngle = paddle_physic.left(self.rotationAngle)
@@ -44,7 +43,6 @@ class GameBall:
         self.newBallY = self.y - self.moveSpeed * math.sin(self.rotationAngle)
 
         if self.newBallY > (self.map_size.y - self.height):
-            # self.turnDirection *= -1
 
             new_angele = self.overflowRadius(math.pi * 2 - self.rotationAngle)
             self.rotationAngle = new_angele
@@ -53,7 +51,7 @@ class GameBall:
             self.x = self.newBallX
 
         elif self.newBallY < 0:
-            # self.turnDirection *= -1
+
             new_angele = self.overflowRadius(math.pi * 2 - self.rotationAngle)
             self.rotationAngle = new_angele
 
@@ -61,32 +59,18 @@ class GameBall:
             self.x = self.newBallX
 
         elif self.newBallX > (self.map_size.x - self.width):
-            # self.walkDirection *= -1
-            """new_angele = self.overflowRadius(math.pi - self.rotationAngle)
-            self.rotationAngle = new_angele
-
-            self.x = self.map_size.x - self.width
-            self.Y = self.newBallY"""
 
             self.x = self.map_size.x / 2
             self.y = self.map_size.y / 2
             self.rotationAngle = self.degreeToRadiant(0)
-
-            print("OUT RIGHT")
+            self.match_points["left"] += 1
 
         elif self.newBallX < 0:
-            # self.walkDirection *= -1
-            """new_angele = self.overflowRadius(math.pi - self.rotationAngle)
-            self.rotationAngle = new_angele
-
-            self.x = 0
-            self.Y = self.newBallY"""
 
             self.x = self.map_size.x / 2
             self.y = self.map_size.y / 2
             self.rotationAngle = self.degreeToRadiant(0)
-
-            print("OUT")
+            self.match_points["right"] += 1
 
         else:
             self.x = self.newBallX
