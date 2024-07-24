@@ -11,7 +11,7 @@ from .pongPlayer import PongPlayer
 class PaddlePhysic:
 
     def __init__(self, newBallY, newBallX, player: PongPlayer) -> None:
-        self.maximum_angle = self.degreeToRadiant(75)
+        self.maximum_angle = self.degreeToRadiant(60)
         self.newBallY = newBallY
         self.newBallX = newBallX
         self.player = player
@@ -23,8 +23,10 @@ class PaddlePhysic:
         - RETURNS the rotationAngle that it already had if no paddle hit
         - player x y gives us just the the left upper point of the paddle need to calc the Hitbox
         """
+        # 5 is player height / 2 ?
+        player_hitbox_offset = self.player.y - 5
         hit_box_x = self.player.x + self.player.width
-        hit_box_y = self.player.y + self.player.height
+        hit_box_y = player_hitbox_offset + self.player.height
 
         # Looks for Ball x or y not hit the paddle
         if self.newBallX > hit_box_x:
@@ -35,11 +37,14 @@ class PaddlePhysic:
 
     # RIGHT PADDLE HIT LOGIC
     def right(self, rotationAngle):
-        hit_box_x = self.player.x - self.player.width
-        hit_box_y = self.player.y + self.player.height
+        # 5 is player height / 2 ?
+        player_hitbox_offset = self.player.y - 5
+        hit_box_x = self.player.x - 10
+        hit_box_y = player_hitbox_offset + self.player.height
+
         if self.newBallX < hit_box_x:
             return rotationAngle
-        if self.newBallY < self.player.y or self.newBallY > hit_box_y:
+        if self.newBallY < player_hitbox_offset or self.newBallY > hit_box_y:
             return rotationAngle
 
         # Here we invert the angle

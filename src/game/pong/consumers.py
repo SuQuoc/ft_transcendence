@@ -1,6 +1,7 @@
 # chat/consumers.py
 import asyncio
 import json
+import time
 import uuid
 
 from asgiref.sync import async_to_sync
@@ -73,29 +74,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
-        ball = GameBall(x=300, y=200, map_size=self.map_size, width=self.ball_width, height=self.ball_height)
+        ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
         while len(self.players) > 0:
             async with self.update_lock:
                 ball.hitWall()
                 ball.move()
-                for player in self.players.values():
-                    player.move(self.MOVE_SPEED)
-                    ball.paddlesHit(player)
-                    # Send to clients in django and then to JS
-                    await self.channel_layer.group_send(
-                        self.group_name,
-                        {
-                            "type": "chat.message",  # Massage type so js knows what he has to do with this strings
-                            "y": player.y,  # This will tell js where to draw the player
-                            "x": player.x,
-                            "playerId": player.id,  # Will tell js if it is the active player
-                            "ball_x": ball.x,  # This will tell js where to draw the ball
-                            "ball_y": ball.y,
-                            "match_points_left": ball.match_points["left"],
-                            "match_points_right": ball.match_points["right"],
-                        },
-                    )
+                [await self.sendToClient(player, ball) for player in self.players.values()]
+
             await asyncio.sleep(self.delay)
+
+    async def sendToClient(self, player: PongPlayer, ball: GameBall):
+        player.move(self.MOVE_SPEED)
+        ball.paddlesHit(player)
+        # Send to clients in django and then to JS
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "chat.message",  # Massage type so js knows what he has to do with this strings
+                "y": player.y,  # This will tell js where to draw the player
+                "x": player.x,
+                "playerId": player.id,  # Will tell js if it is the active player
+                "ball_x": ball.x,  # This will tell js where to draw the ball
+                "ball_y": ball.y,
+                "match_points_left": ball.match_points["left"],
+                "match_points_right": ball.match_points["right"],
+            },
+        )
 
     async def disconnect(self, close_code):
 

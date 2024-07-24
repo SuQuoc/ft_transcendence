@@ -15,21 +15,14 @@ class GameBall:
         self.height = height
         self.map_size = map_size
         self.rotationAngle = self.degreeToRadiant(0)
-        self.moveSpeed = 5
+        self.moveSpeed = 1
         self.match_points = {"left": 0, "right": 0}
 
     def move(self):
-        # player: pong_player
-        # self.player = player
-
         self.x = self.x + self.moveSpeed * math.cos(self.rotationAngle)
         self.y = self.y - self.moveSpeed * math.sin(self.rotationAngle)
-        # self.x += 1
-        # self.y += 1
-        # self.padelHitPhysic()
-        # self.hitWall()
 
-    def paddlesHit(self, player: PongPlayer) -> str | None:
+    def paddlesHit(self, player: PongPlayer):
         paddle_physic = PaddlePhysic(self.newBallY, self.newBallX, player)
         if player.x == 0:
             self.rotationAngle = paddle_physic.left(self.rotationAngle)
@@ -38,49 +31,49 @@ class GameBall:
 
     def hitWall(self):
         # Checks if ball hits the outside wall and inverts his direction
-
+        # First write it into a temp and check if we out or hit a wall
         self.newBallX = self.x + self.moveSpeed * math.cos(self.rotationAngle)
         self.newBallY = self.y - self.moveSpeed * math.sin(self.rotationAngle)
 
         if self.newBallY > (self.map_size.y - self.height):
-
-            new_angele = self.overflowRadius(math.pi * 2 - self.rotationAngle)
-            self.rotationAngle = new_angele
-
+            # Ball hit bottom
+            self.invertRotationAngle()
             self.y = self.map_size.y - self.height
             self.x = self.newBallX
 
         elif self.newBallY < 0:
-
-            new_angele = self.overflowRadius(math.pi * 2 - self.rotationAngle)
-            self.rotationAngle = new_angele
-
+            # Ball hit top
+            self.invertRotationAngle()
             self.y = 0
             self.x = self.newBallX
 
         elif self.newBallX > (self.map_size.x - self.width):
-
-            self.x = self.map_size.x / 2
-            self.y = self.map_size.y / 2
-            self.rotationAngle = self.degreeToRadiant(0)
-            self.match_points["left"] += 1
+            # Ball out right
+            self.reset_ball()
+            self.count_points("left")
 
         elif self.newBallX < 0:
+            # Ball out left
+            self.reset_ball()
+            self.count_points("right")
 
-            self.x = self.map_size.x / 2
-            self.y = self.map_size.y / 2
-            self.rotationAngle = self.degreeToRadiant(0)
-            self.match_points["right"] += 1
-
+        # if we hit or not out nothing we write it into ball pos x/y
         else:
             self.x = self.newBallX
             self.y = self.newBallY
 
-    def degreeToRadiant(self, degree):
-        return degree * (math.pi / 180)
+    def invertRotationAngle(self):
+        new_angel = self.overflowRadius(math.pi * 2 - self.rotationAngle)
+        self.rotationAngle = new_angel
 
-    def radiantToDegree(self, radiant):
-        return radiant * 180 / math.pi
+    def count_points(self, side):
+        if self.match_points[side] < 10000:
+            self.match_points[side] += 1
+
+    def reset_ball(self):
+        self.x = self.map_size.x / 2
+        self.y = self.map_size.y / 2
+        self.rotationAngle = self.degreeToRadiant(0)
 
     # If radiant is bigger/smaller than pi
     def overflowRadius(self, radiant):
@@ -90,3 +83,9 @@ class GameBall:
         if radiant < 0:
             return circle + radiant
         return radiant
+
+    def degreeToRadiant(self, degree):
+        return degree * (math.pi / 180)
+
+    def radiantToDegree(self, radiant):
+        return radiant * 180 / math.pi
