@@ -20,7 +20,9 @@
 		crossorigin="anonymous"
 		defer></script>
 	<!-- Custom js -->
-	<script src="frontendmasters_course/app.js" defer type="module"></script>
+	<!-- The 'type="module"' means that the file will be loaded as a module.
+	 	This means every variables we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->
+	<script src="app.js" defer type="module"></script>
 
 	<title>template</title>
 </head>
@@ -36,8 +38,8 @@
 		</button>
 		<div class="collapse navbar-collapse justify-content-between" id="navbarNav">
 			<ul class="navbar-nav">
-				<a class="nav-link active" href="/fionas_pages/template.html">Home</a>
-				<a class="nav-link" href="/play">Play</a>
+				<a class="nav-link active" href="#">Active</a>
+				<a class="nav-link" href="#">Link</a>
 				<a class="nav-link" href="#">Link</a>
 			</ul>
 			<ul class="navbar-nav">
@@ -52,8 +54,6 @@
 	<!-- Main Page -->
 	<main id="main-content">
 		<!-- main page content -->
-		 <h1>default</h1>
-		 <h1>default</h1>
 	</main>
 
 
