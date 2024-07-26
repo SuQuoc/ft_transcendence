@@ -9,6 +9,11 @@ const Router = {
 				Router.go(url);
 			});
 		});
+		// event handler for url changes (back/forward)
+		window.addEventListener("popstate", event => {
+			Router.go(event.state.route, false);
+		});
+
 		// check initial URL
 		Router.go(location.pathname);
 	},
@@ -24,17 +29,24 @@ const Router = {
 		}
 		// create the new page element depending on the route
 		switch (route) {
-			case "/":
-				pageElement = document.createElement("h1");
-				pageElement.textContent = "Home";
+			case "/prototypes/template.html":
+				pageElement = document.createElement("play-menu");
 				break;
 			case "/play":
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
+			case "/user":
+				pageElement = document.createElement("h1");
+				pageElement.textContent = "User";
+				break;
+			default:
+				// homepage
+				pageElement = document.createElement("play-menu");
+				break;
 		}
 		if (pageElement) {
-			document.querySelector("main").innerHTML = ""; //empty main
+			document.querySelector("main").innerHTML = ""; //empty main the quick and dirty way
 			document.querySelector("main").appendChild(pageElement); //append the new element
 			// scroll to top
 			window.scrollX = 0;

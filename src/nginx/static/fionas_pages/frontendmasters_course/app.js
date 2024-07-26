@@ -1,7 +1,11 @@
 //import Store from './services/Store.js';
 //import API from './services/API.js';
 //import { loadData } from './services/Menu.js';
-import Router from '../router.js';
+import Router from '../../router.js';
+
+// link my web components
+import { PlayMenu } from '../../js/PlayMenu.js';
+
 
 // to make Store global
 window.app = {}
@@ -14,6 +18,7 @@ console.log("global");
 window.addEventListener("DOMContentLoaded", async () => {
 	//loadData();
 	console.log("DOM loaded");
+	// adds event listeners for routing
 	app.router.init();
 });
 
