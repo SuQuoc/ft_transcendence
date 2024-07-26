@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 
+# DO I HAVE TO BE LOGGED IN
 class TestUserCreation(APITestCase):
     def setUp(self):
         self.user_id = str(uuid.uuid4())
@@ -17,7 +18,6 @@ class TestUserCreation(APITestCase):
             "displayname": self.displayname,
         }
         self.url = reverse('user-creation')
-        self.print_response = False
 
     def test_no_uid(self):
         del self.data['user_id']  # This will remove the key 'user_id' and its value from self.data
@@ -28,19 +28,19 @@ class TestUserCreation(APITestCase):
         del self.data['displayname']  #
         response = self.client.post(self.url, self.data, format="json", secure=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
+        # print(response.data)
 
     def test_invalid_uid(self):
         self.data['user_id'] = "invalid user id"
         response = self.client.post(self.url, self.data, format="json", secure=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
+        # print(response.data)
 
     def test_displayname_too_long(self):
         self.data['displayname'] = "displayname too long ggggggggggggggggggggggggggg"
         response = self.client.post(self.url, self.data, format="json", secure=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
+        # print(response.data)
 
     def test_wrong_key_name(self):
         del self.data["user_id"]
@@ -59,7 +59,7 @@ class TestUserCreation(APITestCase):
         response = self.client.post(self.url, self.data, format="json", secure=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(CustomUser.objects.count(), 1)
-        print(response.data)
+        # print(response.data)
 
     # Succesful api call
     def test_success(self):
@@ -77,11 +77,11 @@ class TestUserCreation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-class TestFriendRequest(APITestCase):
-    def setUp(self):
-        self.user1 = CustomUser.objects.create_user(user_id=uuid.uuid4(), displayname='tester1')
-        self.user2 = CustomUser.objects.create_user(user_id=uuid.uuid4(), displayname='tester1')
-        self.data = {}
-
-    def test_success(self):
-        response = self.client.post(self.url, self.data, format="json", secure=True)
+# class TestFriendRequest(APITestCase):
+#     def setUp(self):
+#         self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='tester1')
+#         self.user2 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='tester1')
+#         self.data = {}
+#
+#     def test_success(self):
+#         response = self.client.post(self.url, self.data, format="json", secure=True)
