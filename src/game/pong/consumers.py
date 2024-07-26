@@ -54,20 +54,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # now lock and fill the players[id] dict
 
         x = 0
-        player = PongPlayer(self.player_id, x, self.map_size)
+        self.player = PongPlayer(self.player_id, x, self.map_size)
 
         async with self.update_lock:
 
             if self.players.get(self.room_name, None) is None:
-                player_dict = {self.player_id: player}
+
+                player_dict = {self.player_id: self.player}
                 self.players[self.room_name] = player_dict
-                self.players[self.room_name][self.player_id].task = asyncio.create_task(self.game_loop())
-                if self.players[self.room_name][self.player_id].task is None:
+
+                self.player.task = asyncio.create_task(self.game_loop())
+                if self.player.task is None:
                     print("[ERROR] Task creation failed")
 
             elif len(self.players[self.room_name]) == 1:
-                player.x = self.map_size.x - player.width
-                self.players[self.room_name][self.player_id] = player
+                self.players[self.room_name][self.player_id] = self.player
+                self.player.x = self.map_size.x - self.player.width
 
         # async with self.update_lock:
         # dummy code for user manage t and match making logic #
@@ -92,9 +94,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def game_loop(self):
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
         while len(self.players[self.room_name]) > 0:
+            ball.hitWall()
+            ball.move()
             async with self.update_lock:
-                ball.hitWall()
-                ball.move()
                 [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
 
             await asyncio.sleep(self.delay)
@@ -124,9 +126,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         async with self.update_lock:
             if self.player_id in self.players[self.room_name]:
-                if self.players[self.room_name][self.player_id].task is not None:
-                    self.players[self.room_name][self.player_id].task.cancel()
-                del self.players[self.room_name][self.player_id]
+                if self.player.task is not None:
+                    self.player.task.cancel()
+                del self.player
 
                 if self.players.get(self.room_name, None):
                     del self.players[self.room_name]
