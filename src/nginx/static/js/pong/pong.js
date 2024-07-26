@@ -6,16 +6,16 @@
 
 function startPong()
 {
-    roomName = "1"
+    var roomName = document.getElementById("room").value;
     let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + roomName + "/";
     let chatSocket = new WebSocket(ws_path);
 
-    refresh_rate = 10;   // set refresh rate of the game
-    width = 800;         // set size of the game area
-    height = 600;
+    var refresh_rate = 10;   // set refresh rate of the game
+    var width = 800;         // set size of the game area
+    var height = 600;
 
-    game_area = new GameArea(width, height, refresh_rate);
+    let game_area = new GameArea(width, height, refresh_rate);
 
     let player1 = new Player(id=0, y=300, x=0, width=20, height=100, "Lenox");
     let player2 = new Player(id=0, y=300, x=100, width=20, height=100, "Eule");
@@ -67,15 +67,7 @@ function updateGameArea(game_data)
     game_data.player1.update(game_data, "black");
     game_data.player2.update(game_data, "black");
     game_data.ball.update(game_data, "black");
-    game_data.draw_counter()
+    game_data.draw_counter();
     //console.log(game_data.player1);
     //a.player.;
 }
-
-/* chatSocket.onopen = function(e)
-{
-    console.log("connected");
-} */
-/* chatSocket.send(JSON.stringify({
-    'message': message
-})); */

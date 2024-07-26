@@ -32,9 +32,9 @@ class key_event_handler
         function key_down(e)
         {
             if(e.key === "w")
-                up_down = [true, false]
+                up_down = [true, false];
             if(e.key === "s")
-                up_down = [false, true]
+                up_down = [false, true];
             send_key_status(player1.id, up_down, chatSocket);
         }
 
@@ -48,5 +48,4 @@ class key_event_handler
             send_key_status(player1.id, up_down, chatSocket);
         }
     }
-
 }
