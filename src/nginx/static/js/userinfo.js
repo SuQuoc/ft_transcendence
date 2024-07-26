@@ -4,13 +4,13 @@ class FriendList extends HTMLElement {
 
 		//separates shadow DOM from rest of the DOM, but still being accessible from outside
 		this.root = this.attachShadow({ mode: 'open' });
-
+		console.log(this.root);
 		const styles = document.createElement("style");
 		this.root.appendChild(styles);
 
 		async function loadCSS() {
 			try {
-				const request = await fetch("./userinfo.css");
+				const request = await fetch("../css/userinfo.css");
 				if (!request.ok) {
 					throw new Error(`HTTP error! status: ${request.status}`);
 				}
@@ -20,19 +20,20 @@ class FriendList extends HTMLElement {
 				console.error('Error loading CSS:', error);
 			}
 		}
+		loadCSS();
 		
         this.friends = [];
         this.requested = [];
         this.defriended = [];
 		
-		loadCSS();
     }
 
     async fetchFriendList() {
         try {
 			//substitute with endpoint instead of dummy JSON
-            const response = await fetch('./getfriendlist.json');
+            const response = await fetch('../prototypes/getfriendlist.json');
             const data = await response.json();
+			console.log(data);
             this.friends = data[0].friends;
             this.requested = data[0].requested;
             this.defriended = data[0].defriended;
@@ -65,7 +66,6 @@ class FriendList extends HTMLElement {
                             <div class="details">
                                 <div class="displayname">${request.displayname}</div>
                             </div>
-                            <button class="add-friend" data-displayname="${request.displayname}">Add Friend</button>
                         </div>
                     `).join('')}
                 </div>
@@ -83,6 +83,7 @@ class FriendList extends HTMLElement {
             </div>
         `;
 
+		/*
         this.root.querySelectorAll('.add-friend').forEach(button => {
             button.addEventListener('click', (event) => {
                 const displayname = event.target.getAttribute('data-displayname');
@@ -93,7 +94,7 @@ class FriendList extends HTMLElement {
                 }));
             });
         });
-		/*
+	
 		// Clear existing content
         this.root.innerHTML = '';
 
