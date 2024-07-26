@@ -1,0 +1,32 @@
+[
+	{
+		"friends": [		
+			{
+				"displayname": "asdfas",
+				"onlinestatus": true,
+				"imgURL": "https://i.pravatar.cc/150?img=2"
+			},
+			{
+				"displayname": "asdfas",
+				"onlinestatus": false,
+				"imgURL": "https://i.pravatar.cc/150?img=3"
+			}
+		],
+		"requested": [		
+			{
+				"displayname": "asdfas"
+			},
+			{
+				"displayname": "asdfas"
+			}
+		],
+		"defriended": [		
+			{
+				"displayname": "asdfas"
+			},
+			{
+				"displayname": "asdfas"
+			}
+		]
+	}
+]
