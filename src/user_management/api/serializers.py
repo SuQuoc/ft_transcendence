@@ -36,10 +36,29 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 #    return user_instance
 
 
-class CustomUserDetailSerializer(serializers.ModelSerializer):
+class CustomUserProfileSerializer(serializers.ModelSerializer):
+    is_self = serializers.SerializerMethodField()
+    is_friend = serializers.SerializerMethodField()
+    is_stranger = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ["displayname", "online", "friends"]
+        fields = ["displayname", "online", "is_self", "is_friend", "is_stranger"]  # +avatar
+
+        def get_is_self(self, obj):
+            return self.context.get('is_self', False)
+
+        def get_is_friend(self, obj):
+            return self.context.get('is_friend', False)
+
+        def get_is_stranger(self, obj):
+            return self.context.get('is_stranger', False)
+
+
+class CustomUserEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ["displayname"]  # +avatar
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):

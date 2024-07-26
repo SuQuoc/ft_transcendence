@@ -6,7 +6,7 @@ from django.db import models
 
 class FriendList(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="friend_list")
-    friends = models.ManyToManyField(CustomUser, blank=True, related_name="friends")
+    friends = models.ManyToManyField(CustomUser, blank=True, related_name="a_friend")
 
     def __str__(self):
         return self.user.displayname
@@ -51,12 +51,15 @@ class FriendRequest(models.Model):
     sender = models.ForeignKey(CustomUser, related_name='sender', on_delete=models.CASCADE)
     receiver = models.ForeignKey(CustomUser, related_name='receiver', on_delete=models.CASCADE)
     status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    send_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.sender.displayname
 
     def accept(self):
+        """
+        Accept a friend request.
+        """
         receiver_friend_list = self.receiver.friend_list
         sender_friend_list = self.sender.friend_list
 
@@ -77,5 +80,18 @@ class FriendRequest(models.Model):
     #             self.save()
 
     def decline(self):
+        """
+        Decline a friend request.
+        """
         self.status = self.DECLINED
         self.save()
+
+    # Just for fun
+    def cancel(self):
+        """
+        Cancel a friend request that was send.
+        """
+        if self.status == self.PENDING:
+            self.delete()
+        else:
+            raise ValueError("Cannot cancel a friend request that is not pending.")
