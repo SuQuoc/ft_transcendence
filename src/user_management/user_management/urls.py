@@ -21,8 +21,8 @@ from django.urls import include
 from django.urls import path
 
 urlpatterns = [
-    path("um/profile/admin/", admin.site.urls),
-    path("um/profile/", views.profile, name="profile"),
+    path("um/admin/", admin.site.urls),
+    # path("um/profile/", views.profile, name="profile"), # delete later, just for testing if server is still rendering changes
     path("um/api/", include("api.urls")),
     path("um/api/friend-request/", include("friends.urls")),
 ]
