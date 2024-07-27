@@ -65,17 +65,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.players[self.room_name][self.player_id] = self.player
             self.player.x = self.map_size.x - self.player.width
 
+        self.start_game_and_create_task()
+
+    async def start_game_and_create_task(self):
+        task = asyncio.create_task(self.game_loop())
+        if task is None:
+            print("[ERROR] Task creation failed")
+            return
+        async with self.update_lock:
+            self.player.task = task
         await self.channel_layer.group_send(
             self.group_name,
             {"type": "start.game", "startGame": True},
         )
-
-        task = asyncio.create_task(self.game_loop())
-        if task is None:
-            print("[ERROR] Task creation failed")
-
-        async with self.update_lock:
-            self.player.task = task
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
