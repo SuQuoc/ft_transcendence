@@ -14,6 +14,7 @@
 	<!-- Custom CSS -->
 	<link href="./css/template.css" rel="stylesheet"/>
 
+	<script src="/js/pong/waitForOpenConnection.js" defer></script>
 	<script src="/js/pong/gameArea.js" defer></script>
     <script src="/js/pong/keyEvents.js" defer></script>
     <script src="/js/pong/player.js" defer></script>
@@ -49,9 +50,10 @@
 	<!-- Play Menu -->
 	<div id="Center_div" class="center-div">
 		<div class="">
-				<input id="room" type="text" name="room">
-				<button id="playButton" type="button" value="PLAYER ID ?" onclick="startPong();" class="btn btn-secondary w-100 mb-2">Multiplayer</button>
-				<button type="submit" class="btn btn-secondary w-100">Tournament</button>
+				<input id="room-name" type="text" value="name">
+				<input id="room-size" type="text" value="2">
+				<button id="playButton" type="button" value="PLAYER ID ?" onclick="startPong();" class="btn btn-secondary w-100 mb-2">Create Lobby</button>
+				<button id="startGame" type="button" class="btn btn-secondary w-100">Start Game</button>
 		</div>
 	</div>
 

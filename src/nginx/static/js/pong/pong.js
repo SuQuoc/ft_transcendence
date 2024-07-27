@@ -6,10 +6,15 @@
 
 function startPong()
 {
-    var roomName = document.getElementById("room").value;
+    var room_name = document.getElementById("room-name").value;
+    var room_size = document.getElementById("room-size").value;
+
     let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + roomName + "/";
+    let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + room_name + "/";
     let chatSocket = new WebSocket(ws_path);
+
+    sendRoomSizeMessage(chatSocket, room_size);
+
 
     var refresh_rate = 10;   // set refresh rate of the game
     var width = 800;         // set size of the game area
@@ -23,16 +28,16 @@ function startPong()
 
     chatSocket.onmessage = function(e)
     {
-        update_game_data(player1, player2, ball, e);
+        update_game_data(chatSocket, game_area, player1, player2, ball, e);
     };
 
-    game_area.start(player1, player2, ball);
+    /* game_area.start(player1, player2, ball);
     let keys_handler = new key_event_handler(player1, player2, chatSocket);
-    keys_handler.key_event();
+    keys_handler.key_event(); */
     // if i recv message
 }
 
-function update_game_data(player1, player2, ball, e)
+function update_game_data(chatSocket, game_area, player1, player2, ball, e)
 {
     const data = JSON.parse(e.data)
     if (data.type === "playerId")
@@ -41,20 +46,31 @@ function update_game_data(player1, player2, ball, e)
         return ;
     }
 
-    ball.update_game_count(data.match_points_left,
-        data.match_points_right
-    ) // update the match points here and create the vars
-
-    ball.y = data.ball_y;
-    ball.x = data.ball_x;
-    if(data.playerId === player1.id)
+    if (data.type === "update")
     {
-        player1.y = data.y;
-        player1.x = data.x;
+        ball.update_game_count(data.match_points_left,
+            data.match_points_right
+        ) // update the match points here and create the vars
+
+        ball.y = data.ball_y;
+        ball.x = data.ball_x;
+        if(data.playerId === player1.id)
+        {
+            player1.y = data.y;
+            player1.x = data.x;
+            return ;
+        }
+        player2.y = data.y;
+        player2.x = data.x;
         return ;
     }
-    player2.y = data.y;
-    player2.x = data.x;
+
+    if(data.type === "startGame" && data.startGame === true)
+    {
+        game_area.start(player1, player2, ball);
+        let keys_handler = new key_event_handler(player1, player2, chatSocket);
+        keys_handler.key_event();
+    }
 
 }
 

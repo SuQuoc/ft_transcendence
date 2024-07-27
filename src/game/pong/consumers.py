@@ -25,9 +25,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # create a dict entry for every player
     # players: dict[str, PongPlayer] = {}
     players: dict[str, dict[str, PongPlayer]] = {}
-    # all_players: dict[str, dict[str, PongPlayer]] = {}
-    #         str s channel name | next key is id
-    # lock to get no data races
+
+    # PongPlayer should not be "global"
     update_lock = asyncio.Lock()
 
     map_size = SlotXy(800, 600)
@@ -53,53 +52,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
 
-        x = 0
-        self.player = PongPlayer(self.player_id, x, self.map_size)
+        self.player = PongPlayer(self.player_id, self.map_size)
+        async with self.update_lock:
+            player = self.players.get(self.room_name, None)
+        if player is None:
+            player_dict = {self.player_id: self.player}
+            async with self.update_lock:
+                self.players[self.room_name] = player_dict
+            return
 
         async with self.update_lock:
+            self.players[self.room_name][self.player_id] = self.player
+            self.player.x = self.map_size.x - self.player.width
 
-            if self.players.get(self.room_name, None) is None:
+        await self.channel_layer.group_send(
+            self.group_name,
+            {"type": "start.game", "startGame": True},
+        )
 
-                player_dict = {self.player_id: self.player}
-                self.players[self.room_name] = player_dict
+        task = asyncio.create_task(self.game_loop())
+        if task is None:
+            print("[ERROR] Task creation failed")
 
-                self.player.task = asyncio.create_task(self.game_loop())
-                if self.player.task is None:
-                    print("[ERROR] Task creation failed")
-
-            elif len(self.players[self.room_name]) == 1:
-                self.players[self.room_name][self.player_id] = self.player
-                self.player.x = self.map_size.x - self.player.width
-
-        # async with self.update_lock:
-        # dummy code for user manage t and match making logic #
-        # x = 0
-        # for player in self.players.values():
-        #    if player.x == 0:
-        #        x = self.map_size.x - player.width
-        # logic is we have a struct saved all instances of all socked/client connection
-
-        # now create a task if the Game has no task. Still need to improve the logic
-        """ async with self.update_lock:
-            # look if already run game task
-            for player in self.players[self.room_name].values():
-                if player.task is not None:
-                    return
-            # save task into player struct to close it later
-            self.players[self.room_name][self.player_id].task = asyncio.create_task(self.game_loop())
-            if self.players[self.room_name][self.player_id].task is None:
-                print("[ERROR] Task creation failed") """
+        async with self.update_lock:
+            self.player.task = task
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
+        async with self.update_lock:
+            player_count = len(self.players[self.room_name])
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
-        while len(self.players[self.room_name]) > 0:
+        while player_count > 0:
             ball.hitWall()
             ball.move()
             async with self.update_lock:
                 [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
-
             await asyncio.sleep(self.delay)
+            async with self.update_lock:
+                player_count = len(self.players[self.room_name])
 
     async def sendToClient(self, player: PongPlayer, ball: GameBall):
         player.move(self.MOVE_SPEED)
@@ -140,14 +130,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
 
-        player_id = text_data_json["playerId"]
-        player = self.players[self.room_name].get(player_id, None)
-        if not player:
-            return
+        if text_data_json["type"] == "update":
+            player_id = text_data_json["playerId"]
+            player = self.players[self.room_name].get(player_id, None)
 
-        async with self.update_lock:
-            player.up = text_data_json["up"]
-            player.down = text_data_json["down"]
+            if not player:
+                return
+
+            async with self.update_lock:
+                player.up = text_data_json["up"]
+                player.down = text_data_json["down"]
+
+        elif text_data_json["type"] == "roomSize":
+            self.room_size = int(text_data_json["roomSize"])
+            print(self.room_size)
 
     # Receive message from room group
     async def chat_message(self, e):
@@ -165,6 +161,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+    async def start_game(self, e):
+        print("start game", self.channel_name)
+        await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
 
 
 # Recurses
