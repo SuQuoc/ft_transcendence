@@ -2,25 +2,28 @@
 // add player in constructor
 class GameArea {
 
-    constructor()
+    constructor(width=800, height=600, refresh_rate=30)
     {
         this.canvas = document.createElement("canvas");
+        this.refresh_rate = refresh_rate
+        this.canvas.height = height;
+        this.canvas.width = width;
     }
-    
+
     // use the start function
     // specify game area/canvas size
     // set the refresh rate. How often the game gets rebuild.
-    start(player1, player2, ball, width=800, height=600, refresh_rate=50)
+    start(player1, player2, ball)
     {
+        this.ball = ball;
         this.player1 = player1;
         this.player2 = player2;
-        this.ball = ball;
-        this.canvas.width = width;
-        this.canvas.height = height;
         this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        let centerDiv = document.getElementById("Center_div");
+        centerDiv.appendChild(this.canvas)
+        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, refresh_rate, this);
+        this.interval = setInterval(updateGameArea, this.refresh_rate, this);
     }
 
     // need to clear the canvas after every frame
@@ -34,5 +37,27 @@ class GameArea {
     stop()
     {
         clearInterval(this.interval);
+    }
+
+    draw_middle_line(color, line_width, line_height, space)
+    {
+        var y = 0;
+        var x = this.canvas.width / 2 - line_width / 2;
+
+        while(y < this.canvas.height)
+        {
+            let ctx = this.context;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, line_width, line_height);
+            y += line_height * space;
+        }
+    }
+
+    draw_counter()
+    {
+        let ctx = this.context;
+        ctx.font = "900 50px sans-serif";
+        ctx.fillText(this.ball.match_count_left, this.canvas.width / 4 - 25, 50)
+        ctx.fillText(this.ball.match_count_right, this.canvas.width / 4 * 3 - 25, 50)
     }
 }
