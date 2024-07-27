@@ -3,7 +3,7 @@
 # cancel if faild
 set -e
 
-python manage.py makemigrations api
+python manage.py makemigrations
 python manage.py migrate
 
 # Creating django admin user

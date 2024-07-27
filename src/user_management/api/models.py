@@ -10,28 +10,14 @@ from django.db import models
 
 
 class CustomUser(models.Model):
-    # overriding the default user model
-    displayname = models.CharField(max_length=20, unique=True, blank=False, null=False)
-    # email = models.EmailField(unique=True, blank=False, null=False)
-    # password = models.CharField(blank=False, null=False)
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    # additional fields
-    online = models.BooleanField(default=False)
-    friends = models.ManyToManyField("self", blank=True)
+    user_id = models.UUIDField(primary_key=True, unique=True)
+    displayname = models.CharField(max_length=20, unique=True)  # by default fields are set to be blank=False, null=False
+    online = models.BooleanField(default=False)  # maybe better in registration service, ONLY VISIBLE by FRIENDS
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.displayname
-
-
-class FriendRequest(models.Model):
-    STATUS_CHOICES = [(0, 'Pending'), (1, 'Accepted'), (2, 'Declined')]
-
-    from_user = models.ForeignKey(CustomUser, related_name='from_user', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(CustomUser, related_name='to_user', on_delete=models.CASCADE)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
 
 
 # all the records associated with the user: user.matchrecord_set.all()
