@@ -1,0 +1,29 @@
+# [aguilmea] install vs code extension "REST Client" to use "send request tool"
+# [aguilmea] file was created manually
+
+POST https://127.0.0.1:8000/registration/login/
+Content-Type: application/json
+
+{"username": "annie", "password": "Pass1234!"}
+
+###
+
+POST https://127.0.0.1:8000/registration/signup/
+Content-Type: application/json
+
+{"username": "annie", "first_name": "annie", "last_name": "g", "password": "Pass1234!", "email": "annie@gmail.com"}
+
+###
+
+POST https://127.0.0.1:8000/registration/changepassword/
+Content-Type: application/json
+
+{"old_password": "Pass1234!!", "new_password": "NewPass!"}
+
+###
+
+GET https://127.0.0.1:8000/registration/test_token/
+Content-Type: application/json
+Authorization: Bearer xxxvalidxxxtokenxxxx
+
+{}
