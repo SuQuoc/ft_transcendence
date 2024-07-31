@@ -25,4 +25,6 @@ urlpatterns = [
     re_path('login', views.login), # [aguilmea] added 
     re_path('test_token', views.test_token), # [aguilmea] added 
     re_path('changepassword', views.changepassword), # [aguilmea] added
+    re_path('token_obtain', views.obtaintoken), # [aguilmea] added
+    re_path('token_refresh', views.refreshtoken), # [aguilmea] added
 ]

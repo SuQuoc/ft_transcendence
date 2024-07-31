@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv # [aguilmea] added manually to use for importing env
 import os # [aguilmea] added manually
+from datetime import timedelta # [aguilmea] added manually
 
 load_dotenv() # [aguilmea] added manually
 
@@ -27,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY') # [aguilmea] corrected to have it secret
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG') == 'True' # [aguilmea] correct to have it in the .env
+DEBUG = os.environ.get('DJANGO_DEBUG') # [aguilmea] correct to have it in the .env
 
 ALLOWED_HOSTS = ['*'] # [aguilmea] corrected to have a value set up, mandatory in case of DEBUG ==false
 
@@ -45,6 +46,26 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',# [aguilmea] added manually
     'core_app'
 ]
+
+# [aguilmea] added manually:
+# https://medium.com/django-unleashed/securing-django-rest-apis-with-jwt-authentication-using-simple-jwt-a-step-by-step-guide-28efa84666fe#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImUyNmQ5MTdiMWZlOGRlMTMzODJhYTdjYzlhMWQ2ZTkzMjYyZjMzZTIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTQxNDE4MjQ2NjQ3ODU1MTU1NTQiLCJlbWFpbCI6ImFubmllLmd1aWxtZWF1QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYmYiOjE3MjIyNDM0MjQsIm5hbWUiOiJBbm5pZSBHIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0pueFVDQ0s5SThZTi1ieTh5UnVqSkFKWVByYjl6RVhVYmVyQk9xM1h1VzQ3Nm5GQT1zOTYtYyIsImdpdmVuX25hbWUiOiJBbm5pZSIsImZhbWlseV9uYW1lIjoiRyIsImlhdCI6MTcyMjI0MzcyNCwiZXhwIjoxNzIyMjQ3MzI0LCJqdGkiOiJlYWQ1YWMzMWUxZmIzMDdmZjllNTQ3MWJlZDM0NDU4YjhkMjFkOWVkIn0.vsdjq_04QtB_urpSVlsDBoGX01_kCdTGWnER5oh_rruUi9mRq6mMOAOyJFAhJ32WcRJ1ah32eeBlYCo_gm2DSvvAo2OEdclVXdQQy2voYK5-UGLC957akmCBGapJ2pG80GmManTg6F2KcmHFJpY_S-WtV2pQUuS_ccpsGO299IQO0HWqV5eerZBQvfwfd_5CB_TkGjhtK7nqRo6RpP3LcZFQXEARKOSklJQJyS9C54LOYOx1jtUKT2AC3txC5HrIbxRQSqDG7Dsmld6YN6oow_rT5U82AjGzM0olgdOx87H9noa2XZIG8fN0-NNRSdY2fWlLIP_eAUohm0GNOQEi_w
+
+REST_FRAMEWORK = {  
+    'DEFAULT_AUTHENTICATION_CLASSES': [        
+        'rest_framework_simplejwt.authentication.JWTAuthentication',    
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [        
+        'rest_framework.permissions.IsAuthenticated',    
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+}
+
+# [aguilmea] end of added manually
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -142,3 +163,48 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# [aguilmea] added manually:
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'core_app': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
+# [aguilmea] end of added manually
