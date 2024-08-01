@@ -61,7 +61,7 @@ def signup(request):
     else:
         logger.debug(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -98,7 +98,7 @@ def login(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def changepassword(request):
+def change_password(request):
     try:
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -122,11 +122,6 @@ def changepassword(request):
         logger.exception("An error occurred during password change")
         return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
-#@authentication_classes([SessionAuthentication, TokenAuthentication])
-#@permission_classes([IsAuthenticated])
-def test_token(request):
-    return Response("test_token")
 
 
 from rest_framework.views import APIView
@@ -136,7 +131,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 
-def obtaintoken(request):
+def obtain_token(request):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -144,10 +139,15 @@ def obtaintoken(request):
         content = {'message': 'Hello, World!'}
         return Response(content)
 
-def refreshtoken(request):
+def refresh_token(request):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def verify_token(request):
+    return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)

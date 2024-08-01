@@ -23,8 +23,8 @@ urlpatterns = [
 #    path('admin/', admin.site.urls), # [aguilmea] deleted manuallyfor now
     re_path('signup', views.signup), # [aguilmea] added 
     re_path('login', views.login), # [aguilmea] added 
-    re_path('test_token', views.test_token), # [aguilmea] added 
-    re_path('changepassword', views.changepassword), # [aguilmea] added
-    re_path('token_obtain', views.obtaintoken), # [aguilmea] added
-    re_path('token_refresh', views.refreshtoken), # [aguilmea] added
+    re_path('verify_token', views.verify_token), # [aguilmea] added 
+    re_path('change_password', views.change_password), # [aguilmea] added
+    re_path('token_obtain', views.obtain_token), # [aguilmea] added
+    re_path('token_refresh', views.refresh_token), # [aguilmea] added
 ]
