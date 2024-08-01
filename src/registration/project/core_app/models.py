@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='user id')
     username = models.CharField(max_length=150, unique=True, verbose_name='username')
     password = models.CharField(max_length=128, verbose_name='password')
     last_login = models.DateTimeField(blank=True, null=True, verbose_name='last login')
