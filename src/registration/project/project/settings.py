@@ -11,11 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-from dotenv import load_dotenv # [aguilmea] added manually to use for importing env
 import os # [aguilmea] added manually
 from datetime import timedelta # [aguilmea] added manually
-
-load_dotenv() # [aguilmea] added manually
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY') # [aguilmea] corrected to have it secret
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG') # [aguilmea] correct to have it in the .env
+DEBUG = os.environ.get('DEBUG') # [aguilmea] correct to have it in the .env
 
 ALLOWED_HOSTS = ['*'] # [aguilmea] corrected to have a value set up, mandatory in case of DEBUG ==false
 
@@ -181,12 +178,12 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
         'file': {
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
             'formatter': 'verbose',
@@ -195,12 +192,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },
         'core_app': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },
     },

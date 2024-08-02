@@ -38,7 +38,7 @@ services:
       DB_HOST: "${DB_HOST_REG:-db_registration}"
       DB_PORT: "${DB_PORT_REG:-5432}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      DEBUG: ${DEBUG_REG:-False}
+      DEBUG: ${DJANGO_DEBUG_REG:-False}
     depends_on:
       db_registration:
         condition: service_healthy
