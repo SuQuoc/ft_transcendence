@@ -6,7 +6,7 @@ from django.db import models
 
 class FriendList(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="friend_list")
-    friends = models.ManyToManyField(CustomUser, blank=True, related_name="a_friend")
+    friends = models.ManyToManyField(CustomUser, blank=True, related_name="friends")
 
     def __str__(self):
         return self.user.displayname

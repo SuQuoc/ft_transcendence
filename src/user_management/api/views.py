@@ -12,16 +12,18 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from utils import getUser
+
 from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+
 
 # JWT
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):  # register service
@@ -73,8 +75,6 @@ class CustomUserProfile(generics.GenericAPIView):
     serializer_class = CustomUserProfileSerializer
 
     def get(self, request, displayname):
-        # print(f"Request received for displayname: {displayname}")
-
         context = {'is_self': False, 'is_friend': False, 'is_stranger': False}
 
         stalked_user = getUser("displayname", displayname)

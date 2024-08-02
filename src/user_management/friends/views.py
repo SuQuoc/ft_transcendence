@@ -3,13 +3,32 @@ import json
 from api.models import CustomUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
+from rest_framework import generics
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
 from utils import getUser
 
 from .models import FriendRequest
+from .serializers import FriendRequestAnswerSerializer
+from .serializers import FriendRequestSendSerializer
 
 # Create your views here.
+
+
+def get_json_key(request, key):
+    """
+    Returns the corresponding python object from the request body with the given json key.
+    Main goal:
+    - not hardcoding error based on key name
+    - not checking manually if key was missing
+    """
+    value = request.data.get(key)
+    if value is None:
+        raise ParseError(detail=f"'{key}' not provided")
+    return value
 
 
 def getJsonKey(request, key):
@@ -26,6 +45,37 @@ def getJsonKey(request, key):
         return value, None
     except json.JSONDecodeError:
         return None, JsonResponse({"error": "Invalid JSON"}, status=400)
+
+
+class SendFriendRequestView(generics.GenericAPIView):
+    def post(self, request):
+        sender = getUser("user_id", request.user.user_id)
+        rec_name = request.data.get('receiver')
+        receiver = get_object_or_404(CustomUser, displayname=rec_name)
+
+        # is_self
+        if sender == receiver:
+            return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
+
+        friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+
+        # is_stranger
+        if created:
+            # serializer = FriendRequestSendSerializer(friend_request)
+            # return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return JsonResponse({"message": "friend request sent"}, status=201)
+
+        elif friend_request.status == FriendRequest.PENDING:
+            return JsonResponse({"message": "friend request already sent, be patient"}, status=200)  # maybe 409 Conflict more fitting ??
+
+        elif friend_request.status == FriendRequest.DECLINED:
+            friend_request.status = FriendRequest.PENDING
+            friend_request.save()
+            return JsonResponse({"message": "friend request sent"}, status=200)
+
+        # is_friend
+        elif friend_request.status == FriendRequest.ACCEPTED:
+            return JsonResponse({"error": "You are best buds"}, status=400)
 
 
 # @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service

@@ -21,8 +21,6 @@ class FriendRequestTest(TestCase):
         FriendList.objects.create(user=self.friend)
         FriendList.objects.create(user=self.stranger)
 
-        self.user1.friend_list.addFriend(self.friend)  # test independent of the "send-friend-request" api
-
         self.data = {"receiver": "SET THIS IN EACH TEST FUNCTION"}
 
         self.data_f_request = {"friendRequestId": "1"}
