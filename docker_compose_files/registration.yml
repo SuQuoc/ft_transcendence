@@ -1,6 +1,7 @@
 services:
 
   db_registration:
+    container_name: db_registration
     image: postgres:16
     environment:
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
@@ -26,6 +27,7 @@ services:
       - network_registration
 
   registration:
+    container_name: db_registration
     build: ../src/registration
     volumes:
       - ../src/registration:/app
@@ -50,6 +52,7 @@ services:
       - network_registration
 
   nginx_registration:
+    container_name: nginx_registration
     build: ../src/registration_nginx
     ports:
       - 8000:443
