@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.decorators import api_view
+from utils import getUser
 
 from .models import FriendRequest
 
@@ -16,6 +17,8 @@ def getJsonKey(request, key):
     Returns the corresponding python object from the request body with the given json key.
     """
     try:
+        request_body = request.body
+        # print(f"Request Body: {request_body}")  # Debugging: Print request body
         data = json.loads(request.body)
         value = data.get(key)
         if not value:
@@ -30,27 +33,26 @@ def getJsonKey(request, key):
 @api_view(['POST'])
 def sendFriendRequest(request):
     if request.method == 'POST':
-        # return JsonResponse({"message": "JUST A TEST"}, status=201)
-        from_user = request.user
-        user_id, error = getJsonKey(request, "userId")
+        sender = getUser("user_id", request.user.user_id)
+        rec_displayname, error = getJsonKey(request, "receiver")
         if error:
             return error
-        try:
-            to_user = CustomUser.objects.get(pk=user_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
+        receiver = getUser("displayname", rec_displayname)
 
-        if from_user == to_user:
+        # is_self
+        if sender == receiver:
             return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
-            # return HttpResponse("You can't send a friend request to yourself")
 
-        friend_request, created = FriendRequest.objects.get_or_create(from_user=from_user, to_user=to_user, status=0)
+        # is_friend
+        if receiver in sender.friend_list.friends.all():
+            return JsonResponse({"error": "You are best buds"}, status=400)
+
+        # is_stranger
+        friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver, status=FriendRequest.PENDING)
         if created:
             return JsonResponse({"message": "friend request sent"}, status=201)
-            # return HttpResponse("friend request sent")
         else:
-            return JsonResponse({"message": "friend request sent"}, status=201)
-            # return HttpResponse("friend request already sent, be patient")
+            return JsonResponse({"message": "friend request already sent, be patient"}, status=200)  # maybe 409 Conflict more fitting ??
     else:
         return JsonResponse({"error": "Invalid HTTP method"}, status=405)
 
@@ -65,19 +67,28 @@ def acceptFriendRequest(request):
             friend_request = FriendRequest.objects.get(id=friend_request_id)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "Friend request not found"}, status=404)
-            # return HttpResponse("Friend request not found")
 
-        if friend_request.to_user == request.user:
-            friend_request.to_user.friends.add(friend_request.from_user)
-            friend_request.from_user.friends.add(friend_request.to_user)
-            friend_request.status = 1  # accepted see FriendRequest model
-            friend_request.save()  # storing changes, so only status
-            # friend_request.delete() # i read that its better store all friend requests
+        user = getUser("user_id", request.user.user_id)
+        if friend_request.receiver == user:
+            if friend_request.status == FriendRequest.PENDING:
+                user.friend_list.addFriend(friend_request.sender)
+                friend_request.sender.friend_list.addFriend(user)
+                friend_request.status = FriendRequest.ACCEPTED
+                friend_request.save()  # storing changes, so only status
+                return JsonResponse({"message": "Friend request accepted"}, status=200)
+                # bonus: message the sender
+            else:
+                return JsonResponse({"error": "No pending friend requests"}, status=404)
         else:
             return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
-            # return HttpResponse("Friend request not for you")
     else:
         return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+
+
+def get_all_friend_requests():
+    friend_requests = FriendRequest.objects.all()
+    friend_request_ids = [fr.id for fr in friend_requests]
+    print(friend_request_ids)
 
 
 @api_view(['POST'])
@@ -90,11 +101,15 @@ def declineFriendRequest(request):
             friend_request = FriendRequest.objects.get(id=friend_request_id)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "Friend request not found"}, status=404)
-            # return HttpResponse("Friend request not found")
 
-        if friend_request.to_user == request.user:
-            friend_request.status = 2  # declined, see FriendRequest model
-            friend_request.save()  # storing changes, so only status
+        user = getUser("user_id", request.user.user_id)
+        if friend_request.receiver == user:
+            if friend_request.status == FriendRequest.PENDING:
+                friend_request.status = FriendRequest.DECLINED
+                friend_request.save()  # storing changes, so only status
+                return JsonResponse({"message": "Friend request declined"}, status=200)
+            else:
+                return JsonResponse({"error": "No pending friend requests"}, status=404)
         else:
             return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
     else:
