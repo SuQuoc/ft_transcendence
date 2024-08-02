@@ -27,7 +27,7 @@ services:
       - network_registration
 
   registration:
-    container_name: db_registration
+    container_name: registration
     build: ../src/registration
     volumes:
       - ../src/registration:/app
