@@ -93,11 +93,12 @@ def login(request):
             logger.debug("Invalid password provided")
             return Response({'error': 'Invalid username or password 2'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        token, created = Token.objects.get_or_create(user=user)
-        serializer = UserSerializer(user)
-
-        logger.debug(f"Token created: {token.key}")
-        return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)
+        token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
+        if token_serializer.is_valid():
+            token = token_serializer.validated_data
+            return Response({'token': token}, status=status.HTTP_200_OK)
+        else:
+            return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         logger.exception("An error occurred during login")
