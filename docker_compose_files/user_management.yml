@@ -42,6 +42,7 @@ services:
       DJ_SUDO_USERNAME_MANAGEMENT: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
       DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
       DJ_SUDO_PASSWORD_MANAGEMENT: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
+      JWT_SECRET: "${JWT_SECRET:-somesecret}"
     depends_on:
       db_user_management:
         condition: service_healthy
