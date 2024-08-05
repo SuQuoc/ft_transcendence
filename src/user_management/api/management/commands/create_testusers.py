@@ -5,6 +5,9 @@ from api.models import (
 )
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
+from friends.models import (
+    FriendList,  # Adjust the import path according to your project structure
+)
 
 
 class Command(BaseCommand):
@@ -27,5 +30,6 @@ class Command(BaseCommand):
                 user, created = CustomUser.objects.get_or_create(**user_data)
                 if created:
                     self.stdout.write(self.style.SUCCESS(f'Successfully created test user: {user.displayname}'))
+                    FriendList.objects.create(user=user)
             except IntegrityError as e:
                 self.stdout.write(self.style.ERROR(f'Error creating {user_data["displayname"]}: {e}'))
