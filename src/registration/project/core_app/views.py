@@ -3,6 +3,7 @@ import logging
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -52,9 +53,15 @@ def signup(request):
             )
             user.set_password(password)
             user.save()
-            token = Token.objects.create(user=user)
             logger.debug(f"User created: {user.username}")
-            return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_201_CREATED)
+
+            token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
+            if token_serializer.is_valid():
+                token = token_serializer.validated_data
+                return Response({'token': token, 'user': serializer.data}, status=status.HTTP_201_CREATED)
+            else:
+                return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             logger.exception("An error occurred during user signup")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

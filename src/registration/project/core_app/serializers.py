@@ -5,9 +5,9 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'user_id', 'first_name', 'last_name', 'email', 'password']
+        fields = ['username', 'id', 'first_name', 'last_name', 'email', 'password']
         extra_kwargs = {
-            'user_id': {'read_only': True},     # read-only so it's not required in POST requests
+            'id': {'read_only': True},     # read-only so it's not required in POST requests
             'password': {'write_only': True},   # write-only so it's not returned in GET requests
         }
 
