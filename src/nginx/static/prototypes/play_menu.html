@@ -12,9 +12,15 @@
 		integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
 		crossorigin="anonymous"/>
 	<!-- Custom CSS -->
-	<link href="template.css" rel="stylesheet"/>
+	<link href="../css/template.css" rel="stylesheet"/>
 
-	<title>template</title>
+	<!-- Bootstrap Bundle with Popper -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+		crossorigin="anonymous"
+		defer></script>
+
+	<title>play-menu</title>
 </head>
 
 <body class="d-flex flex-column vh-100">
@@ -40,6 +46,19 @@
 		</div>
 	</nav>
 
+	
+	
+	<!-- Main Page -->
+	<main id="main-content" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
+		<!-- Play Menu -->
+		<div>
+			<button type="submit" class="btn btn-secondary w-100 mb-2">Multiplayer</button>
+			<button type="submit" class="btn btn-secondary w-100">Tournament</button>
+		</div>
+	</main>
+
+
+
 	<!-- Footer -->
 	<footer class="mt-auto bg-dark pt-2">
 		<ul class="nav justify-content-center dark-footer-border-bottom pb-2 mb-2">
@@ -51,12 +70,6 @@
 		</ul>
 		<p class="text-center fst-italic text-white-50">42 Vienna</p>
 	</footer>
-
-
-	<!-- Bootstrap Bundle with Popper -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-		crossorigin="anonymous"></script>
 </body>
 
 </html>

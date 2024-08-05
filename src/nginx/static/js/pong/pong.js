@@ -21,8 +21,7 @@ function startPong()
     let player2 = new Player(id=0, y=300, x=100, width=20, height=100, "Eule");
     let ball = new Player(id="ball", y=0, x=0, width=10, height=10, "Ball");
 
-    chatSocket.onmessage = function(e)
-    {
+    chatSocket.onmessage = (e) => {
         update_game_data(player1, player2, ball, e);
     };
 
