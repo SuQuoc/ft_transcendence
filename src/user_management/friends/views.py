@@ -1,83 +1,114 @@
-import json
-
 from api.models import CustomUser
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from rest_framework import generics
-from rest_framework.decorators import api_view
-from rest_framework.exceptions import ParseError
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from utils import getUser
 
 from .models import FriendRequest
 from .serializers import FriendRequestAnswerSerializer
 from .serializers import FriendRequestSendSerializer
 
-# Create your views here.
-
-
-def get_json_key(request, key):
-    """
-    Returns the corresponding python object from the request body with the given json key.
-    Main goal:
-    - not hardcoding error based on key name
-    - not checking manually if key was missing
-    """
-    value = request.data.get(key)
-    if value is None:
-        raise ParseError(detail=f"'{key}' not provided")
-    return value
-
-
-def getJsonKey(request, key):
-    """
-    Returns the corresponding python object from the request body with the given json key.
-    """
-    try:
-        request_body = request.body
-        # print(f"Request Body: {request_body}")  # Debugging: Print request body
-        data = json.loads(request.body)
-        value = data.get(key)
-        if not value:
-            return None, JsonResponse({"error": f"'{key}' not provided"}, status=400)
-        return value, None
-    except json.JSONDecodeError:
-        return None, JsonResponse({"error": "Invalid JSON"}, status=400)
-
 
 class SendFriendRequestView(generics.GenericAPIView):
+    serializer_class = FriendRequestSendSerializer
+
     def post(self, request):
-        sender = getUser("user_id", request.user.user_id)
-        rec_name = request.data.get('receiver')
-        receiver = get_object_or_404(CustomUser, displayname=rec_name)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            sender = get_object_or_404(CustomUser, user_id=request.user.user_id)
 
-        # is_self
-        if sender == receiver:
-            return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
+            rec_name = serializer.validated_data.get('receiver')
+            receiver = get_object_or_404(CustomUser, displayname=rec_name)
 
-        friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+            # is_self
+            if sender == receiver:
+                return Response({"error": "You can't send a friend request to yourself"}, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
 
-        # is_stranger
-        if created:
-            # serializer = FriendRequestSendSerializer(friend_request)
-            # return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return JsonResponse({"message": "friend request sent"}, status=201)
+            friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
 
-        elif friend_request.status == FriendRequest.PENDING:
-            return JsonResponse({"message": "friend request already sent, be patient"}, status=200)  # maybe 409 Conflict more fitting ??
+            # is_stranger
+            if created:
+                # serializer = FriendRequestSendSerializer(friend_request)
+                return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        elif friend_request.status == FriendRequest.DECLINED:
-            friend_request.status = FriendRequest.PENDING
-            friend_request.save()
-            return JsonResponse({"message": "friend request sent"}, status=200)
+            elif friend_request.status == FriendRequest.PENDING:
+                return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
 
-        # is_friend
-        elif friend_request.status == FriendRequest.ACCEPTED:
-            return JsonResponse({"error": "You are best buds"}, status=400)
+            elif friend_request.status == FriendRequest.DECLINED:
+                friend_request.status = FriendRequest.PENDING
+                friend_request.save()
+                return Response({"message": "friend request sent"}, status=status.HTTP_200_OK)
+
+            # is_friend
+            elif friend_request.status == FriendRequest.ACCEPTED:
+                return Response({"error": "You are best buds"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            raise ValidationError(serializer.errors)
 
 
+# might be better as patch method not post
+class AcceptFriendRequestView(generics.GenericAPIView):
+    serializer_class = FriendRequestAnswerSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            friend_request_id = serializer.validated_data["id"]
+            friend_request = get_object_or_404(FriendRequest, id=friend_request_id)
+
+            user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+
+            if friend_request.receiver == user:
+                if friend_request.status == FriendRequest.PENDING:
+                    user.friend_list.addFriend(friend_request.sender)
+                    friend_request.sender.friend_list.addFriend(user)
+                    friend_request.status = FriendRequest.ACCEPTED
+                    friend_request.save()  # storing changes, so only status
+                    return Response({"message": "Friend request accepted"}, status=status.HTTP_200_OK)
+                    return JsonResponse({"message": "Friend request accepted"}, status=200)
+                    # bonus: message the sender
+                else:
+                    return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
+                    return JsonResponse({"error": "No pending friend requests"}, status=404)
+            else:
+                return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
+                return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
+        else:
+            raise ValidationError(serializer.errors)
+
+
+class DeclineFriendRequestView(generics.GenericAPIView):
+    serializer_class = FriendRequestAnswerSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            id = serializer.validated_data.get("id")
+            friend_request = get_object_or_404(FriendRequest, id=id)
+
+            user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+            if friend_request.receiver == user:
+                if friend_request.status == FriendRequest.PENDING:
+                    friend_request.status = FriendRequest.DECLINED
+                    friend_request.save()  # storing changes, so only status
+                    return Response({"message": "Friend request declined"}, status=status.HTTP_200_OK)
+                    return JsonResponse({"message": "Friend request declined"}, status=200)
+                else:
+                    return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
+                    return JsonResponse({"error": "No pending friend requests"}, status=404)
+            else:
+                return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
+                return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
+        else:
+            raise ValidationError(serializer.errors)
+
+
+""" OLD
 # @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service
 # @permission_classes([IsAuthenticated])
 @api_view(['POST'])
@@ -164,3 +195,4 @@ def declineFriendRequest(request):
             return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
     else:
         return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+ """
