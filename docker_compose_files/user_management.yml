@@ -52,3 +52,5 @@ services:
       - all
     networks:
       - network_user_management
+    secrets:
+      - public_key.pem

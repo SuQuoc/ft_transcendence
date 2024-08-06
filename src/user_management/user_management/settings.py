@@ -161,8 +161,14 @@ REST_FRAMEWORK = {
     ],
 }
 
+
+with open('/run/secrets/public_key.pem', 'r') as f:
+    PUBLIC_KEY = f.read()
+
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html?highlight=USER_ID_FIELD#user-id-field
-# SIMPLE_JWT = {
-#     # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
-#     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
-# }
+SIMPLE_JWT = {
+    'ALGORITHM': 'RS256',
+    'VERIFYING_KEY': PUBLIC_KEY,
+    # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
+    #     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
+}
