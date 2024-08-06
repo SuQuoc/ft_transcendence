@@ -162,13 +162,7 @@ REST_FRAMEWORK = {
 }
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html?highlight=USER_ID_FIELD#user-id-field
-SIMPLE_JWT = {
-    "SIGNING_KEY": os.environ.get("JWT_SECRET"),
-    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    # 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-    # 'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
-    # 'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
-    # 'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
-    "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
-    "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
-}
+# SIMPLE_JWT = {
+#     # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
+#     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
+# }

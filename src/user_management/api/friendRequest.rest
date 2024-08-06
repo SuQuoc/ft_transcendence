@@ -1,26 +1,5 @@
-
-# sending friend request
-
-###
-GET https://127.0.0.1:8000/profile/1/
-
-###
-
-POST https://127.0.0.1:8000/profile/send-friend-request/
+POST https://127.0.0.1:8000/um/api/user-creation/
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyOTQyNTA4LCJpYXQiOjE3MjI5NDIyMDgsImp0aSI6IjBlMzNmNzQ5YzU4MDQ2YThiYmM2NGQ1YmQ1OWQ3NjgxIiwidXNlcl9pZCI6IjE0NTEyMjExLTZmYzAtNDQ2Ny1hMWY3LTFkZDU4NDUwNGQ1ZiJ9.77qUJ-rEcCGLizs5ddCDBFIARgnAsnfsZy3Y8hN6rnE
 
-{"userId": 1}
-
-###
-
-POST https://127.0.0.1:8000/profile/acc-friend-request/
-Content-Type: application/json
-
-{"friend": "zack", "password": "Pass1234!", "email": "zack@gmail.com"}
-
-###
-
-POST https://127.0.0.1:8000/profile/dec-friend-request
-Content-Type: application/json
-
-{}
+{"user_id": "14512211-6fc0-4467-a1f7-1dd584504d5f", "displayname": "name"}
