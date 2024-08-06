@@ -1,7 +1,5 @@
 from api.models import CustomUser
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -26,7 +24,6 @@ class SendFriendRequestView(generics.GenericAPIView):
             # is_self
             if sender == receiver:
                 return Response({"error": "You can't send a friend request to yourself"}, status=status.HTTP_400_BAD_REQUEST)
-                return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
 
             friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
 
@@ -34,7 +31,6 @@ class SendFriendRequestView(generics.GenericAPIView):
             if created:
                 # serializer = FriendRequestSendSerializer(friend_request)
                 return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             elif friend_request.status == FriendRequest.PENDING:
                 return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
@@ -70,14 +66,10 @@ class AcceptFriendRequestView(generics.GenericAPIView):
                     friend_request.status = FriendRequest.ACCEPTED
                     friend_request.save()  # storing changes, so only status
                     return Response({"message": "Friend request accepted"}, status=status.HTTP_200_OK)
-                    return JsonResponse({"message": "Friend request accepted"}, status=200)
-                    # bonus: message the sender
                 else:
                     return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
-                    return JsonResponse({"error": "No pending friend requests"}, status=404)
             else:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
-                return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
         else:
             raise ValidationError(serializer.errors)
 
@@ -97,13 +89,10 @@ class DeclineFriendRequestView(generics.GenericAPIView):
                     friend_request.status = FriendRequest.DECLINED
                     friend_request.save()  # storing changes, so only status
                     return Response({"message": "Friend request declined"}, status=status.HTTP_200_OK)
-                    return JsonResponse({"message": "Friend request declined"}, status=200)
                 else:
                     return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
-                    return JsonResponse({"error": "No pending friend requests"}, status=404)
             else:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
-                return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
         else:
             raise ValidationError(serializer.errors)
 
