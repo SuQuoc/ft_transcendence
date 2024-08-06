@@ -12,14 +12,22 @@
 		integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
 		crossorigin="anonymous"/>
 	<!-- Custom CSS -->
-	<link href="template.css" rel="stylesheet"/>
+	<link href="../css/template.css" rel="stylesheet"/>
+
+	<!-- Bootstrap Bundle with Popper -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+		crossorigin="anonymous"
+		defer></script>
+	<!-- Custom js -->
+	<script src="login.js" defer></script>
 
 	<title>Login Page</title>
 </head>
 
 <body class="d-flex flex-column vh-100">
-	<!-- Login Page -->
-	<div class="center-div">
+	<main id="main-content" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
+		<!-- Login Page -->
 		<div class="p-3 rounded-3 bg-dark">
 			<form id="loginForm">
 				<!-- Email -->
@@ -42,7 +50,7 @@
 				<!-- change to signup page -->
 				<p class="text-white-50 small m-0">No account yet? 
 					<!-- the link may be wrong if the port changes. it also only works if the server is running -->
-					<a href="https://localhost:8000/fionas_pages/signup_page.html" class="text-decoration-none">
+					<a href="https://localhost:8000/prototypes/signup_page.html" class="text-decoration-none">
 						<span class="text-white">Sign up</span> 
 					</a>
 					here!
@@ -50,14 +58,7 @@
 				<button type="submit" class="btn btn-secondary w-100">Log in</button>
 			</form>
 		</div>
-	</div>
-
-
-	<!-- Bootstrap Bundle with Popper -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-		crossorigin="anonymous"></script>
-	<script src="login.js"></script>
+	</main>
 </body>
 
 </html>

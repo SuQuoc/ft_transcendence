@@ -27,7 +27,7 @@ login_form.addEventListener("submit", e => {
 		console.log("Form is valid");
 		alert("correct");
 		window.location.href = "template.html"; // TEMPORARY!!!
-		//history.pushState(null, '', '/fionas_pages/template.html');
+		//history.pushState(null, '', '/prototypes/template.html');
 		//history.go(); //refreshes page
 	}
 	else if (!validated) {
