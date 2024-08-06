@@ -51,6 +51,9 @@ services:
       - all
     networks:
       - network_registration
+    secrets:
+      - public_key.pem
+      - private_key.pem
 
   nginx_registration:
     container_name: nginx_registration
@@ -61,5 +64,5 @@ services:
       - registration
     profiles:
       - registration
-    networks: 
+    networks:
       - network_registration

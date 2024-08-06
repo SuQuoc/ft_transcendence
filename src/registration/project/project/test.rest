@@ -11,7 +11,7 @@ Content-Type: application/json
 POST https://127.0.0.1:8000/registration/signup/
 Content-Type: application/json
 
-{"username": "annie", "first_name": "annie", "last_name": "g", "email": "annie@gmail.com", "password": "Pass1234!"}
+{"username": "q", "first_name": "anie", "last_name": "g", "email": "q@gmail.com", "password": "Pass1234!"}
 
 ###
 
