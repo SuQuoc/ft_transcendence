@@ -37,3 +37,9 @@ networks:
     driver: bridge
   network_user_management:
     driver: bridge
+
+secrets:
+  public_key.pem:
+    file: ../src/common_files/public_key.pem
+  private_key.pem:
+    file: ../src/common_files/private_key.pem

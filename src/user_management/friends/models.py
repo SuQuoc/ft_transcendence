@@ -6,7 +6,7 @@ from django.db import models
 
 class FriendList(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="friend_list")
-    friends = models.ManyToManyField(CustomUser, blank=True, related_name="a_friend")
+    friends = models.ManyToManyField(CustomUser, blank=True, related_name="friends")
 
     def __str__(self):
         return self.user.displayname
@@ -42,6 +42,7 @@ class FriendRequest(models.Model):
     PENDING = 0
     ACCEPTED = 1
     DECLINED = 2
+    UNFRIENDED = 3
     STATUS_CHOICES = [
         (PENDING, 'Pending'),
         (ACCEPTED, 'Accepted'),
@@ -54,7 +55,7 @@ class FriendRequest(models.Model):
     send_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.sender.displayname
+        return f"sender: {self.sender}, receiver: {self.receiver}"
 
     def accept(self):
         """
