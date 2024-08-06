@@ -1,5 +1,5 @@
 POST https://127.0.0.1:8000/um/api/user-creation/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyOTQyNTA4LCJpYXQiOjE3MjI5NDIyMDgsImp0aSI6IjBlMzNmNzQ5YzU4MDQ2YThiYmM2NGQ1YmQ1OWQ3NjgxIiwidXNlcl9pZCI6IjE0NTEyMjExLTZmYzAtNDQ2Ny1hMWY3LTFkZDU4NDUwNGQ1ZiJ9.77qUJ-rEcCGLizs5ddCDBFIARgnAsnfsZy3Y8hN6rnE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyOTUwMjU5LCJpYXQiOjE3MjI5NDk5NTksImp0aSI6IjBiMGQzZjc4YjkxNTRiZGE4OWNhNTBiYWVkN2ZkODMzIiwidXNlcl9pZCI6ImQ5YzJkMTU0LTVlZWYtNDE0MC05ODk3LTI5YzA4MGMzZTg4NSJ9.y70Nq9N3Lj6X9x3WextE5zpMLa9sXt6hoO5P8l2K9aE
 
-{"user_id": "14512211-6fc0-4467-a1f7-1dd584504d5f", "displayname": "name"}
+{"displayname": "name"}

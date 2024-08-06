@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -49,9 +50,13 @@ class CustomUserCreate(generics.CreateAPIView):
     # permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        custom_user = serializer.save()
-        # Create a FriendList instance for the new custom user
-        FriendList.objects.create(user=custom_user)
+        serializer.validated_data['user_id'] = self.request.user.user_id
+
+        with transaction.atomic():
+            new_user = serializer.save()
+
+            # Create a FriendList instance for the new custom user
+            FriendList.objects.create(user=new_user)
 
 
 # only used when editing own profile, viewing own profile is separate

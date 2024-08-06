@@ -8,7 +8,7 @@ from .models import CustomUser
 class CustomUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["user_id", "displayname"]
+        fields = ["displayname"]
 
     # def validate_displayname(self, value):
     #    if CustomUser.objects.filter(displayname=value).exists():
