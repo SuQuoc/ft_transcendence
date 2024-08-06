@@ -1,20 +1,11 @@
-export class LoginPage extends HTMLElement {
+import { ComponentBaseClass } from "./componentBaseClass.js";
+
+export class LoginPage extends ComponentBaseClass {
 	constructor() {
 		super(); // always call super() (it calls the constructor of the parent class)
-		
-		// create a shadow DOM(?) 
-		this.root = this.attachShadow({mode: "open"}); // open mode allows us to access the shadow DOM from outside
-	};
-	
-	// get's called when the component is attached to the DOM
-	connectedCallback() {
-		const template = this.getElementHTML();
-		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
-		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
-	};
-	
+	};	
 
-	getElementHTML() {
+	getElementHTML() { // maybe this should be a static method?!
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
@@ -39,8 +30,8 @@ export class LoginPage extends HTMLElement {
 						class="form-control mb-3">
 					<!-- change to signup page -->
 					<p class="text-white-50 small m-0">No account yet? 
-						<a href="/signup" class="text-decoration-none">
-							<span class="text-white">Sign up</span> 
+						<a href="/signup" class="text-decoration-none text-white">
+							Sign up 
 						</a>
 						here!
 					</p>
