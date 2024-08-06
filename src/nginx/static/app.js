@@ -1,7 +1,10 @@
 import Router from './router.js';
 
 // link custom web components
+import { LoginPage } from './js/LoginPage.js';
 import { PlayMenu } from './js/PlayMenu.js';
+import { ScriptsAndStyles } from './js/ScriptsAndStyles.js';
+import { SignupPage } from './js/SignupPage.js';
 
 
 // global
