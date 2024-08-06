@@ -1,27 +1,21 @@
-import uuid
-
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from friends.models import FriendList
-from friends.models import FriendRequest
-from friends.views import getJsonKey
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
-from utils import getUser
+
 from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+
 
 # JWT
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):  # register service
@@ -73,14 +67,12 @@ class CustomUserProfile(generics.GenericAPIView):
     serializer_class = CustomUserProfileSerializer
 
     def get(self, request, displayname):
-        # print(f"Request received for displayname: {displayname}")
-
         context = {'is_self': False, 'is_friend': False, 'is_stranger': False}
 
-        stalked_user = getUser("displayname", displayname)
-        token_user = request.user
+        stalked_user = get_object_or_404(CustomUser, displayname=displayname)
+
         # print(f"TOKEN STUFF {token_user.user_id}")
-        user = getUser("user_id", token_user.user_id)
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
         if user == stalked_user:
             # Watching my own profile - Frontend: i see personal info, like my friend-list?
             context["is_self"] = True
@@ -95,9 +87,9 @@ class CustomUserProfile(generics.GenericAPIView):
         return Response(serializer.data)
 
     def patch(self, request, displayname):
-        user_to_update = getUser("displayname", displayname)
+        user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 
-        user = getUser("user_id", request.user.user_id)
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
         if user != user_to_update:
             raise PermissionDenied("You do not have permission to edit this user's profile.")
 

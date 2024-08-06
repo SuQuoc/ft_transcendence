@@ -172,15 +172,3 @@ SIMPLE_JWT = {
     "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
     "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }
-
-# Custom JSON Encoder to handle UUIDs
-old_default = JSONEncoder.default
-
-
-def new_default(self, obj):
-    if isinstance(obj, UUID):
-        return str(obj)
-    return old_default(self, obj)
-
-
-JSONEncoder.default = new_default
