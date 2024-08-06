@@ -32,7 +32,8 @@ re: down rm_vol build_up
 
 new: fclean build_up
 
-
+keys:
+	bash ./src/common_files/jwt_create_keys.sh
 
 ###################### Registration #####################
 .PHONY: registration_up registration_down
