@@ -21,19 +21,25 @@ export class ComponentBaseClass extends HTMLElement {
 		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
 		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
 		
-		// Add event listeners to links within the shadow DOM
-		this.root.querySelectorAll("a").forEach(a => {
+		// Add event listeners to links within the shadow DOM, if there are any
+		const links = this.root.querySelectorAll("a");
+		if (links.length === 0)
+			return;
+		links.forEach(a => {
 			a.addEventListener("click", this.handleLinkClick);
-			console.log("added event listener signup");
+			console.log("added event listener ComponentBaseClass");
 		});
 	};
 
 	// get's called when the component is removed from the DOM
 	disconnectedCallback() {
-		// remove event listeners (not sure if necessary)
-		this.root.querySelectorAll("a").forEach(a => {
+		// remove event listeners (not sure if necessary), if there are any
+		const links = this.root.querySelectorAll("a");
+		if (links.length === 0)
+			return;
+		links.forEach(a => {
 			a.removeEventListener("click", this.handleLinkClick);
-			console.log("removed event listener signup");
+			console.log("removed event listener ComponentBaseClass");
 		});
 	};
 
