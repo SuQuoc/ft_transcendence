@@ -52,7 +52,7 @@ export class SignupPage extends ComponentBaseClass {
 						</a>
 						here!
 					</p>
-					<button type="submit" class="btn btn-secondary w-100">Sign up</button>
+					<button type="submit" class="btn btn-secondary w-100" form="signupForm">Sign up</button>
 				</form>
 			</div>
 		`;

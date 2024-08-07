@@ -1,6 +1,6 @@
 export class ScriptsAndStyles extends HTMLElement {
 	constructor() {
-		super(); // always call super() (it calls the constructor of the parent class)
+		super();
 	};
 	
 	// when the component is attached to the DOM
@@ -10,6 +10,7 @@ export class ScriptsAndStyles extends HTMLElement {
 		this.appendChild(content);
 	}
 
+	// are we allowed to use the bootstrap bundle with popper?????!!!!
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `

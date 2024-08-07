@@ -40,7 +40,7 @@ const Router = {
 			history.pushState({route}, "", route);
 		}
 
-		// show/hide navbar and footer (not happy, maybe there is a better solution)
+		// show/hide navbar and footer (not happy, maybe there is a better solution!?)
 		if (route === "/login" || route === "/signup") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
@@ -55,15 +55,14 @@ const Router = {
 		// create the new page element depending on the route
 		switch (route) {
 			case "/":
-				pageElement = document.createElement("play-menu");
+				pageElement = document.createElement("play-menu-home-page");
 				break;
 			case "/play":
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
-			case "/user":
-				pageElement = document.createElement("h1");
-				pageElement.textContent = "User";
+			case "/tournament":
+				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/login":
 				pageElement = document.createElement("login-page");
@@ -75,7 +74,7 @@ const Router = {
 				break;
 			default:
 				// homepage
-				pageElement = document.createElement("play-menu");
+				pageElement = document.createElement("play-menu-home-page");
 				console.log("default in router");
 				break;
 		}

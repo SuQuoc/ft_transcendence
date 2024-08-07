@@ -19,12 +19,8 @@
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
 		crossorigin="anonymous"
 		defer></script>
-	<!-- Custom js -->
-	<!-- The 'type="module"' means that the file will be loaded as a module.
-	 	This means every variables we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->
-	<script src="../app.js" defer type="module"></script>
 
-	<title>template</title>
+	<title>join tournament page</title>
 </head>
 
 <body class="d-flex flex-column vh-100">
@@ -56,26 +52,6 @@
 	<!-- Main Page -->
 	<main id="main-content" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
 		<!-- main page content -->
-	</main>
-	
-	
-	
-	<!-- Footer -->
-	<footer class="mt-auto bg-dark pt-2" id="footer">
-		<ul class="nav justify-content-center dark-footer-border-bottom pb-2 mb-2">
-			<a href="#" class="nav-link px-2 text-white-50">Home</a>
-			<a href="#" class="nav-link px-2 text-white-50">Features</a>
-			<a href="#" class="nav-link px-2 text-white-50">Pricing</a>
-			<a href="#" class="nav-link px-2 text-white-50">FAQs</a>
-			<a href="#" class="nav-link px-2 text-white-50">About</a>
-		</ul>
-		<p class="text-center fst-italic text-white-50">42 Vienna</p>
-	</footer>
-
-
-	<!-- temporary ###Templates### for making new components -->
-	<template id="joinTournamentPageTemplate">
-		<scripts-and-styles></scripts-and-styles>
 		<div class="p-3 rounded-3 bg-dark">
 			<form id="createTournamentForm">
 				<!-- Tournament name -->
@@ -110,7 +86,21 @@
 				<button type="submit" class="btn btn-secondary w-100">create</button>
 			</form>
 		</div>
-	</template>
+	</main>
+	
+	
+	
+	<!-- Footer -->
+	<footer class="mt-auto bg-dark pt-2" id="footer">
+		<ul class="nav justify-content-center dark-footer-border-bottom pb-2 mb-2">
+			<a href="#" class="nav-link px-2 text-white-50">Home</a>
+			<a href="#" class="nav-link px-2 text-white-50">Features</a>
+			<a href="#" class="nav-link px-2 text-white-50">Pricing</a>
+			<a href="#" class="nav-link px-2 text-white-50">FAQs</a>
+			<a href="#" class="nav-link px-2 text-white-50">About</a>
+		</ul>
+		<p class="text-center fst-italic text-white-50">42 Vienna</p>
+	</footer>
 </body>
 
 </html>

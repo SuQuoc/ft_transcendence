@@ -35,7 +35,7 @@ export class LoginPage extends ComponentBaseClass {
 						</a>
 						here!
 					</p>
-					<button type="submit" class="btn btn-secondary w-100">Log in</button>
+					<button type="submit" class="btn btn-secondary w-100" form="loginForm">Log in</button>
 				</form>
 			</div>
 		`;
