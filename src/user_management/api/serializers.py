@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from .models import CustomUser
 
-MEGABYTE_LIMIT = 5
+MEGABYTE_LIMIT = 1
 
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):

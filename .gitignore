@@ -169,4 +169,4 @@ cython_debug/
 *.jpeg
 *.jpg
 
-!src/user_management/uploads/images/profile/default/
+!src/user_management/uploads/images/profile/default/*
