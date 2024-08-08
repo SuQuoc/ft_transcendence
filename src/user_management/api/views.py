@@ -102,3 +102,12 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, displayname):
+        user_to_delete = get_object_or_404(CustomUser, displayname=displayname)
+
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user != user_to_delete:
+            raise PermissionDenied("You do not have permission to edit this user's profile.")
+        user_to_delete.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

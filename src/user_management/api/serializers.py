@@ -4,36 +4,13 @@ from rest_framework import serializers
 
 from .models import CustomUser
 
+MEGABYTE_LIMIT = 5
+
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ["displayname"]
-
-    # def validate_displayname(self, value):
-    #    if CustomUser.objects.filter(displayname=value).exists():
-    #        raise serializers.ValidationError(f"Displayname \"{value}\" already in use")
-    #    return value
-
-
-#
-# def validate_user_id(self, value):
-#    if CustomUser.objects.filter(user_id=value).exists():
-#        raise serializers.ValidationError("User with this id already exists")
-#    return value
-#
-# def validate(self, data):
-#    if 'displayname' not in data:
-#        raise serializers.ValidationError({"displayname": "This field is required."})
-#    if 'user_id' not in data:
-#        raise serializers.ValidationError({"user_id": "This field is required."})
-#    return data
-#
-# def create(self, validated_data):
-#    # Custom creation logic here
-#    user_instance = CustomUser.objects.create(**validated_data)
-#    # print(f"user_instance: {user_instance}")
-#    return user_instance
 
 
 class CustomUserProfileSerializer(serializers.ModelSerializer):
@@ -44,7 +21,7 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["displayname", "online", "is_self", "is_friend", "is_stranger"]  # +avatar
+        fields = ["displayname", "online", "image", "is_self", "is_friend", "is_stranger"]  # +avatar
 
     def get_is_self(self, obj):
         return self.context.get('is_self', False)
@@ -56,10 +33,27 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
         return self.context.get('is_stranger', False)
 
 
+from django.core.files.images import get_image_dimensions
+from rest_framework.exceptions import ValidationError
+
+
+def profile_image_validator(image):
+    filesize = image.size
+
+    # width, height = get_image_dimensions(image)
+    # if width != REQUIRED_WIDTH or height != REQUIRED_HEIGHT:
+    #     raise ValidationError(f"You need to upload an image with {REQUIRED_WIDTH}x{REQUIRED_HEIGHT} dimensions")
+
+    if filesize > MEGABYTE_LIMIT * 1024 * 1024:
+        raise ValidationError(f"Max file size is {MEGABYTE_LIMIT}MB")
+
+
 class CustomUserEditSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(validators=[profile_image_validator])
+
     class Meta:
         model = CustomUser
-        fields = ["displayname"]  # +avatar
+        fields = ["displayname", "image"]
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
