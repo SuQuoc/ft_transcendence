@@ -1,10 +1,6 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
-export class JoinTournamentPage extends ComponentBaseClass {
-	constructor() {
-		super(); // always call super() (it calls the constructor of the parent class)
-	};	
-	
+export class JoinTournamentPage extends ComponentBaseClass {	
 	connectedCallback() {
 		super.connectedCallback();
 		
@@ -12,16 +8,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
 		
 		// getting elements
+		this.create_tournament_form = this.root.getElementById("createTournamentForm");
 		this.range_display = this.root.getElementById("tournamentPointsToWinDisplay");
 		this.display_lane = this.root.getElementById("tournamentDisplayLane");
 		this.input_range = this.root.getElementById("tournamentPointsToWin");
 		
 		// making the "lane" the display div moves in the same width as the middle of the thumb from end to end of the range input (so the percentage is correct)
-		this.thumb_width = 16; // it's defined in template.css as well, so if you change it here, change it there as well
+		this.thumb_width = 16; // it's also defined in template.css, so if you change it here, change it there as well
 		this.display_lane.style.paddingLeft = `${this.thumb_width / 2}px`;
 		this.display_lane.style.paddingRight = `${this.thumb_width / 2}px`;
 
 		// adding event listener
+		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation);
 		this.input_range.addEventListener("input", this.handleRangeDisplay);
 
 		// calling the method to set the initial position of the display
@@ -34,7 +32,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.removeEventListener("input", this.handleRangeDisplay);
 	};
 	
-	// 
+	/// ----- Event Handlers ----- ///
+
+	handleTournamentCreation(event) {
+		event.preventDefault();
+	};
+
+	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
 	handleRangeDisplay(event) {
 		const min = event.target.min || 0;
 		const max = event.target.max || 100;
@@ -46,7 +50,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.range_display.innerHTML = event.target.value;
 	};
 
-	getElementHTML() { // maybe this should be a static method?!
+	getElementHTML() {
 		const template = document.getElementById('joinTournamentPageTemplate');
 		/* template.innerHTML = `
 			

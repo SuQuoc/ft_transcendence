@@ -1,8 +1,4 @@
 export class ScriptsAndStyles extends HTMLElement {
-	constructor() {
-		super();
-	};
-	
 	// when the component is attached to the DOM
 	connectedCallback() {
 		const template = this.getElementHTML();

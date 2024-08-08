@@ -1,10 +1,6 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class PlayMenuHomePage extends ComponentBaseClass {
-	constructor() {
-		super(); // always call super() (it calls the constructor of the parent class)
-	};
-
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `

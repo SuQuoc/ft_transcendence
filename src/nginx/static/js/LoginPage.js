@@ -1,11 +1,7 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class LoginPage extends ComponentBaseClass {
-	constructor() {
-		super(); // always call super() (it calls the constructor of the parent class)
-	};	
-
-	getElementHTML() { // maybe this should be a static method?!
+	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>

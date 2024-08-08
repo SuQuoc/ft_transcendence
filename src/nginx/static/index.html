@@ -81,55 +81,51 @@
 				<h3 class="text-center text-white">Create a Tournament</h3>
 
 				<!-- Tournament name -->
-				<div class="mb-3">
-					<label for="tournamentName" class="form-label text-white-50">Tournament Name:</label>
-					<input name="name"
+				<label for="tournamentName" class="form-label text-white-50">Tournament Name:</label>
+				<input name="name"
 					id="tournamentName"
 					type="text"
-					class="form-control"
+					class="form-control mb-3"
 					placeholder="tournament name"
 				>
-				</div>
 
 				<!-- Number of Players -->
-				<div class="d-flex flex-column mb-3">
-					<label for="tournamentNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
-					<div class="d-flex justify-content-around" id="tournamentNumberOfPlayers" role="group">
-						<input
-							type="radio"
-							value="4"
-							class="btn-check"
-							name="btnradio"
-							id="tournament4PlayerInput"
-							autocomplete="off"
-							checked
-						>
-						<label class="btn btn-outline-secondary w-25" for="tournament4PlayerInput">4</label>
+				<label for="tournamentNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
+				<div class="d-flex justify-content-around  mb-3" id="tournamentNumberOfPlayers" role="group">
+					<input
+						type="radio"
+						value="4"
+						class="btn-check"
+						name="btnradio"
+						id="tournament4PlayerInput"
+						autocomplete="off"
+						checked
+					>
+					<label class="btn btn-outline-secondary w-25" for="tournament4PlayerInput">4</label>
 
-						<input
-							type="radio"
-							value="8"
-							class="btn-check"
-							name="btnradio"
-							id="tournament8PlayerInput"
-							autocomplete="off"
-						>
-						<label class="btn btn-outline-secondary w-25" for="tournament8PlayerInput">8</label>
+					<input
+						type="radio"
+						value="8"
+						class="btn-check"
+						name="btnradio"
+						id="tournament8PlayerInput"
+						autocomplete="off"
+					>
+					<label class="btn btn-outline-secondary w-25" for="tournament8PlayerInput">8</label>
 
-						<input
-							type="radio"
-							value="16"
-							class="btn-check"
-							name="btnradio"
-							id="tournament16PlayerInput"
-							autocomplete="off"
-						>
-						<label class="btn btn-outline-secondary w-25" for="tournament16PlayerInput">16</label>
-					</div>
+					<input
+						type="radio"
+						value="16"
+						class="btn-check"
+						name="btnradio"
+						id="tournament16PlayerInput"
+						autocomplete="off"
+					>
+					<label class="btn btn-outline-secondary w-25" for="tournament16PlayerInput">16</label>
 				</div>
 
 				<!-- Points required to win one round -->
-				<div class="btn-group d-flex flex-column mb-3">
+				<div class="d-flex flex-column mb-3">
 					<label for="tournamentPointsToWin" class="form-label text-nowrap text-white-50 mb-4">Points to win one game:</label>
 					<div id="tournamentDisplayLane" class="position-absolute mt-4">
 						<div id="tournamentPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
