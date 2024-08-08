@@ -66,6 +66,12 @@ um_migrate:
 um_shell:
 	${DOCKER_COMPOSE} exec user_management python manage.py shell
 
+um_exec:
+	${DOCKER_COMPOSE} exec user_management bash
+
+um_db_exec:
+	${DOCKER_COMPOSE} exec db_user_management bash
+
 um_test:
 	${DOCKER_COMPOSE} exec user_management python manage.py test
 
