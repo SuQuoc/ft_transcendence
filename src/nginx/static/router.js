@@ -51,6 +51,7 @@ const Router = {
 			document.getElementById("footer").style.display = "";
 		}
 
+		// check for external links maybe??!! (if first character is not a slash)
 
 		// create the new page element depending on the route
 		switch (route) {

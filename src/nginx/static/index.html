@@ -78,35 +78,74 @@
 		<scripts-and-styles></scripts-and-styles>
 		<div class="p-3 rounded-3 bg-dark">
 			<form id="createTournamentForm">
-				<!-- Tournament name -->
 				<h3 class="text-center text-white">Create a Tournament</h3>
-				<label for="tournamentName" class="form-label text-white-50">Tournament Name</label>
-				<input name="name"
-				id="tournamentName"
-				type="text"
-				class="form-control">
+
+				<!-- Tournament name -->
+				<div class="mb-3">
+					<label for="tournamentName" class="form-label text-white-50">Tournament Name:</label>
+					<input name="name"
+					id="tournamentName"
+					type="text"
+					class="form-control"
+					placeholder="tournament name"
+				>
+				</div>
 
 				<!-- Number of Players -->
-				<div class="d-flex justify-content-around w-100">
-					<button type="button" class="btn btn-secondary">4</button>
-					<button type="button" class="btn btn-secondary">8</button>
-					<button type="button" class="btn btn-secondary">16</button>
+				<div class="d-flex flex-column mb-3">
+					<label for="tournamentNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
+					<div class="d-flex justify-content-around" id="tournamentNumberOfPlayers" role="group">
+						<input
+							type="radio"
+							value="4"
+							class="btn-check"
+							name="btnradio"
+							id="tournament4PlayerInput"
+							autocomplete="off"
+							checked
+						>
+						<label class="btn btn-outline-secondary w-25" for="tournament4PlayerInput">4</label>
+
+						<input
+							type="radio"
+							value="8"
+							class="btn-check"
+							name="btnradio"
+							id="tournament8PlayerInput"
+							autocomplete="off"
+						>
+						<label class="btn btn-outline-secondary w-25" for="tournament8PlayerInput">8</label>
+
+						<input
+							type="radio"
+							value="16"
+							class="btn-check"
+							name="btnradio"
+							id="tournament16PlayerInput"
+							autocomplete="off"
+						>
+						<label class="btn btn-outline-secondary w-25" for="tournament16PlayerInput">16</label>
+					</div>
 				</div>
 
 				<!-- Points required to win one round -->
-				<div class="d-flex flex-column">
-					<label for="tournamentPointsToWin" class="form-label text-white-50">Points required to win one game</label>
-					<span id="tournamentPointsToWinDisplay" class="text-white-50">5</span>
+				<div class="btn-group d-flex flex-column mb-3">
+					<label for="tournamentPointsToWin" class="form-label text-nowrap text-white-50 mb-4">Points to win one game:</label>
+					<div id="tournamentDisplayLane" class="position-absolute mt-4">
+						<div id="tournamentPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
+					</div>
 					<input type="range"
-					class="form-range range-input-slider"
-					id="tournamentPointsToWin"
-					name="pointsToWin"
-					min="1"
-					max="99"
-					step="1"
-					value="5">
+						class="form-range range-input-slider"
+						id="tournamentPointsToWin"
+						name="pointsToWin"
+						min="1"
+						max="25"
+						step="1"
+						value="5"
+					>
 				</div>
 
+				<!-- Submit the form (create a tournament) -->
 				<button type="submit" class="btn btn-secondary w-100">create</button>
 			</form>
 		</div>
