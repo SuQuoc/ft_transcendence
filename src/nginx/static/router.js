@@ -72,6 +72,10 @@ const Router = {
 				pageElement = document.createElement("signup-page");
 				console.log("signup page created");
 				break;
+			case "/friends":
+				pageElement = document.createElement("friends-list");
+				console.log("friends list created");
+				break;
 			default:
 				// homepage
 				pageElement = document.createElement("play-menu-home-page");
