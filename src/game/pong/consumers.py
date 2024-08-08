@@ -8,6 +8,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from .game_code.ball import GameBall
+from .game_code.lobby import Lobby
+from .game_code.match import Match
 from .game_code.pongPlayer import PongPlayer
 from .game_code.storageClasses import SlotXy
 
@@ -26,6 +28,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # players: dict[str, PongPlayer] = {}
     players: dict[str, dict[str, PongPlayer]] = {}
 
+    lobbies: dict[str, Lobby] = {}
+
+    group_current_sizes: dict[str, int] = {}
+    group_max_sizes: dict[str, int] = {}
     # PongPlayer should not be "global"
     update_lock = asyncio.Lock()
 
@@ -46,28 +52,50 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f"chat_{self.room_name}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-
         await self.accept()
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
+        await self.create_player_save_in_dict()
 
+    async def create_player_save_in_dict(self):
         self.player = PongPlayer(self.player_id, self.map_size)
+        lobby = None
         async with self.update_lock:
-            player = self.players.get(self.room_name, None)
-        if player is None:
-            player_dict = {self.player_id: self.player}
-            async with self.update_lock:
-                self.players[self.room_name] = player_dict
+            lobby = self.lobbies.get(self.room_name, None)
+
+        if lobby is None:
+
+            # Now using a lobby class in a dict for better control
+            self.lobby = Lobby(lobby_name=self.room_name, max_len=2)
+            self.lobby.addPlayer(self.player)
+            self.lobbies[self.room_name] = self.lobby
+            print("Lobby created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
             return
 
         async with self.update_lock:
+
+            self.lobby.addPlayer(self.player)
+
+            if len(self.group_current_sizes[self.group_name]) >= self.group_max_size:
+                print("[WARNING]\nGroup is full")
+                # DISCONNECT LOGIC HERE !!! ?????????????????????????????????
+                return
+            self.group_current_sizes[self.group_name] += 1
             self.players[self.room_name][self.player_id] = self.player
             self.player.x = self.map_size.x - self.player.width
 
-        self.start_game_and_create_task()
+        print("aaaa", self.lobby.len, self.lobby.max_len)
 
-    async def start_game_and_create_task(self):
+        if self.lobby.len == self.lobby.max_len:
+            matches = await self.lobby.startMatch()
+            if matches is not None:
+                print(matches)
+                # start the match
+                print("start match")
+                # start the game
+
+        # task is like a thread. Sends client a msg to start the game.
         task = asyncio.create_task(self.game_loop())
         if task is None:
             print("[ERROR] Task creation failed")
@@ -117,13 +145,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         async with self.update_lock:
-            if self.player_id in self.players[self.room_name]:
-                if self.player.task is not None:
-                    self.player.task.cancel()
+
+            if self.player:
                 del self.player
 
-                if self.players.get(self.room_name, None):
-                    del self.players[self.room_name]
+            if self.lobbies[self.room_name].players.get(self.player_id, None):
+                self.lobbies[self.room_name].removePlayer(self.player_id)
+
+            if self.lobbies.get(self.room_name, None):
+                if self.lobbies[self.room_name].len == 0:
+                    del self.lobbies[self.room_name]
+                    self.lobbies.pop(self.room_name, None)
+
+        print("Lobbies", self.lobbies)
 
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
 
@@ -144,8 +178,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 player.down = text_data_json["down"]
 
         elif text_data_json["type"] == "roomSize":
-            self.room_size = int(text_data_json["roomSize"])
-            print(self.room_size)
+            self.group_max_size = int(text_data_json["roomSize"])
+
+            # start here the room ?
+
+            # print(self.room_size)
 
     # Receive message from room group
     async def chat_message(self, e):
