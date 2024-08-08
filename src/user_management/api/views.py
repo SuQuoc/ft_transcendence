@@ -1,21 +1,39 @@
-import json
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
+from django.db import transaction
 from django.http import HttpResponse
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
+from friends.models import FriendList
 from rest_framework import generics
-from rest_framework import mixins
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,  # register service
+)
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import CustomUser
-from .models import FriendRequest
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserCreateSerializer
+from .serializers import CustomUserEditSerializer
+from .serializers import CustomUserProfileSerializer
 
-# Create your views here.
+
+# JWT
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):  # register service
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['learning jwt'] = user.email
+        # token['user_id'] = user.user_id
+        # token['displayname'] = user.displayname
+
+        return token
+
+
+class MyTokenObtainPairView(TokenObtainPairView):  # register service
+    serializer_class = MyTokenObtainPairSerializer
 
 
 def profile(request):
@@ -25,179 +43,62 @@ def profile(request):
 # generics.ListCreateAPIView # to view all users
 class CustomUserCreate(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CustomUserCreateSerializer
 
-    def create(self, request, *args, **kwargs):
-        displayname = request.data.get('displayname')
-        id = request.data.get('user_id')
-        if not displayname or not id:
-            return Response({"error": "Both displayname and id must be provided"}, status=status.HTTP_400_BAD_REQUEST)
-        if CustomUser.objects.filter(displayname=displayname).exists():
-            return Response({"error": "User with this displayname already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        if CustomUser.objects.filter(user_id=id).exists():
-            return Response({"error": "User with this id already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        return super().create(request, *args, **kwargs)
+    # since already in settings not needed here
+    # authentication_classes = [JWTTokenUserAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.validated_data['user_id'] = self.request.user.user_id
+
+        with transaction.atomic():
+            new_user = serializer.save()
+
+            # Create a FriendList instance for the new custom user
+            FriendList.objects.create(user=new_user)
 
 
-class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
+# only used when editing own profile, viewing own profile is separate
+class CustomUserEdit(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CustomUserEditSerializer
 
 
-def getJsonKey(request, key):
-    """
-    Returns the corresponding python object from the request body with the given json key.
-    """
-    try:
-        data = json.loads(request.body)
-        value = data.get(key)
-        if not value:
-            return None, JsonResponse({"error": f"'{key}' not provided"}, status=400)
-        return value, None
-    except json.JSONDecodeError:
-        return None, JsonResponse({"error": "Invalid JSON"}, status=400)
-
-
-# @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service
-# @permission_classes([IsAuthenticated])
-def sendFriendRequest(request):
-    if request.method == 'POST':
-        # return JsonResponse({"message": "JUST A TEST"}, status=201)
-        from_user = request.user
-        user_id, error = getJsonKey(request, "userId")
-        if error:
-            return error
-        try:
-            to_user = CustomUser.objects.get(pk=user_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
-
-        if from_user == to_user:
-            return JsonResponse({"error": "You can't send a friend request to yourself"}, status=400)
-            # return HttpResponse("You can't send a friend request to yourself")
-
-        friend_request, created = FriendRequest.objects.get_or_create(from_user=from_user, to_user=to_user, status=0)
-        if created:
-            return JsonResponse({"message": "friend request sent"}, status=201)
-            # return HttpResponse("friend request sent")
-        else:
-            return JsonResponse({"message": "friend request sent"}, status=201)
-            # return HttpResponse("friend request already sent, be patient")
-    else:
-        return JsonResponse({"error": "Invalid HTTP method"}, status=405)
-
-
-def acceptFriendRequest(request):
-    if request.method == 'POST':
-        friend_request_id, error = getJsonKey(request, "friendRequestId")
-        if error:
-            return error
-        try:
-            friend_request = FriendRequest.objects.get(id=friend_request_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({"error": "Friend request not found"}, status=404)
-            # return HttpResponse("Friend request not found")
-
-        if friend_request.to_user == request.user:
-            friend_request.to_user.friends.add(friend_request.from_user)
-            friend_request.from_user.friends.add(friend_request.to_user)
-            friend_request.status = 1  # accepted see FriendRequest model
-            friend_request.save()  # storing changes, so only status
-            # friend_request.delete() # i read that its better store all friend requests
-        else:
-            return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
-            # return HttpResponse("Friend request not for you")
-    else:
-        return JsonResponse({"error": "Invalid HTTP method"}, status=405)
-
-
-def declineFriendRequest(request):
-    if request.method == 'POST':
-        friend_request_id, error = getJsonKey(request, "friendRequestId")
-        if error:
-            return error
-        try:
-            friend_request = FriendRequest.objects.get(id=friend_request_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({"error": "Friend request not found"}, status=404)
-            # return HttpResponse("Friend request not found")
-
-        if friend_request.to_user == request.user:
-            friend_request.status = 2  # declined, see FriendRequest model
-            friend_request.save()  # storing changes, so only status
-        else:
-            return JsonResponse({"error": "Friend request not for u (should never happen)"}, status=404)
-    else:
-        return JsonResponse({"error": "Invalid HTTP method"}, status=405)
-
-
-# OLD APIS with mixins just for learning -----------------------
-class UserListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+# is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
+# because u may ONLY be able to view OWN PROFILE
+class CustomUserProfile(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CustomUserProfileSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get(self, request, displayname):
+        context = {'is_self': False, 'is_friend': False, 'is_stranger': False}
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        stalked_user = get_object_or_404(CustomUser, displayname=displayname)
 
+        # print(f"TOKEN STUFF {token_user.user_id}")
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user == stalked_user:
+            # Watching my own profile - Frontend: i see personal info, like my friend-list?
+            context["is_self"] = True
+        elif stalked_user in user.friend_list.friends.all():
+            # Watching a friends profile - Frontend: U guys are friends indicator
+            context["is_friend"] = True
+        else:
+            # Watching random persons profile - Frontend: Friend request button
+            context["is_stranger"] = True
 
-class UserDetailMixins(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-
-# OLD APIS
-class UserListOld(APIView):
-    def get(self, request):
-        users = CustomUser.objects.all()
-        serializer = CustomUserSerializer(users, many=True)
+        serializer = self.serializer_class(stalked_user, context=context)
         return Response(serializer.data)
 
-    def post(self, request, format=None):
-        serializer = CustomUserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def patch(self, request, displayname):
+        user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user != user_to_update:
+            raise PermissionDenied("You do not have permission to edit this user's profile.")
 
-class UserDetailOLD(APIView):
-    """
-    Retrieve, update or delete a CustomUser instance.
-    ATM everyone can do this i think.
-    """
-
-    def get_object(self, pk):
-        try:
-            return CustomUser.objects.get(pk=pk)
-        except CustomUser.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = CustomUserSerializer(user)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = CustomUserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = CustomUserProfileSerializer(user_to_update, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

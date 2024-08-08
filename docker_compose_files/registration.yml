@@ -1,20 +1,21 @@
 services:
 
   db_registration:
+    container_name: db_registration
     image: postgres:16
     environment:
-      POSTGRES_DB: "${POSTGRES_DB_REG:-my_default_postgre_db}"
-      POSTGRES_USER: "${POSTGRES_USER_REG:-my_default_POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_REG:-my_default_POSTGRES_PASSWORD}"
-      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_REG:-my_default_POSTGRES_ACCESS_USER}"
-      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_REG:-my_default_POSTGRES_ACCESS_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
+      POSTGRES_USER: "${POSTGRES_USER_REG:-reg_postgress_user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_password}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_REG:-reg_postgress_access_user}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_REG:-reg_postgress_access_password}"
     expose:
       - "${DB_PORT_REG:-5432}"
     volumes:
       - volume_registration:/var/lib/postgresql/data
       - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_REG:-my_default_POSTGRES_USER} -d ${POSTGRES_DB_REG:-my_default_postgre_db}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_REG:-reg_postgress_user} -d ${POSTGRES_DB_REG:-reg_postgress_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
@@ -26,19 +27,21 @@ services:
       - network_registration
 
   registration:
+    container_name: registration
     build: ../src/registration
     volumes:
       - ../src/registration:/app
     expose:
       - "8000:8000"
     environment:
-      POSTGRES_DB: "${POSTGRES_DB_REG:-my_default_postgre_db}"
-      POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-my_default_POSTGRES_USER}"
-      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-my_default_POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_access_password}"
       DB_HOST: "${DB_HOST_REG:-db_registration}"
       DB_PORT: "${DB_PORT_REG:-5432}"
-      SECRET_KEY: ${SECRET_KEY_REG:-django-insecure-6%14m=3l*0z5zus+vmp#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      DEBUG: ${DEBUG:-False}
+      JWT_SECRET: "${JWT_SECRET:-somesecret}"
+      SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      DEBUG: ${DJANGO_DEBUG_REG:-False}
     depends_on:
       db_registration:
         condition: service_healthy
@@ -48,8 +51,12 @@ services:
       - all
     networks:
       - network_registration
+    secrets:
+      - public_key.pem
+      - private_key.pem
 
   nginx_registration:
+    container_name: nginx_registration
     build: ../src/registration_nginx
     ports:
       - 8000:443
@@ -57,5 +64,5 @@ services:
       - registration
     profiles:
       - registration
-    networks: 
+    networks:
       - network_registration
