@@ -10,26 +10,39 @@ class Lobby:
         self.lobby_name = lobby_name
         self.len = 0
         self.max_len = max_len
-        self.matches: list[Match] = []
+        self.matches: list[Match] = [Match(None, None) for i in range(0, len(max_len), 2)]
 
-    def addPlayer(self, new_player: PongPlayer) -> None:
+    def addPlayer(self, new_player: PongPlayer) -> None | str:
         if isinstance(new_player, PongPlayer) is False or new_player is None:
             print("[Error-Lobby] Player is wrong type or None")
-            return False
+            return
         if self.len >= self.max_len:
             print("[Warning-Lobby] Lobby full")
-            return False
+            return
         self.players[new_player.id] = new_player
         self.len = len(self.players)
-        return True
+        return self.addPlayerToMatch(self, new_player)
 
-    def removePlayer(self, player_id: str) -> None:
-        if player_id not in self.players:
+    def addPlayerToMatch(self, player: PongPlayer) -> None:
+        for match in self.matches:
+            if match.player1 is None:
+                match.player1 = player
+                return match.name
+            if match.player2 is None:
+                match.player2 = player
+                return match.name
+        print("[Error-Lobby] We a fucked up this should never happen")
+
+    def removePlayer(self, player: PongPlayer) -> None:
+        if player.id not in self.players:
             print("[Warning-Lobby] Player not in lobby")
             # Send msg ?
             return
-        self.players.pop(player_id)
+        self.players.pop(player.id)
         self.len = len(self.players)
+        for match in self.matches:
+            if player in [match.player1, match.player2]:
+                match.removePlayer(player)
 
     # This needs to be a bit more dynamic !
     # Returns None if lobby is not full !
@@ -38,18 +51,11 @@ class Lobby:
             print("[Warning-Lobby] Not enough Players to start game")
             # Send msg ?
             return
-
-        self.matches = self.split_dict_in_match(self.players)
         return self.matches
 
     def setWinner(self, game_nr, winner_nr):
         # If you give up on a function just pass xD
         pass
-
-    def split_dict_in_match(self, input_dict: dict[str, PongPlayer]) -> list[dict]:
-        players = list(input_dict.values())
-        matches = [Match(players[i], players[i + 1]) for i in range(0, len(players), 2)]
-        return matches
 
     """ def startNextRound(self):
         for game in self.game:

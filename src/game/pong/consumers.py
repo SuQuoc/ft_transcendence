@@ -68,7 +68,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Now using a lobby class in a dict for better control
             self.lobby = Lobby(lobby_name=self.room_name, max_len=2)
-            self.lobby.addPlayer(self.player)
+            self.match_name = self.lobby.addPlayer(self.player)
+            
+            await self.channel_layer.group_add(
+                self.match_name,  # Replace with the actual group name
+                self.channel_name
+            )
+
             self.lobbies[self.room_name] = self.lobby
             print("Lobby created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
             return
@@ -82,53 +88,54 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
         if self.lobby.len == self.lobby.max_len:
-            matches : list[Match] = self.lobby.startMatch()
-            if matches is not None:
-                print("match p1 = ", matches[0].player1.id)
-                print("match p2 = ", matches[0].player2.id)
-                matches[0].name = self.room_name + "_match1"
-                print(self.player.id)
-                # start the match
-                print("start match")
-                # start the game
+            # matches : list[Match] = self.lobby.startMatch()
+            # if matches is not None:
+                #print("match p1 = ", matches[0].player1.id)
+                #print("match p2 = ", matches[0].player2.id)
+                #matches[0].name = self.room_name + "_match1"
+            self.match = selfmatches[0]
+            print(self.player.id)
+            # start the match
+            print("start match")
+            # start the game
 
         # task is like a thread. Sends client a msg to start the game.
-                await self.channel_layer.group_add(
-                    matches[0].name,  # Replace with the actual group name
-                    self.channel_name
-                )
+            await self.channel_layer.group_add(
+                matches[0].name,  # Replace with the actual group name
+                self.channel_name
+            )
 
-                task = asyncio.create_task(self.game_loop())
-                if task is None:
-                    print("[ERROR] Task creation failed")
-                    return
-                async with self.update_lock:
-                    matches[0].task = task
-                await self.channel_layer.group_send(
-                    matches[0].name,
-                    {"type": "start.game", "startGame": True},
-                )
+            task = asyncio.create_task(self.game_loop())
+            if task is None:
+                print("[ERROR] Task creation failed")
+                return
+            async with self.update_lock:
+                matches[0].task = task
+            await self.channel_layer.group_send(
+                matches[0].name,
+                {"type": "start.game", "startGame": True},
+            )
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
-        async with self.update_lock:
-            player_count = len(self.players[self.room_name])
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
-        while player_count > 0:
+        while self.match.len == 2:
             ball.hitWall()
             ball.move()
             async with self.update_lock:
-                [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
+                self.sendToClient(self.match.player1, ball)
+                self.sendToClient(self.match.player2, ball)
+                # [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
             await asyncio.sleep(self.delay)
-            async with self.update_lock:
-                player_count = len(self.players[self.room_name])
+            """ async with self.update_lock:
+                player_count = len(self.players[self.room_name]) """
 
     async def sendToClient(self, player: PongPlayer, ball: GameBall):
         player.move(self.MOVE_SPEED)
         ball.paddlesHit(player)
         # Send to clients in django and then to JS
         await self.channel_layer.group_send(
-            self.group_name,
+            self.match.name,
             {
                 "type": "chat.message",  # Massage type so js knows what he has to do with this strings
                 "y": player.y,  # This will tell js where to draw the player
@@ -204,7 +211,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def start_game(self, e):
-        print("start game", self.channel_name)
+        print("start game", self.room_name)
         await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
 
 
