@@ -1,12 +1,10 @@
 import uuid
-
 from api.models import CustomUser, UPLOAD_TO_PROFILE
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from utils_jwt import generate_token
 import os
-from django.core.files.storage import default_storage
 from django.conf import settings
 
 UNDER_ONE_MB = "default/900kb.jpg"
@@ -34,9 +32,9 @@ class TestCrud(APITestCase):
 
 
         self.images = {
-            "under_1mb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, UNDER_ONE_MB),
-            "around_1mb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, AROUND_ONE_MB),
-            "over_1mb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, OVER_ONE_MB),
+            "900kb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, UNDER_ONE_MB),
+            "1mb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, AROUND_ONE_MB),
+            "1.8mb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, OVER_ONE_MB),
         }
 
     def post(self):
@@ -111,7 +109,7 @@ class TestCrud(APITestCase):
 
     def test_editing_profile_img(self):
         self.test_success()
-        with open(self.images["under_1mb"], 'rb') as image:
+        with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             image_path = CustomUser.objects.get().image.path
@@ -126,12 +124,12 @@ class TestCrud(APITestCase):
     def test_editing_profile_img_twice(self):
         self.test_success()
 
-        with open(self.images["under_1mb"], 'rb') as image:
+        with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             old_image_path = CustomUser.objects.get().image.path
 
-        with open(self.images["around_1mb"], 'rb') as image:
+        with open(self.images["1mb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             image_path = CustomUser.objects.get().image.path
@@ -143,7 +141,7 @@ class TestCrud(APITestCase):
 
     def test_editing_profile_img_too_big(self):
         self.test_success()
-        with open(self.images["over_1mb"], 'rb') as image:
+        with open(self.images["1.8mb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             response_json = response.json()
@@ -157,7 +155,7 @@ class TestCrud(APITestCase):
 
         self.data['displayname'] = NEW_NAME
 
-        with open(self.images["under_1mb"], 'rb') as image:
+        with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
 
@@ -189,7 +187,7 @@ class TestCrud(APITestCase):
 
     def test_user_deletion_with_custom_image(self):
         self.test_success()
-        with open(self.images["under_1mb"], 'rb') as image:
+        with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
 

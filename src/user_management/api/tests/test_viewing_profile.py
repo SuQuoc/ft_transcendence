@@ -4,7 +4,6 @@ from api.models import CustomUser
 from django.test import TestCase
 from django.urls import reverse
 from friends.models import FriendList
-from rest_framework_simplejwt.tokens import RefreshToken
 from utils_jwt import generate_token
 
 

@@ -1,13 +1,6 @@
-import uuid
 
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
-from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from PIL import Image
-from django.conf import settings
-import os
 from django.templatetags.static import static
 
 

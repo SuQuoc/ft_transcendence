@@ -1,7 +1,6 @@
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from friends.models import FriendList
 from rest_framework import generics
 from rest_framework import status
@@ -17,7 +16,6 @@ from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.decorators import parser_classes
 
 
 # JWT
