@@ -6,8 +6,8 @@ export class PlayMenuHomePage extends ComponentBaseClass {
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
 			<div>
-				<button type="button" class="btn btn-secondary w-100 mb-2">Multiplayer</button>
-				<button type="button" class="btn btn-secondary w-100">Tournament</button>
+				<a href="/" type="button" class="btn btn-secondary w-100 mb-2">Multiplayer</a>
+				<a href="/tournament" type="button" class="btn btn-secondary w-100">Tournament</a>
 			</div>
 		`;
 		return template;
