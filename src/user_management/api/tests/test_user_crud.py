@@ -141,6 +141,16 @@ class TestCrud(APITestCase):
         self.assertFalse(os.path.exists(old_image_path))
         self.delete()
 
+    def test_editing_profile_img_too_big(self):
+        self.test_success()
+        with open(self.images["over_1mb"], 'rb') as image:
+            self.data['image'] = image
+            response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+            response_json = response.json()
+            image_path = CustomUser.objects.get().image.path
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_json, {'image': ['Max file size is 1MB']})
 
     def test_editing_profile_img_and_data(self):
         self.test_success()
