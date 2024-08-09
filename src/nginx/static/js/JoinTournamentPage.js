@@ -9,16 +9,16 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		// getting elements
 		this.create_tournament_form = this.root.getElementById("createTournamentForm");
-		this.range_display = this.root.getElementById("tournamentPointsToWinDisplay");
-		this.display_lane = this.root.getElementById("tournamentDisplayLane");
-		this.input_range = this.root.getElementById("tournamentPointsToWin");
+		this.range_display = this.root.getElementById("createPointsToWinDisplay");
+		this.display_lane = this.root.getElementById("createDisplayLane");
+		this.input_range = this.root.getElementById("createPointsToWin");
 		
 		// making the "lane" the display div moves in the same width as the middle of the thumb from end to end of the range input (so the percentage is correct)
 		this.thumb_width = 16; // it's also defined in template.css, so if you change it here, change it there as well
 		this.display_lane.style.paddingLeft = `${this.thumb_width / 2}px`;
 		this.display_lane.style.paddingRight = `${this.thumb_width / 2}px`;
 
-		// adding event listener
+		// adding event listeners
 		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation);
 		this.input_range.addEventListener("input", this.handleRangeDisplay);
 
@@ -29,13 +29,27 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	disconnectedCallback() {
 		super.disconnectedCallback();
 		
-		this.removeEventListener("input", this.handleRangeDisplay);
+		// removing event listeners
+		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation);
+		this.input_range.removeEventListener("input", this.handleRangeDisplay);
 	};
 	
-	/// ----- Event Handlers ----- ///
 
+	/// ----- Event Handlers ----- ///
+	/** get's called when someone creates a tournament, doesn't do anything yet */
 	handleTournamentCreation(event) {
 		event.preventDefault();
+
+		const	number_of_players = event.target.number_of_players.value;
+		const	points_to_win = event.target.points_to_win.value;
+		let		tournament_name = event.target.create_name.value;
+
+		if (tournament_name === "") {
+			tournament_name = "tournament";
+		}
+		console.log("tournament name: ", tournament_name,
+					"\nnumber of players: ", number_of_players,
+					"\npoints to win: ", points_to_win);
 	};
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
