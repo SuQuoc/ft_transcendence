@@ -74,6 +74,7 @@ const Router = {
 				break;
 			case "/friends":
 				pageElement = document.createElement("friends-list");
+				pageElement.setAttribute("requested", "");
 				console.log("friends list created");
 				break;
 			default:

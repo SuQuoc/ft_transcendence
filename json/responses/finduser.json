@@ -9,6 +9,8 @@
 	{
 		"uid": 1234,
 		"displayname": "AB",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": true,
 		"is_friend": true,
 		"is_pending_sender": false,
 		"is_pending_receiver": false
@@ -16,6 +18,7 @@
 	{
 		"uid": 1235,
 		"displayname": "BA",
+		"img": "https://i.pravatar.cc/150",
 		"is_friend": false,
 		"is_pending_sender": true,
 		"is_pending_receiver": false

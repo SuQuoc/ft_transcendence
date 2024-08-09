@@ -1,0 +1,47 @@
+[
+	{
+		"uid": 1234,
+		"displayname": "User 1",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": true,
+		"is_friend": true,
+		"is_pending_sender": false,
+		"is_pending_receiver": false
+	},
+	{
+		"uid": 1235,
+		"displayname": "Username 2",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": false,
+		"is_friend": true,
+		"is_pending_sender": false,
+		"is_pending_receiver": false
+	},
+	{
+		"uid": 1235,
+		"displayname": "Short",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": false,
+		"is_friend": false,
+		"is_pending_sender": true,
+		"is_pending_receiver": false
+	},
+	{
+		"uid": 1235,
+		"displayname": "Long",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": false,
+		"is_friend": false,
+		"is_pending_sender": false,
+		"is_pending_receiver": true
+	},
+	{
+		"uid": 1235,
+		"displayname": "Test 5",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": false,
+		"is_friend": false,
+		"is_pending_sender": false,
+		"is_pending_receiver": false
+	}
+]
