@@ -78,6 +78,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.PENDING).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "friend request already sent, be patient")
@@ -93,6 +94,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.ACCEPTED).count()
+
         self.assertEqual(count, 1)
         self.assertEqual(response_json["error"], "You are best buds")
         self.assertEqual(response.status_code, 400)
@@ -109,6 +111,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.ACCEPTED).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "Friend request accepted")
@@ -124,6 +127,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.DECLINED).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "Friend request declined")
