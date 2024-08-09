@@ -6,7 +6,7 @@ export class ScriptsAndStyles extends HTMLElement {
 		this.appendChild(content);
 	}
 
-	// are we allowed to use the bootstrap bundle with popper?????!!!!
+	// do we need all the js in the shadow doms?????!!!!
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
@@ -18,11 +18,12 @@ export class ScriptsAndStyles extends HTMLElement {
 			<!-- Custom CSS -->
 				<link href="../css/template.css" rel="stylesheet"/>
 				
-			<!-- Bootstrap Bundle with Popper -->
-				<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-					integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+			<!-- Bootstrap js -->
+				<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+					integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
 					crossorigin="anonymous"
-					defer></script>
+					defer>
+				</script>
 			<!-- Custom js -->
 			<!-- The 'type="module"' means that the file will be loaded as a module.
 				This means every variables we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->

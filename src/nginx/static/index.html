@@ -14,11 +14,13 @@
 	<!-- Custom CSS -->
 	<link href="../css/template.css" rel="stylesheet"/>
 	
-	<!-- Bootstrap Bundle with Popper -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+	<!-- Bootstrap js -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+		integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
 		crossorigin="anonymous"
-		defer></script>
+		defer>
+	</script>
+
 	<!-- Custom js -->
 	<!-- The 'type="module"' means that the file will be loaded as a module.
 	 	This means every variables we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->
@@ -82,7 +84,7 @@
 
 				<!-- Tournament name -->
 				<label for="tournamentName" class="form-label text-white-50">Tournament Name:</label>
-				<input name="name"
+				<input name="tournament_name"
 					id="tournamentName"
 					type="text"
 					class="form-control mb-3"
@@ -96,7 +98,7 @@
 						type="radio"
 						value="4"
 						class="btn-check"
-						name="btnradio"
+						name="number_of_players"
 						id="tournament4PlayerInput"
 						autocomplete="off"
 						checked
@@ -107,7 +109,7 @@
 						type="radio"
 						value="8"
 						class="btn-check"
-						name="btnradio"
+						name="number_of_players"
 						id="tournament8PlayerInput"
 						autocomplete="off"
 					>
@@ -117,7 +119,7 @@
 						type="radio"
 						value="16"
 						class="btn-check"
-						name="btnradio"
+						name="number_of_players"
 						id="tournament16PlayerInput"
 						autocomplete="off"
 					>
@@ -133,7 +135,7 @@
 					<input type="range"
 						class="form-range range-input-slider"
 						id="tournamentPointsToWin"
-						name="pointsToWin"
+						name="points_to_win"
 						min="1"
 						max="25"
 						step="1"
