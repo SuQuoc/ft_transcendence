@@ -74,38 +74,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         async with self.update_lock:
-
-            self.lobby.addPlayer(self.player)
-
-            if len(self.group_current_sizes[self.group_name]) >= self.group_max_size:
-                print("[WARNING]\nGroup is full")
-                # DISCONNECT LOGIC HERE !!! ?????????????????????????????????
+            
+            self.lobby = self.lobbies[self.room_name]
+            if self.lobby.addPlayer(self.player) is False:
+                print("[Error] Player not added to lobby")
                 return
-            self.group_current_sizes[self.group_name] += 1
-            self.players[self.room_name][self.player_id] = self.player
-            self.player.x = self.map_size.x - self.player.width
 
-        print("aaaa", self.lobby.len, self.lobby.max_len)
 
         if self.lobby.len == self.lobby.max_len:
-            matches = await self.lobby.startMatch()
+            matches : list[Match] = self.lobby.startMatch()
             if matches is not None:
-                print(matches)
+                print("match p1 = ", matches[0].player1.id)
+                print("match p2 = ", matches[0].player2.id)
+                matches[0].name = self.room_name + "_match1"
+                print(self.player.id)
                 # start the match
                 print("start match")
                 # start the game
 
         # task is like a thread. Sends client a msg to start the game.
-        task = asyncio.create_task(self.game_loop())
-        if task is None:
-            print("[ERROR] Task creation failed")
-            return
-        async with self.update_lock:
-            self.player.task = task
-        await self.channel_layer.group_send(
-            self.group_name,
-            {"type": "start.game", "startGame": True},
-        )
+                await self.channel_layer.group_add(
+                    matches[0].name,  # Replace with the actual group name
+                    self.channel_name
+                )
+
+                task = asyncio.create_task(self.game_loop())
+                if task is None:
+                    print("[ERROR] Task creation failed")
+                    return
+                async with self.update_lock:
+                    matches[0].task = task
+                await self.channel_layer.group_send(
+                    matches[0].name,
+                    {"type": "start.game", "startGame": True},
+                )
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):

@@ -3,7 +3,6 @@ from .pongPlayer import PongPlayer
 
 # This class would start when a lobby starts and manages the games !
 
-
 class Lobby:
 
     def __init__(self, lobby_name=None, max_len=2) -> None:
@@ -16,13 +15,13 @@ class Lobby:
     def addPlayer(self, new_player: PongPlayer) -> None:
         if isinstance(new_player, PongPlayer) is False or new_player is None:
             print("[Error-Lobby] Player is wrong type or None")
-            return
+            return False
         if self.len >= self.max_len:
             print("[Warning-Lobby] Lobby full")
-            # Send msg ?
-            return
+            return False
         self.players[new_player.id] = new_player
         self.len = len(self.players)
+        return True
 
     def removePlayer(self, player_id: str) -> None:
         if player_id not in self.players:
@@ -40,16 +39,16 @@ class Lobby:
             # Send msg ?
             return
 
-        self.matches = self.split_dict_in_pairs(self.players)
+        self.matches = self.split_dict_in_match(self.players)
         return self.matches
 
     def setWinner(self, game_nr, winner_nr):
         # If you give up on a function just pass xD
         pass
 
-    def split_dict_in_match(input_dict: dict[str, PongPlayer]) -> list[dict]:
-        match = list(input_dict.values())
-        matches = [Match(match[i : i + 2]) for i in range(0, len(match), 2)]
+    def split_dict_in_match(self, input_dict: dict[str, PongPlayer]) -> list[dict]:
+        players = list(input_dict.values())
+        matches = [Match(players[i], players[i + 1]) for i in range(0, len(players), 2)]
         return matches
 
     """ def startNextRound(self):
