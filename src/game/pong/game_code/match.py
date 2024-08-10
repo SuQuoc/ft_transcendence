@@ -19,7 +19,7 @@ class Match:
             self.len += 1
             return True
         return False
-    
+
     def removePlayer(self, player):
         if self.player1 == player:
             self.player1 = None
