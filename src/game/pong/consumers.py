@@ -79,12 +79,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print("Lobby created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
             return
 
-        """ async with self.update_lock:
+        async with self.update_lock:
             
             self.lobby = self.lobbies[self.room_name]
-            if self.lobby.addPlayer(self.player) is False:
-                print("[Error] Player not added to lobby")
-                return """
+            self.match: Match = self.lobby.addPlayer(self.player)
 
 
         if self.lobby.len == self.lobby.max_len:
@@ -118,19 +116,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # ASYNC TASK WITH 0.05 S DELAY
     async def game_loop(self):
+        print("game loop started")
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
+        print(self.match.len)
         while self.match.len == 2:
             ball.hitWall()
             ball.move()
             async with self.update_lock:
-                self.sendToClient(self.match.player1, ball)
-                self.sendToClient(self.match.player2, ball)
+                await self.sendToClient(self.match.player1, ball)
+                await self.sendToClient(self.match.player2, ball)
                 # [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
             await asyncio.sleep(self.delay)
             """ async with self.update_lock:
                 player_count = len(self.players[self.room_name]) """
 
     async def sendToClient(self, player: PongPlayer, ball: GameBall):
+        print("send to client")
         player.move(self.MOVE_SPEED)
         ball.paddlesHit(player)
         # Send to clients in django and then to JS
@@ -147,6 +148,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "match_points_right": ball.match_points["right"],
             },
         )
+        print("send to client done")
 
     async def disconnect(self, close_code):
 
@@ -176,15 +178,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
 
         if text_data_json["type"] == "update":
-            player_id = text_data_json["playerId"]
-            player = self.players[self.room_name].get(player_id, None)
+            #player_id = text_data_json["playerId"]
+            #player = self.players[self.room_name].get(player_id, None)
 
-            if not player:
+            if not self.player:
                 return
 
             async with self.update_lock:
-                player.up = text_data_json["up"]
-                player.down = text_data_json["down"]
+                self.player.up = text_data_json["up"]
+                self.player.down = text_data_json["down"]
 
         elif text_data_json["type"] == "roomSize":
             self.group_max_size = int(text_data_json["roomSize"])

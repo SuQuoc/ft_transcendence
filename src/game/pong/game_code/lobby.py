@@ -24,15 +24,13 @@ class Lobby:
         return self.addPlayerToMatch(new_player)
 
     def addPlayerToMatch(self, player: PongPlayer) -> None:
-        i = 0
         for match in self.matches:
             if match.player1 is None:
-                match.player1 = player
+                match.addPlayer(player)
                 return match
             if match.player2 is None:
-                match.player2 = player
+                match.addPlayer(player)
                 return match
-            i += 1
         print("[Error-Lobby] We a fucked up this should never happen")
 
     def removePlayer(self, player: PongPlayer) -> None:
