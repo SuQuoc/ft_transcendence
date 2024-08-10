@@ -10,7 +10,7 @@ class Lobby:
         self.lobby_name = lobby_name
         self.len = 0
         self.max_len = max_len
-        self.matches: list[Match] = [Match(None, None) for i in range(0, len(max_len), 2)]
+        self.matches: list[Match] = [Match(None, None, name=self.lobby_name + "_match" + str(i)) for i in range(0, max_len, 2)]
 
     def addPlayer(self, new_player: PongPlayer) -> None | str:
         if isinstance(new_player, PongPlayer) is False or new_player is None:
@@ -21,16 +21,18 @@ class Lobby:
             return
         self.players[new_player.id] = new_player
         self.len = len(self.players)
-        return self.addPlayerToMatch(self, new_player)
+        return self.addPlayerToMatch(new_player)
 
     def addPlayerToMatch(self, player: PongPlayer) -> None:
+        i = 0
         for match in self.matches:
             if match.player1 is None:
                 match.player1 = player
-                return match.name
+                return match
             if match.player2 is None:
                 match.player2 = player
-                return match.name
+                return match
+            i += 1
         print("[Error-Lobby] We a fucked up this should never happen")
 
     def removePlayer(self, player: PongPlayer) -> None:

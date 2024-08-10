@@ -68,10 +68,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Now using a lobby class in a dict for better control
             self.lobby = Lobby(lobby_name=self.room_name, max_len=2)
-            self.match_name = self.lobby.addPlayer(self.player)
+            self.match: Match = self.lobby.addPlayer(self.player)
             
             await self.channel_layer.group_add(
-                self.match_name,  # Replace with the actual group name
+                self.match.name,  # Replace with the actual group name
                 self.channel_name
             )
 
@@ -79,12 +79,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print("Lobby created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
             return
 
-        async with self.update_lock:
+        """ async with self.update_lock:
             
             self.lobby = self.lobbies[self.room_name]
             if self.lobby.addPlayer(self.player) is False:
                 print("[Error] Player not added to lobby")
-                return
+                return """
 
 
         if self.lobby.len == self.lobby.max_len:
@@ -93,7 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 #print("match p1 = ", matches[0].player1.id)
                 #print("match p2 = ", matches[0].player2.id)
                 #matches[0].name = self.room_name + "_match1"
-            self.match = selfmatches[0]
+            # self.match = self.matches[0]
             print(self.player.id)
             # start the match
             print("start match")
@@ -101,7 +101,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # task is like a thread. Sends client a msg to start the game.
             await self.channel_layer.group_add(
-                matches[0].name,  # Replace with the actual group name
+                self.match.name,  # Replace with the actual group name
                 self.channel_name
             )
 
@@ -110,9 +110,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 print("[ERROR] Task creation failed")
                 return
             async with self.update_lock:
-                matches[0].task = task
+                self.match.task = task
             await self.channel_layer.group_send(
-                matches[0].name,
+                self.match.name,
                 {"type": "start.game", "startGame": True},
             )
 
