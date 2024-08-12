@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from .serializers import DeleteUserSerializer
@@ -77,6 +78,24 @@ def login(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def blacklist(request):
+    try:
+        refresh_token = request.data.get('refresh_token')      
+        if not refresh_token:
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({'message': 'Logout successful'}, status=status.HTTP_205_RESET_CONTENT)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    return Response({'message': 'not setup yet'}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
