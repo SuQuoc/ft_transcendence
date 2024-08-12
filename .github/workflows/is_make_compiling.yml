@@ -15,7 +15,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     - name: generate keys
       run: make keys
-    - name: Makefilecheck
+    - name: Makefile check
       run: make build_only
+    - name: start servers
+      run: make &
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' 
+    - run: python .github/workflows/playwright_install.py
+
+    - name: playwright test
+      run: pytest playwright_tests/test_basic.py
