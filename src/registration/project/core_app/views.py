@@ -23,30 +23,19 @@ def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            validated_data = serializer.validated_data
-            username = validated_data.get('username')
-            email = validated_data.get('email')
-            password = validated_data.get('password')
-            if not (username and email and password):
-                return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
-
-            user = CustomUser(username=username, email=email)
-            user.set_password(password)
-            user.save()
-            logger.debug(f"User created: {user.username}")
-
+            user = serializer.save()
+            username = serializer.validated_data.get('username')
+            password = request.data.get('password')
             token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
             if token_serializer.is_valid():
                 token = token_serializer.validated_data
                 return Response({'token': token, 'user': serializer.data}, status=status.HTTP_201_CREATED)
             else:
                 return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
-            logger.exception("An error occurred during user signup")
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception("An error occurred during signup")
+            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        logger.debug(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
