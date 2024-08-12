@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import CustomUser
+from .serializers import DeleteUserSerializer
 from .serializers import UserSerializer
 
 logger = logging.getLogger('core_app')
@@ -62,6 +63,26 @@ def signup(request):
         except Exception as e:
             logger.exception("An error occurred during user signup")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        logger.debug(f"Signup serializer errors: {serializer.errors}")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request):
+    user = request.user
+    serializer = DeleteUserSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            password = serializer.validated_data['password']
+            if not user.check_password(password):
+                return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+            user.delete()
+            return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.exception("An error occurred during the deletion of the user")
+            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         logger.debug(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

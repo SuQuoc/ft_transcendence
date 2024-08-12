@@ -28,3 +28,13 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)  # Set the password for the user instance (if it exists)
         instance.save()
         return instance
+
+
+class DeleteUserSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+
+    def validate_password(self, value):
+        # Ensure that the password field is provided
+        if not value:
+            raise serializers.ValidationError("Password is required.")
+        return value
