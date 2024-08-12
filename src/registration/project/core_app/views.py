@@ -1,5 +1,5 @@
 # [aguilmea] this file has been created manually
-import logging
+import logging # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -14,12 +14,11 @@ from .models import CustomUser
 from .serializers import DeleteUserSerializer
 from .serializers import UserSerializer
 
-logger = logging.getLogger('core_app')
+logger = logging.getLogger('core_app') # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    logger.debug(f"Signup request data: {request.data}")
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         try:
@@ -33,7 +32,6 @@ def signup(request):
             else:
                 return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.exception("An error occurred during signup")
             return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -46,16 +44,14 @@ def delete_user(request):
     serializer = DeleteUserSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            password = serializer.validated_data['password']
-            if not user.check_password(password):
+            current_password = serializer.validated_data['current_password']
+            if not user.check_password(current_password):
                 return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
             user.delete()
             return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
-            logger.exception("An error occurred during the deletion of the user")
             return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        logger.debug(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -65,32 +61,20 @@ def login(request):
     try:
         username = request.data.get('username')
         password = request.data.get('password')
-
-        logger.debug(f"Received login attempt with username: {username} and password: {password}")
-
         if not username or not password:
             return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-
         user = CustomUser.objects.filter(username=username).first()
-        logger.debug(f"Query result: {user}")
-
         if user is None:
-            logger.debug(f"No user found with username: {username}")
-            return Response({'error': 'Invalid username or password 1'}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
         if not user.check_password(password):
-            logger.debug("Invalid password provided")
-            return Response({'error': 'Invalid username or password 2'}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
         token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
         if token_serializer.is_valid():
             token = token_serializer.validated_data
             return Response({'token': token}, status=status.HTTP_200_OK)
         else:
             return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     except Exception as e:
-        logger.exception("An error occurred during login")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

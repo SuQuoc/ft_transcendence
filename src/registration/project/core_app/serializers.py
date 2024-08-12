@@ -31,4 +31,4 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class DeleteUserSerializer(serializers.Serializer):
-    password = serializers.CharField(write_only=True)
+    current_password = serializers.CharField(write_only=True)
