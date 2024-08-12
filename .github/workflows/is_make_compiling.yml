@@ -32,6 +32,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
+    - name: apt update and install python-dev, gcc and libmariadb-dev
+      run: |
+        sudo apt update
+        sudo apt install gcc -y
+        sudo apt-get install libmariadb-dev -y
+        sudo apt-get install python3.10-dev -y
+
     - name: playwright install
       run: playwright install
 
