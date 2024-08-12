@@ -33,7 +33,7 @@ jobs:
         pip install -r requirements.txt
     
     - name: playwright install
-      run: pip install playwright
+      run: playwright install
 
     - name: playwright test
       run: pytest playwright_tests/test_basic.py
