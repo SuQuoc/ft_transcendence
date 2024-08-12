@@ -1,7 +1,6 @@
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from friends.models import FriendList
 from rest_framework import generics
 from rest_framework import status
@@ -16,6 +15,7 @@ from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # JWT
@@ -40,7 +40,6 @@ def profile(request):
     return HttpResponse("This is the profile page")
 
 
-# generics.ListCreateAPIView # to view all users
 class CustomUserCreate(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserCreateSerializer
@@ -54,7 +53,6 @@ class CustomUserCreate(generics.CreateAPIView):
 
         with transaction.atomic():
             new_user = serializer.save()
-
             # Create a FriendList instance for the new custom user
             FriendList.objects.create(user=new_user)
 
@@ -68,6 +66,7 @@ class CustomUserEdit(generics.RetrieveUpdateDestroyAPIView):
 # is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
 # because u may ONLY be able to view OWN PROFILE
 class CustomUserProfile(generics.GenericAPIView):
+    parser_classes = [MultiPartParser, FormParser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserProfileSerializer
 
@@ -91,6 +90,7 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer = self.serializer_class(stalked_user, context=context)
         return Response(serializer.data)
 
+    #@parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
         user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 
@@ -98,7 +98,16 @@ class CustomUserProfile(generics.GenericAPIView):
         if user != user_to_update:
             raise PermissionDenied("You do not have permission to edit this user's profile.")
 
-        serializer = CustomUserProfileSerializer(user_to_update, data=request.data, partial=True)
+        serializer = CustomUserEditSerializer(user_to_update, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, displayname):
+        user_to_delete = get_object_or_404(CustomUser, displayname=displayname)
+
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user != user_to_delete:
+            raise PermissionDenied("You do not have permission to edit this user's profile.")
+        user_to_delete.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
