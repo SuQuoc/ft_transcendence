@@ -44,9 +44,8 @@ jobs:
         sudo apt-get install -y \
           libwoff1 \
           libopus0 \
-          libwebp6 \
           libwebpdemux2 \
-          libenchant1c2a \
+          libenchant-2-2 \
           libgudev-1.0-0 \
           libsecret-1-0 \
           libhyphen0 \
@@ -61,7 +60,7 @@ jobs:
           gstreamer1.0-pulseaudio \
           libgstreamer1.0-0 \
           libharfbuzz-icu0 \
-          libvpx6 \
+          libvpx5 \
           libevent-2.1-7 \
           libflite1 \
           libgles2
