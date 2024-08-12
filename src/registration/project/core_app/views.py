@@ -16,7 +16,6 @@ from .serializers import UserSerializer
 
 logger = logging.getLogger('core_app')
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
@@ -25,30 +24,13 @@ def signup(request):
     if serializer.is_valid():
         try:
             validated_data = serializer.validated_data
-            logger.debug(f"Validated data: {validated_data}")
-
-            # Extracting fields and adding logs to check if they exist
             username = validated_data.get('username')
             email = validated_data.get('email')
-            first_name = validated_data.get('first_name')
-            last_name = validated_data.get('last_name')
             password = validated_data.get('password')
-
-            if not username:
-                logger.debug("Username is missing in validated data")
-            if not email:
-                logger.debug("Email is missing in validated data")
-            if not first_name:
-                logger.debug("First name is missing in validated data")
-            if not last_name:
-                logger.debug("Last name is missing in validated data")
-            if not password:
-                logger.debug("Password is missing in validated data")
-
-            if not (username and email and first_name and last_name and password):
+            if not (username and email and password):
                 return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = CustomUser(username=username, email=email, first_name=first_name, last_name=last_name)
+            user = CustomUser(username=username, email=email)
             user.set_password(password)
             user.save()
             logger.debug(f"User created: {user.username}")
