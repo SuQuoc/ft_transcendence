@@ -48,7 +48,7 @@ registration_down:
 
 
 ###################### User Management #####################
-.PHONY: um_up um_down um_mm um_migrate um_shell
+.PHONY: um_up um_down um_mm um_migrate um_shell cache_clean
 
 um_up:
 	@${DOCKER_COMPOSE} --profile user_management build
@@ -75,7 +75,7 @@ um_db_exec:
 um_test:
 	${DOCKER_COMPOSE} exec user_management python manage.py test
 
-clean_cache:
+cache_clean:
 	sudo rm -rf ./src/user_management/__pycache__/
 	sudo rm -rf ./src/user_management/api/__pycache__/
 	sudo rm -rf ./src/user_management/api/management/__pycache__/
