@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
-    
+
 
 jobs:
   make_rule_check:
@@ -15,5 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name:
+      run: make keys
     - name: Makefilecheck
       run: make
