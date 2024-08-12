@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name:
+    - name: generate keys
       run: make keys
     - name: Makefilecheck
       run: make
