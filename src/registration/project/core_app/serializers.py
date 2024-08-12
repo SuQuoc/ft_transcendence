@@ -32,9 +32,3 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DeleteUserSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
-
-    def validate_password(self, value):
-        # Ensure that the password field is provided
-        if not value:
-            raise serializers.ValidationError("Password is required.")
-        return value
