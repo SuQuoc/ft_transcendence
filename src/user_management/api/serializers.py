@@ -1,5 +1,5 @@
-
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from .models import CustomUser
 
@@ -32,10 +32,6 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
         return self.context.get('is_stranger', False)
 
 
-from django.core.files.images import get_image_dimensions
-from rest_framework.exceptions import ValidationError
-
-
 def profile_image_validator(image):
     filesize = image.size
 
@@ -47,15 +43,10 @@ def profile_image_validator(image):
         raise ValidationError(f"Max file size is {MEGABYTE_LIMIT}MB")
 
 
+# old
 class CustomUserEditSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(validators=[profile_image_validator])
 
     class Meta:
         model = CustomUser
         fields = ["displayname", "image"]
-
-
-class FriendRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = '__all__'
