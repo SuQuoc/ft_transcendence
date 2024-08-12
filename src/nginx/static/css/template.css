@@ -14,6 +14,10 @@ body {
 	border-bottom: 1px solid var(--custom-bg-color);
 }
 
+/* for text in join-tournament-element */
+.extra-small {
+    font-size: 0.70rem;
+}
 
 .tournament-max-width {
 	max-width: 1000px;

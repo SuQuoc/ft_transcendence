@@ -6,7 +6,7 @@ js-Filenames:
 js-Code:
 	- Class names are PascalCase
 	- custom element names are the same as the name of its class but in kebap-case. E.g.: join-tournament-page
-		There must be at least one '-' because of forward(?) compatibility. (should be anyways, because of the Page rule)
+		There must be at least one '-' because of forward(?) compatibility.
 	- Event handlers start with 'handle' and are camelCase
 	- variable names are in snake_case (to distinguish them from functions)
 	- function names are in camelCase
