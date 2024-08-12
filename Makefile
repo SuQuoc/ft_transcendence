@@ -3,7 +3,7 @@ DOCKER_COMPOSE = docker compose -f ./docker_compose_files/docker-compose.yml
 
 
 ###################### General #####################
-.PHONY: all up build_up build_no_cache down rm_vol clean fclean re new
+.PHONY: all up build_up build_no_cache down build_only rm_vol clean fclean re new keys
 
 all: up
 
@@ -18,6 +18,9 @@ build_no_cache:
 
 down:
 	${DOCKER_COMPOSE} --profile all down
+
+build_only:
+	${DOCKER_COMPOSE} --profile all build
 
 rm_vol:
 	docker volume prune -af
