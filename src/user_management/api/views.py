@@ -50,11 +50,7 @@ class CustomUserCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.validated_data['user_id'] = self.request.user.user_id
-
-        with transaction.atomic():
-            new_user = serializer.save()
-            # Create a FriendList instance for the new custom user
-            FriendList.objects.create(user=new_user)
+        serializer.save()
 
 
 # only used when editing own profile, viewing own profile is separate

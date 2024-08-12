@@ -14,10 +14,6 @@ class CustomUserProfileTest(TestCase):
         self.friend = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='Friend', online=True)
         self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='Stranger', online=True)
 
-        # Create FriendList instances, since it's only done for u when the api is used
-        FriendList.objects.create(user=self.user1)
-        FriendList.objects.create(user=self.friend)
-        FriendList.objects.create(user=self.stranger)
 
         self.user1.friend_list.friends.add(self.friend)  # test independent on the friend-request api
 
