@@ -18,8 +18,4 @@ jobs:
     - name: generate keys
       run: make keys
     - name: Makefilecheck
-      run: make &
-    - name: Sleep for 60 seconds
-      uses: jakejarvis/wait-action@master
-      with:
-        time: '60s'
+      run: build_only

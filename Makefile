@@ -19,6 +19,9 @@ build_no_cache:
 down:
 	${DOCKER_COMPOSE} --profile all down
 
+build_only:
+	${DOCKER_COMPOSE} --profile all build
+
 rm_vol:
 	docker volume prune -af
 
