@@ -48,7 +48,7 @@ registration_down:
 
 
 ###################### User Management #####################
-.PHONY: um_up um_down um_mm um_migrate um_shell
+.PHONY: um_up um_down um_mm um_migrate um_shell cache_clean
 
 um_up:
 	@${DOCKER_COMPOSE} --profile user_management build
@@ -75,6 +75,17 @@ um_db_exec:
 um_test:
 	${DOCKER_COMPOSE} exec user_management python manage.py test
 
+cache_clean:
+	sudo rm -rf ./src/user_management/__pycache__/
+	sudo rm -rf ./src/user_management/api/__pycache__/
+	sudo rm -rf ./src/user_management/api/management/__pycache__/
+	sudo rm -rf ./src/user_management/api/management/commands/__pycache__/
+	sudo rm -rf ./src/user_management/api/migrations/__pycache__/
+	sudo rm -rf ./src/user_management/api/migrations/0001_initial.py
+	sudo rm -rf ./src/user_management/friends/migrations/__pycache__/
+	sudo rm -rf ./src/user_management/friends/__pycache__/
+	sudo rm -rf ./src/user_management/friends/migrations/0001_initial.py
+	sudo rm -rf ./src/user_management/user_management/__pycache__/
 
 ###################### Game #####################
 .PHONY: registration_up registration_down
