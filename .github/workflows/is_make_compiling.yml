@@ -18,4 +18,4 @@ jobs:
     - name: generate keys
       run: make keys
     - name: Makefilecheck
-      run: build_only
+      run: make build_only
