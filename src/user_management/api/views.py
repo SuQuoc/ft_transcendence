@@ -5,6 +5,8 @@ from friends.models import FriendList
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
@@ -15,7 +17,6 @@ from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # JWT
@@ -86,7 +87,7 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer = self.serializer_class(stalked_user, context=context)
         return Response(serializer.data)
 
-    #@parser_classes([MultiPartParser, FormParser])
+    # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
         user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 
@@ -107,3 +108,21 @@ class CustomUserProfile(generics.GenericAPIView):
             raise PermissionDenied("You do not have permission to edit this user's profile.")
         user_to_delete.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SearchUserView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserProfileSerializer
+
+
+class ListFriendRelationsView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserProfileSerializer
+
+    def get(self, request, displayname):
+
+        # user = get_object_or_404(CustomUser, displayname=displayname)
+
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user.displayname != displayname:
+            raise PermissionDenied("My friendlist is private, keep your nose out")
