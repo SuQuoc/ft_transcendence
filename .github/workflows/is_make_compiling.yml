@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    #- name: generate keys
-    #  run: make keys
+    - name: generate keys
+      run: make keys
     - name: Makefilecheck
       run: make build_only
