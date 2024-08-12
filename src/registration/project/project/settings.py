@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']  # [aguilmea] corrected to have a value set up, mandatory 
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
