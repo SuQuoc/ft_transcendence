@@ -19,6 +19,7 @@ POST https://127.0.0.1:8000/registration/change_password/
 Content-Type: application/json
 Authorization: Bearer 5121696b7685d5cbb1c81445b6203262cb84afe3
 
+
 {
   "old_password": "Pass1234!",
   "new_password": "NewPass!"
