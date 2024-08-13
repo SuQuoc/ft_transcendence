@@ -81,7 +81,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		let		tournament_name = event.target.create_name.value;
 
 		if (tournament_name === "") {
-			tournament_name = "tournament";
+			tournament_name = "tournament"; // tournament name should be unique
 		}
 		console.log("tournament name: ", tournament_name,
 					"\nnumber of players: ", number_of_players,
@@ -111,9 +111,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			<scripts-and-styles></scripts-and-styles>
 
 			<!-- Tournaments to join -->
-				<!-- align-items-end because flex-wrap-reverse reverses that as well. The elements are at the top -->
-			<div class="d-flex flex-row flex-wrap-reverse align-items-end
+			<div class="d-flex flex-column-reverse flex-md-row
 						justify-content-center justify-content-evenly
+						align-items-md-start
 						vw-100 gap-3 gap-row-4 p-4"
 			>
 
@@ -128,7 +128,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 				</div>
 		
 				<!-- Create Tournament Form -->
-				<div class="p-3 rounded-3 bg-dark">
+				<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
 					<form id="createTournamentForm">
 						<h3 class="text-center text-white">Create a Tournament</h3>
 						
