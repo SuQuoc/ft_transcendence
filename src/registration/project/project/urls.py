@@ -17,13 +17,17 @@ Including another URLconf
 
 from core_app import views  # [aguilmea] added manually
 from django.contrib import admin  # [aguilmea] deleted manually for now
+from django.urls import path
 from django.urls import re_path
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-#    path('admin/', admin.site.urls),  # [aguilmea] deleted manuallyfor now
+    #    path('admin/', admin.site.urls),  # [aguilmea] deleted manuallyfor now
     re_path('signup', views.signup),  # [aguilmea] added
     re_path('login', views.login),  # [aguilmea] added
     re_path('logout', views.logout),  # [aguilmea] added
     re_path('verify_token', views.verify_token),  # [aguilmea] added
+    path('refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
+    #    re_path('refresh_token', views.refresh_token),  # [aguilmea] added
     re_path('delete_user', views.delete_user),  # [aguilmea] added
 ]

@@ -1,5 +1,5 @@
 # [aguilmea] this file has been created manually
-import logging # [aguilmea] logger was added / to be deleted as well as in the settings.py file
+import logging  # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -15,7 +15,8 @@ from .models import CustomUser
 from .serializers import DeleteUserSerializer
 from .serializers import UserSerializer
 
-logger = logging.getLogger('core_app') # [aguilmea] logger was added / to be deleted as well as in the settings.py file
+logger = logging.getLogger('core_app')  # [aguilmea] logger was added / to be deleted as well as in the settings.py file
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -78,24 +79,27 @@ def login(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def blacklist(request):
     try:
-        refresh_token = request.data.get('refresh_token')      
+        refresh_token = request.data.get('refresh_token')
         if not refresh_token:
             return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
         token = RefreshToken(refresh_token)
         token.blacklist()
         return Response({'message': 'Logout successful'}, status=status.HTTP_205_RESET_CONTENT)
-    
+
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
     return Response({'message': 'not setup yet'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
