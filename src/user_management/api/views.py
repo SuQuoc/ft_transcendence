@@ -1,10 +1,12 @@
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from friends.models import FriendList
+from friends.models import FriendList, FriendRequest
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
@@ -15,7 +17,6 @@ from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # JWT
@@ -38,6 +39,12 @@ class MyTokenObtainPairView(TokenObtainPairView):  # register service
 
 def profile(request):
     return HttpResponse("This is the profile page")
+
+def get_user_from_jwt(request):
+    try:
+        user = CustomUser.objects.get(user_id=request.user.user_id)
+    except CustomUser.DoesNotExist:
+        raise PermissionDenied("Invalid user ID in JWT (either our mistake or u sus)")
 
 
 class CustomUserCreate(generics.CreateAPIView):
@@ -104,3 +111,57 @@ class CustomUserProfile(generics.GenericAPIView):
             raise PermissionDenied("You do not have permission to edit this user's profile.")
         user_to_delete.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SearchUserView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserProfileSerializer
+
+    def get(self, request):
+        user = get_user_from_jwt(request)
+        search_term = request.query_params.get("displayname", "")
+
+        results = CustomUser.objects.filter(displayname__icontains=search_term)[:5]
+        if not results:
+            return Response({"detail": "No users found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        relationships = {}
+        friend_requests = {}
+        online_status = {}
+        for found_u in results:
+            if found_u in user.friend_list.friends.all():
+                relationships[found_u.user_id] = "friend"
+                online_status[found_u.user_id] = {
+                    'status': "online" if found_u.online else "offline",
+                }
+            else:
+                fr_sent = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=user, receiver=found_u).first() # using first to get the obj not a queryset, allthough there can only be one
+                fr_received = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=found_u, receiver=user).first()
+                if fr_sent:
+                    relationships[found_u.user_id] = "hePendsMe"
+                    friend_requests[found_u.user_id] = fr_sent.id
+                elif fr_received: 
+                    relationships[found_u.user_id] = "iHaveOpenRequest"
+                    friend_requests[found_u.user_id] = fr_received.id
+                else:
+                    relationships[found_u.user_id] = "stranger"
+        
+        context = {"relationships": relationships, 
+                   "friend_requests": friend_requests,
+                   "online_status": online_status,
+        }
+        serializer = self.serializer_class(results, many=True, context=context)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ListFriendRelationsView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserProfileSerializer
+
+    def get(self, request, displayname):
+
+        # user = get_object_or_404(CustomUser, displayname=displayname)
+
+        user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        if user.displayname != displayname:
+            raise PermissionDenied("My friendlist is private, keep your nose out")

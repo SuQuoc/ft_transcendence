@@ -34,6 +34,30 @@ def profile_image_validator(image):
         raise ValidationError(f"Max file size is {MEGABYTE_LIMIT}MB")
 
 
+
+class SearchUserSerializer(serializers.ModelSerializer):
+    # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
+    relationship = serializers.SerializerMethodField()
+    friend_request_id = serializers.SerializerMethodField()
+    online_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ["displayname", "online_status", "image", "relationship", "friend_request_id"]
+
+    def get_relationship(self, obj):
+        relationships = self.context.get('relationships', {})
+        return relationships.get(obj.user_id, "SHOULD NEVER EVER HAPPEN !!")
+    
+    def get_friend_request_id(self, obj):
+        friend_request_id = self.context.get('friend_request_id', {})
+        return friend_request_id.get(obj.user_id, "")
+
+    def get_online_status(self, obj):
+        online_status = self.context.get('online_status', {})
+        return online_status.get(obj.user_id, "not_viewable")
+
+
 # old
 class CustomUserEditSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(validators=[profile_image_validator])
