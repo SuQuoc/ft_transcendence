@@ -31,24 +31,18 @@ class CustomUserProfileTest(TestCase):
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['is_self'])
-        self.assertFalse(response.json()['is_friend'])
-        self.assertFalse(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "self")
 
     def test_view_friends_profile(self):
         self.url = reverse('profile', args=[self.friend.displayname])
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()['is_self'])
-        self.assertTrue(response.json()['is_friend'])
-        self.assertFalse(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "friend")
 
     def test_view_strangers_profile(self):
         self.url = reverse('profile', args=[self.stranger.displayname])
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()['is_self'])
-        self.assertFalse(response.json()['is_friend'])
-        self.assertTrue(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "stranger")

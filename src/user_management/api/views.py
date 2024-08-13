@@ -53,12 +53,6 @@ class CustomUserCreate(generics.CreateAPIView):
         serializer.save()
 
 
-# only used when editing own profile, viewing own profile is separate
-class CustomUserEdit(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserEditSerializer
-
-
 # is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
 # because u may ONLY be able to view OWN PROFILE
 class CustomUserProfile(generics.GenericAPIView):
@@ -67,26 +61,29 @@ class CustomUserProfile(generics.GenericAPIView):
     serializer_class = CustomUserProfileSerializer
 
     def get(self, request, displayname):
-        context = {'is_self': False, 'is_friend': False, 'is_stranger': False}
 
         stalked_user = get_object_or_404(CustomUser, displayname=displayname)
 
         # print(f"TOKEN STUFF {token_user.user_id}")
         user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+        context = {}
         if user == stalked_user:
             # Watching my own profile - Frontend: i see personal info, like my friend-list?
+            context["relationship"] = "self"
             context["is_self"] = True
         elif stalked_user in user.friend_list.friends.all():
             # Watching a friends profile - Frontend: U guys are friends indicator
+            context["relationship"] = "friend"
             context["is_friend"] = True
         else:
             # Watching random persons profile - Frontend: Friend request button
+            context["relationship"] = "stranger"
             context["is_stranger"] = True
 
         serializer = self.serializer_class(stalked_user, context=context)
         return Response(serializer.data)
 
-    #@parser_classes([MultiPartParser, FormParser])
+    # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
         user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 

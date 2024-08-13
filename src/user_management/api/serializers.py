@@ -14,22 +14,13 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
-    is_self = serializers.SerializerMethodField()
-    is_friend = serializers.SerializerMethodField()
-    is_stranger = serializers.SerializerMethodField()
-
+    relationship = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ["displayname", "online", "image", "is_self", "is_friend", "is_stranger"]  # +avatar
+        fields = ["displayname", "online", "image", "relationship"]
 
-    def get_is_self(self, obj):
-        return self.context.get('is_self', False)
-
-    def get_is_friend(self, obj):
-        return self.context.get('is_friend', False)
-
-    def get_is_stranger(self, obj):
-        return self.context.get('is_stranger', False)
+    def get_relationship(self, obj):
+        return self.context.get('relationship', "error: could not resolve [should never happen]")
 
 
 def profile_image_validator(image):
