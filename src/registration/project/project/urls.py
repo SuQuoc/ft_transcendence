@@ -14,17 +14,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin # [aguilmea] deleted manually for now
-#from django.urls import path # [aguilmea] deleted manually for now
-from django.urls import re_path # [aguilmea] added manually
-from core_app import views # [aguilmea] added manually
+
+from core_app import views  # [aguilmea] added manually
+from django.contrib import admin  # [aguilmea] deleted manually for now
+from django.urls import path
 
 urlpatterns = [
-#    path('admin/', admin.site.urls), # [aguilmea] deleted manuallyfor now
-    re_path('signup', views.signup), # [aguilmea] added 
-    re_path('login', views.login), # [aguilmea] added 
-    re_path('verify_token', views.verify_token), # [aguilmea] added 
-    re_path('change_password', views.change_password), # [aguilmea] added
-    re_path('token_obtain', views.obtain_token), # [aguilmea] added
-    re_path('token_refresh', views.refresh_token), # [aguilmea] added
+    path('admin/', admin.site.urls),  # [aguilmea] deleted manuallyfor now
+    path('signup', views.signup),  # [aguilmea] added
+    path('login', views.login),  # [aguilmea] added
+    path('verify_token', views.verify_token),  # [aguilmea] added
+    path('delete_user', views.delete_user),  # [aguilmea] added
 ]
