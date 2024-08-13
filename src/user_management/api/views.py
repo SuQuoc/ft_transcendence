@@ -64,11 +64,6 @@ class CustomUserEdit(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomUserEditSerializer
 
 
-my_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-# Slicing examples
-print(my_list[2:5])  # Output: [2, 3, 4]
-
-
 # is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
 # because u may ONLY be able to view OWN PROFILE
 class CustomUserProfile(generics.GenericAPIView):
