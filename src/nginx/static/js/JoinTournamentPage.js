@@ -130,7 +130,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 				<!-- Create Tournament Form -->
 				<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
 					<form id="createTournamentForm">
-						<h3 class="text-center text-white">Create a Tournament</h3>
+						<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
 						
 						<!-- Tournament name -->
 						<label for="createName" class="form-label text-white-50">Tournament Name:</label>
