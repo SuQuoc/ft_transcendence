@@ -162,4 +162,11 @@ cython_debug/
 #.idea/
 
 .vscode
+**/migrations/
+*.pem
 
+*.png
+*.jpeg
+*.jpg
+
+!src/user_management/uploads/images/profile/default/*

@@ -1,19 +1,49 @@
+:root {
+	--custom-bg-color: rgb(52, 52, 56);
+}
+
 html {
-	height: 100%;
+	min-height: 100%;
 }
 
 body {
-	background: rgb(52, 52, 56);
+	background: var(--custom-bg-color);
 }
 
 .dark-footer-border-bottom {
-	border-bottom: 1px solid rgb(60, 60, 68);
+	border-bottom: 1px solid var(--custom-bg-color);
 }
 
-/* center elements vertically and horizontally */
-.center-div {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
+/* for text in join-tournament-element */
+.extra-small {
+    font-size: 0.70rem;
+}
+
+.tournament-max-width {
+	max-width: 1000px;
+}
+
+
+/*  Style the thumb of the range input slider */
+/* it wouldn't let me stack the pseudo elements */
+.range-input-slider::-webkit-slider-thumb {
+    background-color: var(--bs-secondary);
+    border: 1px solid var(--custom-bg-color);
+	cursor: pointer;
+	height: 16px;
+	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
+}
+.range-input-slider::-moz-range-thumb {
+    background-color: var(--bs-secondary);
+    border: 1px solid var(--custom-bg-color);
+	cursor: pointer;
+	height: 16px;
+	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
+}
+.range-input-slider::-ms-thumb {
+    background-color: var(--bs-secondary);
+    border: 1px solid var(--custom-bg-color);
+	cursor: pointer;
+	height: 16px;
+	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
 }

@@ -1,0 +1,25 @@
+js-Filenames:
+	- Component-files are named in PascalCase
+	- other js files in the js folder in camelCase
+	- if the component is the shadow dom component that is attached to the main tag, the filename ends with 'Page'. E.g.: JoinTournamentPage.js
+	
+js-Code:
+	- Class names are PascalCase
+	- custom element names are the same as the name of its class but in kebap-case. E.g.: join-tournament-page
+		There must be at least one '-' because of forward(?) compatibility.
+	- Event handlers start with 'handle' and are camelCase
+	- variable names are in snake_case (to distinguish them from functions)
+	- function names are in camelCase
+
+html-Code:
+	- names are written in snake_case
+	- ids are written in camelCase
+	- ids start with a common identifier for the element (e.g.: tournament in tournamentName)
+
+
+useful things to know:
+	The componentBaseClass can be used for 'Page' components. It makes a shadow dom and an event listener,
+	that listens for links (a elements) and dispaches a custom event that the router listens to.
+	All you have to do is inherit it and put your html code in a 'getElementHTML()' class.
+
+	There is also the custom 'scripts-and-styles' tag, that has bootstrap 5.3, custom styles and custom js (it does not make a shadow dom)

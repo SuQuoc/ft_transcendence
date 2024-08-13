@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
+from json import JSONEncoder
 import os
 from pathlib import Path
+from uuid import UUID
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api",
+    "friends",
     "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -121,7 +126,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "um/static/"  # had to add um/ before to have the browsable api from DRF to render the page correctly
+STATIC_URL = "um/static/"  # had to add um/ before [probably of nginx config] to have the browsable api from DRF to render the page correctly
+STATIC_ROOT = BASE_DIR / "/static/"
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+MEDIA_URL = "um/media/" # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
+MEDIA_ROOT = BASE_DIR / "uploads"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -142,27 +153,28 @@ CSRF_COOKIE_SECURE = True  # Set to False for local development
 # Allauth settings
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-# AUTHENTICATION_BACKENDS = (
-#    "django.contrib.auth.backends.ModelBackend",
-#    "allauth.account.auth_backends.AuthenticationBackend",
-# )
-#
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_USERNAME_REQUIRED = True
-# LOGIN_REDIRECT_URL = "/"  # new line
-#
-
-
 # REST framework settings
 REST_FRAMEWORK = {
-    # "DEFAULT_PERMISSION_CLASSES": [
-    #    "rest_framework.permissions.IsAuthenticated",
-    # ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.BrowsableAPIRenderer',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
+        # 'jwt_auth.CustomJWTAuthentication', depreciated
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+
+with open('/run/secrets/public_key.pem', 'r') as f:
+    PUBLIC_KEY = f.read()
+
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html?highlight=USER_ID_FIELD#user-id-field
+# SIMPLE_JWT = {
+#      'ALGORITHM': 'RS256',
+#      'VERIFYING_KEY': PUBLIC_KEY,
+#      # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
+#      #     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
+# }
