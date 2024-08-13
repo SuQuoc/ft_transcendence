@@ -7,8 +7,6 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser
 from rest_framework.parsers import MultiPartParser
-from rest_framework.parsers import FormParser
-from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
