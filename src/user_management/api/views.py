@@ -5,6 +5,8 @@ from friends.models import FriendList
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,  # register service
@@ -15,7 +17,6 @@ from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # JWT
@@ -77,7 +78,7 @@ class CustomUserProfile(generics.GenericAPIView):
 
         # print(f"TOKEN STUFF {token_user.user_id}")
         user = get_object_or_404(CustomUser, user_id=request.user.user_id)
-        if user == stalked_user:
+        if user == stalked_user:  # inline comment
             # Watching my own profile - Frontend: i see personal info, like my friend-list?
             context["is_self"] = True
         elif stalked_user in user.friend_list.friends.all():
@@ -90,7 +91,7 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer = self.serializer_class(stalked_user, context=context)
         return Response(serializer.data)
 
-    #@parser_classes([MultiPartParser, FormParser])
+    # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
         user_to_update = get_object_or_404(CustomUser, displayname=displayname)
 
