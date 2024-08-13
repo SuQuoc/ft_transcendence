@@ -78,7 +78,7 @@ class CustomUserProfile(generics.GenericAPIView):
 
         # print(f"TOKEN STUFF {token_user.user_id}")
         user = get_object_or_404(CustomUser, user_id=request.user.user_id)
-        if user == stalked_user:
+        if user == stalked_user:  # inline comment
             # Watching my own profile - Frontend: i see personal info, like my friend-list?
             context["is_self"] = True
         elif stalked_user in user.friend_list.friends.all():
