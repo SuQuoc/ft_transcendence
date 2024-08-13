@@ -28,7 +28,7 @@ function startPong()
 
     chatSocket.onmessage = function(e)
     {
-        update_game_data(chatSocket, game_area, player1, player2, ball, e);
+        update_game_data(player1, player2, ball, e);
     };
 
     /* game_area.start(player1, player2, ball);

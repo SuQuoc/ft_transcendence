@@ -53,6 +53,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.group_name = f"chat_{self.room_name}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+        self.player = PongPlayer(self.player_id, self.map_size)
+        return
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
@@ -176,7 +178,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Receive key up {up=1}
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-
+        print("hehehehhehheheehhe ", text_data_json["type"])
         if text_data_json["type"] == "update":
             #player_id = text_data_json["playerId"]
             #player = self.players[self.room_name].get(player_id, None)
@@ -194,6 +196,43 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # start here the room ?
 
             # print(self.room_size)
+        elif text_data_json["type"] == "newClient":
+            print(text_data_json)
+        elif text_data_json["type"] == "createTournament":
+            await self.createTournament(text_data_json)
+
+    async def createTournament(self, msg):
+        self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
+        self.lobbies[msg["tournament_name"]] = self.lobby
+        self.lobby.addPlayer(self.player)
+        await self.updateLobbyList()
+        print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
+
+    async def updateLobbyList(self):
+        print("updateLobbyList")
+        print(self.room_name)
+        i = 0
+        msg = {}
+        for lobby in self.lobbies.values():
+            msg[i] = {"tournament_name": lobby.lobby_name, "creator_name": "creator", "current_player_num": lobby.len, "max_player_num": lobby.max_len}
+            i += 1
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "update.tournamentlist",
+                "tournaments": msg,
+            })
+
+    async def update_tournamentlist(self, e):
+        print("updateTournamentListSend")
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "updateTournamentList",
+                    "tournaments": e["tournaments"],
+                }
+            )
+        )
 
     # Receive message from room group
     async def chat_message(self, e):

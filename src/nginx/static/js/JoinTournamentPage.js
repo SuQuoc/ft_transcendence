@@ -5,8 +5,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		
-
-
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
 		this.handleTournamentCreation = this.handleTournamentCreation.bind(this); // temporary !!!!!
@@ -28,6 +26,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// calling the method to set the initial position of the display
 		this.handleRangeDisplay({target: this.input_range});
+
+		// creating a websocket
+		this.makeWebSocket();
 	};
 
 	disconnectedCallback() {
@@ -39,15 +40,45 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 	
 
+	makeWebSocket() {
+		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    	let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
+    	this.socket = new WebSocket(ws_path);
+
+		this.socket.addEventListener("open", (event) => {
+			console.log("connected to websocket");
+			this.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
+		});
+
+		// makes new joinTournamentElements when a new tournament is created
+		this.socket.addEventListener("message", this.handleRecievedMessage.bind(this));
+	}
+
+	handleRecievedMessage(event) {
+		const data = JSON.parse(event.data);
+		this.root.getElementById("joinTournamentElements").innerHTML = "";
+
+		if (data.type === "updateTournamentList") {
+			for (let key in data.tournaments) {
+				const tournament = data.tournaments[key];
+				this.createJoinTournamentElement(tournament.name,
+												tournament.creator_name,
+												tournament.points_to_win,
+												tournament.current_player_num,
+												tournament.max_player_num);
+			}
+		}
+	}
+
 
 
 	/// ----- Methods ----- ///
-	createJoinTournamentElement(name, points_to_win, max_player_num, current_player_num = 1) {
+	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
 		let element = new JoinTournamentElement(); // protect new ???!!!!??
 		this.root.getElementById("joinTournamentElements").appendChild(element);
-		
-		element.querySelectorAll("[name='join_name']")[0].innerHTML = name;
-		element.querySelectorAll("[name='join_creator']")[0].innerHTML = "creator name"; // temporary !!!!! (should be the name of the display name of the client)
+
+		element.querySelectorAll("[name='join_name']")[0].innerHTML = tournament_name;
+		element.querySelectorAll("[name='join_creator']")[0].innerHTML = creator_name;
 		element.querySelectorAll("[name='join_points_to_win']")[0].innerHTML = points_to_win;
 		element.querySelectorAll("[name='join_current_player_num']")[0].innerHTML = current_player_num;
 		element.querySelectorAll("[name='join_max_player_num']")[0].innerHTML = max_player_num;
@@ -76,19 +107,21 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	handleTournamentCreation(event) {
 		event.preventDefault();
 
+		const	tournament_name = event.target.create_name.value;
 		const	number_of_players = event.target.number_of_players.value;
 		const	points_to_win = event.target.points_to_win.value;
-		let		tournament_name = event.target.create_name.value;
 
-		if (tournament_name === "") {
-			tournament_name = "tournament"; // tournament name should be unique
-		}
 		console.log("tournament name: ", tournament_name,
 					"\nnumber of players: ", number_of_players,
 					"\npoints to win: ", points_to_win);
 
-		// console.log("event: ", event);
-		this.createJoinTournamentElement(tournament_name, points_to_win, number_of_players);
+		this.socket.send(JSON.stringify({"type": "createTournament",
+										"tournament_name": tournament_name,
+										"creator_name": "display name",
+										"points_to_win": points_to_win,
+										"current_player_num": "1", // the creator is the first player
+										"max_player_num": number_of_players}));
+		//this.createJoinTournamentElement(tournament_name, "display name", points_to_win, "1", number_of_players);
 	};
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
