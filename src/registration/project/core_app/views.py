@@ -1,18 +1,21 @@
 # [aguilmea] this file has been created manually
 import logging
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
 
-from .serializers import UserSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from .models import CustomUser
-from rest_framework.authtoken.models import Token
+from .serializers import DeleteUserSerializer
+from .serializers import UserSerializer
 
 logger = logging.getLogger('core_app')
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -45,12 +48,7 @@ def signup(request):
             if not (username and email and first_name and last_name and password):
                 return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = CustomUser(
-                username=username,
-                email=email,
-                first_name=first_name,
-                last_name=last_name
-            )
+            user = CustomUser(username=username, email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)
             user.save()
             logger.debug(f"User created: {user.username}")
@@ -68,7 +66,27 @@ def signup(request):
     else:
         logger.debug(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request):
+    user = request.user
+    serializer = DeleteUserSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            password = serializer.validated_data['password']
+            if not user.check_password(password):
+                return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+            user.delete()
+            return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.exception("An error occurred during the deletion of the user")
+            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        logger.debug(f"Signup serializer errors: {serializer.errors}")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -104,56 +122,6 @@ def login(request):
         logger.exception("An error occurred during login")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def change_password(request):
-    try:
-        serializer = ChangePasswordSerializer(data=request.data)
-        if serializer.is_valid():
-            user = request.user
-            old_password = serializer.validated_data['old_password']
-            new_password = serializer.validated_data['new_password']
-
-            logger.debug(f"Old password: {old_password}, New password: {new_password}")
-
-            if not user.check_password(old_password):
-                return Response({'error': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
-
-            user.set_password(new_password)
-            user.save()
-
-            return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    except Exception as e:
-        logger.exception("An error occurred during password change")
-        return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
-
-
-def obtain_token(request):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
-
-def refresh_token(request):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
