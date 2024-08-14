@@ -13,6 +13,7 @@ export class ComponentBaseClass extends HTMLElement {
 		
 		// create a shadow DOM
 		this.root = this.attachShadow({mode: "open"}); // open mode allows us to access the shadow DOM from outside
+		this.handleLinkClick = this.handleLinkClick.bind(this); // bind the event handler to this instance of the class
 	};
 
 	// get's called when the component is attached to the DOM
@@ -26,7 +27,7 @@ export class ComponentBaseClass extends HTMLElement {
 		if (links.length === 0)
 			return;
 		links.forEach(a => {
-			a.addEventListener("click", this.handleLinkClick.bind(this));
+			a.addEventListener("click", this.handleLinkClick);
 			console.log("added event listener ComponentBaseClass");
 		});
 	};

@@ -1,11 +1,21 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 import { JoinTournamentElement } from "./JoinTournamentElement.js";
 
-export class JoinTournamentPage extends ComponentBaseClass {	
+export class JoinTournamentPage extends ComponentBaseClass {
+	constructor() {
+		super();
+		
+		// Binds the method to this class instance so it can be used in the event listener
+		this.handleSocketOpen = this.handleSocketOpen.bind(this);
+		this.handleRecievedMessage = this.handleRecievedMessage.bind(this);
+		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
+		this.handleTournamentCreation = this.handleTournamentCreation.bind(this);
+	};
+
 	connectedCallback() {
 		super.connectedCallback();
 
-		// getting elements
+		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
 		this.create_tournament_form = this.root.getElementById("createTournamentForm");
 		this.range_display = this.root.getElementById("createPointsToWinDisplay");
 		this.display_lane = this.root.getElementById("createDisplayLane");
@@ -15,12 +25,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.thumb_width = 16; // it's also defined in template.css, so if you change it here, change it there as well
 		this.display_lane.style.paddingLeft = `${this.thumb_width / 2}px`;
 		this.display_lane.style.paddingRight = `${this.thumb_width / 2}px`;
-		
-		// Binds the method to this class instance so it can be used in the event listener
-		this.handleSocketOpen = this.handleSocketOpen.bind(this);
-		this.handleRecievedMessage = this.handleRecievedMessage.bind(this);
-		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
-		this.handleTournamentCreation = this.handleTournamentCreation.bind(this);
 
 		// creating a websocket
 		this.makeWebSocket();
