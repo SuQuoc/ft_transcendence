@@ -4,10 +4,6 @@ import { JoinTournamentElement } from "./JoinTournamentElement.js";
 export class JoinTournamentPage extends ComponentBaseClass {	
 	connectedCallback() {
 		super.connectedCallback();
-		
-		// Binds the method to this class instance so it can be used in the event listener
-		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
-		this.handleTournamentCreation = this.handleTournamentCreation.bind(this); // temporary !!!!!
 
 		// getting elements
 		this.create_tournament_form = this.root.getElementById("createTournamentForm");
@@ -19,22 +15,32 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.thumb_width = 16; // it's also defined in template.css, so if you change it here, change it there as well
 		this.display_lane.style.paddingLeft = `${this.thumb_width / 2}px`;
 		this.display_lane.style.paddingRight = `${this.thumb_width / 2}px`;
-
-		// adding event listeners
-		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation);
-		this.input_range.addEventListener("input", this.handleRangeDisplay);
-
-		// calling the method to set the initial position of the display
-		this.handleRangeDisplay({target: this.input_range});
+		
+		// Binds the method to this class instance so it can be used in the event listener
+		this.handleSocketOpen = this.handleSocketOpen.bind(this);
+		this.handleRecievedMessage = this.handleRecievedMessage.bind(this);
+		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
+		this.handleTournamentCreation = this.handleTournamentCreation.bind(this);
 
 		// creating a websocket
 		this.makeWebSocket();
+
+		// adding event listeners
+		this.socket.addEventListener("open", this.handleSocketOpen);
+		this.socket.addEventListener("message", this.handleRecievedMessage);
+		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation);
+		this.input_range.addEventListener("input", this.handleRangeDisplay);
+		
+		// calling the method to set the initial position of the display
+		this.handleRangeDisplay({target: this.input_range});
 	};
 
 	disconnectedCallback() {
 		super.disconnectedCallback();
 		
 		// removing event listeners
+		this.socket.removeEventListener("open", this.handleSocketOpen);
+		this.socket.removeEventListener("message", this.handleRecievedMessage);
 		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation);
 		this.input_range.removeEventListener("input", this.handleRangeDisplay);
 
@@ -42,25 +48,58 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 	
 
+	/// ----- Methods ----- ///
+	
+	/** creates a websocket */
 	makeWebSocket() {
 		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     	let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
     	this.socket = new WebSocket(ws_path);
-
-		this.socket.addEventListener("open", (event) => {
-			console.log("connected to websocket");
-			this.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
-		});
-
-		// makes new joinTournamentElements when a new tournament is created
-		this.socket.addEventListener("message", this.handleRecievedMessage.bind(this));
 	}
 	
+	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
+	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
+		let element = new JoinTournamentElement(); // protect new ???!!!!??
+		this.root.getElementById("joinTournamentElements").appendChild(element);
+
+		element.querySelectorAll("[name='join_name']")[0].innerHTML = tournament_name;
+		element.querySelectorAll("[name='join_creator']")[0].innerHTML = creator_name;
+		element.querySelectorAll("[name='join_points_to_win']")[0].innerHTML = points_to_win;
+		element.querySelectorAll("[name='join_current_player_num']")[0].innerHTML = current_player_num;
+		element.querySelectorAll("[name='join_max_player_num']")[0].innerHTML = max_player_num;
+
+		//this.noTournamentsToJoin();
+	};
+	
+	/** hides or shows a text that says "no tournaments to join" */
+	noTournamentsToJoin() { // not working!!!!!
+		const tournament_elements = this.root.querySelectorAll("join-tournament-element");
+		console.log("tournament_elements: ", tournament_elements);
+
+		if (tournament_elements === null || tournament_elements.length === 0) {
+			this.root.getElementById("noTournamentsToJoin").style.display = "";
+		}
+		else {
+			this.root.getElementById("noTournamentsToJoin").style.display = "none";
+		}
+	};
+	
+	
+	/// ----- Event Handlers ----- ///
+	
+	/** gets called when the websocket opens 
+	 *  sends the user_id to the server */
+	handleSocketOpen(event) {
+		console.log("connected to websocket");
+		this.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
+	};
+
+	/** gets called when the websocket receives a message */
 	handleRecievedMessage(event) {
 		const data = JSON.parse(event.data);
 		
 		console.log("data: ", data);
-
+		
 		this.root.getElementById("joinTournamentElements").innerHTML = "";
 		if (data.type === "updateTournamentList") {
 			for (let key in data.tournaments) {
@@ -74,64 +113,24 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 	}
 
-
-
-	/// ----- Methods ----- ///
-	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
-		let element = new JoinTournamentElement(); // protect new ???!!!!??
-		this.root.getElementById("joinTournamentElements").appendChild(element);
-
-		element.querySelectorAll("[name='join_name']")[0].innerHTML = tournament_name;
-		element.querySelectorAll("[name='join_creator']")[0].innerHTML = creator_name;
-		element.querySelectorAll("[name='join_points_to_win']")[0].innerHTML = points_to_win;
-		element.querySelectorAll("[name='join_current_player_num']")[0].innerHTML = current_player_num;
-		element.querySelectorAll("[name='join_max_player_num']")[0].innerHTML = max_player_num;
-
-		//this.noTournamentsToJoin();
-	};
-
-	/** hides or shows a text that says "no tournaments to join" */
-	noTournamentsToJoin() {
-		const tournament_elements = this.root.querySelectorAll("join-tournament-element");
-		console.log("tournament_elements: ", tournament_elements);
-
-		if (tournament_elements === null || tournament_elements.length === 0) {
-			this.root.getElementById("noTournamentsToJoin").style.display = "";
-		}
-		else {
-			this.root.getElementById("noTournamentsToJoin").style.display = "none";
-		}
-	};
-
-
-
-
-	/// ----- Event Handlers ----- ///
-	/** get's called when someone creates a tournament, doesn't do anything yet */
+	/** get's called when someone creates a tournament */
 	handleTournamentCreation(event) {
 		event.preventDefault();
-
+		
 		const	tournament_name = event.target.create_name.value;
 		const	number_of_players = event.target.number_of_players.value;
 		const	points_to_win = event.target.points_to_win.value;
 
-		console.log("tournament name: ", tournament_name,
-					"\nnumber of players: ", number_of_players,
-					"\npoints to win: ", points_to_win);
-
+		// sends the tournament details to the game server
 		this.socket.send(JSON.stringify({"type": "createTournament",
-										"tournament_name": tournament_name,
-										"creator_name": "display name",
+			"tournament_name": tournament_name,
+			"creator_name": "display name",
 										"points_to_win": points_to_win,
 										"current_player_num": "1", // the creator is the first player
 										"max_player_num": number_of_players}));
-										
-		//this.createJoinTournamentElement(tournament_name, "display name", points_to_win, "1", number_of_players);
-		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
-			bubbles: true,
-			composed: true,
-			detail: { url: "/tournament-lobby" }
-		}));
+		
+		// goes to the tournament lobby
+		this.changeRoute("/tournament-lobby");
 	};
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
@@ -141,19 +140,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		const range_width = event.target.offsetWidth - this.thumb_width;
 		const thumb_position = ((event.target.value - min) / (max - min)) * range_width;
 		const display_position = thumb_position - (this.range_display.offsetWidth / 2);
-
+		
 		this.range_display.style.marginLeft = `${display_position}px`;
 		this.range_display.innerHTML = event.target.value;
 	};
+	
 
 	getElementHTML() {
-		//const template = document.getElementById('joinTournamentPageTemplate');
-
 		const template = document.createElement('template');
 		template.innerHTML = `
-			<scripts-and-styles></scripts-and-styles>
-
-			<!-- Tournaments to join -->
+		<scripts-and-styles></scripts-and-styles>
+		
+		<!-- Tournaments to join -->
 			<div class="d-flex flex-column-reverse flex-md-row
 						justify-content-center justify-content-evenly
 						align-items-md-start
@@ -168,12 +166,12 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					<div id="noTournamentsToJoin" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div>
 					
 					<!-- Join Tournament elements will be added here -->
-				</div>
-		
-				<!-- Create Tournament Form -->
-				<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
+					</div>
+					
+					<!-- Create Tournament Form -->
+					<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
 					<form id="createTournamentForm">
-						<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
+					<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
 						
 						<!-- Tournament name -->
 						<label for="createName" class="form-label text-white-50">Tournament Name:</label>

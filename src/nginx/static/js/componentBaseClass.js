@@ -26,7 +26,7 @@ export class ComponentBaseClass extends HTMLElement {
 		if (links.length === 0)
 			return;
 		links.forEach(a => {
-			a.addEventListener("click", this.handleLinkClick);
+			a.addEventListener("click", this.handleLinkClick.bind(this));
 			console.log("added event listener ComponentBaseClass");
 		});
 	};
@@ -43,6 +43,24 @@ export class ComponentBaseClass extends HTMLElement {
 		});
 	};
 
+
+	/// ----- Methods ----- ///
+
+	/** Is used to go to a different page by dispaching a custom event that the router listens to
+	 *  
+	 *  @param {string} url - the url to navigate to
+	 */
+	changeRoute(url) {
+		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
+			bubbles: true,
+			composed: true,
+			detail: { url }
+		}));
+	};
+
+
+	/// ----- Event Handlers ----- ///
+	
 	// triggers a custom event when a link is clicked inside the shadow DOM,
 	// the router listens for the custom event
 	handleLinkClick(event) {
@@ -53,12 +71,9 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("url: ", url);
 		console.log("event: ", event);
 		console.log("target: ", event.target);
-		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
-			bubbles: true,
-			composed: true,
-			detail: { url }
-		}));
+		this.changeRoute(url);
 	};
+
 
 	// the method where the HTML of the component is defined, must be overridden
 	getElementHTML() {
