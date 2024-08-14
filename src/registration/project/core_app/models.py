@@ -6,11 +6,10 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=150, unique=True)
+    username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(blank=True, null=True)
-    email = models.EmailField(max_length=254, unique=True)
     enabled2fa = models.BooleanField(default=False)
 
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = []
     USERNAME_FIELD = 'username'

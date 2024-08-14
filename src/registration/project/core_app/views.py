@@ -8,7 +8,8 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
@@ -24,19 +25,20 @@ def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            user = serializer.save()
             username = serializer.validated_data.get('username')
             password = request.data.get('password')
             token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
+            serializer.save()
             if token_serializer.is_valid():
                 token = token_serializer.validated_data
-                return Response({'token': token, 'user': serializer.data}, status=status.HTTP_201_CREATED)
+                return Response({'token': token}, status=status.HTTP_201_CREATED)
             else:
                 return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -63,7 +65,7 @@ def login(request):
         username = request.data.get('username')
         password = request.data.get('password')
         if not username or not password:
-            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)       
+            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
         user = CustomUser.objects.filter(username=username).first()
         if user is None:
             return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -77,6 +79,7 @@ def login(request):
             return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -93,6 +96,7 @@ def refresh_token(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
