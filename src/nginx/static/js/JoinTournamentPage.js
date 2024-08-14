@@ -37,6 +37,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// removing event listeners
 		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation);
 		this.input_range.removeEventListener("input", this.handleRangeDisplay);
+
+		this.socket.close(); // need to remove the event listener for the socket ?????!!
 	};
 	
 
@@ -53,15 +55,17 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// makes new joinTournamentElements when a new tournament is created
 		this.socket.addEventListener("message", this.handleRecievedMessage.bind(this));
 	}
-
+	
 	handleRecievedMessage(event) {
 		const data = JSON.parse(event.data);
-		this.root.getElementById("joinTournamentElements").innerHTML = "";
+		
+		console.log("data: ", data);
 
+		this.root.getElementById("joinTournamentElements").innerHTML = "";
 		if (data.type === "updateTournamentList") {
 			for (let key in data.tournaments) {
 				const tournament = data.tournaments[key];
-				this.createJoinTournamentElement(tournament.name,
+				this.createJoinTournamentElement(tournament.tournament_name,
 												tournament.creator_name,
 												tournament.points_to_win,
 												tournament.current_player_num,
@@ -83,7 +87,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		element.querySelectorAll("[name='join_current_player_num']")[0].innerHTML = current_player_num;
 		element.querySelectorAll("[name='join_max_player_num']")[0].innerHTML = max_player_num;
 
-		this.noTournamentsToJoin();
+		//this.noTournamentsToJoin();
 	};
 
 	/** hides or shows a text that says "no tournaments to join" */
@@ -121,7 +125,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 										"points_to_win": points_to_win,
 										"current_player_num": "1", // the creator is the first player
 										"max_player_num": number_of_players}));
+										
 		//this.createJoinTournamentElement(tournament_name, "display name", points_to_win, "1", number_of_players);
+		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
+			bubbles: true,
+			composed: true,
+			detail: { url: "/tournament-lobby" }
+		}));
 	};
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */

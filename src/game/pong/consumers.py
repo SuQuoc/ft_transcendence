@@ -54,6 +54,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
         self.player = PongPlayer(self.player_id, self.map_size)
+        await self.updateLobbyList()
         return
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
@@ -161,9 +162,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             if self.player:
                 del self.player
-
-            if self.lobbies[self.room_name].players.get(self.player_id, None):
-                self.lobbies[self.room_name].removePlayer(self.player_id)
+            if self.lobbies.get(self.room_name, None):
+                if self.lobbies[self.room_name].players.get(self.player_id, None):
+                    self.lobbies[self.room_name].removePlayer(self.player_id)
 
             if self.lobbies.get(self.room_name, None):
                 if self.lobbies[self.room_name].len == 0:
@@ -205,6 +206,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.lobbies[msg["tournament_name"]] = self.lobby
         self.lobby.addPlayer(self.player)
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.updateLobbyList()
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 

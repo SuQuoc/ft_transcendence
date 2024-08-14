@@ -18,7 +18,7 @@ const Router = {
 		});
 
 		// Listen for custom events from shadow DOMs
-        document.addEventListener("change-route-from-shadow", (event) => {
+        document.addEventListener("change-route-custom-event", (event) => {
             const url = event.detail.url;
             Router.go(url);
         });
@@ -65,13 +65,15 @@ const Router = {
 			case "/tournament":
 				pageElement = document.createElement("join-tournament-page");
 				break;
+			case "/tournament-lobby":
+				console.log("router: tournament-lobby");
+				pageElement = document.createElement("tournament-lobby-page");
+				break;
 			case "/login":
 				pageElement = document.createElement("login-page");
-				console.log("login page created");
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
-				console.log("signup page created");
 				break;
 			default:
 				// homepage

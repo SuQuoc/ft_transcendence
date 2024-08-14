@@ -6,6 +6,7 @@ import { LoginPage } from './js/LoginPage.js';
 import { PlayMenuHomePage } from './js/PlayMenuHomePage.js';
 import { ScriptsAndStyles } from './js/ScriptsAndStyles.js';
 import { SignupPage } from './js/SignupPage.js';
+import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
 
 // global
 window.app = {}

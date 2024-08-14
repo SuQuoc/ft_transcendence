@@ -53,7 +53,7 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("url: ", url);
 		console.log("event: ", event);
 		console.log("target: ", event.target);
-		this.dispatchEvent(new CustomEvent("change-route-from-shadow", { // the router listens for this event
+		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
 			bubbles: true,
 			composed: true,
 			detail: { url }
