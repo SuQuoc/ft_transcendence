@@ -13,12 +13,13 @@
 		"displayname": "Username 2",
 		"img": "https://i.pravatar.cc/150",
 		"onlinestatus": false,
+		"relationship": "friend"
 		"is_friend": true,
 		"is_pending_sender": false,
 		"is_pending_receiver": false
 	},
 	{
-		"uid": 1235,
+		"uid": 1236,
 		"displayname": "Short",
 		"img": "https://i.pravatar.cc/150",
 		"onlinestatus": false,
@@ -27,7 +28,7 @@
 		"is_pending_receiver": false
 	},
 	{
-		"uid": 1235,
+		"uid": 1237,
 		"displayname": "Long",
 		"img": "https://i.pravatar.cc/150",
 		"onlinestatus": false,
@@ -36,7 +37,7 @@
 		"is_pending_receiver": true
 	},
 	{
-		"uid": 1235,
+		"uid": 1238,
 		"displayname": "Test 5",
 		"img": "https://i.pravatar.cc/150",
 		"onlinestatus": false,

@@ -73,9 +73,9 @@ const Router = {
 				console.log("signup page created");
 				break;
 			case "/friends":
-				pageElement = document.createElement("friends-list");
-				pageElement.setAttribute("requested", "");
-				console.log("friends list created");
+				pageElement = document.createElement("friend-list");
+				//pageElement.setAttribute("requested", "");
+				console.log("friends search created");
 				break;
 			default:
 				// homepage

@@ -7,6 +7,7 @@ import { PlayMenuHomePage } from './js/PlayMenuHomePage.js';
 import { ScriptsAndStyles } from './js/ScriptsAndStyles.js';
 import { SignupPage } from './js/SignupPage.js';
 import { FriendList } from './js/FriendList.js';
+import { FriendSearch } from './js/FriendSearch.js';
 
 // global
 window.app = {}
