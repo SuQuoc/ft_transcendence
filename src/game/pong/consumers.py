@@ -7,6 +7,7 @@ import uuid
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from .game_code.createMsg import createLobbyStatusDict
 from .game_code.ball import GameBall
 from .game_code.lobby import Lobby
 from .game_code.match import Match
@@ -155,38 +156,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
 
-        if self.player_id is None:
-            return
-
         async with self.update_lock:
+
+            
+            lobby_name = None
+            if self.lobby:
+                lobby_name = self.lobby.lobby_name
+            if self.lobbies.get(lobby_name, None):
+                self.lobbies[lobby_name].removePlayer(self.player)
+                print("Player removed from lobby")
+                if self.lobbies[lobby_name].len == 0:
+                    print("Lobby empty")
+                    del self.lobbies[lobby_name]
+                    self.lobbies.pop(lobby_name, None)
 
             if self.player:
                 del self.player
-            if self.lobbies.get(self.room_name, None):
-                if self.lobbies[self.room_name].players.get(self.player_id, None):
-                    self.lobbies[self.room_name].removePlayer(self.player_id)
-
-            if self.lobbies.get(self.room_name, None):
-                if self.lobbies[self.room_name].len == 0:
-                    del self.lobbies[self.room_name]
-                    self.lobbies.pop(self.room_name, None)
 
         print("Lobbies", self.lobbies)
 
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     # Receive message from WebSocket
     # Receive key up {up=1}
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        print("hehehehhehheheehhe ", text_data_json["type"])
         if text_data_json["type"] == "update":
-            #player_id = text_data_json["playerId"]
-            #player = self.players[self.room_name].get(player_id, None)
-
             if not self.player:
                 return
-
             async with self.update_lock:
                 self.player.up = text_data_json["up"]
                 self.player.down = text_data_json["down"]
@@ -194,9 +192,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif text_data_json["type"] == "roomSize":
             self.group_max_size = int(text_data_json["roomSize"])
 
-            # start here the room ?
-
-            # print(self.room_size)
         elif text_data_json["type"] == "newClient":
             print(text_data_json)
         elif text_data_json["type"] == "createTournament":
@@ -212,20 +207,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def updateLobbyList(self):
         print("updateLobbyList")
-        print(self.room_name)
-        i = 0
-        msg = {}
-        for lobby in self.lobbies.values():
-            msg[i] = {"tournament_name": lobby.lobby_name, "creator_name": "creator", "current_player_num": lobby.len, "max_player_num": lobby.max_len}
-            i += 1
+        msg = await createLobbyStatusDict(self.lobbies)
+        if msg is None:
+            return
         await self.channel_layer.group_send(
             self.group_name,
             {
-                "type": "update.tournamentlist",
+                "type": "update.tournamentList",
                 "tournaments": msg,
             })
 
-    async def update_tournamentlist(self, e):
+    async def update_tournamentList(self, e):
         print("updateTournamentListSend")
         await self.send(
             text_data=json.dumps(
@@ -256,7 +248,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def start_game(self, e):
         print("start game", self.room_name)
         await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
-
 
 # Recurses
 
