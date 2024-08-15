@@ -14,10 +14,6 @@ class CustomUserProfileTest(TestCase):
         self.friend = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='Friend', online=True)
         self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='Stranger', online=True)
 
-        # Create FriendList instances, since it's only done for u when the api is used
-        FriendList.objects.create(user=self.user1)
-        FriendList.objects.create(user=self.friend)
-        FriendList.objects.create(user=self.stranger)
 
         self.user1.friend_list.friends.add(self.friend)  # test independent on the friend-request api
 
@@ -35,24 +31,18 @@ class CustomUserProfileTest(TestCase):
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['is_self'])
-        self.assertFalse(response.json()['is_friend'])
-        self.assertFalse(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "self")
 
     def test_view_friends_profile(self):
         self.url = reverse('profile', args=[self.friend.displayname])
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()['is_self'])
-        self.assertTrue(response.json()['is_friend'])
-        self.assertFalse(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "friend")
 
     def test_view_strangers_profile(self):
         self.url = reverse('profile', args=[self.stranger.displayname])
         response = self.get()
         # print(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()['is_self'])
-        self.assertFalse(response.json()['is_friend'])
-        self.assertTrue(response.json()['is_stranger'])
+        self.assertEqual(response.json()['relationship'], "stranger")

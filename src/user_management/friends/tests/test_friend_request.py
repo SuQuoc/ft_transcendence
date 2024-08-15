@@ -15,10 +15,6 @@ class FriendRequestTest(TestCase):
         self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="TestUser1", online=False)
         self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="Stranger", online=True)
 
-        # Create FriendList instances, since it"s only done for u when the api is used
-        FriendList.objects.create(user=self.user1)
-        FriendList.objects.create(user=self.stranger)
-
         self.user_tokens = {
             f"{self.user1.displayname}": f"{generate_token(self.user1.user_id)}",
             f"{self.stranger.displayname}": f"{generate_token(self.stranger.user_id)}",
