@@ -1,5 +1,4 @@
 # [aguilmea] this file has been created manually
-import logging  # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -13,11 +12,9 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
-from .serializers import DeleteUserSerializer
-from .serializers import UserSerializer
+from .serializers import UserSerializer, LoginSerializer, DeleteUserSerializer
 
 from datetime import datetime, timedelta
-logger = logging.getLogger('core_app')  # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 
 @api_view(['POST'])
@@ -26,11 +23,11 @@ def signup(request):
     try:
         user_s = UserSerializer(data=request.data)
         if not user_s.is_valid():
-            return Response(user_s.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
         token_s = TokenObtainPairSerializer(data=request.data)
         if not token_s.is_valid(): # [aguilmea] not sure why this should happen and if i should keep the check
-            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         
         response = Response(status=status.HTTP_201_CREATED)
         
@@ -72,21 +69,30 @@ def delete_user(request):
 @permission_classes([AllowAny])
 def login(request):
     try:
-        username = request.data.get('username')
-        password = request.data.get('password')
-        if not username or not password:
-            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=username).first()
-        if user is None:
-            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
-        if not user.check_password(password):
-            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
-        token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
-        if token_serializer.is_valid():
-            token = token_serializer.validated_data
-            return Response({'token': token}, status=status.HTTP_200_OK)
-        else:
-            return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        credentials_s = LoginSerializer(data=request.data)
+        if not credentials_s.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.filter(username=credentials_s.validated_data['username']).first()
+        if user is None or not user.check_password(credentials_s.validated_data['password']):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        token_s = TokenObtainPairSerializer(data=request.data)
+        if not token_s.is_valid(): # [aguilmea] not sure why this should happen and if i should keep the check
+            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = Response(status=status.HTTP_200_OK)
+        
+        response.data = token_s.validated_data
+        
+        access_token = token_s.validated_data['access']
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5) 
+        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
+
+        refresh_token = token_s.validated_data['refresh']
+        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
+        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
+
+        return response
+
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
