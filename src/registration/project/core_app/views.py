@@ -82,25 +82,8 @@ def login(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def refresh_token(request):
-    try:
-        refresh_token = request.data.get('refresh')
-        if not refresh_token:
-            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = TokenRefreshSerializer(data={'refresh': refresh_token})
-        if serializer.is_valid():
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def blacklist(request):
+def change_password(request):
     try:
         refresh_token = request.data.get('refresh_token')
         if not refresh_token:
@@ -117,6 +100,23 @@ def blacklist(request):
 @permission_classes([IsAuthenticated])
 def logout(request):
     return Response({'message': 'not setup yet'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def refresh_token(request):
+    try:
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = TokenRefreshSerializer(data={'refresh': refresh_token})
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
