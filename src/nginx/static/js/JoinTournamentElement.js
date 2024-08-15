@@ -27,7 +27,7 @@ export class JoinTournamentElement extends HTMLElement {
 	handleJoinTournament(event) {
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
-		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute);
+		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
 
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));

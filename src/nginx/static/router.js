@@ -125,16 +125,13 @@ const Router = {
 
 	/// ----- Event Handlers ----- ///
 
-	/** Add this as a "message" event listener to window.app.socket.
-	 *  It changes the route (page) depending on the message received from the server
+	/** !!! Use this only with the "once" option when adding the Event Listener !!!
 	 * 
-	 *  !!! removes the event listener !!!
-	 */
+	 *  Add this as a "message" event listener to window.app.socket.
+	 *  It changes the route (page) depending on the message received from the server */
 	handleSocketMessageChangeRoute(event) {
-		// removes the event listener that calls this function
-		window.app.socket.removeEventListener("message", Router.handleSocketMessageChangeRoute);
-
 		const data = JSON.parse(event.data);
+
 		switch (data.type) {
 			case "joinTournament":
 				if (data.joined === "true")
