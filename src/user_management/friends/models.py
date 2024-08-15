@@ -1,5 +1,6 @@
 from api.models import CustomUser
 from django.db import models
+from django.db.models import Q
 
 # Create your models here.
 
@@ -32,10 +33,35 @@ class FriendList(models.Model):
         initiator_friend_list.del_friend(to_unfriend)
         to_unfriend_friend_list.del_friend(self.user)
 
-    def isFriend(self, friend):
+    def contains(self, friend):
         if friend in self.friends:
             return True
         return False
+
+    def get_friends_with_request_ids(self):
+        friends_with_request_id = []
+        for friend in self.friends.all():
+            friend_request = FriendRequest.objects.filter(
+                (Q(sender=self.user) & Q(receiver=friend)) | 
+                (Q(sender=friend) & Q(receiver=self.user)),
+                status=FriendRequest.ACCEPTED
+            ).first()
+            friends_with_request_id.append({
+                'friend': friend,
+                'request_id': friend_request.id if friend_request else None
+            })
+        return friends_with_request_id
+    
+    def get_friends_request_id(self, friend):
+        friend_request = FriendRequest.objects.filter(
+            (Q(sender=self.user) & Q(receiver=friend)) | 
+            (Q(sender=friend) & Q(receiver=self.user)),
+            status=FriendRequest.ACCEPTED
+        ).first()
+        if friend_request:
+            return friend_request.id
+        return None
+
 
 
 class FriendRequest(models.Model):
@@ -55,7 +81,7 @@ class FriendRequest(models.Model):
     send_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"sender: {self.sender}, receiver: {self.receiver}"
+        return f"sender: {self.sender} --> receiver: {self.receiver}"
 
     def accept(self):
         """
