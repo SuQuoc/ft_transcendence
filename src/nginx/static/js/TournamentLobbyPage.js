@@ -5,7 +5,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
-			<div>Tournament Lobby<div>
+			<h1>Tournament Lobby<h1>
 		`;
 		return template;
 	}

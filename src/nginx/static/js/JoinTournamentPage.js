@@ -6,10 +6,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		super();
 		
 		// Binds the method to this class instance so it can be used in the event listener
-		this.handleSocketOpen = this.handleSocketOpen.bind(this);
-		this.handleRecievedMessage = this.handleRecievedMessage.bind(this);
-		this.handleRangeDisplay = this.handleRangeDisplay.bind(this);
-		this.handleTournamentCreation = this.handleTournamentCreation.bind(this);
+		this.handleRecievedMessageVar = this.handleRecievedMessage.bind(this);
+		this.handleRangeDisplayVar = this.handleRangeDisplay.bind(this);
+		this.handleTournamentCreationVar = this.handleTournamentCreation.bind(this);
 	};
 
 	connectedCallback() {
@@ -26,14 +25,11 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.display_lane.style.paddingLeft = `${this.thumb_width / 2}px`;
 		this.display_lane.style.paddingRight = `${this.thumb_width / 2}px`;
 
-		// creating a websocket
-		this.makeWebSocket();
-
 		// adding event listeners
-		this.socket.addEventListener("open", this.handleSocketOpen);
-		this.socket.addEventListener("message", this.handleRecievedMessage);
-		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation);
-		this.input_range.addEventListener("input", this.handleRangeDisplay);
+		if (window.app.socket)
+			window.app.socket.addEventListener("message", this.handleRecievedMessageVar);
+		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreationVar);
+		this.input_range.addEventListener("input", this.handleRangeDisplayVar);
 		
 		// calling the method to set the initial position of the display
 		this.handleRangeDisplay({target: this.input_range});
@@ -43,27 +39,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		super.disconnectedCallback();
 		
 		// removing event listeners
-		this.socket.removeEventListener("open", this.handleSocketOpen);
-		this.socket.removeEventListener("message", this.handleRecievedMessage);
-		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation);
-		this.input_range.removeEventListener("input", this.handleRangeDisplay);
-
-		this.socket.close(); // need to remove the event listener for the socket ?????!!
+		if (window.app.socket)
+			window.app.socket.removeEventListener("message", this.handleRecievedMessageVar);
+		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreationVar);
+		this.input_range.removeEventListener("input", this.handleRangeDisplayVar);
 	};
 	
 
 	/// ----- Methods ----- ///
 	
-	/** creates a websocket */
-	makeWebSocket() {
-		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    	let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
-    	this.socket = new WebSocket(ws_path);
-	}
-	
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
 	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
-		let element = new JoinTournamentElement(); // protect new ???!!!!??
+		let element = new JoinTournamentElement();
 		this.root.getElementById("joinTournamentElements").appendChild(element);
 
 		element.querySelectorAll("[name='join_name']")[0].innerHTML = tournament_name;
@@ -90,13 +77,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	
 	
 	/// ----- Event Handlers ----- ///
-	
-	/** gets called when the websocket opens 
-	 *  sends the user_id to the server */
-	handleSocketOpen(event) {
-		console.log("connected to websocket");
-		this.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
-	};
 
 	/** gets called when the websocket receives a message */
 	handleRecievedMessage(event) {
@@ -126,7 +106,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		const	points_to_win = event.target.points_to_win.value;
 
 		// sends the tournament details to the game server
-		this.socket.send(JSON.stringify({"type": "createTournament",
+		window.app.socket.send(JSON.stringify({"type": "createTournament",
 			"tournament_name": tournament_name,
 			"creator_name": "display name",
 										"points_to_win": points_to_win,

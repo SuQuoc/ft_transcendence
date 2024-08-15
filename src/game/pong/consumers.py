@@ -49,6 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # create a random id
         self.player_id = str(uuid.uuid4())
+        self.lobby = None
         # set up rooms
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f"chat_{self.room_name}"

@@ -17,7 +17,7 @@ export class ComponentBaseClass extends HTMLElement {
 	};
 
 	// get's called when the component is attached to the DOM
-	connectedCallback() {
+	connectedCallback() { // HTMLElement doesn't have connectedCallback
 		const template = this.getElementHTML();
 		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
 		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
@@ -33,7 +33,7 @@ export class ComponentBaseClass extends HTMLElement {
 	};
 
 	// get's called when the component is removed from the DOM
-	disconnectedCallback() {
+	disconnectedCallback() { // HTMLElement doesn't have disconnectedCallback
 		// remove event listeners (not sure if necessary), if there are any
 		const links = this.root.querySelectorAll("a");
 		if (links.length === 0)
@@ -69,9 +69,6 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("link clicked in shadow DOM");
 
 		const url = event.target.getAttribute("href");
-		console.log("url: ", url);
-		console.log("event: ", event);
-		console.log("target: ", event.target);
 		this.changeRoute(url);
 	};
 

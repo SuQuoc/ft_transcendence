@@ -30,6 +30,32 @@ const Router = {
 		Router.go(location.pathname);
 	},
 
+
+	/** opens the window.app.socket if it is closed */
+	makeWebSocket: () => {
+		if (!window.app.socket) {
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
+			window.app.socket = new WebSocket(ws_path);
+			console.log("socket created");
+		};
+
+		// does it make sense to have this here??
+		window.app.socket.onopen = () => {
+			window.app.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
+		};
+	},
+
+	/** closes the window.app.socket if it is open */
+	closeWebSocket: () => {
+		if (window.app.socket) {
+			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
+			window.app.socket.close();
+			window.app.socket = null;
+			console.log("socket closed");
+		}
+	},
+
 	// changes the page main content and update the URL
 	go: (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
@@ -56,27 +82,33 @@ const Router = {
 		// create the new page element depending on the route
 		switch (route) {
 			case "/":
+				//Router.closeWebSocket();
 				pageElement = document.createElement("play-menu-home-page");
 				break;
 			case "/play":
+				//Router.closeWebSocket();
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
 			case "/tournament":
+				Router.makeWebSocket();
 				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/tournament-lobby":
-				console.log("router: tournament-lobby");
+				Router.makeWebSocket();
 				pageElement = document.createElement("tournament-lobby-page");
 				break;
 			case "/login":
+				//Router.closeWebSocket();
 				pageElement = document.createElement("login-page");
 				break;
 			case "/signup":
+				//Router.closeWebSocket();
 				pageElement = document.createElement("signup-page");
 				break;
 			default:
 				// homepage
+				//Router.closeWebSocket();
 				pageElement = document.createElement("play-menu-home-page");
 				console.log("default in router");
 				break;
@@ -87,6 +119,11 @@ const Router = {
 			// scroll to top
 			window.scrollX = 0;
 			window.scrollY = 0;
+
+			// close websocket if we leave tournament pages
+			if (route != "/tournament" && route != "/tournament-lobby") {
+				Router.closeWebSocket(); // checks if the socket is open before closing
+			}
 		}
 	}
 }

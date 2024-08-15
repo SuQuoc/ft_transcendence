@@ -11,6 +11,7 @@ import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
 // global
 window.app = {}
 app.router = Router;
+app.socket = null;
 
 console.log("app.js loaded");
 // it's better to wait for the DOM to load before running any JS
