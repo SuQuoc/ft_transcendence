@@ -22,22 +22,18 @@ logger = logging.getLogger('core_app')  # [aguilmea] logger was added / to be de
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            username = serializer.validated_data.get('username')
-            password = request.data.get('password')
-            token_serializer = TokenObtainPairSerializer(data={'username': username, 'password': password})
-            serializer.save()
-            if token_serializer.is_valid():
-                token = token_serializer.validated_data
-                return Response({'token': token}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user_s = UserSerializer(data=request.data)
+        if not user_s.is_valid():
+            return Response(user_s.errors, status=status.HTTP_400_BAD_REQUEST)
+        user_s.save()
+        token_s = TokenObtainPairSerializer(data=request.data)
+        if not token_s.is_valid():
+            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST) # [aguilmea] not sure why this should happen
+        return Response({'token': token_s.validated_data}, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['DELETE'])
