@@ -8,6 +8,7 @@ import { ScriptsAndStyles } from './js/ScriptsAndStyles.js';
 import { SignupPage } from './js/SignupPage.js';
 import { FriendList } from './js/FriendList.js';
 import { FriendSearch } from './js/FriendSearch.js';
+import { UserProfile } from './js/UserProfile.js';
 
 // global
 window.app = {}

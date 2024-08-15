@@ -146,7 +146,7 @@ export class FriendList extends ComponentBaseClass {
 		if (this.requested.size < 1 && this.received.size < 1) {
 			const item = document.createElement('li');
 			item.className = 'list-group-item d-flex justify-content-start w-100';
-			item.innerHTML = `<span class="text-muted">No friends yet</span>`;
+			item.innerHTML = `<span class="text-muted">No friend requests yet</span>`;
 			listElement.appendChild(item);
 			return;
 		}
@@ -210,20 +210,22 @@ export class FriendList extends ComponentBaseClass {
 	async fetchFriendList() {
 		try {
 			//substitute with endpoint instead of dummy JSON
-			const response = await fetch('./js/friends.json');
+			const response = await fetch('./js/friends.json?asdfas', { cache: 'no-store' });
 			const data = await response.json();
-			data.map(item => {
-				if (item.is_friend === true)
-					this.friends.set(item.uid, { "name": item.displayname, "img": item.img, "online": item.onlinestatus });
-				else if (item.is_pending_sender === true)
-					this.requested.set(item.uid, { "name": item.displayname, "img": item.img });
-				else if (item.is_pending_receiver === true)
-					this.received.set(item.uid, { "name": item.displayname, "img": item.img });
+			data.forEach(item => {
+				if (item.relationship === 'friend')
+					this.friends.set(item.user.uid, { "name": item.user.displayname, "img": item.user.img, "online": item.user.online, "id": item.friend_request_id });
+				else if (item.relationship === 'requested')
+					this.requested.set(item.uid, { "name": item.user.displayname, "img": item.user.img, "id": item.friend_request_id });
+				else if (item.relationship === 'received')
+					this.received.set(item.uid, { "name": item.user.displayname, "img": item.user.img, "id": item.friend_request_id });
 			});
 			this.updateList();
 		} catch (e) {
-			console.error('Error fetching friend list:', e);
+			console.error('Error fetching friend list:', e.message);
 		}
+		console.log(this.received);
+		console.log(this.requested);
 	}
 
 	updateList() {

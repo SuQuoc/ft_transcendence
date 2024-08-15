@@ -56,8 +56,8 @@ export class FriendSearch extends ComponentBaseClass {
         if (!query) return;
 
         try {
-            //TODO: Add API call to search for users
-            const response = await fetch(`./js/friends.json?adfasdfasf`);
+            //TODO: Add API call to search for users, no-store prevents caching https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
+            const response = await fetch(`./js/friends.json`, { cache : "no-store" });
             const data = await response.json();
             this.results.clear();
             console.log(data);
@@ -65,7 +65,7 @@ export class FriendSearch extends ComponentBaseClass {
             console.log(this.results);
             this.updateResults();
         } catch (e) {
-            console.error('Error fetching search results:', e);
+            console.error('Error fetching search results:', e.message);
         }
     }
 
@@ -78,18 +78,18 @@ export class FriendSearch extends ComponentBaseClass {
             item.innerHTML = `
         <span>${user.displayname}</span>
         <div>
-          ${user.is_friend ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${user.is_pending_sender ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${user.is_pending_receiver ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${!user.is_friend && !user.is_pending_sender && !user.is_pending_receiver ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
+          ${user.relationship === 'friend' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
+          ${user.relationship === 'requested' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
+          ${user.relationship === 'received' ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ''}
+          ${user.relationship === 'stranger' ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
         </div>
       `;
 
-            if (user.is_friend) {
+            if (user.relationship === 'friend') {
                 item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriend(user.uid));
-            } else if (user.is_pending_sender) {
+            } else if (user.relationship === 'requested') {
                 item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriendRequest(user.uid));
-            } else if (user.is_pending_receiver) {
+            } else if (user.relationship === 'received') {
                 item.querySelector('.btn-success').addEventListener('click', () => this.acceptFriendRequest(user.uid));
                 item.querySelector('.btn-danger').addEventListener('click', () => this.declineFriendRequest(user.uid));
             } else {
