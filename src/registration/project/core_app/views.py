@@ -16,6 +16,7 @@ from .models import CustomUser
 from .serializers import DeleteUserSerializer
 from .serializers import UserSerializer
 
+from datetime import datetime, timedelta
 logger = logging.getLogger('core_app')  # [aguilmea] logger was added / to be deleted as well as in the settings.py file
 
 
@@ -28,10 +29,23 @@ def signup(request):
             return Response(user_s.errors, status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
         token_s = TokenObtainPairSerializer(data=request.data)
-        if not token_s.is_valid():
-            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST) # [aguilmea] not sure why this should happen
-        return Response({'token': token_s.validated_data}, status=status.HTTP_201_CREATED)
-    
+        if not token_s.is_valid(): # [aguilmea] not sure why this should happen and if i should keep the check
+            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = Response(status=status.HTTP_201_CREATED)
+        
+        response.data = token_s.validated_data
+        
+        access_token = token_s.validated_data['access']
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5) 
+        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
+
+        refresh_token = token_s.validated_data['refresh']
+        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
+        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
+
+        return response
+
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
