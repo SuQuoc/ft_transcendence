@@ -107,15 +107,28 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "createTournament",
-			"tournament_name": tournament_name,
-			"creator_name": "display name",
-										"points_to_win": points_to_win,
-										"current_player_num": "1", // the creator is the first player
-										"max_player_num": number_of_players}));
+											"tournament_name": tournament_name,
+											"creator_name": "display name",
+											"points_to_win": points_to_win,
+											"current_player_num": "1", // the creator is the first player
+											"max_player_num": number_of_players}));
 		
 		// goes to the tournament lobby
 		this.changeRoute("/tournament-lobby");
 	};
+
+
+
+	handleJoinTournament(event) {
+		console.log("join tournament button clicked");
+		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
+		
+		window.app.socket.send(JSON.stringify({"type": "joinTournament",
+										"tournament_name": tournament_name}));
+		this.changeRoute("/tournament-waiting-room");
+	}
+
+
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
 	handleRangeDisplay(event) {

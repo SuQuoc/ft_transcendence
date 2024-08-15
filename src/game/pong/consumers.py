@@ -193,9 +193,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif text_data_json["type"] == "createTournament":
             await self.createTournament(text_data_json)
 
+        elif text_data_json["type"] == "joinTournament":
+            await self.joinTournament(text_data_json)
+
+    async def joinTournament(self, msg):
+        print("joinTournament")
+        self.lobby = self.lobbies.get(msg["tournament_name"], None)
+        if self.lobby is None:
+            # send error message ?
+            return
+        self.lobby = self.lobbies[msg["tournament_name"]]
+        status = "false"
+        if self.lobby.addPlayer(self.player):
+            status = "true"
+        await self.sendJoinTournament(status)
+
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.updateLobbyList()
+        print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
+
     # Receive message from WebSocket
     async def createTournament(self, msg):
         # Create a new tournament
+        # send if tournament already exists ?
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.lobbies[msg["tournament_name"]] = self.lobby
         self.lobby.addPlayer(self.player)
@@ -249,6 +269,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def start_game(self, e):
         print("start game", self.room_name)
         await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
+
+    async def sendJoinTournament(self, e) -> None:
+        print("sendJoinTournament")
+        await self.send(text_data=json.dumps(
+            {
+                "type": "joinTournament",
+                "joined": e}
+            ))
 
 # Recurses
 

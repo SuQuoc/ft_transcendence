@@ -56,16 +56,12 @@ const Router = {
 		}
 	},
 
+
 	// changes the page main content and update the URL
 	go: (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
-
-		// adds the route to the history, so the back/forward buttons work
-		if (addToHistory) {
-			history.pushState({route}, "", route);
-		}
-
+		
 		// show/hide navbar and footer (not happy, maybe there is a better solution!?)
 		if (route === "/login" || route === "/signup") {
 			document.getElementById("navbar").style.display = "none";
@@ -82,11 +78,9 @@ const Router = {
 		// create the new page element depending on the route
 		switch (route) {
 			case "/":
-				//Router.closeWebSocket();
 				pageElement = document.createElement("play-menu-home-page");
 				break;
-			case "/play":
-				//Router.closeWebSocket();
+				case "/play":
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
@@ -95,21 +89,23 @@ const Router = {
 				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/tournament-lobby":
-				Router.makeWebSocket();
+				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-lobby-page");
 				break;
+			case "/tournament-waiting-room":
+				//protection (what if the socket is not open??!!!!)
+				pageElement = document.createElement("tournament-waiting-room-page");
+				break;
 			case "/login":
-				//Router.closeWebSocket();
 				pageElement = document.createElement("login-page");
 				break;
 			case "/signup":
-				//Router.closeWebSocket();
 				pageElement = document.createElement("signup-page");
 				break;
 			default:
 				// homepage
-				//Router.closeWebSocket();
 				pageElement = document.createElement("play-menu-home-page");
+				route = "/";
 				console.log("default in router");
 				break;
 		}
@@ -120,10 +116,46 @@ const Router = {
 			window.scrollX = 0;
 			window.scrollY = 0;
 
-			// close websocket if we leave tournament pages
-			if (route != "/tournament" && route != "/tournament-lobby") {
-				Router.closeWebSocket(); // checks if the socket is open before closing
-			}
+		}
+
+		// close websocket if we leave tournament pages
+		if (route != "/tournament" && route != "/tournament-lobby" && route != "/tournament-waiting-room") {
+			Router.closeWebSocket(); // checks if the socket is open before closing
+		}
+
+		// adds the route to the history, so the back/forward buttons work
+		if (addToHistory) {
+			console.log("pushing state");
+			console.log("route: ", route);
+			history.pushState({route}, "", route);
+		}
+	},
+
+	/// ----- Event Handlers ----- ///
+
+	/** Add this as a "message" event listener to window.app.socket.
+	 *  It changes the route (page) depending on the message received from the server
+	 * 
+	 *  !!! removes the event listener !!!
+	 */
+	handleSocketMessageChangeRoute(event) {
+		// removes the event listener that calls this function
+		window.app.socket.removeEventListener("message", Router.handleSocketMessageChangeRoute);
+		
+		console.log("handleSocketMessageChangeRoute");
+
+		const data = JSON.parse(event.data);
+		switch (data.type) {
+			case "joinTournament":
+				console.log("joined tournament: ", data.joined);
+				if (data.joined === "true")
+					Router.go("/tournament-lobby");
+				else
+					Router.go("/tournament");
+				break;
+			default:
+				console.log("unknown message type: ", data.type);
+				break;
 		}
 	}
 }
