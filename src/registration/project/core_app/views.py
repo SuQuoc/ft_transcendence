@@ -51,7 +51,7 @@ def delete_user(request):
             if not user.check_password(current_password):
                 return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
             user.delete()
-            return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
