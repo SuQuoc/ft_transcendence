@@ -47,7 +47,7 @@ def delete_user(request):
     serializer = DeleteUserSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            current_password = serializer.validated_data['current_password']
+            current_password = serializer.validated_data['password']
             if not user.check_password(current_password):
                 return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
             user.delete()
@@ -85,6 +85,21 @@ def login(request):
 @permission_classes([IsAuthenticated])
 def change_password(request):
     try:
+        old_token = request.data.get('refresh_token')
+        if not old_token:
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        new_token = RefreshToken(old_token)
+        old_token.blacklist()
+        return Response({'message': 'okay'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    try:
         refresh_token = request.data.get('refresh_token')
         if not refresh_token:
             return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -94,12 +109,6 @@ def change_password(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def logout(request):
-    return Response({'message': 'not setup yet'}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 @api_view(['POST'])
