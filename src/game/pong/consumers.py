@@ -157,23 +157,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
 
         async with self.update_lock:
-
-            
             lobby_name = None
             if self.lobby:
                 lobby_name = self.lobby.lobby_name
+
             if self.lobbies.get(lobby_name, None):
                 self.lobbies[lobby_name].removePlayer(self.player)
-                print("Player removed from lobby")
                 if self.lobbies[lobby_name].len == 0:
-                    print("Lobby empty")
                     del self.lobbies[lobby_name]
                     self.lobbies.pop(lobby_name, None)
 
             if self.player:
                 del self.player
-
-        print("Lobbies", self.lobbies)
 
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
@@ -197,12 +192,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif text_data_json["type"] == "createTournament":
             await self.createTournament(text_data_json)
 
+    # Receive message from WebSocket
     async def createTournament(self, msg):
+        # Create a new tournament
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.lobbies[msg["tournament_name"]] = self.lobby
         self.lobby.addPlayer(self.player)
+
+        # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.updateLobbyList()
+
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
     async def updateLobbyList(self):
