@@ -21,6 +21,15 @@ export class UserProfile extends ComponentBaseClass {
         .form-container button {
           width: 100%;
         }
+        .profile-image {
+          width: 100%;
+          max-width: 150px;
+          height: auto;
+          cursor: pointer;
+          display: block;
+          margin: 0 auto 1rem;
+          border-radius: 50%;
+        }
         .warning {
           border-color: red;
         }
@@ -29,7 +38,10 @@ export class UserProfile extends ComponentBaseClass {
           display: none;
         }
       </style>
-      <div class="form-container">
+      <div class="form-container bg-dark text-white">
+        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
+        <div id="imageWarning" class="mt-2"></div>
+        <input type="file" id="imageUpload" style="display: none;">
         <form id="profileForm">
           <div class="mb-3">
             <label for="displayName" class="form-label">Display Name</label>
@@ -41,6 +53,7 @@ export class UserProfile extends ComponentBaseClass {
           </div>
           <button type="button" class="btn btn-primary" id="saveProfile">Save</button>
         </form>
+        <hr>
         <form id="passwordForm">
           <div class="mb-3">
             <label for="oldPassword" class="form-label">Old Password</label>
@@ -68,6 +81,8 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('changePassword').addEventListener('click', this.changePassword.bind(this));
         this.shadowRoot.getElementById('newPassword').addEventListener('input', this.validatePasswords.bind(this));
         this.shadowRoot.getElementById('confirmPassword').addEventListener('input', this.validatePasswords.bind(this));
+        this.shadowRoot.getElementById('profileImage').addEventListener('click', () => this.shadowRoot.getElementById('imageUpload').click());
+        this.shadowRoot.getElementById('imageUpload').addEventListener('change', this.handleImageUpload.bind(this));
         this.loadUserData();
 
         this.shadowRoot.addEventListener('click', (event) => {
@@ -81,6 +96,7 @@ export class UserProfile extends ComponentBaseClass {
             const userData = await this.fetchUserData();
             this.shadowRoot.getElementById('displayName').value = userData.displayName;
             this.shadowRoot.getElementById('email').value = userData.email;
+            this.shadowRoot.getElementById('profileImage').src = userData.profileImage;
         } catch (error) {
             console.error('Error loading user data:', error);
         }
@@ -95,14 +111,72 @@ export class UserProfile extends ComponentBaseClass {
         }
         return await response.json();
         */
-        return { displayName: 'Max Payne', email: 'dummy@gmx.at' };
+        return { displayName: 'Max Payne', email: 'dummy@gmx.at', profileImage: 'https://i.pravatar.cc/300?img=52' };
     }
 
-    saveProfile() {
+    handleImageUpload(event) {
+        const file = event.target.files[0];
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        const maxSize = 1024 * 1024; // 1MB
+        console.log('Image selected:', file);
+
+        const warningMessage = this.shadowRoot.getElementById('imageWarning');
+        warningMessage.textContent = '';
+        warningMessage.classList.remove('alert', 'alert-danger');
+
+        if (file) {
+            if (!allowedTypes.includes(file.type)) {
+                warningMessage.textContent = 'Only JPEG and PNG files are allowed.';
+                warningMessage.classList.add('alert', 'alert-danger');
+                return;
+            }
+
+            if (file.size > maxSize) {
+                warningMessage.textContent = 'File size must be less than 1MB.';
+                warningMessage.classList.add('alert', 'alert-danger');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.shadowRoot.getElementById('profileImage').src = e.target.result;
+                this.selectedImage = file;
+            };
+            //TODO: Add API call to upload image, use base64 string to transmit
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async saveProfile() {
         const displayName = this.shadowRoot.getElementById('displayName').value;
         const email = this.shadowRoot.getElementById('email').value;
-        // TODO: Add API call to save profile changes
-        console.log('Profile saved:', { displayName, email });
+        const profileImage = this.selectedImage;
+
+        //TODO: Add API call to save profile
+        /*
+        const formData = new FormData();
+        formData.append('displayName', displayName);
+        formData.append('email', email);
+        if (profileImage) {
+            formData.append('profileImage', profileImage);
+        }
+
+        try {
+            const response = await fetch('/api/user/profile', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save profile');
+            }
+
+            const result = await response.json();
+            console.log('Profile saved:', result);
+        } catch (error) {
+            console.error('Error saving profile:', error);
+        }
+        */
     }
 
     validatePasswords() {
