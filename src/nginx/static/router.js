@@ -3,7 +3,6 @@ const Router = {
 		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
 			a.addEventListener("click", (event) => {
 				event.preventDefault();
-				console.log("link clicked");
 				
 				const url = event.target.getAttribute("href");
 				Router.go(url);
@@ -12,16 +11,9 @@ const Router = {
 
 		// event handler for url changes (back/forward)
 		window.addEventListener("popstate", (event) => {
-			console.log("popstate event");
 			event.preventDefault(); // not sure if needed
 			Router.go(event.state.route, false);
 		});
-
-		// Listen for custom events from shadow DOMs
-        document.addEventListener("change-route-custom-event", (event) => {
-            const url = event.detail.url;
-            Router.go(url);
-        });
 
 		// somewhere here we should check if the user is logged in and redirect to the login page if not
 		// load event can be used to listen for initial page load. Don't know if it has the right timing here though
@@ -56,22 +48,25 @@ const Router = {
 		}
 	},
 
+	/** hides or shows the navbar and footer depending on the route */
+	hideOrShowNavbarAndFooter: (route) => {
+		if (route === "/login" || route === "/signup") {
+			document.getElementById("navbar").style.display = "none";
+			document.getElementById("footer").style.display = "none";
+		}
+		else {
+			document.getElementById("navbar").style.display = "";
+			document.getElementById("footer").style.display = "";
+		}
+	},
+
 
 	// changes the page main content and update the URL
 	go: (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
 		
-		// show/hide navbar and footer (not happy, maybe there is a better solution!?)
-		if (route === "/login" || route === "/signup") {
-			document.getElementById("navbar").style.display = "none";
-			document.getElementById("footer").style.display = "none";
-			console.log("hide navbar and footer");
-		}
-		else {
-			document.getElementById("navbar").style.display = "";
-			document.getElementById("footer").style.display = "";
-		}
+		Router.hideOrShowNavbarAndFooter(route);
 
 		// check for external links maybe??!! (if first character is not a slash)
 
@@ -115,21 +110,18 @@ const Router = {
 			// scroll to top
 			window.scrollX = 0;
 			window.scrollY = 0;
-
 		}
 
 		// close websocket if we leave tournament pages
-		if (route != "/tournament" && route != "/tournament-lobby" && route != "/tournament-waiting-room") {
+		if (!route.startsWith("/tournament")) {
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 
 		// adds the route to the history, so the back/forward buttons work
-		if (addToHistory) {
-			console.log("pushing state");
-			console.log("route: ", route);
+		if (addToHistory)
 			history.pushState({route}, "", route);
-		}
 	},
+
 
 	/// ----- Event Handlers ----- ///
 
@@ -141,13 +133,10 @@ const Router = {
 	handleSocketMessageChangeRoute(event) {
 		// removes the event listener that calls this function
 		window.app.socket.removeEventListener("message", Router.handleSocketMessageChangeRoute);
-		
-		console.log("handleSocketMessageChangeRoute");
 
 		const data = JSON.parse(event.data);
 		switch (data.type) {
 			case "joinTournament":
-				console.log("joined tournament: ", data.joined);
 				if (data.joined === "true")
 					Router.go("/tournament-lobby");
 				else

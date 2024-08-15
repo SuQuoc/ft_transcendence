@@ -12,7 +12,6 @@ export class JoinTournamentElement extends HTMLElement {
 
 		this.join_tournament_button = this.querySelector("[name='join_tournament_button']");
 
-		console.log("join tournament button: ", this.join_tournament_button);
 		// add event listeners
 		this.join_tournament_button.addEventListener("click", this.handleJoinTournamentVar);
 	}
@@ -26,7 +25,6 @@ export class JoinTournamentElement extends HTMLElement {
 	/// ----- Event Handlers ----- ///
 
 	handleJoinTournament(event) {
-		console.log("join tournament button clicked");
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
 		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute);

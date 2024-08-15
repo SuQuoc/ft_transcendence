@@ -45,21 +45,6 @@ export class ComponentBaseClass extends HTMLElement {
 	};
 
 
-	/// ----- Methods ----- ///
-
-	/** Is used to go to a different page by dispaching a custom event that the router listens to
-	 *  
-	 *  @param {string} url - the url to navigate to
-	 */
-	changeRoute(url) {
-		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
-			bubbles: true,
-			composed: true,
-			detail: { url }
-		}));
-	};
-
-
 	/// ----- Event Handlers ----- ///
 	
 	// triggers a custom event when a link is clicked inside the shadow DOM,
@@ -69,7 +54,7 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("link clicked in shadow DOM");
 
 		const url = event.target.getAttribute("href");
-		this.changeRoute(url);
+		window.app.router.go(url);
 	};
 
 

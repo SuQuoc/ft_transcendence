@@ -114,7 +114,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 											"max_player_num": number_of_players}));
 		
 		// goes to the tournament lobby
-		this.changeRoute("/tournament-lobby");
+		window.app.router.go("/tournament-lobby");
 	};
 
 
@@ -125,7 +125,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));
-		this.changeRoute("/tournament-waiting-room");
+		window.app.router.go("/tournament-waiting-room");
 	}
 
 
