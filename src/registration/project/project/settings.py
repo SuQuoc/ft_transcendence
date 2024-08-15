@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # [aguilmea] added manually
     'rest_framework.authtoken',  # [aguilmea] added manually
+    'rest_framework_simplejwt.token_blacklist',  # [aguilmea] added manually
     'core_app',
 ]
 
@@ -57,17 +58,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-#     # "SIGNING_KEY": os.environ.get("JWT_SECRET"),
-#     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-#     'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
-# }
-
-# to generate the keys:
-# openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
-# openssl rsa -pubout -in private_key.pem -out public_key.pem
-
 with open('/run/secrets/private_key.pem', 'r') as f:
     PRIVATE_KEY = f.read()
 
@@ -78,6 +68,8 @@ SIMPLE_JWT = {
     'ALGORITHM': 'RS256',
     'SIGNING_KEY': PRIVATE_KEY,
     'VERIFYING_KEY': PUBLIC_KEY,
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 # [aguilmea] end of added manually
 

@@ -7,7 +7,7 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'id', 'first_name', 'last_name', 'email', 'password']
+        fields = ['username', 'id', 'password']
         extra_kwargs = {
             'id': {'read_only': True},  # read-only so it's not required in POST requests
             'password': {'write_only': True},  # write-only so it's not returned in GET requests
@@ -31,4 +31,4 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class DeleteUserSerializer(serializers.Serializer):
-    password = serializers.CharField(write_only=True)
+    current_password = serializers.CharField(write_only=True)
