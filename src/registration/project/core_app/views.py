@@ -53,20 +53,25 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def delete_user(request):
-    user = request.user
-    serializer = DeleteUserSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            current_password = serializer.validated_data['password']
-            if not user.check_password(current_password):
-                return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
-            user.delete()
-            
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        current_password = request.data.get('current_password')
+        refresh = request.COOKIES.get('refresh')
+        if not current_password or not refresh:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        if not user.check_password(current_password):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = RefreshToken(refresh)
+        refresh_token.blacklist()
+
+        user.delete()
+        response = Response(status=status.HTTP_200_OK)
+        return response
+
+    except Exception as e:
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
