@@ -6,14 +6,6 @@ Content-Type: application/json
 
 ###
 
-DELETE https://127.0.0.1:8000/registration/delete_user/
-Content-Type: application/json
-Authorization: Bearer bla.bla.bla
-
-{"current_password": "Pass1234!"}
-
-###
-
 POST https://127.0.0.1:8000/registration/login/
 Content-Type: application/json
 
@@ -21,17 +13,25 @@ Content-Type: application/json
 
 ###
 
+POST https://127.0.0.1:8000/registration/delete_user/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{"current_password": "Pass1234!"}
+
+###
+
 GET https://127.0.0.1:8000/registration/logout/
 Content-Type: application/json
-Authorization: Bearer bla.bla.bla
+Cookie: access=a,b,c refresh=x,y,z
 
-{"refresh": "bla.bla.bla"}
+{}
 
 ###
 
 POST https://127.0.0.1:8000/registration/change_password/
 Content-Type: application/json
-Authorization: Bearer bla.bla.bla
+Cookie: access=a,b,c refresh=x,y,z
 
 {"current_password": "Pass1234!", "new_password": "Pass5678!"}
 
@@ -39,7 +39,7 @@ Authorization: Bearer bla.bla.bla
 
 GET https://127.0.0.1:8000/registration/verify_token/
 Content-Type: application/json
-Authorization: Bearer bla.bla.bla
+Cookie: access=a,b,c refresh=x,y,z
 
 {}
 
@@ -47,7 +47,6 @@ Authorization: Bearer bla.bla.bla
 
 POST https://127.0.0.1:8000/registration/refresh_token/
 Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
 
-{
-  "refresh": "bla.bla.bla"
-}
+{}
