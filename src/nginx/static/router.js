@@ -56,11 +56,14 @@ const Router = {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
 
+		//comment out to add token check
+		/*
 		const tokenValid = await validateToken();
 
 		if (!tokenValid && route !== "/login" && route !== "/signup") {
 			route = "/login";
 		}
+		*/
 
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory) {
