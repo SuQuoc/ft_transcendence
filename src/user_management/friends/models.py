@@ -53,6 +53,7 @@ class FriendList(models.Model):
         return friends_with_request_id
     
     def get_friends_request_id(self, friend):
+         # Ensure self.user is defined
         friend_request = FriendRequest.objects.filter(
             (Q(sender=self.user) & Q(receiver=friend)) | 
             (Q(sender=friend) & Q(receiver=self.user)),
@@ -62,6 +63,15 @@ class FriendList(models.Model):
             return friend_request.id
         return None
 
+    def get_friends_request(self, friend):
+         # Ensure self.user is defined
+        friend_request = FriendRequest.objects.filter(
+            (Q(sender=self.user) & Q(receiver=friend)) | 
+            (Q(sender=friend) & Q(receiver=self.user)),
+            status=FriendRequest.ACCEPTED
+        ).first()
+        
+        return friend_request
 
 
 class FriendRequest(models.Model):

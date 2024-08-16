@@ -15,7 +15,7 @@ class FriendRequestSendSerializer(serializers.ModelSerializer):
 
 
 class FriendRequestAnswerSerializer(serializers.ModelSerializer):
-    friend_request_id = serializers.IntegerField(source='id')
+    friend_request_id = serializers.IntegerField(source='id') # renaming id to friend_request_id
 
     class Meta:
         model = FriendRequest

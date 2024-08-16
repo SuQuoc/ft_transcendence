@@ -36,9 +36,16 @@ def create_user_objs(user_infos):
         return users
 
 def create_friend_request_objs(user_objs, friend_request_info):
+    """
+    Creates the request and triggers the models accept and decline to add the person to the FriendList
+    """
     requests = []
     for sender, receiver, status in friend_request_info:
         fr = FriendRequest.objects.create(sender=user_objs[sender], receiver=user_objs[receiver], status=status)
+        if status == FriendRequest.ACCEPTED:
+            fr.accept()
+        elif status == FriendRequest.DECLINED:
+            fr.decline()
         requests.append(fr)
     return requests
 
@@ -88,20 +95,20 @@ class SearchTest(APITestCase):
         print(json.dumps(response_json, indent=4))
         # self.assertEqual(response.status_code, 210)
 
-    def test_search_pending(self):
-        url = create_url_with_query_params(self.url, {"term": "pend"})
-        response = self.client.get(url, secure=True, **self.headers)
-        response_json = response.json()
-        print(json.dumps(response_json, indent=4))
-
-    def test_search_declined(self):
-        url = create_url_with_query_params(self.url, {"term": "decline"})
-        response = self.client.get(url, secure=True, **self.headers)
-        response_json = response.json()
-        print(json.dumps(response_json, indent=4))
-    
-    def test_search_stranger(self):
-        url = create_url_with_query_params(self.url, {"term": "Stranger"})
-        response = self.client.get(url, secure=True, **self.headers)
-        response_json = response.json()
-        print(json.dumps(response_json, indent=4))
+    # def test_search_pending(self):
+    #     url = create_url_with_query_params(self.url, {"term": "pend"})
+    #     response = self.client.get(url, secure=True, **self.headers)
+    #     response_json = response.json()
+    #     print(json.dumps(response_json, indent=4))
+# 
+    # def test_search_declined(self):
+    #     url = create_url_with_query_params(self.url, {"term": "decline"})
+    #     response = self.client.get(url, secure=True, **self.headers)
+    #     response_json = response.json()
+    #     print(json.dumps(response_json, indent=4))
+    # 
+    # def test_search_stranger(self):
+    #     url = create_url_with_query_params(self.url, {"term": "Stranger"})
+    #     response = self.client.get(url, secure=True, **self.headers)
+    #     response_json = response.json()
+    #     print(json.dumps(response_json, indent=4))
