@@ -15,14 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app import views  # [aguilmea] added manually
-from django.contrib import admin  # [aguilmea] deleted manually for now
-from django.urls import path
+from core_app import views
+from django.contrib import admin
+from django.urls import re_path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # [aguilmea] deleted manuallyfor now
-    path('signup', views.signup),  # [aguilmea] added
-    path('login', views.login),  # [aguilmea] added
-    path('verify_token', views.verify_token),  # [aguilmea] added
-    path('delete_user', views.delete_user),  # [aguilmea] added
+    re_path('signup', views.signup),
+    re_path('delete_user', views.delete_user),
+    re_path('login', views.login),
+    re_path('logout', views.logout),
+    re_path('change_password', views.change_password),
+    re_path('verify_token', views.verify_token),
+    re_path('refresh_token', views.refresh_token),
 ]
