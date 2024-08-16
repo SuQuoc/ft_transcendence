@@ -175,47 +175,60 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-    # Receive message from WebSocket
-    # Receive key up {up=1}
+    # Receive message from Client
     async def receive(self, text_data=None, bytes_data=None):
-        text_data_json = json.loads(text_data)
-        if text_data_json["type"] == "update":
-            if not self.player:
-                return
-            async with self.update_lock:
-                self.player.up = text_data_json["up"]
-                self.player.down = text_data_json["down"]
+        msg = json.loads(text_data)
 
-        elif text_data_json["type"] == "roomSize":
-            self.group_max_size = int(text_data_json["roomSize"])
+        match msg["type"]:
 
-        elif text_data_json["type"] == "newClient":
-            print(text_data_json)
-        elif text_data_json["type"] == "createTournament":
-            await self.createTournament(text_data_json)
+            case "update":
+                if not self.player:
+                    return
+                async with self.update_lock:
+                    self.player.up = msg["up"]
+                    self.player.down = msg["down"]
 
-        elif text_data_json["type"] == "joinTournament":
-            await self.joinTournament(text_data_json)
+            case "roomSize":
+                self.group_max_size = int(msg["roomSize"])
 
+            case "newClient":
+                print(msg)
+
+            case "createTournament":
+                print("createTournament")
+                await self.createTournament(msg)
+
+            case "joinTournament":
+                print("joinTournament")
+                await self.joinTournament(msg)
+
+            case None:
+                print("[Warning] Received message with None type")
+
+    # JoinTournament
     async def joinTournament(self, msg):
         print("joinTournament")
+
+        # Check if the tournament exists
         self.lobby = self.lobbies.get(msg["tournament_name"], None)
         if self.lobby is None:
             # send error message ?
             return
+
+        # Add player to the tournament
         self.lobby = self.lobbies[msg["tournament_name"]]
         status = "false"
         if self.lobby.addPlayer(self.player):
             status = "true"
         await self.sendJoinTournament(status)
 
+        # remove player to the tournaments lobbies group and send a update the lobby list 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.updateLobbyList()
         print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
-    # Receive message from WebSocket
+    # Create a Tournament
     async def createTournament(self, msg):
-        # Create a new tournament
         # send if tournament already exists ?
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.lobbies[msg["tournament_name"]] = self.lobby
