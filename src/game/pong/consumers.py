@@ -7,12 +7,13 @@ import uuid
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from .game_code.createMsg import createLobbyStatusDict
 from .game_code.ball import GameBall
 from .game_code.lobby import Lobby
 from .game_code.match import Match
 from .game_code.pongPlayer import PongPlayer
 from .game_code.storageClasses import SlotXy
+
+from .game_code.createMsg import SendToClient
 
 # need asgiref
 # NEED TO FIX X !!!!!!!!!!!!!!!!!!
@@ -55,7 +56,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
         self.player = PongPlayer(self.player_id, self.map_size)
-        await self.updateLobbyList()
+        self.sendtoClient: SendToClient = SendToClient()
+        await self.sendtoClient.sendLobbyStatus(self.lobbies, self.group_name)
         return
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
@@ -152,7 +154,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "match_points_right": ball.match_points["right"],
             },
         )
-        print("send to client done")
 
     async def disconnect(self, close_code):
 
@@ -201,21 +202,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        await self.updateLobbyList()
+        await self.sendtoClient.sendLobbyStatus(self.lobbies, self.group_name)
 
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
-
-    async def updateLobbyList(self):
-        print("updateLobbyList")
-        msg = await createLobbyStatusDict(self.lobbies)
-        if msg is None:
-            return
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                "type": "update.tournamentList",
-                "tournaments": msg,
-            })
 
     async def update_tournamentList(self, e):
         print("updateTournamentListSend")
