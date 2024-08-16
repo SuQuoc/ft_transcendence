@@ -5,6 +5,7 @@ export class UserProfile extends ComponentBaseClass {
         super();
     }
 
+    // Update the getElementHTML method to include a spinner
     getElementHTML() {
         const template = document.createElement('template');
         template.innerHTML = `
@@ -37,6 +38,12 @@ export class UserProfile extends ComponentBaseClass {
           color: red;
           display: none;
         }
+        .spinner-border {
+          display: none;
+          width: 1rem;
+          height: 1rem;
+          border-width: 0.2em;
+        }
       </style>
       <div class="form-container bg-dark text-white">
         <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
@@ -52,6 +59,9 @@ export class UserProfile extends ComponentBaseClass {
             <input type="email" class="form-control" id="email" disabled readonly>
           </div>
           <button type="button" class="btn btn-primary" id="saveProfile">Save</button>
+          <div class="spinner-border text-light" role="status" id="saveProfileSpinner">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </form>
         <hr>
         <form id="passwordForm">
@@ -69,6 +79,9 @@ export class UserProfile extends ComponentBaseClass {
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
           </div>
           <button type="button" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
+          <div class="spinner-border text-light" role="status" id="changePasswordSpinner">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </form>
       </div>
     `;
@@ -147,10 +160,19 @@ export class UserProfile extends ComponentBaseClass {
         }
     }
 
+    // Update the saveProfile method to show/hide the spinner and disable/enable the button
     async saveProfile() {
+        const saveButton = this.shadowRoot.getElementById('saveProfile');
+        const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');
+        saveButton.disabled = true;
+        saveSpinner.style.display = 'inline-block';
+
         const displayName = this.shadowRoot.getElementById('displayName').value;
         const email = this.shadowRoot.getElementById('email').value;
         const profileImage = this.selectedImage;
+
+        // Simulate API call, can be removed later
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         //TODO: Add API call to save profile
         /*
@@ -177,6 +199,9 @@ export class UserProfile extends ComponentBaseClass {
             console.error('Error saving profile:', error);
         }
         */
+
+        saveButton.disabled = false;
+        saveSpinner.style.display = 'none';
     }
 
     validatePasswords() {
@@ -198,15 +223,28 @@ export class UserProfile extends ComponentBaseClass {
         }
     }
 
-    changePassword() {
+    // Update the changePassword method to show/hide the spinner and disable/enable the button
+    async changePassword() {
+        const changeButton = this.shadowRoot.getElementById('changePassword');
+        const changeSpinner = this.shadowRoot.getElementById('changePasswordSpinner');
+        changeButton.disabled = true;
+        changeSpinner.style.display = 'inline-block';
+
         const oldPassword = this.shadowRoot.getElementById('oldPassword').value;
         const newPassword = this.shadowRoot.getElementById('newPassword').value;
         const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
         if (newPassword !== confirmPassword) {
             return;
         }
+
+        // Simulate API call, can be removed later
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         //TODO: Add API call to change password
         console.log('Password changed:', { oldPassword, newPassword });
+
+        changeButton.disabled = false;
+        changeSpinner.style.display = 'none';
     }
 }
 
