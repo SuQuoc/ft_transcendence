@@ -87,4 +87,21 @@ class SearchTest(APITestCase):
         response_json = response.json()
         print(json.dumps(response_json, indent=4))
         # self.assertEqual(response.status_code, 210)
-        
+
+    def test_search_pending(self):
+        url = create_url_with_query_params(self.url, {"term": "pend"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        print(json.dumps(response_json, indent=4))
+
+    def test_search_declined(self):
+        url = create_url_with_query_params(self.url, {"term": "decline"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        print(json.dumps(response_json, indent=4))
+    
+    def test_search_stranger(self):
+        url = create_url_with_query_params(self.url, {"term": "Stranger"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        print(json.dumps(response_json, indent=4))
