@@ -1,5 +1,8 @@
 # [aguilmea] this file has been created manually
 
+from datetime import datetime
+from datetime import timedelta
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -12,9 +15,9 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
-from .serializers import UserSerializer, LoginSerializer, DeleteUserSerializer
-
-from datetime import datetime, timedelta
+from .serializers import DeleteUserSerializer
+from .serializers import LoginSerializer
+from .serializers import UserSerializer
 
 
 @api_view(['POST'])
@@ -26,15 +29,15 @@ def signup(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
         token_s = TokenObtainPairSerializer(data=request.data)
-        if not token_s.is_valid(): # [aguilmea] not sure why this should happen and if i should keep the check
+        if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        
+
         response = Response(status=status.HTTP_201_CREATED)
-        
+
         response.data = token_s.validated_data
-        
+
         access_token = token_s.validated_data['access']
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5) 
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
         response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
 
         refresh_token = token_s.validated_data['refresh']
@@ -47,7 +50,7 @@ def signup(request):
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['DELETE'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def delete_user(request):
     user = request.user
@@ -76,15 +79,15 @@ def login(request):
         if user is None or not user.check_password(credentials_s.validated_data['password']):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenObtainPairSerializer(data=request.data)
-        if not token_s.is_valid(): # [aguilmea] not sure why this should happen and if i should keep the check
+        if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
             return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         response = Response(status=status.HTTP_200_OK)
-        
+
         response.data = token_s.validated_data
-        
+
         access_token = token_s.validated_data['access']
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5) 
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
         response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
 
         refresh_token = token_s.validated_data['refresh']
@@ -112,7 +115,7 @@ def change_password(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def logout(request):
     try:
@@ -127,7 +130,7 @@ def logout(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def refresh_token(request):
     try:
