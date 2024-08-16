@@ -24,7 +24,7 @@ const Router = {
 
 
 	/** opens the window.app.socket if it is closed */
-	makeWebSocket: () => {
+	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
@@ -34,7 +34,7 @@ const Router = {
 
 		// does it make sense to have this here??
 		window.app.socket.onopen = () => {
-			window.app.socket.send(JSON.stringify({"type": "newClient", "user_id": "123456"}));
+			window.app.socket.send(JSON.stringify({"type": type, "user_id": "123456"}));
 		};
 	},
 
@@ -80,14 +80,14 @@ const Router = {
 				pageElement.textContent = "Play";
 				break;
 			case "/tournament":
-				Router.makeWebSocket();
+				Router.makeWebSocket("onTournamentPage");
 				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-lobby-page");
 				break;
-			case "/tournament-waiting-room":
+			case "/tournament-waiting-room": // TODO: shouldn't log to history!!!!!
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-waiting-room-page");
 				break;
