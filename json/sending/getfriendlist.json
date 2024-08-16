@@ -1,3 +1,47 @@
 {
 	"uid": 1234
 }
+
+
+
+[
+	{
+		"uid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+		"displayname": "Max Mustermann",
+		"img": "https://i.pravatar.cc/15",
+		"online": true,
+		"relationship": "friend",
+		"friend_request_id": 0
+	}
+]
+
+
+
+
+[
+
+	{
+		"user":
+		{
+			"uid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+			"displayname": "Max Mustermann",
+			"img": "https://i.pravatar.cc/15",
+			"online": true,	
+		},
+		"relationship": "friend",
+		"friend_request_id": 0
+	},
+
+	{
+		"user":
+		{
+			"uid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+			"displayname": "Max Mustermann",
+			"img": "https://i.pravatar.cc/15",
+			"online": true,	
+		},
+		"relationship": "friend",
+		"friend_request_id": 0
+	}
+
+]

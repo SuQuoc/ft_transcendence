@@ -29,10 +29,10 @@ urlpatterns = (
     [
         path("um/admin/", admin.site.urls),
         # path("um/profile/", views.profile, name="profile"), # delete later, just for testing if server is still rendering changes
-        path('um/api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  # register service
-        path('um/api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # register service
-        path("um/api/friend-request/", include("friends.urls")),
-        path("um/api/", include("api.urls")),
+        path('um/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  # register service
+        path('um/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # register service
+        path("um/friends/", include("friends.urls")),
+        path("um/", include("api.urls")),
     ]
 
 )
