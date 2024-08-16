@@ -1,6 +1,8 @@
 from .match import Match
 from .pongPlayer import PongPlayer
 
+from channels.layers import get_channel_layer
+
 # This class would start when a lobby starts and manages the games !
 
 class Lobby:

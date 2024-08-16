@@ -17,7 +17,7 @@ export class ComponentBaseClass extends HTMLElement {
 	};
 
 	// get's called when the component is attached to the DOM
-	connectedCallback() {
+	connectedCallback() { // HTMLElement doesn't have connectedCallback
 		const template = this.getElementHTML();
 		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
 		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
@@ -33,7 +33,7 @@ export class ComponentBaseClass extends HTMLElement {
 	};
 
 	// get's called when the component is removed from the DOM
-	disconnectedCallback() {
+	disconnectedCallback() { // HTMLElement doesn't have disconnectedCallback
 		// remove event listeners (not sure if necessary), if there are any
 		const links = this.root.querySelectorAll("a");
 		if (links.length === 0)
@@ -42,21 +42,6 @@ export class ComponentBaseClass extends HTMLElement {
 			a.removeEventListener("click", this.handleLinkClick);
 			console.log("removed event listener ComponentBaseClass");
 		});
-	};
-
-
-	/// ----- Methods ----- ///
-
-	/** Is used to go to a different page by dispaching a custom event that the router listens to
-	 *  
-	 *  @param {string} url - the url to navigate to
-	 */
-	changeRoute(url) {
-		this.dispatchEvent(new CustomEvent("change-route-custom-event", { // the router listens for this event
-			bubbles: true,
-			composed: true,
-			detail: { url }
-		}));
 	};
 
 
@@ -69,10 +54,7 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("link clicked in shadow DOM");
 
 		const url = event.target.getAttribute("href");
-		console.log("url: ", url);
-		console.log("event: ", event);
-		console.log("target: ", event.target);
-		this.changeRoute(url);
+		window.app.router.go(url);
 	};
 
 
