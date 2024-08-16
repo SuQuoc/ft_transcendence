@@ -1,3 +1,24 @@
+const validateToken = async () => {
+	try {
+		// check if the token is valid
+		const response = await fetch("/registration/verify_token", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include"
+		});
+
+		if (!response.status !== 200) {
+			throw new Error("Error verifying token");
+		}
+		return true;
+	} catch (error) {
+		console.error("Error validating token:", error.message);
+		return false;
+	}
+}
+
 const Router = {
 	init: () => {
 		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
@@ -31,9 +52,15 @@ const Router = {
 	},
 
 	// changes the page main content and update the URL
-	go: (route, addToHistory = true) => {
+	go: async (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
+
+		const tokenValid = await validateToken();
+
+		if (!tokenValid && route !== "/login" && route !== "/signup") {
+			route = "/login";
+		}
 
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory) {
@@ -45,8 +72,7 @@ const Router = {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 			console.log("hide navbar and footer");
-		}
-		else {
+		} else {
 			document.getElementById("navbar").style.display = "";
 			document.getElementById("footer").style.display = "";
 		}
