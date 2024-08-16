@@ -3,6 +3,11 @@ import { ComponentBaseClass } from './componentBaseClass.js';
 export class UserProfile extends ComponentBaseClass {
     constructor() {
         super();
+        //done to check on visibility of the element
+        this.observer = new IntersectionObserver(this.handleVisibilityChange.bind(this), {
+            root: null,
+            threshold: 0.1
+        });
     }
 
     // Update the getElementHTML method to include a spinner
@@ -96,11 +101,24 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('confirmPassword').addEventListener('input', this.validatePasswords.bind(this));
         this.shadowRoot.getElementById('profileImage').addEventListener('click', () => this.shadowRoot.getElementById('imageUpload').click());
         this.shadowRoot.getElementById('imageUpload').addEventListener('change', this.handleImageUpload.bind(this));
-        this.loadUserData();
 
+        this.observer.observe(this);
         this.shadowRoot.addEventListener('click', (event) => {
             event.stopPropagation();
         });
+    }
+
+    handleVisibilityChange(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                this.loadUserData();
+            }
+        });
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.observer.unobserve(this);
     }
 
     async loadUserData() {
@@ -124,7 +142,22 @@ export class UserProfile extends ComponentBaseClass {
         }
         return await response.json();
         */
-        return { displayName: 'Max Payne', email: 'dummy@gmx.at', profileImage: 'https://i.pravatar.cc/300?img=52' };
+        //TODO: check why there's apparently an timing issue, only works with this workaround
+        if (!window.app) {
+            await new Promise(resolve => {
+                const checkApp = setInterval(() => {
+                    if (window.app) {
+                        clearInterval(checkApp);
+                        resolve();
+                    }
+                }, 50);
+            });
+        }
+        console.log("Fetching user data, window.app:", window.app);
+        if (!window.app) {
+            throw new Error("window.app is not initialized");
+        }
+        return { displayName: app.userData.username, email: app.userData.email, profileImage: 'https://i.pravatar.cc/300?img=52' };
     }
 
     handleImageUpload(event) {
@@ -160,7 +193,6 @@ export class UserProfile extends ComponentBaseClass {
         }
     }
 
-    // Update the saveProfile method to show/hide the spinner and disable/enable the button
     async saveProfile() {
         const saveButton = this.shadowRoot.getElementById('saveProfile');
         const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');

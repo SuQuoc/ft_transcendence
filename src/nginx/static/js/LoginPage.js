@@ -56,13 +56,11 @@ export class LoginPage extends ComponentBaseClass {
 			if (!response.ok) {
 				throw new Error('Login failed');
 			}
-
-			const data = await response.json();
-			window.app.token = data.token;
+			window.app.userData.username = username;
+			window.app.userData.email = username;
 
 			// Redirect to the home page or another page
-			const event = new CustomEvent('change-route-from-shadow', { detail: { url: '/' } });
-			document.dispatchEvent(event);
+			app.router.go('/');
 		} catch (error) {
 			console.error('Error during login:', error);
 		} finally {

@@ -9,7 +9,7 @@ const validateToken = async () => {
 			credentials: "include"
 		});
 
-		if (!response.status !== 200) {
+		if (response.status !== 200) {
 			throw new Error("Error verifying token");
 		}
 		return true;
@@ -20,7 +20,15 @@ const validateToken = async () => {
 }
 
 const Router = {
-	init: () => {
+	init: async () => {
+		// check if the user is logged in
+		if (location.pathname !== "/login" && location.pathname !== "/signup") {
+			const tokenValid = await validateToken();
+			if (!tokenValid) {
+				Router.go("/login", false);
+				return;
+			}
+		}
 		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
 			a.addEventListener("click", (event) => {
 				event.preventDefault();
@@ -82,19 +90,18 @@ const Router = {
 
 
 	// changes the page main content and update the URL
-	go: (route, addToHistory = true) => {
+	go: async (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
 
 		//comment out to add token check
-		/*
-		const tokenValid = await validateToken();
-
-		if (!tokenValid && route !== "/login" && route !== "/signup") {
-			route = "/login";
+		if (route !== "/login" && route !== "/signup") {
+			const tokenValid = await validateToken();
+			if (!tokenValid) {
+				route = "/login";
+			}
 		}
-		*/
-		
+
 		Router.hideOrShowNavbarAndFooter(route);
 
 		// check for external links maybe??!! (if first character is not a slash)
@@ -104,7 +111,7 @@ const Router = {
 			case "/":
 				pageElement = document.createElement("play-menu-home-page");
 				break;
-				case "/play":
+			case "/play":
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
@@ -132,6 +139,11 @@ const Router = {
 				fragment.appendChild(document.createElement("friend-search"));
 				pageElement = fragment;
 				console.log("friends page created");
+				break;
+			case "/logout":
+				//TODO: add API call to registration/logout endpoint
+				//redirect to login page
+				route = "/login";
 				break;
 			default:
 				// homepage
