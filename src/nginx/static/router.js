@@ -1,3 +1,24 @@
+const validateToken = async () => {
+	try {
+		// check if the token is valid
+		const response = await fetch("/registration/verify_token", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include"
+		});
+
+		if (!response.status !== 200) {
+			throw new Error("Error verifying token");
+		}
+		return true;
+	} catch (error) {
+		console.error("Error validating token:", error.message);
+		return false;
+	}
+}
+
 const Router = {
 	init: () => {
 		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
@@ -22,6 +43,23 @@ const Router = {
 		Router.go(location.pathname);
 	},
 
+	// changes the page main content and update the URL
+	go: async (route, addToHistory = true) => {
+		console.log(`Going to ${route}`);
+		let pageElement = null; // the new page element
+
+		//comment out to add token check
+		/*
+		const tokenValid = await validateToken();
+
+		if (!tokenValid && route !== "/login" && route !== "/signup") {
+			route = "/login";
+		}
+		*/
+
+		// adds the route to the history, so the back/forward buttons work
+		if (addToHistory) {
+			history.pushState({route}, "", route);
 
 	/** opens the window.app.socket if it is closed */
 	makeWebSocket: (type) => {
@@ -96,6 +134,13 @@ const Router = {
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
+				break;
+			case "/friends":
+				const fragment = document.createDocumentFragment();
+				fragment.appendChild(document.createElement("friend-list"));
+				fragment.appendChild(document.createElement("friend-search"));
+				pageElement = fragment;
+				console.log("friends page created");
 				break;
 			default:
 				// homepage
