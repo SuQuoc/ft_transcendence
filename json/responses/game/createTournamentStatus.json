@@ -1,0 +1,4 @@
+{
+	"type": "createTournamentStatus",
+	"status": "accepted" //(or "declined")
+}

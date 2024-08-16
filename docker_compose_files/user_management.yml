@@ -2,18 +2,18 @@ services:
   db_user_management:
     image: postgres:16
     environment:
-      POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-my_default_postgre_db}"
-      POSTGRES_USER: "${POSTGRES_USER_MANAGEMENT:-my_default_POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_MANAGEMENT:-my_default_POSTGRES_PASSWORD}"
-      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_MANAGEMENT:-my_default_POSTGRES_ACCESS_USER}"
-      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_MANAGEMENT:-my_default_POSTGRES_ACCESS_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
+      POSTGRES_USER: "${POSTGRES_USER_MANAGEMENT:-posty}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_MANAGEMENT:-insecurepass}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_MANAGEMENT:-accessy}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_MANAGEMENT:-accesspass}"
     expose:
       - "${DB_PORT_MANAGEMENT:-5432}"
     volumes:
       - volume_user_management:/var/lib/postgresql/data
       - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_MANAGEMENT:-my_default_POSTGRES_USER} -d ${POSTGRES_DB_MANAGEMENT:-my_default_postgre_db}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_MANAGEMENT:-posty} -d ${POSTGRES_DB_MANAGEMENT:-default_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
@@ -31,9 +31,11 @@ services:
     expose:
       - "8000:8000"
     environment:
-      POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-my_default_postgre_db}"
-      POSTGRES_ACCESS_USER: "${POSTGRES_USER_MANAGEMENT:-my_default_POSTGRES_USER}"
-      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_MANAGEMENT:-my_default_POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
+      POSTGRES_USER: "${POSTGRES_USER_MANAGEMENT:-posty}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_MANAGEMENT:-insecurepass}"
+      POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_MANAGEMENT:-accessy}"
+      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_MANAGEMENT:-accesspass}"
       DB_HOST: "${DB_HOST_MANAGEMENT:-db_user_management}"
       DB_PORT: "${DB_PORT_MANAGEMENT:-5432}"
       DJ_SECRET_KEY: ${DJ_SECRET_KEY_MANAGEMENT:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}

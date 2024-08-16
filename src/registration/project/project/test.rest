@@ -1,33 +1,52 @@
-# [aguilmea] install vs code extension "REST Client" to use "send request tool"
-# [aguilmea] file was created manually
-
-POST https://127.0.0.1:8000/registration/login/
-Content-Type: application/json
-
-{"username": "annie", "password": "Pass1234!"}
-
-###
 
 POST https://127.0.0.1:8000/registration/signup/
 Content-Type: application/json
 
-{"username": "q", "first_name": "anie", "last_name": "g", "email": "q@gmail.com", "password": "Pass1234!"}
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+POST https://127.0.0.1:8000/registration/login/
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+POST https://127.0.0.1:8000/registration/delete_user/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{"current_password": "Pass1234!"}
+
+###
+
+GET https://127.0.0.1:8000/registration/logout/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
 
 ###
 
 POST https://127.0.0.1:8000/registration/change_password/
 Content-Type: application/json
-Authorization: Bearer 5121696b7685d5cbb1c81445b6203262cb84afe3
+Cookie: access=a,b,c refresh=x,y,z
 
-{
-  "old_password": "Pass1234!",
-  "new_password": "NewPass!"
-}
+{"current_password": "Pass1234!", "new_password": "Pass5678!"}
 
 ###
 
 GET https://127.0.0.1:8000/registration/verify_token/
 Content-Type: application/json
-Authorization: Bearer 5121696b7685d5cbb1c81445b6203262cb84afe3
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+GET https://127.0.0.1:8000/registration/refresh_token/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
 
 {}

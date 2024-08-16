@@ -15,10 +15,6 @@ class FriendRequestTest(TestCase):
         self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="TestUser1", online=False)
         self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="Stranger", online=True)
 
-        # Create FriendList instances, since it"s only done for u when the api is used
-        FriendList.objects.create(user=self.user1)
-        FriendList.objects.create(user=self.stranger)
-
         self.user_tokens = {
             f"{self.user1.displayname}": f"{generate_token(self.user1.user_id)}",
             f"{self.stranger.displayname}": f"{generate_token(self.stranger.user_id)}",
@@ -78,6 +74,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.PENDING).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "friend request already sent, be patient")
@@ -93,6 +90,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.ACCEPTED).count()
+
         self.assertEqual(count, 1)
         self.assertEqual(response_json["error"], "You are best buds")
         self.assertEqual(response.status_code, 400)
@@ -109,6 +107,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.ACCEPTED).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "Friend request accepted")
@@ -124,6 +123,7 @@ class FriendRequestTest(TestCase):
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.DECLINED).count()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(count, 1)
         self.assertEqual(response_json["message"], "Friend request declined")

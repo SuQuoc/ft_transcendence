@@ -13,12 +13,13 @@
 	crossorigin="anonymous"/>
 	<!-- Custom CSS -->
 	<link href="../css/template.css" rel="stylesheet"/>
-
 	<!-- Bootstrap Bundle with Popper -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
 		crossorigin="anonymous"
-		defer></script>
+		defer>
+	</script>
+
 	<!-- Custom js -->
 	<!-- The 'type="module"' means that the file will be loaded as a module.
 	 	This means every variables we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->
@@ -83,43 +84,6 @@
 
 
 	<!-- temporary ###Templates### for making new components -->
-	<template id="joinTournamentPageTemplate">
-		<scripts-and-styles></scripts-and-styles>
-		<div class="p-3 rounded-3 bg-dark">
-			<form id="createTournamentForm">
-				<!-- Tournament name -->
-				<h3 class="text-center text-white">Create a Tournament</h3>
-				<label for="tournamentName" class="form-label text-white-50">Tournament Name</label>
-				<input name="name"
-				id="tournamentName"
-				type="text"
-				class="form-control">
-
-				<!-- Number of Players -->
-				<div class="d-flex justify-content-around w-100">
-					<button type="button" class="btn btn-secondary">4</button>
-					<button type="button" class="btn btn-secondary">8</button>
-					<button type="button" class="btn btn-secondary">16</button>
-				</div>
-
-				<!-- Points required to win one round -->
-				<div class="d-flex flex-column">
-					<label for="tournamentPointsToWin" class="form-label text-white-50">Points required to win one game</label>
-					<span id="tournamentPointsToWinDisplay" class="text-white-50">5</span>
-					<input type="range"
-					class="form-range range-input-slider"
-					id="tournamentPointsToWin"
-					name="pointsToWin"
-					min="1"
-					max="99"
-					step="1"
-					value="5">
-				</div>
-
-				<button type="submit" class="btn btn-secondary w-100">create</button>
-			</form>
-		</div>
-	</template>
 </body>
 
 </html>
