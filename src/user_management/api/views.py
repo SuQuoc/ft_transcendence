@@ -116,9 +116,10 @@ class SearchUserView(generics.ListAPIView):
 
     def get(self, request):
         user = get_user_from_jwt(request)
-        search_term = request.query_params.get("displayname", "")
-
-        results = CustomUser.objects.filter(displayname__icontains=search_term)[:5]
+        
+        searchterm = request.query_params.get("term", "")
+            
+        results = CustomUser.objects.filter(displayname__icontains=searchterm)[:5]
         if not results:
             return Response({"detail": "No users found."}, status=status.HTTP_404_NOT_FOUND)
         
@@ -156,5 +157,5 @@ def get_pending_friend_request(*, me, other):
     elif fr_received: 
         return "received", fr_received.id
     else:
-        return None
+        return None, None
 

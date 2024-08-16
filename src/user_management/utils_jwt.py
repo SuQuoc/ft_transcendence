@@ -16,3 +16,4 @@ def get_user_from_jwt(request):
         user = CustomUser.objects.get(user_id=request.user.user_id)
     except CustomUser.DoesNotExist:
         raise PermissionDenied("Invalid user ID in JWT (either our mistake or u sus)")
+    return user

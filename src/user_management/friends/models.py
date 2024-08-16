@@ -34,7 +34,7 @@ class FriendList(models.Model):
         to_unfriend_friend_list.del_friend(self.user)
 
     def contains(self, friend):
-        if friend in self.friends:
+        if self.friends.filter(user_id=friend.user_id).exists():
             return True
         return False
 
