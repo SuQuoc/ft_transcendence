@@ -43,25 +43,7 @@ const Router = {
 		Router.go(location.pathname);
 	},
 
-	// changes the page main content and update the URL
-	go: async (route, addToHistory = true) => {
-		console.log(`Going to ${route}`);
-		let pageElement = null; // the new page element
-
-		//comment out to add token check
-		/*
-		const tokenValid = await validateToken();
-
-		if (!tokenValid && route !== "/login" && route !== "/signup") {
-			route = "/login";
-		}
-		*/
-
-		// adds the route to the history, so the back/forward buttons work
-		if (addToHistory) {
-			history.pushState({route}, "", route);
-
-	/** opens the window.app.socket if it is closed */
+	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -76,7 +58,7 @@ const Router = {
 		};
 	},
 
-	/** closes the window.app.socket if it is open */
+	//closes the window.app.socket if it is open
 	closeWebSocket: () => {
 		if (window.app.socket) {
 			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
@@ -86,7 +68,7 @@ const Router = {
 		}
 	},
 
-	/** hides or shows the navbar and footer depending on the route */
+	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
 		if (route === "/login" || route === "/signup") {
 			document.getElementById("navbar").style.display = "none";
@@ -103,6 +85,15 @@ const Router = {
 	go: (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
+
+		//comment out to add token check
+		/*
+		const tokenValid = await validateToken();
+
+		if (!tokenValid && route !== "/login" && route !== "/signup") {
+			route = "/login";
+		}
+		*/
 		
 		Router.hideOrShowNavbarAndFooter(route);
 
