@@ -3,9 +3,9 @@ from .storageClasses import SlotXy
 
 class PongPlayer:
 
-    def __init__(self, player_id, x, map_size: SlotXy) -> None:
+    def __init__(self, player_id, map_size: SlotXy) -> None:
         self.id = player_id
-        self.x = x
+        self.x = 0
         self.y = 0
         self.width = 20
         self.height = 100

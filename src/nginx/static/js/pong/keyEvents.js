@@ -5,7 +5,7 @@
 function send_key_status(id, up_down, chatSocket)
 {
     chatSocket.send(JSON.stringify({
-        "playerId": id, "up": up_down[0], "down": up_down[1],
+        "type": "update", "playerId": id, "up": up_down[0], "down": up_down[1],
     }));
 }
 
