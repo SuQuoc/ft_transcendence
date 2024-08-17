@@ -1,6 +1,5 @@
 import re
 import pytest
-import socket
 from playwright.sync_api import Page, Browser, BrowserContext, sync_playwright, expect
 
 @pytest.fixture(scope="function")
