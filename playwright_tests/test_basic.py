@@ -1,5 +1,6 @@
 import re
 import pytest
+import socket
 from playwright.sync_api import Page, Browser, BrowserContext, sync_playwright, expect
 
 @pytest.fixture(scope="function")
@@ -17,8 +18,11 @@ def page(context: BrowserContext):
     yield page
     page.close()
 
-def test_has_title(page: Page):
+def test_homepage(page: Page):
     page.goto("https://127.0.0.1:8000/")
-
-    # Expect a title "to contain" a substring.
     expect(page).to_have_title(re.compile("template"))
+
+def test_joinTournamentPage(page: Page):
+    page.goto("https://127.0.0.1:8000/")
+    page.locator('#main-content a[href="/tournament"].btn.btn-secondary.w-100').click()
+    expect(page).to_have_url("https://127.0.0.1:8000/tournament")
