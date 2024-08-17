@@ -30,7 +30,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # players: dict[str, PongPlayer] = {}
     players: dict[str, dict[str, PongPlayer]] = {}
 
-    lobbies: dict[str, Lobby] = {}
+    joinTournamentPage: dict[str, Lobby] = {}
 
     group_current_sizes: dict[str, int] = {}
     group_max_sizes: dict[str, int] = {}
@@ -58,7 +58,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         self.player = PongPlayer(self.player_id, self.map_size)
         self.sendtoClient: SendToClient = SendToClient()
-        await self.sendtoClient.sendLobbyStatus(self.lobbies, self.group_name)
+        await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage, self.group_name)
         return
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
@@ -69,7 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.player = PongPlayer(self.player_id, self.map_size)
         lobby = None
         async with self.update_lock:
-            lobby = self.lobbies.get(self.room_name, None)
+            lobby = self.joinTournamentPage.get(self.room_name, None)
 
         if lobby is None:
 
@@ -82,13 +82,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-            self.lobbies[self.room_name] = self.lobby
+            self.joinTournamentPage[self.room_name] = self.lobby
             print("Lobby created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
             return
 
         async with self.update_lock:
             
-            self.lobby = self.lobbies[self.room_name]
+            self.lobby = self.joinTournamentPage[self.room_name]
             self.match: Match = self.lobby.addPlayer(self.player)
 
 
@@ -163,11 +163,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if self.lobby:
                 lobby_name = self.lobby.lobby_name
 
-            if self.lobbies.get(lobby_name, None):
-                self.lobbies[lobby_name].removePlayer(self.player)
-                if self.lobbies[lobby_name].len == 0:
-                    del self.lobbies[lobby_name]
-                    self.lobbies.pop(lobby_name, None)
+            if self.joinTournamentPage.get(lobby_name, None):
+                self.joinTournamentPage[lobby_name].removePlayer(self.player)
+                if self.joinTournamentPage[lobby_name].len == 0:
+                    del self.joinTournamentPage[lobby_name]
+                    self.joinTournamentPage.pop(lobby_name, None)
 
             if self.player:
                 del self.player
@@ -210,19 +210,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("joinTournament")
 
         # Check if the tournament exists
-        self.lobby = self.lobbies.get(msg["tournament_name"], None)
+        self.lobby = self.joinTournamentPage.get(msg["tournament_name"], None)
         if self.lobby is None:
             # send error message ?
             return
 
         # Add player to the tournament
-        self.lobby = self.lobbies[msg["tournament_name"]]
+        self.lobby = self.joinTournamentPage[msg["tournament_name"]]
         status = "false"
         if self.lobby.addPlayer(self.player):
             status = "true"
         await self.sendJoinTournament(status)
 
-        # remove player to the tournaments lobbies group and send a update the lobby list 
+        # remove player to the tournaments joinTournamentPage group and send a update the lobby list 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.updateLobbyList()
         print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
@@ -231,12 +231,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def createTournament(self, msg):
         # send if tournament already exists ?
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
-        self.lobbies[msg["tournament_name"]] = self.lobby
+        self.joinTournamentPage[msg["tournament_name"]] = self.lobby
         self.lobby.addPlayer(self.player)
 
         # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        await self.sendtoClient.sendLobbyStatus(self.lobbies, self.group_name)
+        await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage, self.group_name)
 
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
