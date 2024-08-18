@@ -38,3 +38,8 @@ def test_login(page: Page):
     # Tournament button
     page.locator('#main-content a[href="/tournament"].btn.btn-secondary.w-100').click()
     expect(page).to_have_url("https://127.0.0.1:8000/tournament")
+
+    # Create Tournament
+    page.locator('#createName').fill("DieAlone")
+    page.locator('#create-tournament-button').click()
+    expect(page).to_have_url("https://127.0.0.1:8000/tournament-lobby")

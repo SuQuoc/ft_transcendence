@@ -101,3 +101,14 @@ game_up:
 
 game_down:
 	@${DOCKER_COMPOSE} --profile game down
+
+test: down
+	@make re > /dev/null 2>&1 &
+	@PID=$$!
+	@wait $$PID
+	@while ! nc -z localhost 8000; do \
+		echo "* Waiting for the server to start..."; \
+		sleep 2; \
+	done
+	pytest ./playwright_tests/test_basic.py
+	@make down
