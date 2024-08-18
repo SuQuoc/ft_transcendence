@@ -1,8 +1,26 @@
+//uid: User ID from User table
+//displayname: Current display name set by user
+//is_friend: boolean, true when user is a friend of the user searching (in FE cancel button)
+//is_pending_sender: boolean, true when user sent a friend request to the the user searching (in FE accept/decline request)
+//is_pending_receiver: boolean, true when user received a friend request from the user searching (in FE cancel request, same as decline)
+//if all values false, FE displays a + button for adding as a friend
+
 [
 	{
-		"displayname": "asdfas"
+		"uid": 1234,
+		"displayname": "AB",
+		"img": "https://i.pravatar.cc/150",
+		"onlinestatus": true,
+		"is_friend": true,
+		"is_pending_sender": false,
+		"is_pending_receiver": false
 	},
 	{
-		"displayname": "asdfas"
+		"uid": 1235,
+		"displayname": "BA",
+		"img": "https://i.pravatar.cc/150",
+		"is_friend": false,
+		"is_pending_sender": true,
+		"is_pending_receiver": false
 	}
 ]

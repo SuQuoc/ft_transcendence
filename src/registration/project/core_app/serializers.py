@@ -32,3 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DeleteUserSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField() # I should have a regex or something like that just like in CustomUser model

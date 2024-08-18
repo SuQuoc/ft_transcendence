@@ -1,0 +1,52 @@
+[
+	{
+		"user": {
+			"uid": 1234,
+			"displayname": "User 1",
+			"img": "https://i.pravatar.cc/150",
+			"online": true
+		},
+		"relationship": "friend",
+		"friend_request_id": 1
+	},
+	{
+		"user": {
+			"uid": 1235,
+			"displayname": "Username 2",
+			"img": "https://i.pravatar.cc/150",
+			"online": false
+		},
+		"relationship": "requested",
+		"friend_request_id": 2
+	},
+	{
+		"user": {
+			"uid": 1236,
+			"displayname": "Short",
+			"img": "https://i.pravatar.cc/150",
+			"online": false
+		},
+		"relationship": "received",
+		"friend_request_id": 3
+	},
+	{
+		"user": {
+			"uid": 1237,
+			"displayname": "Long",
+			"img": "https://i.pravatar.cc/150",
+			"online": false
+		},
+		"relationship": "stranger",
+		"friend_request_id": null
+	},
+	{
+		"user": {
+			"uid": 1238,
+			"displayname": "Test 5",
+			"img": "https://i.pravatar.cc/150",
+			"online": false
+		},
+		"relationship": "friend",
+		"friend_request_id": 4
+	}
+]

@@ -1,14 +1,14 @@
 import uuid
 
 from api.models import CustomUser
-from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.urls import reverse
 from friends.models import FriendList
 from utils_jwt import generate_token
 
 
 # is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
-class CustomUserProfileTest(TestCase):
+class CustomUserProfileTest(APITestCase):
     def setUp(self):
         self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='TestUser1', online=False)
         self.friend = CustomUser.objects.create(user_id=uuid.uuid4(), displayname='Friend', online=True)

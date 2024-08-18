@@ -19,7 +19,7 @@ def page(context: BrowserContext):
 
 def test_homepage(page: Page):
     page.goto("https://127.0.0.1:8000/")
-    expect(page).to_have_title(re.compile("template"))
+    expect(page).to_have_title(re.compile("ft_transcendence"))
 
 def test_joinTournamentPage(page: Page):
     page.goto("https://127.0.0.1:8000/")

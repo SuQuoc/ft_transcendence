@@ -73,5 +73,8 @@ class CustomUser(models.Model):
             # since i do super.save() the imageField = None and then self.image.name will fail
         super().delete(*args, **kwargs)
 
+    def get_online_status(self):
+        return "true" if self.online else "false"
+
     def __str__(self):
         return self.displayname

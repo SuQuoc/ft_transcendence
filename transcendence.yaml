@@ -1,0 +1,383 @@
+openapi: 3.0.3
+info:
+  title: ft_transcendence
+  description: |-
+    This is the documentation of the API endpoints for the ft_transcendence project created by a team at 42 Vienna.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/MichaelLeitner/ft_transcendence/0.0.1
+  - url: https://localhost:8000/
+tags:
+  - name: registration
+    description: Required for registration/signup and login.
+  - name: um
+    description: Everything related to managing the user
+paths:
+  /registration/signup:
+    post:
+      tags:
+        - registration
+      summary: Signs up a new user
+      description: TBD
+      requestBody:
+        description: Object containing email address and password for new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+        required: true
+      responses:
+        '201':
+          description: Successful sign up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized user
+        '500':
+          description: Internal server error
+  /registration/login:
+    post:
+      tags:
+        - registration
+      summary: Logs an existing user in, if correct username and password are provided
+      description: TBD
+      requestBody:
+        description: Object containing email address and password for existing user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+        required: true
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized user
+        '500':
+          description: Internal server error
+  /registration/logout:
+    post:
+      tags:
+        - registration
+      summary: Logs user out, invalidates refresh token
+      description: tbd
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing current refresh token of user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Token'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Token'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Token'
+        required: true
+      responses:
+        '205':
+          description: Successfully logged user out
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized token
+        '500':
+          description: Internal server error
+  /registration/change_password:
+    post:
+      tags:
+        - registration
+      summary: Changes password for user
+      description: tbd
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing current and new password of user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+        required: true
+      responses:
+        '200':
+          description: Successfully changed password
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized token
+        '500':
+          description: Internal server error
+  /registration/verify_token:
+    get:
+      tags:
+        - registration
+      summary: Checks if JWT (access token) is still valid
+      description: tbd
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+        '401':
+          description: Unauthorized token
+  /registration/refresh_token:
+    post:
+      tags:
+        - registration
+      summary: Creates new refresh and access token
+      description: TBD
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing refresh token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Token'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Token'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Token'
+        required: true
+      responses:
+        '200':
+          description: Successfully created new token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewToken'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized user
+        '500':
+          description: Internal server error
+  /registration/delete_user:
+    post:
+      tags:
+        - registration
+      summary: Deletes user from database
+      description: tbd
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing current password of user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteUser'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/DeleteUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeleteUser'
+        required: true
+      responses:
+        '200':
+          description: Successfully deleted account
+        '400':
+          description: Invalid request body
+        '500':
+          description: Internal server error
+  /um/search:
+    get:
+      tags:
+        - um
+      summary: Searches with string for users
+      description: TBD
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: term
+          schema:
+            type: string
+          required: true
+          description: Term used to search for users
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid Authentication supplied
+        '404':
+          description: No matching users found
+  /um/friends/{uid}:
+    get:
+      tags:
+        - um
+      summary: gets a users friends and friend requests
+      description: This endpoint is used to get an object containing all current friends of a user including also friend requests sent and received by the user. This is mostly used for updating the information on the users profile page.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: Numeric ID of the user to get
+          example: "0123456"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid Authentication supplied
+        '404':
+          description: No matching users found
+
+components:
+  schemas:
+    ChangePassword:
+      type: object
+      properties:
+        current_password:
+          type: string
+          format: password
+          description: Current password of user
+        new_password:
+          type: string
+          format: password
+          description: New password for user
+    DeleteUser:
+      type: object
+      properties:
+        current_password:
+          type: string
+          format: password
+          description: current password of the user to confirm they're the owner of the account
+    Token:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          format: token
+          description: string containing the refresh token created for the user
+    NewToken:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          format: token
+          description: string containing refresh token (JWT)
+        access_token:
+          type: string
+          format: token
+          description: string containing access token (JWT)
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+          description: E-Mail-Address of user
+          format: email
+        password:
+          type: string
+          description: Password associated with user
+          format: password
+      required:
+        - username
+        - password
+    User:
+      type: array
+      items:
+        type: object
+        properties:
+          user:
+            type: object
+            properties:
+              uid:
+                type: string
+                format: uuid
+              displayname:
+                type: string
+                minLength: 1
+                example: "Max Mustermann"
+              img:
+                type: string
+                example: "https://i.pravatar.cc/15"
+                nullable: true
+              online:
+                type: boolean
+                format: string
+                example: "true"
+                nullable: true
+          relationship:
+            type: string
+            description: relationship between users
+            example: friend
+            enum:
+              - friend
+              - requested
+              - received
+              - stranger
+          friend_request_id:
+            type: number
+            format: string
+            nullable: true
+            description: id for friendship request, null if relationship set to stranger
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

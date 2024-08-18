@@ -4,11 +4,14 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from .models import FriendRequest
 from .serializers import FriendRequestAnswerSerializer
 from .serializers import FriendRequestSendSerializer
-
+from api.serializers import CustomUserProfileSerializer
+from utils_jwt import get_user_from_jwt
+from api.serializers import UserRelationSerializer
 
 class SendFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestSendSerializer
@@ -96,6 +99,51 @@ class DeclineFriendRequestView(generics.GenericAPIView):
         else:
             raise ValidationError(serializer.errors)
 
+class ListFriendRelationsView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+
+    def get(self, request, user_id):
+        user = get_user_from_jwt(request)
+        if user.user_id != user_id:
+            raise PermissionDenied("My friendlist is private, keep your nose out")
+        
+        relationships = {}
+        online_status = {}
+        friend_requests = {}
+
+        friends = user.friend_list.friends
+        for friend in friends:
+            relationships[friend.user_id] = "friend"
+            online_status[friend.user_id] = friend.get_online_status()
+            friend_requests[friend.user_id] = user.friend_list.get_friends_request_id(friend)
+        all_people = list(friends)
+
+
+        frs_sent = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=user)
+        for friend_request in frs_sent:
+            person = friend_request.receiver
+            all_people.append(person)
+            relationships[person.user_id] = "requested"
+            friend_requests[person.user_id] = friend_request.id
+            
+        
+        frs_received = FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
+        for friend_request in frs_received:
+            person = friend_request.sender
+            all_people.append(person)
+            relationships[person.user_id] = "received"
+            friend_requests[person.user_id] = friend_request.id
+
+        context = {"relationships": relationships, 
+                   "online_status": online_status,
+                   "friend_requests": friend_requests,
+        }
+        serializer = UserRelationSerializer(all_people, many=True, context=context)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+def get_pending_received_friend_requests(user):
+    FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
 
 """ OLD
 # @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service

@@ -1,5 +1,34 @@
+const validateToken = async () => {
+	try {
+		// check if the token is valid
+		const response = await fetch("/registration/verify_token", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include"
+		});
+
+		if (response.status !== 200) {
+			throw new Error("Error verifying token");
+		}
+		return true;
+	} catch (error) {
+		console.error("Error validating token:", error.message);
+		return false;
+	}
+}
+
 const Router = {
-	init: () => {
+	init: async () => {
+		// check if the user is logged in
+		if (location.pathname !== "/login" && location.pathname !== "/signup") {
+			const tokenValid = await validateToken();
+			if (!tokenValid) {
+				Router.go("/login", false);
+				return;
+			}
+		}
 		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
 			a.addEventListener("click", (event) => {
 				event.preventDefault();
@@ -22,8 +51,7 @@ const Router = {
 		Router.go(location.pathname);
 	},
 
-
-	/** opens the window.app.socket if it is closed */
+	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -38,7 +66,7 @@ const Router = {
 		};
 	},
 
-	/** closes the window.app.socket if it is open */
+	//closes the window.app.socket if it is open
 	closeWebSocket: () => {
 		if (window.app.socket) {
 			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
@@ -48,7 +76,7 @@ const Router = {
 		}
 	},
 
-	/** hides or shows the navbar and footer depending on the route */
+	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
 		if (route === "/login" || route === "/signup") {
 			document.getElementById("navbar").style.display = "none";
@@ -62,10 +90,18 @@ const Router = {
 
 
 	// changes the page main content and update the URL
-	go: (route, addToHistory = true) => {
+	go: async (route, addToHistory = true) => {
 		console.log(`Going to ${route}`);
 		let pageElement = null; // the new page element
-		
+
+		//comment out to add token check
+		if (route !== "/login" && route !== "/signup") {
+			const tokenValid = await validateToken();
+			if (!tokenValid) {
+				route = "/login";
+			}
+		}
+
 		Router.hideOrShowNavbarAndFooter(route);
 
 		// check for external links maybe??!! (if first character is not a slash)
@@ -75,7 +111,7 @@ const Router = {
 			case "/":
 				pageElement = document.createElement("play-menu-home-page");
 				break;
-				case "/play":
+			case "/play":
 				pageElement = document.createElement("h1");
 				pageElement.textContent = "Play";
 				break;
@@ -96,6 +132,18 @@ const Router = {
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
+				break;
+			case "/friends":
+				const fragment = document.createDocumentFragment();
+				fragment.appendChild(document.createElement("friend-list"));
+				fragment.appendChild(document.createElement("friend-search"));
+				pageElement = fragment;
+				console.log("friends page created");
+				break;
+			case "/logout":
+				//TODO: add API call to registration/logout endpoint
+				//redirect to login page
+				route = "/login";
 				break;
 			default:
 				// homepage
