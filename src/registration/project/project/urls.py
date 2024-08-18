@@ -16,7 +16,6 @@ Including another URLconf
 """
 
 from core_app import views
-from django.contrib import admin
 from django.urls import re_path
 
 urlpatterns = [
@@ -27,4 +26,9 @@ urlpatterns = [
     re_path('change_password', views.change_password),
     re_path('verify_token', views.verify_token),
     re_path('refresh_token', views.refresh_token),
+    
+    re_path('set_oauth2', views.set_oauth2),
+    re_path('unset_oauth2', views.unset_oauth2),
+    re_path('login_oauth2', views.login_oauth2),
+    # [aguilmea] I think i need to modify logout for oauth2 and not writte a own one
 ]
