@@ -202,6 +202,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 print("joinTournament")
                 await self.joinTournament(msg)
 
+            case "leaveTournament":
+                await self.leaveTournament(msg)
+
             case None:
                 print("[Warning] Received message with None type")
 
@@ -227,6 +230,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
+    # LeaveTournament
+    async def leaveTournament(self, msg):
+        print("leaveTournament")
+        if self.lobby is None:
+            return
+        self.lobby.removePlayer(self.player)
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
+
     # Create a Tournament
     async def createTournament(self, msg):
         # send if tournament already exists ?
@@ -247,10 +259,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         msg = { "type": "updateTournamentList",
                 "tournaments": e }
         await self.send(text_data=json.dumps(msg))
-        """ {
-            "type": "updateTournamentList",
-                "tournaments": e["tournaments"],
-        } """
 
     # Receive message from room group
     async def chat_message(self, e):
