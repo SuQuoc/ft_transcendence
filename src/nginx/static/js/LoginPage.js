@@ -23,7 +23,7 @@ export class LoginPage extends ComponentBaseClass {
                     <div class="form-text text-white-50 mb-3" id="loginEmailHelp">We'll never share your email with a third party.....</div>
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3">
-                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white">Sign up</a> here!</p>
+                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" id="signup-login-page" class="text-decoration-none text-white">Sign up</a> here!</p>
                     <button type="submit" class="btn btn-secondary w-100" form="loginForm">Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
