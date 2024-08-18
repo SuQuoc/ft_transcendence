@@ -309,10 +309,10 @@ components:
     Token:
       type: object
       properties:
-        token:
+        refresh_token:
           type: string
           format: token
-          description: string containing the JWT token created for the user
+          description: string containing the refresh token created for the user
     NewToken:
       type: object
       properties:
@@ -339,38 +339,43 @@ components:
         - username
         - password
     User:
-      type: object
-      properties:
-        uid:
-          type: string
-          format: uuid
-        displayname:
-          type: string
-          minLength: 1
-          example: "Max Mustermann"
-        img:
-          type: string
-          example: "https://i.pravatar.cc/15"
-          nullable: true
-        online:
-          type: boolean
-          format: string
-          example: "true"
-          nullable: true
-        relationship:
-          type: string
-          description: relationship between users
-          example: friend
-          enum:
-            - friend
-            - requested
-            - received
-            - stranger
-        friend_request_id:
-          type: number
-          format: string
-          nullable: true
-          description: id for friendship request, null if relationship set to stranger
+      type: array
+      items:
+        type: object
+        properties:
+          user:
+            type: object
+            properties:
+              uid:
+                type: string
+                format: uuid
+              displayname:
+                type: string
+                minLength: 1
+                example: "Max Mustermann"
+              img:
+                type: string
+                example: "https://i.pravatar.cc/15"
+                nullable: true
+              online:
+                type: boolean
+                format: string
+                example: "true"
+                nullable: true
+          relationship:
+            type: string
+            description: relationship between users
+            example: friend
+            enum:
+              - friend
+              - requested
+              - received
+              - stranger
+          friend_request_id:
+            type: number
+            format: string
+            nullable: true
+            description: id for friendship request, null if relationship set to stranger
   securitySchemes:
     bearerAuth:
       type: http
