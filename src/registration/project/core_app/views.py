@@ -53,19 +53,25 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def delete_user(request):
-    user = request.user
-    serializer = DeleteUserSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            current_password = serializer.validated_data['password']
-            if not user.check_password(current_password):
-                return Response({'error': 'password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({'error': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        current_password = request.data.get('current_password')
+        refresh = request.COOKIES.get('refresh')
+        if not current_password or not refresh:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        if not user.check_password(current_password):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = RefreshToken(refresh)
+        refresh_token.blacklist()
+
+        user.delete()
+        response = Response(status=status.HTTP_200_OK)
+        return response
+
+    except Exception as e:
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -104,22 +110,55 @@ def login(request):
 @permission_classes([IsAuthenticated])
 def change_password(request):
     try:
-        old_token = request.data.get('refresh_token')
-        if not old_token:
-            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
-        new_token = RefreshToken(old_token)
-        old_token.blacklist()
-        return Response({'message': 'okay'}, status=status.HTTP_200_OK)
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        refresh = request.COOKIES.get('refresh')
+        if not current_password or not new_password or not refresh:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        if not user.check_password(current_password):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        refresh_token = RefreshToken(refresh)
+        refresh_token.blacklist()
+
+        new_refresh = RefreshToken.for_user(user)
+        new_access = new_refresh.access_token
+        
+        response = Response({
+            'access': str(new_access),
+            'refresh': str(new_refresh)
+        }, status=status.HTTP_200_OK)
+
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
+        response.set_cookie(
+            key='access',
+            value=str(new_access),
+            expires=access_token_expiration,
+            httponly=True
+        )
+
+        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
+        response.set_cookie(
+            key='refresh',
+            value=str(new_refresh),
+            expires=refresh_token_expiration,
+            httponly=True
+        )
+
+        return response
 
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def logout(request):
     try:
-        refresh_token = request.data.get('refresh_token')
+        refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
             return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
         token = RefreshToken(refresh_token)
@@ -134,15 +173,27 @@ def logout(request):
 @permission_classes([AllowAny])
 def refresh_token(request):
     try:
-        refresh_token = request.data.get('refresh')
+        refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
-            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = TokenRefreshSerializer(data={'refresh': refresh_token})
-        if serializer.is_valid():
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
+        if not token_s.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        response = Response(status=status.HTTP_200_OK)
+
+        response.data = token_s.validated_data
+
+        access_token = token_s.validated_data['access']
+        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
+        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
+
+        refresh_token = token_s.validated_data['refresh']
+        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
+        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
+
+        return response
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

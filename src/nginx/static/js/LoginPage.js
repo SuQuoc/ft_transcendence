@@ -23,7 +23,7 @@ export class LoginPage extends ComponentBaseClass {
                     <div class="form-text text-white-50 mb-3" id="loginEmailHelp">We'll never share your email with a third party.....</div>
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3">
-                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white">Sign up</a> here!</p>
+                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" id="loginGoToSignup" class="text-decoration-none text-white">Sign up</a> here!</p>
                     <button type="submit" class="btn btn-secondary w-100" form="loginForm">Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
@@ -56,13 +56,11 @@ export class LoginPage extends ComponentBaseClass {
 			if (!response.ok) {
 				throw new Error('Login failed');
 			}
-
-			const data = await response.json();
-			window.app.token = data.token;
+			window.app.userData.username = username;
+			window.app.userData.email = username;
 
 			// Redirect to the home page or another page
-			const event = new CustomEvent('change-route-from-shadow', { detail: { url: '/' } });
-			document.dispatchEvent(event);
+			app.router.go('/');
 		} catch (error) {
 			console.error('Error during login:', error);
 		} finally {
