@@ -57,6 +57,9 @@ const Router = {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
 			window.app.socket = new WebSocket(ws_path);
+
+			// add event listeners
+			//window.app.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("socket created");
 		};
 
@@ -91,7 +94,7 @@ const Router = {
 
 	// changes the page main content and update the URL
 	go: async (route, addToHistory = true) => {
-		console.log(`Going to ${route}`);
+		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
 		//comment out to add token check
@@ -116,6 +119,7 @@ const Router = {
 				pageElement.textContent = "Play";
 				break;
 			case "/tournament":
+				Router.closeWebSocket(); //only closes the socket if it is open
 				Router.makeWebSocket("onTournamentPage");
 				pageElement = document.createElement("join-tournament-page");
 				break;
@@ -168,6 +172,7 @@ const Router = {
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
+		console.log("history: ", history);
 	},
 
 
@@ -183,7 +188,7 @@ const Router = {
 		switch (data.type) {
 			case "joinTournament":
 				if (data.joined === "true")
-					Router.go("/tournament-lobby");
+					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 				else
 					Router.go("/tournament");
 				break;
@@ -191,7 +196,15 @@ const Router = {
 				console.log("unknown message type: ", data.type);
 				break;
 		}
-	}
+	},
+
+
+	// !!! when the socket closes normally, you also get sent to the home page
+	/** You get sent back to the home poge in case the Socket disconnects unexpectedly */
+	/* handleSocketUnexpectedDisconnect(event) {
+		console.log("socket unexpectdedly disconnected");
+		Router.go("/");
+	} */
 }
 
 export default Router;

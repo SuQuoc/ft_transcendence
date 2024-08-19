@@ -31,7 +31,7 @@ export class JoinTournamentElement extends HTMLElement {
 
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room");
+		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}
 
 	// the element with the info of the tournament and a button to join it

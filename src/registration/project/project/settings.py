@@ -118,6 +118,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_HTTP_ONLY': True,  # Http only cookie flag.It's not fetch by javascript.
     'AUTH_COOKIE_PATH': '/',  # The path of the auth cookie.
     'AUTH_COOKIE_SAMESITE': 'Lax',  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # !!! was added for development, should be 5 minutes (token expiration time)
 }
 
 CORS_ALLOWED_ORIGINS = [

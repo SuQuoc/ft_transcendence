@@ -204,6 +204,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             case "leaveTournament":
                 await self.leaveTournament(msg)
+            
+            case "getUpdateLobbyPlayerList":
+                print("getUpdateLobbyPlayerList")
+                await self.sendtoClient.sendLobbyPlayerList(self.lobby)
 
             case None:
                 print("[Warning] Received message with None type")
@@ -227,6 +231,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # remove player to the tournaments joinTournamentPage group and send a update the lobby list 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
@@ -238,6 +243,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.lobby.removePlayer(self.player)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
+        await self.sendtoClient.sendLobbyPlayerList(self.lobby)
 
     # Create a Tournament
     async def createTournament(self, msg):
@@ -248,6 +254,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
 
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
@@ -288,6 +295,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "joinTournament",
                 "joined": e}
             ))
+        
+    async def update_LobbyPlayerList(self, e) -> None:
+        print("hi dude")
+        e["type"] = "updateLobbyPlayerList"
+        print(e)
+        await self.send(text_data=json.dumps(e))
 
 # Recurses
 

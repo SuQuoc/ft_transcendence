@@ -108,13 +108,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "createTournament",
 											"tournament_name": tournament_name,
-											"creator_name": "display name",
+											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
 											"current_player_num": "1", // the creator is the first player
 											"max_player_num": number_of_players}));
 		
 		// goes to the tournament lobby
-		window.app.router.go("/tournament-lobby");
+		window.app.router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 	};
 
 
@@ -125,7 +125,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room");
+		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}
 
 
@@ -177,6 +177,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 						type="text"
 						class="form-control mb-3"
 						placeholder="tournament name"
+						value="tournament"
 						>
 						
 						<!-- Number of Players -->
