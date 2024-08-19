@@ -232,7 +232,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 						</div>
 						
 						<!-- Submit the form (create a tournament) -->
-						<button type="submit" class="btn btn-secondary w-100">create</button>
+						<button id="createTournamentButton" type="submit" class="btn btn-secondary w-100">create</button>
 					</form>
 				</div>
 			</div>

@@ -1,7 +1,7 @@
 services:
 
   db_registration:
-    container_name: db_registration
+    container_name: pong_reg_db
     image: postgres:16
     environment:
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
@@ -27,12 +27,12 @@ services:
       - network_registration
 
   registration:
-    container_name: registration
+    container_name: pong_reg
     build: ../src/registration
     volumes:
       - ../src/registration:/app
     expose:
-      - "8000:8000"
+      - "8000/tcp"
     environment:
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
       POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
@@ -57,15 +57,3 @@ services:
     secrets:
       - public_key.pem
       - private_key.pem
-
-  nginx_registration:
-    container_name: nginx_registration
-    build: ../src/registration_nginx
-    ports:
-      - 8000:443
-    depends_on:
-      - registration
-    profiles:
-      - registration
-    networks:
-      - network_registration

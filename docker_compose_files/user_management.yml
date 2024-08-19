@@ -1,5 +1,6 @@
 services:
   db_user_management:
+    container_name: pong_um_db
     image: postgres:16
     environment:
       POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
@@ -25,11 +26,12 @@ services:
       - network_user_management
 
   user_management:
+    container_name: pong_um
     build: ../src/user_management
     volumes:
       - ../src/user_management:/user_management
     expose:
-      - "8000:8000"
+      - "8000/tcp"
     environment:
       POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
       POSTGRES_USER: "${POSTGRES_USER_MANAGEMENT:-posty}"
