@@ -9,7 +9,6 @@ from rest_framework.exceptions import PermissionDenied
 from .models import FriendRequest
 from .serializers import FriendRequestAnswerSerializer
 from .serializers import FriendRequestSendSerializer
-from api.serializers import CustomUserProfileSerializer
 from utils_jwt import get_user_from_jwt
 from api.serializers import UserRelationSerializer
 
@@ -111,7 +110,7 @@ class ListFriendRelationsView(generics.ListAPIView):
         online_status = {}
         friend_requests = {}
 
-        friends = user.friend_list.friends
+        friends = user.friend_list.friends.all()
         for friend in friends:
             relationships[friend.user_id] = "friend"
             online_status[friend.user_id] = friend.get_online_status()
@@ -119,7 +118,7 @@ class ListFriendRelationsView(generics.ListAPIView):
         all_people = list(friends)
 
 
-        frs_sent = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=user)
+        frs_sent = user.get_pending_requested_friend_requests()
         for friend_request in frs_sent:
             person = friend_request.receiver
             all_people.append(person)
@@ -127,7 +126,7 @@ class ListFriendRelationsView(generics.ListAPIView):
             friend_requests[person.user_id] = friend_request.id
             
         
-        frs_received = FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
+        frs_received = user.get_pending_received_friend_requests()
         for friend_request in frs_received:
             person = friend_request.sender
             all_people.append(person)
@@ -142,8 +141,7 @@ class ListFriendRelationsView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def get_pending_received_friend_requests(user):
-    FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
+
 
 """ OLD
 # @authentication_classes([TokenAuthentication]) # for auth a user with a token from regis service
