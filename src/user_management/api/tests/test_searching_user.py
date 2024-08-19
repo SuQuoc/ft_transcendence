@@ -54,11 +54,11 @@ class SearchTest(APITestCase):
         self.test_users = [
             {'displayname': ME, 'online': True},
             {'displayname': I_FRIEND_U, 'online': True},
-            {'displayname': U_FRIEND_ME, 'online': True},
+            {'displayname': U_FRIEND_ME, 'online': False},
             {'displayname': I_PEND_U, 'online': True},
-            {'displayname': U_PEND_ME, 'online': True},
+            {'displayname': U_PEND_ME, 'online': False},
             {'displayname': I_DECLINE_U, 'online': True},
-            {'displayname': U_DECLINE_ME, 'online': True},
+            {'displayname': U_DECLINE_ME, 'online': False},
             {'displayname': STRANGER, 'online': True},
             {'displayname': 'Deleted account', 'online': False},
         ]
@@ -70,8 +70,8 @@ class SearchTest(APITestCase):
             (U_FRIEND_ME, ME, FriendRequest.ACCEPTED),
             (ME, I_PEND_U, FriendRequest.PENDING),
             (U_PEND_ME, ME, FriendRequest.PENDING),
-            (ME, I_DECLINE_U, FriendRequest.PENDING),
-            (U_DECLINE_ME, ME, FriendRequest.PENDING),
+            (ME, I_DECLINE_U, FriendRequest.DECLINED),
+            (U_DECLINE_ME, ME, FriendRequest.DECLINED),
         ]
 
         self.user_objs = create_user_objs(self.test_users)
@@ -93,22 +93,37 @@ class SearchTest(APITestCase):
         response = self.client.get(url, secure=True, **self.headers)
         response_json = response.json()
         print(json.dumps(response_json, indent=4))
-        # self.assertEqual(response.status_code, 210)
+        
+        self.assertEqual(response_json[0]['relationship'], "friend")
+        self.assertEqual(response_json[1]['relationship'], "friend")
+        # checking for name and online status seems a bit unflexible
 
-    # def test_search_pending(self):
-    #     url = create_url_with_query_params(self.url, {"term": "pend"})
-    #     response = self.client.get(url, secure=True, **self.headers)
-    #     response_json = response.json()
-    #     print(json.dumps(response_json, indent=4))
-# 
-    # def test_search_declined(self):
-    #     url = create_url_with_query_params(self.url, {"term": "decline"})
-    #     response = self.client.get(url, secure=True, **self.headers)
-    #     response_json = response.json()
-    #     print(json.dumps(response_json, indent=4))
-    # 
-    # def test_search_stranger(self):
-    #     url = create_url_with_query_params(self.url, {"term": "Stranger"})
-    #     response = self.client.get(url, secure=True, **self.headers)
-    #     response_json = response.json()
-    #     print(json.dumps(response_json, indent=4))
+
+    def test_search_pending(self):
+        url = create_url_with_query_params(self.url, {"term": "pend"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        # print(json.dumps(response_json, indent=4))
+
+        self.assertEqual(response_json[0]['relationship'], "requested")
+        self.assertEqual(response_json[1]['relationship'], "received")
+    
+
+    def test_search_declined(self):
+        url = create_url_with_query_params(self.url, {"term": "decline"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        # print(json.dumps(response_json, indent=4))
+
+        self.assertNotIn('relationship', response_json[0])
+        self.assertNotIn('relationship', response_json[1])
+
+
+
+    def test_search_stranger(self):
+        url = create_url_with_query_params(self.url, {"term": "Stranger"})
+        response = self.client.get(url, secure=True, **self.headers)
+        response_json = response.json()
+        # print(json.dumps(response_json, indent=4))
+
+        self.assertNotIn('relationship', response_json[0])
