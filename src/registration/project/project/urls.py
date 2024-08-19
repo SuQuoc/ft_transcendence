@@ -27,6 +27,7 @@ urlpatterns = [
     re_path('verify_token', views.verify_token),
     re_path('refresh_token', views.refresh_token),
     
+    re_path('get_oauth2_url', views.get_oauth2_url),
     re_path('set_oauth2', views.set_oauth2),
     re_path('unset_oauth2', views.unset_oauth2),
     re_path('login_oauth2', views.login_oauth2),

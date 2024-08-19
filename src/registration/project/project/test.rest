@@ -50,3 +50,35 @@ Content-Type: application/json
 Cookie: access=a,b,c refresh=x,y,z
 
 {}
+
+###
+
+GET https://127.0.0.1:8000/registration/get_oauth2_url/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+POST https://127.0.0.1:8000/registration/set_oauth2/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+GET https://127.0.0.1:8000/registration/unset_oauth2/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+GET https://127.0.0.1:8000/registration/login_oauth2/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
