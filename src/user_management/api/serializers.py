@@ -10,16 +10,23 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["displayname"]
 
-
+# for deserilazing
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
-    relationship = serializers.SerializerMethodField()
+    relationship = serializers.SerializerMethodField(required=False)
+    
     class Meta:
         model = CustomUser
         fields = ["displayname", "online", "image", "relationship"]
-
+    
     def get_relationship(self, obj):
         return self.context.get('relationship', "error: could not resolve [should never happen]")
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if self.context.get('relationship', None) != "friend":
+            representation.pop('online')
+        return representation
 
 
 def profile_image_validator(image):
@@ -49,18 +56,18 @@ class UserRelationSerializer(serializers.ModelSerializer):
         return relationships.get(obj.user_id, None)
     
     def get_friend_request_id(self, obj):
-        friend_request_id = self.context.get('friend_request_id', {})
-        return friend_request_id.get(obj.user_id, "")
+        friend_request_id = self.context.get('friend_requests', {})
+        return friend_request_id.get(obj.user_id, None)
 
     def get_online(self, obj):
         online_status = self.context.get('online_status', {})
-        return online_status.get(obj.user_id, "no_permission")
+        return online_status.get(obj.user_id, None)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if representation.get('relationship') is None:
             representation.pop('relationship')
-        if representation.get('online') == "no_permission":
+        if representation.get('online') is None:
             representation.pop('online')
         return representation
 
