@@ -1,4 +1,3 @@
-from api.models import CustomUser
 from django.db import models
 from django.db.models import Q
 
@@ -6,8 +5,8 @@ from django.db.models import Q
 
 
 class FriendList(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="friend_list")
-    friends = models.ManyToManyField(CustomUser, blank=True, related_name="friends")
+    user = models.OneToOneField("api.CustomUser", on_delete=models.CASCADE, related_name="friend_list")
+    friends = models.ManyToManyField("api.CustomUser", blank=True, related_name="friends")
 
     def __str__(self):
         return self.user.displayname
@@ -85,8 +84,8 @@ class FriendRequest(models.Model):
         (DECLINED, 'Declined'),
     ]
 
-    sender = models.ForeignKey(CustomUser, related_name='sender', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(CustomUser, related_name='receiver', on_delete=models.CASCADE)
+    sender = models.ForeignKey("api.CustomUser", related_name='sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey("api.CustomUser", related_name='receiver', on_delete=models.CASCADE)
     status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
     send_timestamp = models.DateTimeField(auto_now_add=True)
 

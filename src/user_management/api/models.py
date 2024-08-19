@@ -74,7 +74,7 @@ class CustomUser(models.Model):
         super().delete(*args, **kwargs)
 
     def get_online_status(self):
-        return "true" if self.online else "false"
+        return "True" if self.online else "False"
 
     # FriendRequests
     def get_pending_received_friend_requests(user):
