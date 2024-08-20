@@ -107,11 +107,13 @@ with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
 
 SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'RS256',
     'SIGNING_KEY': PRIVATE_KEY,
     'VERIFYING_KEY': PUBLIC_KEY,
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_COOKIE': 'access',  # Cookie name. Enables cookies if value is set.
     'AUTH_COOKIE_DOMAIN': None,  # A string like "example.com", or None for standard domain cookie.
     'AUTH_COOKIE_SECURE': False,  # Whether the auth cookies should be secure (https:// only).

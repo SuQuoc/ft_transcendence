@@ -1,9 +1,7 @@
-# [aguilmea] this file has been created manually
-
 from datetime import datetime
 from datetime import timedelta
 
-from django.shortcuts import get_object_or_404
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
@@ -15,7 +13,6 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
-from .serializers import DeleteUserSerializer
 from .serializers import LoginSerializer
 from .serializers import UserSerializer
 
@@ -23,6 +20,21 @@ import os
 import random
 import string
 import requests
+
+
+def generate_response(status_code, token_s):
+    response = Response(status=status_code)
+    if not token_s.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    response.data = token_s.validated_data
+    access_token = token_s.validated_data['access']
+    access_token_expiration = datetime.utcnow() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+    response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
+    refresh_token = token_s.validated_data['refresh']
+    refresh_token_expiration = datetime.utcnow() + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+    response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
+    return response
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -35,21 +47,7 @@ def signup(request):
         token_s = TokenObtainPairSerializer(data=request.data)
         if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        response = Response(status=status.HTTP_201_CREATED)
-
-        response.data = token_s.validated_data
-
-        access_token = token_s.validated_data['access']
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
-        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
-
-        refresh_token = token_s.validated_data['refresh']
-        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
-        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
-
-        return response
-
+        return generate_response(status.HTTP_201_CREATED, token_s)
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -63,17 +61,14 @@ def delete_user(request):
         refresh = request.COOKIES.get('refresh')
         if not current_password or not refresh:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
         user = request.user
         if not user.check_password(current_password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         refresh_token = RefreshToken(refresh)
         refresh_token.blacklist()
-
         user.delete()
         response = Response(status=status.HTTP_200_OK)
         return response
-
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -91,24 +86,10 @@ def login(request):
         token_s = TokenObtainPairSerializer(data=request.data)
         if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
             return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        response = Response(status=status.HTTP_200_OK)
-
-        response.data = token_s.validated_data
-
-        access_token = token_s.validated_data['access']
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
-        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
-
-        refresh_token = token_s.validated_data['refresh']
-        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
-        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
-
-        return response
+        return generate_response(status.HTTP_200_OK, token_s)
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -136,7 +117,7 @@ def change_password(request):
             'refresh': str(new_refresh)
         }, status=status.HTTP_200_OK)
 
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
+        access_token_expiration = datetime.now(datetime.UTC) + timedelta(minutes=5)
         response.set_cookie(
             key='access',
             value=str(new_access),
@@ -144,7 +125,7 @@ def change_password(request):
             httponly=True
         )
 
-        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
+        refresh_token_expiration = datetime.now(datetime.UTC) + timedelta(days=1)
         response.set_cookie(
             key='refresh',
             value=str(new_refresh),
@@ -186,18 +167,7 @@ def refresh_token(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         response = Response(status=status.HTTP_200_OK)
-
-        response.data = token_s.validated_data
-
-        access_token = token_s.validated_data['access']
-        access_token_expiration = datetime.utcnow() + timedelta(minutes=5)
-        response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
-
-        refresh_token = token_s.validated_data['refresh']
-        refresh_token_expiration = datetime.utcnow() + timedelta(days=1)
-        response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
-
-        return response
+        return generate_response(response, token_s)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
