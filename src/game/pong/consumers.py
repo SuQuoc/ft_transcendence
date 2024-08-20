@@ -164,7 +164,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 lobby_name = self.lobby.lobby_name
 
             if self.joinTournamentPage.get(lobby_name, None):
-                self.joinTournamentPage[lobby_name].removePlayer(self.player)
+                await self.joinTournamentPage[lobby_name].removePlayer(self.player, self.channel_name)
                 if self.joinTournamentPage[lobby_name].len == 0:
                     del self.joinTournamentPage[lobby_name]
                     self.joinTournamentPage.pop(lobby_name, None)
@@ -225,7 +225,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Add player to the tournament
         self.lobby = self.joinTournamentPage[msg["tournament_name"]]
         status = "false"
-        if self.lobby.addPlayer(self.player):
+        if await self.lobby.addPlayer(self.player, self.channel_name):
             status = "true"
         await self.sendJoinTournament(status)
 
@@ -240,7 +240,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("leaveTournament")
         if self.lobby is None:
             return
-        self.lobby.removePlayer(self.player)
+        await self.lobby.removePlayer(self.player, self.channel_name)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         await self.sendtoClient.sendLobbyPlayerList(self.lobby)
@@ -250,7 +250,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # send if tournament already exists ?
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.joinTournamentPage[msg["tournament_name"]] = self.lobby
-        self.lobby.addPlayer(self.player)
+        await self.lobby.addPlayer(self.player, self.channel_name)
 
         # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
