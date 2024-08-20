@@ -1,3 +1,4 @@
+@COOKIES=access=a.b.c...,refresh=x.y.z...
 
 POST https://127.0.0.1:8000/registration/signup/
 Content-Type: application/json
@@ -15,7 +16,7 @@ Content-Type: application/json
 
 POST https://127.0.0.1:8000/registration/delete_user/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {"current_password": "Pass1234!"}
 
@@ -23,7 +24,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 GET https://127.0.0.1:8000/registration/logout/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {}
 
@@ -31,7 +32,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 POST https://127.0.0.1:8000/registration/change_password/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {"current_password": "Pass1234!", "new_password": "Pass5678!"}
 
@@ -39,7 +40,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 GET https://127.0.0.1:8000/registration/verify_token/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {}
 
@@ -47,7 +48,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 GET https://127.0.0.1:8000/registration/refresh_token/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {}
 
@@ -55,7 +56,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 GET https://127.0.0.1:8000/registration/get_oauth2_url/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {}
 
@@ -63,7 +64,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 POST https://127.0.0.1:8000/registration/set_oauth2/
 Content-Type: application/json
-Cookie: access=a,b,c refresh=x,y,z
+Cookie: {{COOKIES}}
 
 {}
 
