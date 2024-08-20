@@ -44,7 +44,10 @@ def set_oauth2(request):
         headers = {
         'Authorization': f'Bearer {access_token}'
     }
-        user_details = request.get('https://api.intra.42.fr/v2/me', headers=headers)
+        user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
+        if (user_response.status_code != 200):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        user_details =user_response.json()
         id = user_details.get('id')
         setattr(request.user, 'ft_userid', id)
         return Response(status=status.HTTP_200_OK)
@@ -57,6 +60,7 @@ def set_oauth2(request):
 @permission_classes([IsAuthenticated])
 def unset_oauth2(request):
     try:
+        setattr(request.user, 'ft_userid', None)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

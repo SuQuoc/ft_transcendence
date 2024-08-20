@@ -42,7 +42,7 @@ services:
       JWT_SECRET: "${JWT_SECRET:-somesecret}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DJANGO_DEBUG_REG:-False}
-      SERVER_URL: ${SERVER_URL_REG:-http://localhost:8000}
+      SERVER_URL: ${SERVER_URL_REG:-https://localhost:8000}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
       FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
     depends_on:
