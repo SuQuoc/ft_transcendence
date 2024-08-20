@@ -53,9 +53,14 @@ const Router = {
 
 	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
+		let channel_name = "tournament";
+
+		if (type === "onFindOpponentPage")
+			channel_name = "match";
+
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
 			window.app.socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -63,13 +68,12 @@ const Router = {
 			console.log("socket created");
 		};
 
-		// does it make sense to have this here??
 		window.app.socket.onopen = () => {
 			window.app.socket.send(JSON.stringify({"type": type, "user_id": "123456"}));
 		};
 	},
 
-	//closes the window.app.socket if it is open
+	/** closes the window.app.socket if it is open */
 	closeWebSocket: () => {
 		if (window.app.socket) {
 			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
@@ -114,10 +118,6 @@ const Router = {
 			case "/":
 				pageElement = document.createElement("play-menu-home-page");
 				break;
-			case "/play":
-				pageElement = document.createElement("h1");
-				pageElement.textContent = "Play";
-				break;
 			case "/tournament":
 				Router.closeWebSocket(); //only closes the socket if it is open
 				Router.makeWebSocket("onTournamentPage");
@@ -130,6 +130,16 @@ const Router = {
 			case "/tournament-waiting-room": // TODO: shouldn't log to history!!!!!
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-waiting-room-page");
+				break;
+			case "/match":
+				console.log("match page created");
+				Router.closeWebSocket(); //only closes the socket if it is open
+				Router.makeWebSocket("onFindOpponentPage");
+				pageElement = document.createElement("find-opponent-page");
+				break;
+			case "/pong":
+				pageElement = document.createElement("pong-page");
+				pageElement.innerHTML = "Pong Game";
 				break;
 			case "/login":
 				pageElement = document.createElement("login-page");
@@ -165,7 +175,7 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (!route.startsWith("/tournament")) {
+		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) {
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 

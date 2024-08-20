@@ -3,7 +3,7 @@ from .storageClasses import SlotXy
 
 class PongPlayer:
 
-    def __init__(self, player_id, map_size: SlotXy) -> None:
+    def __init__(self, player_id, map_size: SlotXy, channel_name) -> None:
         self.id = player_id
         self.x = 0
         self.y = 0
@@ -13,6 +13,7 @@ class PongPlayer:
         self.down = False
         self.task = None
         self.map_size = map_size
+        self.channel_name = channel_name
 
     def move(self, MOVE_SPEED):
         new_y = self.y

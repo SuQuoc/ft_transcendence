@@ -54,19 +54,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # set up rooms
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f"chat_{self.room_name}"
+
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
-        self.player = PongPlayer(self.player_id, self.map_size)
+
+        self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
+        self.players[self.player_id] = self.player
+    
+        if self.room_name == "match":
+            return
+
         self.sendtoClient: SendToClient = SendToClient(self.group_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         return
+
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
         await self.create_player_save_in_dict()
 
     async def create_player_save_in_dict(self):
-        self.player = PongPlayer(self.player_id, self.map_size)
+        self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
         lobby = None
         async with self.update_lock:
             lobby = self.joinTournamentPage.get(self.room_name, None)
@@ -212,6 +220,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
             case None:
                 print("[Warning] Received message with None type")
 
+            case "onFindOpponentPage":
+                await self.lookforOpponent(msg)
+
+    async def lookforOpponent(self, msg):
+        match = Match(name=f"{self.player_id}_match")
+        await match.addPlayer(self.player, channel_name=self.channel_name)
+        if await match.findOpponent(self.players) is False:
+            return
+        self.players.pop(self.player_id)
+        self.players.pop(match.player2.id)
+        print("match.name: ", match.name)
+        await self.channel_layer.group_send(match.name,{"type": "start.Pong"})
+        print("players = ", self.players)
+    
+    async def start_Pong(self, e):
+        print("start pong", self.room_name)
+        e["type"] = "startPong"
+        await self.send(text_data=json.dumps(e))
+
     # JoinTournament
     async def joinTournament(self, msg):
         print("joinTournament")
@@ -284,9 +311,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def start_game(self, e):
+    """ async def start_game(self, e):
         print("start game", self.room_name)
-        await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
+        await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]})) """
 
     async def sendJoinTournament(self, e) -> None:
         print("sendJoinTournament")

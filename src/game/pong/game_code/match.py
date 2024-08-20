@@ -49,3 +49,11 @@ class Match:
             await channel_layer.group_discard(self.name, channel_name)
             return True
         return False
+
+    async def findOpponent(self, players:dict) -> None:
+        for player in players.values():
+            if player.id != self.player1.id:
+                print("Opponent found", player.channel_name)
+                return await self.addPlayer(player, player.channel_name)
+        print("No opponent found")
+        return False

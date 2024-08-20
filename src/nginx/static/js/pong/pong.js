@@ -6,14 +6,14 @@
 
 function startPong()
 {
-    var room_name = document.getElementById("room-name").value;
-    var room_size = document.getElementById("room-size").value;
+    /* var room_name = document.getElementById("room-name").value;
+    var room_size = document.getElementById("room-size").value; */
 
-    let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    /* let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + room_name + "/";
-    let chatSocket = new WebSocket(ws_path);
+    let chatSocket = new WebSocket(ws_path); */
 
-    sendRoomSizeMessage(chatSocket, room_size);
+    //sendRoomSizeMessage(chatSocket, room_size);
 
 
     var refresh_rate = 10;   // set refresh rate of the game
