@@ -48,7 +48,7 @@ const Router = {
 		// load event can be used to listen for initial page load. Don't know if it has the right timing here though
 		
 		// check initial URL
-		Router.go(location.pathname);
+		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 
 	//opens the window.app.socket if it is closed

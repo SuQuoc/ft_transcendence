@@ -1,5 +1,6 @@
 services:
   db_game:
+    container_name: pong_game_db
     image: postgres:16
     environment:
       PYTHONUNBUFFERED: 1
@@ -31,11 +32,12 @@ services:
   # TODO change the environment variables with env variables and default values
   # also the django non admin user should be used - see the other .yml files
   game:
+    container_name: pong_game
     build: ../src/game
     volumes:
       - ../src/game:/daphne
     expose:
-      - 8000
+      - "8000/tcp"
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SECRET_KEY: 'django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn'

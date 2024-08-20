@@ -23,6 +23,10 @@ import { TournamentWaitingRoomPage } from './js/TournamentWaitingRoomPage.js';
 console.log("app.js loaded");
 // it's better to wait for the DOM to load before running any JS
 window.addEventListener("DOMContentLoaded", async () => {
+	// replaces the "null" state the browser pushes to the history when the page is loaded
+	if (!history.state)
+		history.replaceState({route: location.pathname}, "", location.pathname);
+
 	// adds event listeners for routing
 	await app.router.init();
 });
