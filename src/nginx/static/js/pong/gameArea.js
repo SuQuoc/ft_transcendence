@@ -1,6 +1,6 @@
 // create the game area
 // add player in constructor
-class GameArea {
+export class GameArea {
 
     constructor(width=800, height=600, refresh_rate=30)
     {
@@ -19,7 +19,7 @@ class GameArea {
         this.player1 = player1;
         this.player2 = player2;
         this.context = this.canvas.getContext("2d");
-        let centerDiv = document.getElementById("Center_div");
+        let centerDiv = document.querySelector("pong-page");
         centerDiv.appendChild(this.canvas)
         //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;

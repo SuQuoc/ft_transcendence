@@ -1,10 +1,15 @@
+import {GameArea} from "./gameArea.js";
+import {Player} from "./player.js";
+import {key_event_handler} from "./keyEvents.js";
+
+
 // Basic Pong game with remote players
 // create the game with gameArea.js class
 
 // if daphne is separate how to connect?
 //window.location.host
 
-function startPong()
+export function startPong(chatSocket)
 {
     /* var room_name = document.getElementById("room-name").value;
     var room_size = document.getElementById("room-size").value; */
@@ -22,9 +27,9 @@ function startPong()
 
     let game_area = new GameArea(width, height, refresh_rate);
 
-    let player1 = new Player(id=0, y=300, x=0, width=20, height=100, "Lenox");
-    let player2 = new Player(id=0, y=300, x=100, width=20, height=100, "Eule");
-    let ball = new Player(id="ball", y=0, x=0, width=10, height=10, "Ball");
+    let player1 = new Player(0, 300, 0, 20, 100, "Lenox");
+    let player2 = new Player(0, 300, 100, 20, 100, "Eule");
+    let ball = new Player("ball", 0, 0, 10, 10, "Ball");
 
     chatSocket.onmessage = function(e)
     {

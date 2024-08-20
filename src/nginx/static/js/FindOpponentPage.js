@@ -14,8 +14,6 @@ export class FindOpponentPage extends ComponentBaseClass {
 	handleSocketMessageStartPong(event) {
 		const data = JSON.parse(event.data);
 
-		console.log("startPong event");
-		console.log("data: ", data);
 		if (data.type === "startPong") {
 			window.app.router.go("/pong", false);
 		}

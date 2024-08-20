@@ -9,7 +9,7 @@ function send_key_status(id, up_down, chatSocket)
     }));
 }
 
-class key_event_handler
+export class key_event_handler
 {
     constructor(player1, player2, chatSocket)
     {
