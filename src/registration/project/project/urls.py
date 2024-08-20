@@ -15,21 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app import views
+from core_app.views import simple_registration, oauth2
 from django.urls import re_path
 
 urlpatterns = [
-    re_path('signup', views.signup),
-    re_path('delete_user', views.delete_user),
-    re_path('login', views.login),
-    re_path('logout', views.logout),
-    re_path('change_password', views.change_password),
-    re_path('verify_token', views.verify_token),
-    re_path('refresh_token', views.refresh_token),
+    re_path('signup', simple_registration.signup),
+    re_path('delete_user', simple_registration.delete_user),
+    re_path('login', simple_registration.login),
+    re_path('logout', simple_registration.logout),
+    re_path('change_password', simple_registration.change_password),
+    re_path('verify_token', simple_registration.verify_token),
+    re_path('refresh_token', simple_registration.refresh_token),
     
-    re_path('get_oauth2_url', views.get_oauth2_url),
-    re_path('set_oauth2', views.set_oauth2),
-    re_path('unset_oauth2', views.unset_oauth2),
-    re_path('login_oauth2', views.login_oauth2),
+    re_path('get_oauth2_url', oauth2.get_oauth2_url),
+    re_path('set_oauth2', oauth2.set_oauth2),
+    re_path('unset_oauth2', oauth2.unset_oauth2),
+    re_path('login_oauth2', oauth2.login_oauth2),
     # [aguilmea] I think i need to modify logout for oauth2 and not writte a own one
 ]
