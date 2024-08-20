@@ -47,7 +47,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	// TODO: arrow keys!!!!??
 	handleLeaveLobby(event) {
 		window.app.socket.send(JSON.stringify({type: "leaveTournament"}));
-		window.app.router.go("/tournament");
+		window.app.router.go("/tournament", false); // not sure if it makes sense not to add it to the history, but I feel like the history should behave the same with this button as the arrow keys
 	}
 
 	/** gets called when the websocket receives a message */
