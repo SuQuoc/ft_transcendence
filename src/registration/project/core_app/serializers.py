@@ -9,29 +9,25 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'id', 'password']
         extra_kwargs = {
-            'id': {'read_only': True},  # read-only so it's not required in POST requests
+            'id': {'read_only': True},  # read-only so it's not required in POST requests but sent back in dem JWT
             'password': {'write_only': True},  # write-only so it's not returned in GET requests
         }
 
     def create(self, validated_data):
-        password = validated_data.pop('password')  # Pop the password out of the validated_data dictionary
-        user = CustomUser(**validated_data)  # Create a new user instance with the validated data
-        user.set_password(password)  # Set the password for the user instance(it will be hased in this way)
-        user.save()  # Save the user instance to the database
-        return user  # Return the user instance
+        password = validated_data.pop('password') 
+        user = CustomUser(**validated_data)
+        user.set_password(password)
+        user.save()  
+        return user 
 
     def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)  # Pop the password out of the validated_data dictionary (if it exists)
-        for attr, value in validated_data.items():  # Iterate over the validated_data dictionary and set each attribute on the user instance
+        password = validated_data.pop('password', None) 
+        for attr, value in validated_data.items(): 
             setattr(instance, attr, value)
         if password:
-            instance.set_password(password)  # Set the password for the user instance (if it exists)
+            instance.set_password(password) 
         instance.save()
         return instance
-
-
-class DeleteUserSerializer(serializers.Serializer):
-    current_password = serializers.CharField(write_only=True)
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
