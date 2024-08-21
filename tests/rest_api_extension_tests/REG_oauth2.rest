@@ -1,0 +1,58 @@
+@base_url = https://localhost:8000
+
+# @name post_signup
+POST {{base_url}}/registration/signup/
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+# @name post_login
+POST {{base_url}}/registration/login/
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+@COOKIES = {{post_login.response.headers.Set-Cookie}}
+
+###
+
+GET https://127.0.0.1:8000/registration/get_oauth2_url/
+Content-Type: application/json
+Cookie: {{COOKIES}}
+
+{}
+
+###
+
+
+
+###
+
+POST https://127.0.0.1:8000/registration/set_oauth2/
+Content-Type: application/json
+Cookie: {{COOKIES}}
+
+{
+    "code": "0d431be0d2d78145be62d95cbef6d143f06178e355e22201e25836c62398b88c"
+}
+
+###
+
+GET https://127.0.0.1:8000/registration/unset_oauth2/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+GET https://127.0.0.1:8000/registration/login_oauth2/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
