@@ -62,7 +62,7 @@ class CustomUserProfile(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserProfileSerializer
 
-    """ def get(self, request, displayname):
+    def get(self, request, displayname):
 
         stalked_user = get_object_or_404(CustomUser, displayname=displayname)
 
@@ -83,7 +83,7 @@ class CustomUserProfile(generics.GenericAPIView):
             context["stranger"] = True
 
         serializer = self.serializer_class(stalked_user, context=context)
-        return Response(serializer.data) """
+        return Response(serializer.data)
 
     # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
