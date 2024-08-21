@@ -29,6 +29,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 	if (!history.state)
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
+	// generate a random user id (temporary!!!)
+	window.app.userData.username = crypto.randomUUID();
+	console.log("User ID: ", window.app.userData.username);
+
 	// adds event listeners for routing
 	await app.router.init();
 });

@@ -13,6 +13,7 @@ export class key_event_handler
 {
     constructor(player1, player2, chatSocket)
     {
+        this.element_pong_page = document.getElementsByTagName("pong-page")[0];
         this.chatSocket = chatSocket;
         this.player1 = player1;
         this.player2 = player2;
@@ -24,21 +25,23 @@ export class key_event_handler
     // Calls the key Down function that will send data to backend
     key_event()
     {
+        console.log("key_event");
         let player1 = this.player1;
         let up_down = [this.up, this.down];
         let chatSocket = this.chatSocket;
 
-        document.addEventListener("keydown", key_down)
+        this.element_pong_page.root.addEventListener("keydown", key_down)
         function key_down(e)
         {
-            if(e.key === "w")
+            if(e.key === "w"){
                 up_down = [true, false];
+            }
             if(e.key === "s")
                 up_down = [false, true];
             send_key_status(player1.id, up_down, chatSocket);
         }
 
-        document.addEventListener("keyup", key_up)
+        this.element_pong_page.root.addEventListener("keyup", key_up)
         function key_up(e)
         {
             if(e.key === "w")

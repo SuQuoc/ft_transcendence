@@ -31,10 +31,17 @@ export function startPong(chatSocket)
     let player2 = new Player(0, 300, 100, 20, 100, "Eule");
     let ball = new Player("ball", 0, 0, 10, 10, "Ball");
 
+    console.log("startPong");
+
     chatSocket.onmessage = function(e)
     {
-        update_game_data(player1, player2, ball, e);
+        const data = JSON.parse(e.data)
+        update_game_data(chatSocket, game_area, player1, player2, ball, data);
     };
+
+    game_area.start(player1, player2, ball);
+    let keys_handler = new key_event_handler(player1, player2, chatSocket);
+    keys_handler.key_event();
 
     /* game_area.start(player1, player2, ball);
     let keys_handler = new key_event_handler(player1, player2, chatSocket);
@@ -42,12 +49,13 @@ export function startPong(chatSocket)
     // if i recv message
 }
 
-function update_game_data(chatSocket, game_area, player1, player2, ball, e)
+function update_game_data(chatSocket, game_area, player1, player2, ball, data)
 {
-    const data = JSON.parse(e.data)
+    console.log(data);
     if (data.type === "playerId")
     {
-        player1.id = data.playerId;
+        player1.id = data.player1;
+        player2.id = data.player2;
         return ;
     }
 
@@ -70,18 +78,17 @@ function update_game_data(chatSocket, game_area, player1, player2, ball, e)
         return ;
     }
 
-    if(data.type === "startGame" && data.startGame === true)
+    /* if(data.type === "startGame" && data.startGame === true)
     {
         game_area.start(player1, player2, ball);
         let keys_handler = new key_event_handler(player1, player2, chatSocket);
         keys_handler.key_event();
-    }
-
+    } */
 }
 
 //clear the frame and update it
 //gets called all x times from the game_area class
-function updateGameArea(game_data)
+export function updateGameArea(game_data)
 {
     game_data.clear();
     game_data.draw_middle_line("black", 6, 30, 1.5);

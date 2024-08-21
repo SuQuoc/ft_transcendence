@@ -49,7 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         # create a random id
-        self.player_id = str(uuid.uuid4())
+        #self.player_id = str(uuid.uuid4())
         self.lobby = None
         # set up rooms
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
@@ -59,7 +59,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
-        self.players[self.player_id] = self.player
     
         if self.room_name == "match":
             return
@@ -130,7 +129,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     # ASYNC TASK WITH 0.05 S DELAY
-    async def game_loop(self):
+    """ async def game_loop(self):
         print("game loop started")
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
         print(self.match.len)
@@ -142,10 +141,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.sendToClient(self.match.player2, ball)
                 # [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
             await asyncio.sleep(self.delay)
-            """ async with self.update_lock:
+            async with self.update_lock:
                 player_count = len(self.players[self.room_name]) """
 
-    async def sendToClient(self, player: PongPlayer, ball: GameBall):
+    """ async def sendToClient(self, player: PongPlayer, ball: GameBall):
         print("send to client")
         player.move(self.MOVE_SPEED)
         ball.paddlesHit(player)
@@ -162,7 +161,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "match_points_left": ball.match_points["left"],
                 "match_points_right": ball.match_points["right"],
             },
-        )
+        ) """
 
     async def disconnect(self, close_code):
 
@@ -221,18 +220,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 print("[Warning] Received message with None type")
 
             case "onFindOpponentPage":
-                await self.lookforOpponent(msg)
+                await self.lookForOpponent(msg)
 
-    async def lookforOpponent(self, msg):
+    async def lookForOpponent(self, msg):
+
+        self.player_id = msg["user_id"]
+        self.player.id = self.player_id
+        self.players[self.player_id] = self.player
+
         match = Match(name=f"{self.player_id}_match")
         await match.addPlayer(self.player, channel_name=self.channel_name)
         if await match.findOpponent(self.players) is False:
+            del match
             return
+
         self.players.pop(self.player_id)
         self.players.pop(match.player2.id)
         print("match.name: ", match.name)
         await self.channel_layer.group_send(match.name,{"type": "start.Pong"})
-        print("players = ", self.players)
+        await self.channel_layer.group_send(match.name,{"type": "player.Id", "player1": match.player1.id, "player2": match.player2.id})
+        await match.startGame()
+        print("start game")
+
+    async def player_Id(self, e):
+        print("player id", self.room_name)
+        e["type"] = "playerId"
+        await self.send(text_data=json.dumps(e))
     
     async def start_Pong(self, e):
         print("start pong", self.room_name)

@@ -69,7 +69,7 @@ const Router = {
 		};
 
 		window.app.socket.onopen = () => {
-			window.app.socket.send(JSON.stringify({"type": type, "user_id": "123456"}));
+			window.app.socket.send(JSON.stringify({"type": type, "user_id": window.app.userData.username}));
 		};
 	},
 
