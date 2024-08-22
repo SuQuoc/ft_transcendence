@@ -22,10 +22,10 @@ def generate_response(status_code, token_s):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     response.data = token_s.validated_data
     access_token = token_s.validated_data['access']
-    access_token_expiration = datetime.utcnow() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+    access_token_expiration = datetime.now(datetime.UTC) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
     response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
     refresh_token = token_s.validated_data['refresh']
-    refresh_token_expiration = datetime.utcnow() + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+    refresh_token_expiration = datetime.now(datetime.UTC) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
     response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
     return response
 
@@ -39,8 +39,6 @@ def signup(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
         token_s = TokenObtainPairSerializer(data=request.data)
-        if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         return generate_response(status.HTTP_201_CREATED, token_s)
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -78,8 +76,6 @@ def login(request):
         if user is None or not user.check_password(credentials_s.validated_data['password']):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenObtainPairSerializer(data=request.data)
-        if not token_s.is_valid():  # [aguilmea] not sure why this should happen and if i should keep the check
-            return Response(token_s.errors, status=status.HTTP_400_BAD_REQUEST)
         return generate_response(status.HTTP_200_OK, token_s)
 
     except Exception as e:
@@ -155,13 +151,8 @@ def refresh_token(request):
         refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
-        if not token_s.is_valid():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        
-        response = Response(status=status.HTTP_200_OK)
-        return generate_response(response, token_s)
+        token_s = TokenRefreshSerializer(data={'refresh': refresh_token})      
+        return generate_response(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
