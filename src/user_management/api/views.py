@@ -1,45 +1,24 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from friends.models import FriendList, FriendRequest
+from friends.models import FriendList
+from friends.models import FriendRequest
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.parsers import FormParser
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer,  # register service
-)
-from rest_framework_simplejwt.views import TokenObtainPairView
+from utils_jwt import get_user_from_jwt
 
 from .models import CustomUser
 from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
-from utils_jwt import get_user_from_jwt
-
-# JWT
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):  # register service
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-
-        # Add custom claims
-        token['learning jwt'] = user.email
-        # token['user_id'] = user.user_id
-        # token['displayname'] = user.displayname
-
-        return token
-
-
-class MyTokenObtainPairView(TokenObtainPairView):  # register service
-    serializer_class = MyTokenObtainPairSerializer
 
 
 def profile(request):
     return HttpResponse("This is the profile page")
-
 
 
 class CustomUserCreate(generics.CreateAPIView):
@@ -62,7 +41,7 @@ class CustomUserProfile(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserProfileSerializer
 
-    """ def get(self, request, displayname):
+    def get(self, request, displayname):
 
         stalked_user = get_object_or_404(CustomUser, displayname=displayname)
 
@@ -83,7 +62,7 @@ class CustomUserProfile(generics.GenericAPIView):
             context["stranger"] = True
 
         serializer = self.serializer_class(stalked_user, context=context)
-        return Response(serializer.data) """
+        return Response(serializer.data)
 
     # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request, displayname):
@@ -113,13 +92,13 @@ class SearchUserView(generics.ListAPIView):
 
     def get(self, request):
         user = get_user_from_jwt(request)
-        
+
         searchterm = request.query_params.get("term", "")
-        
+
         results = CustomUser.objects.filter(displayname__icontains=searchterm)[:5]
         if not results:
             return Response({"detail": "No users found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
         relationships = {}
         online_status = {}
         friend_requests = {}
@@ -133,25 +112,25 @@ class SearchUserView(generics.ListAPIView):
                 if friend_request_relation:
                     relationships[found_u.user_id] = friend_request_relation
                     friend_requests[found_u.user_id] = friend_request_id
-                #else:
+                # else:
                 #    relationships[found_u.user_id] = "stranger"
-        
-        context = {"relationships": relationships, 
-                   "online_status": online_status,
-                   "friend_requests": friend_requests,
+
+        context = {
+            "relationships": relationships,
+            "online_status": online_status,
+            "friend_requests": friend_requests,
         }
-        #print(friend_requests)
+        # print(friend_requests)
         serializer = UserRelationSerializer(results, many=True, context=context)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 def get_pending_friend_request(*, me, other):
-    fr_sent = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=me, receiver=other).first() # using first to get the obj not a queryset, allthough there can only be one
+    fr_sent = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=me, receiver=other).first()  # using first to get the obj not a queryset, allthough there can only be one
     fr_received = FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=other, receiver=me).first()
     if fr_sent:
         return "requested", fr_sent.id
-    elif fr_received: 
+    elif fr_received:
         return "received", fr_received.id
     else:
         return None, None
-
