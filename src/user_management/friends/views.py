@@ -22,26 +22,27 @@ class SendFriendRequestView(generics.GenericAPIView):
 
             rec_name = serializer.validated_data.get('receiver')
             receiver = get_object_or_404(CustomUser, displayname=rec_name)
+            
 
             # is_self
             if sender == receiver:
                 return Response({"error": "You can't send a friend request to yourself"}, status=status.HTTP_400_BAD_REQUEST)
 
-            friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+            friend_request = FriendRequest.objects.filter(sender=receiver, receiver=sender).first()
+            if not friend_request:
+                friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
 
-            # is_stranger
+
             if created:
-                # serializer = FriendRequestSendSerializer(friend_request)
                 return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
-
-            elif friend_request.status == FriendRequest.PENDING:
+            if friend_request.status in (FriendRequest.UNFRIENDED, FriendRequest.DECLINED):
+                friend_request.set_sender_and_receiver(sender=sender, receiver=receiver)
+                return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
+            if friend_request.status == FriendRequest.PENDING:
                 return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
-
-            elif friend_request.status == FriendRequest.DECLINED:
-                friend_request.status = FriendRequest.PENDING
-                friend_request.save()
-                return Response({"message": "friend request sent"}, status=status.HTTP_200_OK)
-
+            #if friend_request.status == FriendRequest.DECLINED:
+            #    friend_request.set_sender_and_receiver(sender=sender, receiver=receiver)
+            #    return Response({"message": "friend request sent"}, status=status.HTTP_200_OK)
             # is_friend
             elif friend_request.status == FriendRequest.ACCEPTED:
                 return Response({"error": "You are best buds"}, status=status.HTTP_400_BAD_REQUEST)
@@ -49,31 +50,46 @@ class SendFriendRequestView(generics.GenericAPIView):
             raise ValidationError(serializer.errors)
 
 
-# might be better as patch method not post
-class AcceptFriendRequestView(generics.GenericAPIView):
+# might be better as patch method not post ??
+class AnswerFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestAnswerSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            friend_request_id = serializer.validated_data["id"]
+            friend_request_id = serializer.validated_data.get("id")
+            action = serializer.validated_data.get("action")
             friend_request = get_object_or_404(FriendRequest, id=friend_request_id)
 
-            user = get_object_or_404(CustomUser, user_id=request.user.user_id)
+            user = get_user_from_jwt(request)
 
-            if friend_request.receiver == user:
-                if friend_request.status == FriendRequest.PENDING:
-                    user.friend_list.addFriend(friend_request.sender)
-                    friend_request.sender.friend_list.addFriend(user)
-                    friend_request.status = FriendRequest.ACCEPTED
-                    friend_request.save()  # storing changes, so only status
-                    return Response({"message": "Friend request accepted"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
-            else:
+            if friend_request.receiver != user:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
+    
+            response = self.act_on_friend_request(friend_request, action)
+            return response
         else:
             raise ValidationError(serializer.errors)
+
+    def act_on_friend_request(self, friend_request: FriendRequest, action: str):
+        if friend_request.status == FriendRequest.PENDING:
+            if action == self.serializer_class.ACCEPT:
+                friend_request.accept()
+                return Response({"message": "Friend request accepted"}, status=status.HTTP_200_OK)
+            elif action == self.serializer_class.DECLINE:
+                friend_request.decline()
+                return Response({"message": "Friend request declined"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "No other action allowed on pending requests"}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif friend_request.status == FriendRequest.ACCEPTED:
+            if action == self.serializer_class.UNFRIEND:
+                friend_request.unfriend()
+            else:
+                return Response({"error": "No other action allowed on ACCEPTED requests"}, status=status.HTTP_400_BAD_REQUEST)
+                
+        else:
+            return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class DeclineFriendRequestView(generics.GenericAPIView):
@@ -120,17 +136,17 @@ class ListFriendRelationsView(generics.ListAPIView):
         frs_sent = user.get_pending_requested_friend_requests()
         for friend_request in frs_sent:
             person = friend_request.receiver
-            all_people.append(person)
             relationships[person.user_id] = "requested"
             friend_requests[person.user_id] = friend_request.id
+            all_people.append(person)
             
         
         frs_received = user.get_pending_received_friend_requests()
         for friend_request in frs_received:
             person = friend_request.sender
-            all_people.append(person)
             relationships[person.user_id] = "received"
             friend_requests[person.user_id] = friend_request.id
+            all_people.append(person)
 
         context = {"relationships": relationships, 
                    "online_status": online_status,
