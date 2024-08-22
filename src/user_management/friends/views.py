@@ -18,7 +18,7 @@ class SendFriendRequestView(generics.GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            sender = get_object_or_404(CustomUser, user_id=request.user.user_id)
+            sender = get_user_from_jwt(request)
 
             rec_name = serializer.validated_data.get('receiver')
             receiver = get_object_or_404(CustomUser, displayname=rec_name)
@@ -85,16 +85,15 @@ class DeclineFriendRequestView(generics.GenericAPIView):
             id = serializer.validated_data.get("id")
             friend_request = get_object_or_404(FriendRequest, id=id)
 
-            user = get_object_or_404(CustomUser, user_id=request.user.user_id)
-            if friend_request.receiver == user:
-                if friend_request.status == FriendRequest.PENDING:
-                    friend_request.status = FriendRequest.DECLINED
-                    friend_request.save()  # storing changes, so only status
-                    return Response({"message": "Friend request declined"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
-            else:
+            user = get_user_from_jwt(request)
+            if friend_request.receiver != user:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
+            if friend_request.status == FriendRequest.PENDING:
+                friend_request.decline()
+                return Response({"message": "Friend request declined"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)        
+        
         else:
             raise ValidationError(serializer.errors)
 
