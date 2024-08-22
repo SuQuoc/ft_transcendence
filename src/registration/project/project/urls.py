@@ -27,8 +27,8 @@ urlpatterns = [
     re_path('verify_token', simple_registration.verify_token),
     re_path('refresh_token', simple_registration.refresh_token),
     
-    re_path('get_oauth2_url', oauth2.get_oauth2_url),
-    re_path('set_oauth2', oauth2.set_oauth2),
+    re_path('send_oauth2_authorization_request', oauth2.send_oauth2_authorization_request),
+    re_path('exchange_code_against_access_token', oauth2.exchange_code_against_access_token),
     re_path('unset_oauth2', oauth2.unset_oauth2),
     re_path('login_oauth2', oauth2.login_oauth2),
     # [aguilmea] I think i need to modify logout for oauth2 and not writte a own one

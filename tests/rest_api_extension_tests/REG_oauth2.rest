@@ -20,7 +20,8 @@ Content-Type: application/json
 
 ###
 
-GET https://127.0.0.1:8000/registration/get_oauth2_url/
+@name get_oauth2_authorization_request
+GET {{base_url}}/registration/send_oauth2_authorization_request
 Content-Type: application/json
 Cookie: {{COOKIES}}
 
@@ -28,11 +29,11 @@ Cookie: {{COOKIES}}
 
 ###
 
-
+@CODE = {{get_oauth2_authorization_request.response.headers.Set-Cookie}}
 
 ###
 
-POST https://127.0.0.1:8000/registration/set_oauth2/
+POST https://127.0.0.1:8000/registration/exchange_code_against_access_token/?code={{CODE}}
 Content-Type: application/json
 Cookie: {{COOKIES}}
 
