@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timezone
 
 from django.conf import settings
 from rest_framework import status
@@ -22,10 +21,10 @@ def generate_response(status_code, token_s):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     response.data = token_s.validated_data
     access_token = token_s.validated_data['access']
-    access_token_expiration = datetime.now(datetime.UTC) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+    access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
     response.set_cookie(key='access', value=access_token, expires=access_token_expiration, httponly=True)
     refresh_token = token_s.validated_data['refresh']
-    refresh_token_expiration = datetime.now(datetime.UTC) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+    refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
     response.set_cookie(key='refresh', value=refresh_token, expires=refresh_token_expiration, httponly=True)
     return response
 
@@ -107,7 +106,7 @@ def change_password(request):
             'refresh': str(new_refresh)
         }, status=status.HTTP_200_OK)
 
-        access_token_expiration = datetime.now(datetime.UTC) + timedelta(minutes=5)
+        access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         response.set_cookie(
             key='access',
             value=str(new_access),
@@ -115,7 +114,7 @@ def change_password(request):
             httponly=True
         )
 
-        refresh_token_expiration = datetime.now(datetime.UTC) + timedelta(days=1)
+        refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
         response.set_cookie(
             key='refresh',
             value=str(new_refresh),
