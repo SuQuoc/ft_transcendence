@@ -53,7 +53,7 @@ export class JoinTournamentElement extends HTMLElement {
 					<span class="text-white-50 fs-4">/</span>
 					<span name="join_max_player_num" class="text-white fs-4">4</span>
 				</div>
-				<button type="button" name="join_tournament_button" class="btn btn-secondary py-1 px-3">Join</button>
+				<button type="button" name="join_tournament_button" class="btn btn-custom py-1 px-3">Join</button>
 			</div>
 		`;
 		return template;

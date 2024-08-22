@@ -192,7 +192,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 							autocomplete="off"
 							checked
 							>
-							<label class="btn btn-outline-secondary w-25" for="create4PlayerInput">4</label>
+							<label class="btn btn-outline-custom w-25" for="create4PlayerInput">4</label>
 							
 							<input
 							type="radio"
@@ -202,7 +202,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 							id="create8PlayerInput"
 							autocomplete="off"
 							>
-							<label class="btn btn-outline-secondary w-25" for="create8PlayerInput">8</label>
+							<label class="btn btn-outline-custom w-25" for="create8PlayerInput">8</label>
 							
 							<input
 							type="radio"
@@ -212,7 +212,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 							id="create16PlayerInput"
 							autocomplete="off"
 							>
-							<label class="btn btn-outline-secondary w-25" for="create16PlayerInput">16</label>
+							<label class="btn btn-outline-custom w-25" for="create16PlayerInput">16</label>
 						</div>
 						
 						<!-- Points required to win one round -->
@@ -233,7 +233,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 						</div>
 						
 						<!-- Submit the form (create a tournament) -->
-						<button id="createTournamentButton" type="submit" class="btn btn-secondary w-100">create</button>
+						<button id="createTournamentButton" type="submit" class="btn btn-custom w-100">create</button>
 					</form>
 				</div>
 			</div>
