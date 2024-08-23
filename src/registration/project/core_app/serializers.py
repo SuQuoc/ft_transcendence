@@ -7,7 +7,7 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'id', 'password']
+        fields = ['username', 'id', 'password', 'ft_userid']
         extra_kwargs = {
             'id': {'read_only': True},  # read-only so it's not required in POST requests but sent back in dem JWT
             'password': {'write_only': True},  # write-only so it's not returned in GET requests
