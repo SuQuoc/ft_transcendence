@@ -1,7 +1,7 @@
 
 from django.db import models
+from friends.models import FriendRequest
 from PIL import Image
-from django.templatetags.static import static
 
 
 # Create your models here.
@@ -74,7 +74,14 @@ class CustomUser(models.Model):
         super().delete(*args, **kwargs)
 
     def get_online_status(self):
-        return "true" if self.online else "false"
+        return "True" if self.online else "False"
+
+    # FriendRequests
+    def get_pending_received_friend_requests(user):
+        return FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
+
+    def get_pending_requested_friend_requests(user):
+        return FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=user)
 
     def __str__(self):
         return self.displayname
