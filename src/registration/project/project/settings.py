@@ -114,6 +114,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'core_app.authenticate.AccessTokenAuthentication',
         'core_app.authenticate.RefreshTokenAuthentication',
+        'core_app.authenticate.NoTokenAuthentication',
     ],
 }
 # [aguilmea] end of added manually

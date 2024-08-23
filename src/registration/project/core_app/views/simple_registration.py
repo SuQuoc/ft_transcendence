@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -67,7 +67,7 @@ def generate_response_with_invalid_JWT(status_code, token_s):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@authentication_classes([NoTokenAuthentication])
 def signup(request):
     try:
         user_s = UserSerializer(data=request.data)
@@ -103,7 +103,7 @@ def delete_user(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@authentication_classes([NoTokenAuthentication])
 def login(request):
     try:
         credentials_s = LoginSerializer(data=request.data)

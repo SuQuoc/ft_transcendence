@@ -54,3 +54,8 @@ class RefreshTokenAuthentication(BaseAuthentication):
             return (user, None)
         except InvalidTokenError:
             raise AuthenticationFailed('Invalid token')
+        
+class NoTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):    
+        return (None, None)
+
