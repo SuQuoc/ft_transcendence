@@ -18,10 +18,6 @@ body {
 }
 
 
-.custom-bg-color {
-	background: var(--custom-bg-color);
-}
-
 .dark-footer-border-bottom {
 	border-bottom: 1px solid var(--custom-bg-color);
 }
@@ -118,5 +114,5 @@ input[type="range"]:focus::-ms-thumb {
 }
 
 input[type="range"] {
-	outline: none !important; /* the !important is needed to override my custom outline which is also important */
+	outline: none !important; /* the !important is needed to override my custom outline for input:focus which is also important */
 }

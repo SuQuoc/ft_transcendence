@@ -95,26 +95,16 @@
 
 
 		<!-- Tournaments to join -->
-		<div class="d-flex flex-column-reverse flex-md-row
+		<div class="d-flex flex-column flex-md-row
 		justify-content-center justify-content-evenly
-		align-items-md-start
 		vw-100 gap-5 p-5"
 		>
-
-
-			<div class="flex-grow-1 tournament-max-width d-flex flex-column row-gap-2">
-				<!-- No tournaments to join (should only appear when there are no tournaments available -->
-				<div id="noTournamentsToJoin" class="text-center text-secondary fw-bold fs-1 w-100">Waiting for Players</div>
-				
-				<!-- Join Tournament elements will be added here -->
-			</div>
-				
+		  
+		
 			<!-- Players and Leave button -->
-			<div class="d-flex flex-column flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 row-gap-2 p-3">
-				<h3 class="text-center text-white fs-4 fw-semibold">Players</h3>
-					
-				div.
-
+			<div class="d-flex flex-column align-self-center align-self-md-start bg-dark rounded-3 row-gap-2 p-3">
+				<h3 class="text-center text-white fs-4 fw-semibold">Players:</h3>
+				
 				<!-- Player List -->
 				<div id="lobbyPlayerList" class="d-flex flex-column row-gap-1">
 					
@@ -129,8 +119,13 @@
 				<!-- Leave the tournament -->
 				<button type="button" id="lobbyLeaveButton" class="btn btn-secondary w-100">leave</button>
 			</div>
+		
+		
+			<div class="d-flex justify-content-center align-items-center flex-grow-1 tournament-max-width">
+				<div id="lobbyWaitingForPlayers" class="text-center text-secondary fw-bold fs-1 w-100">Waiting for Players</div>
+				
+			</div>
 		</div>
-
 
 
 	</main>
