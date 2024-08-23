@@ -18,6 +18,10 @@ body {
 }
 
 
+.custom-bg-color {
+	background: var(--custom-bg-color);
+}
+
 .dark-footer-border-bottom {
 	border-bottom: 1px solid var(--custom-bg-color);
 }
