@@ -16,13 +16,16 @@ Content-Type: application/json
 
 ###
 
-@COOKIES = {{post_login.response.headers.Set-Cookie}}
+@SET_COOKIE = {{post_login.response.headers.Set-Cookie}}
 
 ###
 
+@ACCESS_COOKIE = {{SET_COOKIE}}
+
+
 POST {{base_url}}/registration/delete_user/
 Content-Type: application/json
-Cookie: {{COOKIES}}
+Cookie: {{ACCESS_COOKIE}}
 
 {"current_password": "Pass1234!"}
 
@@ -30,7 +33,7 @@ Cookie: {{COOKIES}}
 
 GET {{base_url}}/registration/logout/
 Content-Type: application/json
-Cookie: {{COOKIES}}
+Cookie: {{ACCESS_COOKIE}}
 
 {}
 
@@ -38,7 +41,7 @@ Cookie: {{COOKIES}}
 
 POST {{base_url}}/registration/change_password/
 Content-Type: application/json
-Cookie: {{COOKIES}}
+Cookie: {{ACCESS_COOKIE}}
 
 {"current_password": "Pass1234!", "new_password": "Pass5678!"}
 
@@ -46,7 +49,7 @@ Cookie: {{COOKIES}}
 
 GET {{base_url}}/registration/verify_token/
 Content-Type: application/json
-Cookie: {{COOKIES}}
+Cookie: {{ACCESS_COOKIE}}
 
 {}
 
@@ -54,6 +57,6 @@ Cookie: {{COOKIES}}
 
 GET https://127.0.0.1:8000/registration/refresh_token/
 Content-Type: application/json
-Cookie: {{COOKIES}}
+Cookie: refresh=x.x.x;y;z
 
 {}
