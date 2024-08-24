@@ -8,6 +8,7 @@ from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..models import CustomUser
@@ -28,7 +29,8 @@ def generate_response_with_valid_JWT(status_code, token_s):
         expires=access_token_expiration,
         domain=os.environ.get('DOMAIN'),
         httponly=True,
-        secure=True)
+        secure=True,
+        samesite = 'Strict')
     refresh_token = token_s.validated_data['refresh']
     refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
     response.set_cookie(
@@ -37,7 +39,8 @@ def generate_response_with_valid_JWT(status_code, token_s):
         expires=refresh_token_expiration,
         domain=os.environ.get('DOMAIN'),
         httponly=True,
-        secure=True)
+        secure=True,
+        samesite = 'Strict')
     return response
 
 
@@ -53,7 +56,8 @@ def generate_response_with_invalid_JWT(status_code, token_s):
         expires=access_token_expiration,
         domain=os.environ.get('DOMAIN'),
         httponly=True,
-        secure=True)
+        secure=True,
+        samesite = 'Strict')
     refresh_token = token_s.validated_data['refresh']
     refresh_token_expiration = datetime.now(timezone.utc)
     response.set_cookie(
@@ -62,7 +66,8 @@ def generate_response_with_invalid_JWT(status_code, token_s):
         expires=refresh_token_expiration,
         domain=os.environ.get('DOMAIN'),
         httponly=True,
-        secure=True)
+        secure=True,
+        samesite = 'Strict')
     return response
 
 

@@ -16,12 +16,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # [aguilmea] added manually
     'rest_framework_simplejwt.token_blacklist',  # [aguilmea] added manually
-    'corsheaders',  # [aguilmea] added manually for cookies
     'core_app',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # [aguilmea] added manually for cookies
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -103,12 +101,6 @@ SIMPLE_JWT = {
     'SIGNING_KEY': PRIVATE_KEY,
     'VERIFYING_KEY': PUBLIC_KEY,
 }
-
-CORS_ALLOWED_ORIGINS = [
-    os.environ.get('SERVER_URL'),
-]
-
-CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
