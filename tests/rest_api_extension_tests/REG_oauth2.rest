@@ -36,7 +36,7 @@ Cookie: {{{{ACCESS_COOKIE}}}}
 
 ###
 
-POST https://127.0.0.1:8000/registration/exchange_code_against_access_token/?code={{CODE}}
+POST {{base_url}}/registration/exchange_code_against_access_token/?code={{CODE}}
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
@@ -46,7 +46,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-GET https://127.0.0.1:8000/registration/unset_oauth2/
+GET {{base_url}}/registration/unset_oauth2/
 Content-Type: application/json
 Cookie: access=a,b,c refresh=x,y,z
 
@@ -54,7 +54,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 ###
 
-GET https://127.0.0.1:8000/registration/login_oauth2/
+GET {{base_url}}/registration/login_oauth2/
 Content-Type: application/json
 Cookie: access=a,b,c refresh=x,y,z
 

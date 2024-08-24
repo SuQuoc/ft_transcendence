@@ -55,7 +55,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-GET https://127.0.0.1:8000/registration/refresh_token/
+GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
 Cookie: refresh=x.x.x;y;z
 
