@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ADDED BY US--------------------------------------------- #
-CSRF_TRUSTED_ORIGINS = ["https://127.0.0.1:8000", "https://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
 
 # Security settings for development - clarify if needed !!

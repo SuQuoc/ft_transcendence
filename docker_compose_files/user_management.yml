@@ -47,7 +47,7 @@ services:
       DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
       DJ_SUDO_PASSWORD_MANAGEMENT: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
       JWT_SECRET: "${JWT_SECRET:-somesecret}"
-      SERVER_URL: ${SERVER_URL_REG:-https://localhost:8000}
+      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
     depends_on:
       db_user_management:
         condition: service_healthy

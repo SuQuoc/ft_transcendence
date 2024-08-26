@@ -21,6 +21,8 @@ jobs:
       run: make build_only
     - name: start servers
       run: make &
+    - name: run user_management api tests
+      run: make um_test
 
     - uses: actions/setup-python@v5
       with:
