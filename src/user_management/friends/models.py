@@ -1,6 +1,6 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
 
 # Create your models here.
 
@@ -31,7 +31,7 @@ class FriendList(models.Model):
         try:
             to_unfriend_friend_list = FriendList.objects.get(user=to_unfriend)
         except ObjectDoesNotExist:
-            raise ValueError("Smth fundamentally wrong: FriendList - unfriend method") 
+            raise ValueError("Smth fundamentally wrong: FriendList - unfriend method")
 
         initiator_friend_list.del_friend(to_unfriend)
         to_unfriend_friend_list.del_friend(self.user)
@@ -40,6 +40,9 @@ class FriendList(models.Model):
         if self.friends.filter(user_id=friend.user_id).exists():
             return True
         return False
+
+    def get_friend_count(self):
+        return self.friends.count()
 
     # Needed ??
     def get_friends_with_request_ids(self):
@@ -55,7 +58,7 @@ class FriendList(models.Model):
                 'request_id': friend_request.id if friend_request else None
             })
         return friends_with_request_id
-    
+
     def get_friends_request_id(self, friend):
         friend_request = self.get_friends_request(friend)
         if friend_request:
@@ -137,4 +140,3 @@ class FriendRequest(models.Model):
         self.receiver = receiver
         self.status = self.PENDING
         self.save()
-
