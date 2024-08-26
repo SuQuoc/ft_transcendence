@@ -7,6 +7,8 @@ from friends.models import FriendRequest
 from rest_framework.test import APITestCase
 from utils_jwt import generate_token
 
+from user_management.authenticate import ACCESS
+
 
 class MyTestSetUp(APITestCase):
     @staticmethod
@@ -49,5 +51,5 @@ class MyTestSetUp(APITestCase):
         and SETS the APIClient to use it.
         """
         self.access_token = generate_token(user_id)
-        cookie_name = settings.SIMPLE_JWT['AUTH_COOKIE']
+        cookie_name = ACCESS
         self.client.cookies[cookie_name] = self.access_token

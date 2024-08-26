@@ -177,12 +177,6 @@ with open('/run/secrets/public_key.pem', 'r') as f:
 SIMPLE_JWT = {
     # 'ALGORITHM': 'RS256',
     # 'VERIFYING_KEY': PUBLIC_KEY,
-    'AUTH_COOKIE': 'access',  # Cookie name. Enables cookies if value is set.
-    'AUTH_COOKIE_DOMAIN': None,  # A string like "example.com", or None for standard domain cookie.
-    'AUTH_COOKIE_SECURE': False,  # Whether the auth cookies should be secure (https:// only).
-    'AUTH_COOKIE_HTTP_ONLY': True,  # Http only cookie flag.It's not fetch by javascript.
-    'AUTH_COOKIE_PATH': '/',  # The path of the auth cookie.
-    'AUTH_COOKIE_SAMESITE': 'Lax',
     # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }

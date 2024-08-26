@@ -15,8 +15,17 @@ class FriendRequestSendSerializer(serializers.ModelSerializer):
 
 
 class FriendRequestAnswerSerializer(serializers.ModelSerializer):
-    friend_request_id = serializers.IntegerField(source='id') # renaming id to friend_request_id
+    ACCEPT = "accept"
+    DECLINE = "decline"
+    UNFRIEND = "unfriend"
 
+    friend_request_id = serializers.IntegerField(source='id') # renaming id to friend_request_id
+    action = serializers.CharField(write_only=True)
     class Meta:
         model = FriendRequest
-        fields = ["friend_request_id"]
+        fields = ["friend_request_id", "action"]
+
+    def validate_action(self, value):
+        if value not in [self.ACCEPT, self.DECLINE, self.UNFRIEND]:
+            raise serializers.ValidationError("Invalid action. Must be 'accept' or 'decline'.")
+        return value
