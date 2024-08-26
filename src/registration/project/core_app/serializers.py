@@ -7,11 +7,11 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'id', 'password', 'ft_userid']
+        fields = ['id', 'username', 'password', 'enabled2fa', 'resetpasscode', 'resetpasscode_expires' , 'ft_userid']
         extra_kwargs = {
-            'id': {'read_only': True},  # read-only so it's not required in POST requests but sent back in dem JWT
-            'password': {'write_only': True},  # write-only so it's not returned in GET requests
-        }
+            'id': {'read_only': True},          # [aguilmea] read-only so it's not necessary for creation
+            'password': {'write_only': True},   # [aguilmea] write-only so it's not returned in get requests
+        }                                       # [aguilmea] I should have a regex or something like that just like in CustomUser model
 
     def create(self, validated_data):
         password = validated_data.pop('password') 
@@ -31,4 +31,4 @@ class UserSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField() # I should have a regex or something like that just like in CustomUser model
+    password = serializers.CharField() 
