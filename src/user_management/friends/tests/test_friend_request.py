@@ -1,21 +1,19 @@
-import json
 import uuid
 
 from api.models import CustomUser
 from django.db import connection
-from django.test import TestCase
 from django.urls import reverse
-from friends.models import FriendList
 from friends.models import FriendRequest
+from test_setup import MyTestSetUp
 from utils_jwt import generate_token
 
 
-class FriendRequestTest(TestCase):
+class FriendRequestTest(MyTestSetUp):
     def setUp(self):
         self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="TestUser1", online=False)
         self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="Stranger", online=True)
 
-        self.user_tokens = {
+        self.user_tokens = {  # old JWT WITHOUT COOKIE:
             f"{self.user1.displayname}": f"{generate_token(self.user1.user_id)}",
             f"{self.stranger.displayname}": f"{generate_token(self.stranger.user_id)}",
         }
@@ -29,8 +27,10 @@ class FriendRequestTest(TestCase):
         self.url_acc = reverse("acc-friend-request")
         self.url_dec = reverse("dec-friend-request")
 
+        self.setup_jwt_with_cookie(self.user1.user_id)
+
         self.headers = {
-            "HTTP_AUTHORIZATION": f"Bearer {self.user_tokens[self.user1.displayname]}",
+            # "HTTP_AUTHORIZATION": f"Bearer {self.user_tokens[self.user1.displayname]}",
         }
 
         # to reset the id to start with 1 for every test method,
@@ -44,16 +44,18 @@ class FriendRequestTest(TestCase):
         FriendRequest.objects.all().delete()
         CustomUser.objects.all().delete()
 
+    # old
     def set_request_user(self, displayname):
         self.headers["HTTP_AUTHORIZATION"] = f"Bearer {self.user_tokens[displayname]}"
 
     def post(self):
-        return self.client.post(self.url, data=self.data, content_type="application/json", format="json", secure=True, **self.headers)
+        return self.client.post(self.url, data=self.data, format="json", secure=True, **self.headers)
 
     def test_sending_to_myself(self):
         self.data["receiver"] = self.user1.displayname
         response = self.post()
         response_json = response.json()
+
         # print(response)
         # print(response_json)
         self.assertEqual(response.status_code, 400)
@@ -81,11 +83,11 @@ class FriendRequestTest(TestCase):
 
     def test_sending_to_friend(self):
         self.test_accept_friend_request()
-        # obj = FriendRequest.objects.get(sender=self.user1, receiver=self.stranger, status=FriendRequest.ACCEPTED)
 
         self.url = self.url_send
         self.data["receiver"] = self.stranger.displayname  # stranger became a friend via code before
-        self.set_request_user(self.user1.displayname)
+
+        self.setup_jwt_with_cookie(self.user1.user_id)
 
         response = self.post()
         response_json = response.json()
@@ -97,12 +99,15 @@ class FriendRequestTest(TestCase):
 
     # Answering a friend request
     def test_accept_friend_request(self):
+        """
+        after this test APIClient uses cookie created with stranger
+        """
         self.test_sending_to_stranger()
 
         # setup for post to work correctly
         self.data = self.data_f_request
         self.url = self.url_acc
-        self.set_request_user(self.stranger.displayname)
+        self.setup_jwt_with_cookie(self.stranger.user_id)
 
         response = self.post()
         response_json = response.json()
@@ -118,8 +123,8 @@ class FriendRequestTest(TestCase):
         # setup for post to work correctly
         self.data = self.data_f_request
         self.url = self.url_dec
-        self.headers["HTTP_AUTHORIZATION"] = f"Bearer {generate_token(self.stranger.user_id)}"
-
+        # JWT WITHOUT COOKIE: self.headers["HTTP_AUTHORIZATION"] = f"Bearer {generate_token(self.stranger.user_id)}"
+        self.setup_jwt_with_cookie(self.stranger.user_id)
         response = self.post()
         response_json = response.json()
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.DECLINED).count()

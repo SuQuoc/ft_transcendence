@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from .models import CustomUser
-from .models import FriendRequest
+from api.models import CustomUser
+from friends.models import FriendRequest
 
 
 class FriendRequestSendSerializer(serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class FriendRequestSendSerializer(serializers.ModelSerializer):
 
 
 class FriendRequestAnswerSerializer(serializers.ModelSerializer):
-    friend_request_id = serializers.IntegerField(source='id')
+    friend_request_id = serializers.IntegerField(source='id') # renaming id to friend_request_id
 
     class Meta:
         model = FriendRequest
