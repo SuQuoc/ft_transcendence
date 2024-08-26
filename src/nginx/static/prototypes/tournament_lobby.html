@@ -69,62 +69,67 @@
 		<!-- main page content -->
 
 
-<!-- 		<div class="d-flex flex-row justify-content-evenly align-items-center w-100 h-100 p-5 gap-5">
+		<!-- Lobby -->
+		<div class="d-flex flex-lg-row flex-column-reverse w-100 h-100">
+			<!-- lobby player sidebar -->
+			<div class="d-flex flex-lg-column flex-row
+						justify-content-between
+						lobby-player-sidebar-lg
+						overflow-auto
+						bg-dark shadow text-white
+						h-lg-100 p-2 gap-lg-0 gap-5"
+			>
+				<!-- leave button -->
+				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
+				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
 
-			<div class="d-flex flex-column justify-content-around h-100">
-				<div  id="lobbyPlayerList" class="d-flex flex-column row-gap-1">
-					
-					TournamentLobbyElement
-					<div name="lobby_player_name" class="bg-dark text-white">name</div>
-					<div name="lobby_player_name" class="bg-dark text-white">name</div>
-					<div name="lobby_player_name" class="bg-dark text-white">name</div>
-					<div name="lobby_player_name" class="bg-dark text-white">name</div>
-					
+				<!-- number of players -->
+				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
+					<span class="d-lg-block d-none fs-4">Players:</span>
+					<div class="d-flex ms-lg-auto">
+						<span id="lobbyCurrentPlayerNum" class="fs-4">1</span>
+						<span class="fs-4">/</span>
+						<span id="lobbyMaxPlayerNum" class="fs-4">4</span>
+					</div>
 				</div>
-				<div class="d-flex justify-content-center align-items-center text-center">
-					<button type="button" id="lobbyLeaveButton" class="btn btn-secondary">leave</button>
+
+				<!-- player list -->
+				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2"></hr>
+				<div id="lobbyPlayerList"
+					class="d-flex flex-lg-column flex-row
+							align-self-lg-start align-self-center
+							gap-3 row-gap-2
+							order-lg-2"
+				>
+
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle" style="width: 30px; height: 30px;">
+						name
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle" style="width: 30px; height: 30px;">
+						username
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle" style="width: 30px; height: 30px;">
+						Name
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle" style="width: 30px; height: 30px;">
+						name
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle" style="width: 30px; height: 30px;">
+						name
+					</div>
 				</div>
+
 			</div>
-
-			<div class="d-flex flex-grow-1">
-				<h1>Looking for Players</h1>
+			<!-- game -->
+			<div class="d-flex flex-grow-1 justify-content-center align-items-center align-self-">
+				Game
 			</div>
-
-		</div> -->
-
-
-
-		<!-- Tournaments to join -->
-		<div class="d-flex flex-column flex-md-row
-		justify-content-center justify-content-evenly
-		vw-100 gap-5 p-5"
-		>
-		  
-		
-			<!-- Players and Leave button -->
-			<div class="d-flex flex-column align-self-center align-self-md-start bg-dark rounded-3 row-gap-2 p-3">
-				<h3 class="text-center text-white fs-4 fw-semibold">Players:</h3>
-				
-				<!-- Player List -->
-				<div id="lobbyPlayerList" class="d-flex flex-column row-gap-1">
-					
-					<div name="lobby_player_name" class="text-white">name</div>
-					<div name="lobby_player_name" class="text-white">name</div>
-					<div name="lobby_player_name" class="text-white">name</div>
-					<div name="lobby_player_name" class="text-white">name</div>
-					
-				</div>
-				
-				<hr class="text-white">
-				<!-- Leave the tournament -->
-				<button type="button" id="lobbyLeaveButton" class="btn btn-secondary w-100">leave</button>
-			</div>
-		
-		
-			<div class="d-flex justify-content-center align-items-center flex-grow-1 tournament-max-width">
-				<div id="lobbyWaitingForPlayers" class="text-center text-secondary fw-bold fs-1 w-100">Waiting for Players</div>
-				
-			</div>
+			
 		</div>
 
 
