@@ -1,14 +1,14 @@
 ########## main modules installed (the ones i chose to install)
 
-Django==5.0.7
 djangorestframework==3.15.2
 psycopg2-binary==2.9.9
-djangorestframework_simplejwt[crypto,blacklist]==5.3.1
+djangorestframework_simplejwt[crypto]==5.3.1
 django-cors-headers # for cookies
-pyjwt # te decrypt token
+requests # for oauth2
 
 ########## dependencies
 
+Django==5.0.7
 asgiref==3.8.1
 pip==24.0
 PyJWT==2.8.0

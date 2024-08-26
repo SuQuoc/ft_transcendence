@@ -39,19 +39,28 @@ keys:
 	bash ./src/common_files/jwt_create_keys.sh
 
 ###################### Registration #####################
-.PHONY: registration_up registration_down
+.PHONY: reg_cache_clean
 
-registration_up:
-	@${DOCKER_COMPOSE} --profile registration build
-	@${DOCKER_COMPOSE} --profile registration up
+reg_cache_clean:
+	rm -rf ./src/registration/project/core_app/__pycache__/
+	rm -rf ./src/registration/project/core_app/migrations/__pycache__/
+	rm -rf ./src/registration/project/core_app/migrations/0001_initial.py
+	rm -rf ./src/registration/project/core_app/views/__pycache__/
+	rm -rf ./src/registration/project/project/__pycache__/
 
-registration_down:
-	@${DOCKER_COMPOSE} --profile registration down
 
+###################### Game #####################
+.PHONY: game_cache_clean
 
+game_cache_clean:
+	rm -rf ./src/game/__pycache__/
+	rm -rf ./src/pong/__pycache__/
+	rm -rf ./src/pong/game_core/__pycache__/
+	rm -rf ./src/pong/migrations/__pycache__/
+	rm -rf ./src/pong/migrations/0001_initial.py
 
 ###################### User Management #####################
-.PHONY: um_up um_down um_mm um_migrate um_shell cache_clean
+.PHONY: um_up um_down um_mm um_migrate um_shell um_cache_clean
 
 um_up:
 	@${DOCKER_COMPOSE} --profile user_management build
@@ -62,6 +71,7 @@ um_down:
 
 um_mm:
 	${DOCKER_COMPOSE} exec user_management python manage.py makemigrations
+
 
 um_migrate:
 	${DOCKER_COMPOSE} exec user_management python manage.py migrate
@@ -78,7 +88,7 @@ um_db_exec:
 um_test:
 	${DOCKER_COMPOSE} exec user_management python manage.py test
 
-cache_clean:
+um_cache_clean:
 	rm -rf ./src/user_management/__pycache__/
 	rm -rf ./src/user_management/api/__pycache__/
 	rm -rf ./src/user_management/api/management/__pycache__/
