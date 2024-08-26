@@ -55,6 +55,13 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
+POST {{base_url}}/registration/forgot_password/
+Content-Type: application/json
+
+{"email": "email@domain.at"}
+
+###
+
 GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
 Cookie: refresh=x.x.x;y;z

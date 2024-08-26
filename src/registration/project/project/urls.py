@@ -26,6 +26,7 @@ urlpatterns = [
     re_path('change_password', basic.change_password),
     re_path('verify_token', basic.verify_token),
     re_path('refresh_token', basic.refresh_token),
+    re_path('forgot_password', basic.forgot_password),
     
     re_path('send_oauth2_authorization_request', oauth2.send_oauth2_authorization_request),
     re_path('exchange_code_against_access_token', oauth2.exchange_code_against_access_token),

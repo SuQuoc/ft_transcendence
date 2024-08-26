@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -130,13 +131,10 @@ def change_password(request):
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
         refresh = request.COOKIES.get('refresh', None)
-        access = request.COOKIES.get(settings['AUTH_COOKIE'])
-        if not access:
+        if not refresh:
             return Response({'message' : 'bla'}, status=status.HTTP_401_UNAUTHORIZED)
         if not current_password or not new_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if not refresh:
-            return Response({'access': access}, status=status.HTTP_401_UNAUTHORIZED)
         user = request.user
         if not user.check_password(current_password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -202,3 +200,35 @@ def refresh_token(request):
 @permission_classes([IsAuthenticated])
 def verify_token(request):
     return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
+
+def send_reset_email(self):
+    try:
+        send_mail(
+            "Subject here",
+            "Here is the message: Youhhhhou",
+            "from@gmail.com",
+            ["recipient@mail.com"],
+            fail_silently=False,
+            auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
+            auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
+            connection=None, # [aguilmea] optional email backend
+            html_message=None, # [aguilmea] will only be sent as plain text and not html
+        )
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([NoTokenAuthentication])
+def forgot_password(request):
+    try:
+        email = request.data.get('email')
+        if not email:
+            return Response({"test":"1"}, status=status.HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.filter(username=email).first()
+        if not user:
+            return Response({"test":"2"}, status=status.HTTP_400_BAD_REQUEST)
+        send_reset_email(user)
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
