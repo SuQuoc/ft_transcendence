@@ -18,28 +18,28 @@ def page(context: BrowserContext):
     page.close()
 
 def test_homepage(page: Page):
-    page.goto("https://127.0.0.1:8000/")
+    page.goto("https://localhost:8000/")
     expect(page).to_have_title(re.compile("ft_transcendence"))
 
 # def test_signup and Tournament button
 def test_login(page: Page):
     # goto signup page
-    page.goto("https://127.0.0.1:8000/")
+    page.goto("https://localhost:8000/")
     page.click("#loginGoToSignup")
-    expect(page).to_have_url("https://127.0.0.1:8000/signup")
+    expect(page).to_have_url("https://localhost:8000/signup")
     
     # signup
     page.locator("#signupEmail").fill("lenox@lenox.at")
     page.locator("#signupPassword1").fill("12345678")
     page.locator("#signupPassword2").fill("12345678")
     page.locator("#signupSubmitButton").click()
-    expect(page).to_have_url("https://127.0.0.1:8000/")
+    expect(page).to_have_url("https://localhost:8000/")
     
     # Tournament button
     page.locator('#playMenuGoToTournament').click()
-    expect(page).to_have_url("https://127.0.0.1:8000/tournament")
+    expect(page).to_have_url("https://localhost:8000/tournament")
 
     # Create Tournament
     page.locator('#createName').fill("DieAlone")
     page.locator('#createTournamentButton').click()
-    expect(page).to_have_url("https://127.0.0.1:8000/tournament-lobby")
+    expect(page).to_have_url("https://localhost:8000/tournament-lobby")
