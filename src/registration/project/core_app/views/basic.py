@@ -8,7 +8,6 @@ from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..models import CustomUser
