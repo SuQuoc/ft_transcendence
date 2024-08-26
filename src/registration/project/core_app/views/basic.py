@@ -12,7 +12,6 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..models import CustomUser
-from ..serializers import LoginSerializer
 from ..serializers import UserSerializer
 
 import os
@@ -111,11 +110,12 @@ def delete_user(request):
 @authentication_classes([NoTokenAuthentication])
 def login(request):
     try:
-        credentials_s = LoginSerializer(data=request.data)
-        if not credentials_s.is_valid():
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=credentials_s.validated_data['username']).first()
-        if user is None or not user.check_password(credentials_s.validated_data['password']):
+        user = CustomUser.objects.filter(username=username).first()
+        if user is None or not user.check_password(password):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
