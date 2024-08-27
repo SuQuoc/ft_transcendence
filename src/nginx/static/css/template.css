@@ -88,17 +88,16 @@ input[type="range"]:focus::-ms-thumb {
 	outline: 2px solid var(--custom-outline-color);
 }
 
-input[type="range"] {
-	outline: none !important; /* the !important is needed to override my custom outline for input:focus which is also important */
-}
-
-.nav-link:focus-visible {
-	outline: 4px solid var(--custom-outline-color);
-}
-
 input:focus {
 	outline: 4px solid var(--custom-outline-color) !important; /* the !important is needed to override the default outline */
 	border-color: var(--custom-btn-text-color) !important; /* the !important is needed to override the default outline */
+}
+
+input[type="range"] {
+	outline: none !important; /* the !important is needed to override my custom outline for input:focus which is also important */
+}
+.nav-link:focus-visible {
+	outline: 4px solid var(--custom-outline-color);
 }
 /* ###################################### */
 
