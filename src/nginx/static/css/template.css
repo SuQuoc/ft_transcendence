@@ -32,6 +32,11 @@ body {
 	max-width: 1000px;
 }
 
+.lobby-player-avatar {
+	width: 30px;
+	height: 30px;
+}
+
 @media (min-width: 992px) {
 	.lobby-player-sidebar-lg {
 		width: 200px;

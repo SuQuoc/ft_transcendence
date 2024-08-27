@@ -11,6 +11,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 
+		// adding classes
+		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
+
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
 		this.player_list = this.root.getElementById("lobbyPlayerList");
 		this.leave_button = this.root.getElementById("lobbyLeaveButton");
@@ -39,22 +42,23 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		this.player_list.appendChild(element);
 		element.querySelector("[name='lobby_player_name']").innerText = player_name;
+
+		//TODO: change avatar
 	}
 
 
 	/// ----- Event Handlers ----- ///
 
-	// TODO: arrow keys!!!!??
 	handleLeaveLobby(event) {
 		window.app.socket.send(JSON.stringify({type: "leaveTournament"}));
-		window.app.router.go("/tournament", false); // not sure if it makes sense not to add it to the history, but I feel like the history should behave the same with this button as the arrow keys
+		window.app.router.go("/tournament", false); // isn't added to the history
 	}
 
 	/** gets called when the websocket receives a message */
 	handleRecievedMessage(event) {
 		const data = JSON.parse(event.data);
 		
-		console.log("data: ", data);
+		console.log("received message in tournament-lobby-page: ", data);
 		
 		this.root.getElementById("lobbyPlayerList").innerHTML = "";
 		if (data.type === "updateLobbyPlayerList") {
@@ -66,12 +70,50 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	}
 
 	getElementHTML() {
-		const template = document.getElementById("tournamentLobbyPageTemplate")
-		/* const template = document.createElement('template');
+		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
-			<h1>Tournament Lobby<h1>
-		`; */
+			
+			<!-- lobby player sidebar -->
+			<div class="d-flex flex-lg-column flex-row
+						justify-content-between
+						lobby-player-sidebar-lg
+						overflow-auto
+						bg-dark shadow text-white
+						h-lg-100 p-2 gap-lg-0 gap-5"
+			>
+				<!-- leave button -->
+				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
+				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
+
+				<!-- number of players -->
+				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
+					<span class="d-lg-block d-none fs-4">Players:</span>
+					<div class="d-flex ms-lg-auto">
+						<span id="lobbyCurrentPlayerNum" class="fs-4">1</span>
+						<span class="fs-4">/</span>
+						<span id="lobbyMaxPlayerNum" class="fs-4">4</span>
+					</div>
+				</div>
+
+				<!-- player list -->
+				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2"></hr>
+				<div id="lobbyPlayerList"
+					class="d-flex flex-lg-column flex-row
+							align-self-lg-start align-self-center
+							gap-3 row-gap-2
+							order-lg-2"
+				>
+					<!-- tournament-lobby-player-elements: -->
+					
+				</div>
+
+			</div>
+			<!-- game -->
+			<div class="d-flex flex-grow-1 justify-content-center align-items-center align-self-">
+				Game
+			</div>
+		`;
 		return template;
 	}
 }

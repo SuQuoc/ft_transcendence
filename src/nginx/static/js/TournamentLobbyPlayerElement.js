@@ -9,7 +9,14 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
-			<div name="lobby_player_name" class="text-white">name</div>
+			<div class="d-flex align-items-center gap-2">
+				<img src="https://i.pravatar.cc/150?img=52"
+					alt="Profile image"
+					class="rounded-circle lobby-player-avatar"
+					name="lobby_player_avatar"
+				>
+				<span name="lobby_player_name">name</span>
+			</div>
 		`;
 		return template;
 	}
