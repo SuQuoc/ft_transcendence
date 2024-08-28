@@ -201,13 +201,26 @@ def refresh_token(request):
 def verify_token(request):
     return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
 
-def send_reset_email(self):
+def send_reset_email(recipient):
     try:
+        link = os.environ.get('SERVER_URL') + '/reset-password'
+        message = f"""
+        Hello,
+        
+        Please go to the following link to reset your password for Transcendence:
+
+        {link}
+
+        Once there, enter the following code to reset your password: abcd
+
+        Best regards,
+        Your Transcendence team
+        """
         send_mail(
-            "Subject here",
-            "Here is the message: Youhhhhou",
-            "from@gmail.com",
-            ["recipient@mail.com"],
+            "Reset your password for Transcendence",
+            message,
+            "Your Transcendence team",
+            [recipient],
             fail_silently=False,
             auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
             auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
@@ -222,13 +235,13 @@ def send_reset_email(self):
 @authentication_classes([NoTokenAuthentication])
 def forgot_password(request):
     try:
-        email = request.data.get('email')
-        if not email:
-            return Response({"test":"1"}, status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=email).first()
+        username = request.data.get('username')
+        if not username:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.filter(username=username).first()
         if not user:
-            return Response({"test":"2"}, status=status.HTTP_400_BAD_REQUEST)
-        send_reset_email(user)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        send_reset_email(user.username)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
