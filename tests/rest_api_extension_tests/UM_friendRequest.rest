@@ -1,0 +1,41 @@
+
+@baseUrl = https://localhost:8000
+
+# @name postSignup
+POST {{baseUrl}}/registration/signup/
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+
+###
+
+# @name postLogin
+POST {{baseUrl}}/registration/login/
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+@cookie = {{postLogin.response.headers.Set-Cookie}}
+
+###
+
+@displayname = ProCoder
+POST {{baseUrl}}/um/user-creation/
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "displayname": "{{displayname}}"
+}
+
+
+###
+
+GET {{baseUrl}}/um/profile/{{displayname}}
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
