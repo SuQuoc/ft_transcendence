@@ -246,3 +246,30 @@ def forgot_password(request):
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# [aguilmea] https://simpleisbetterthancomplex.com/tutorial/2016/08/24/how-to-create-one-time-link.html
+# according to source code the function make_hash value is doing more but i do not understand why the uid will be hashed
+# do i really need a last login in my model? (needed by the PasswordResetTokenGenerator.make_token??)
+
+
+@api_view(['POST'])
+@authentication_classes([NoTokenAuthentication])
+def forgot_password_reset(request):
+    try:
+        username = request.data.get('username')
+        token = request.data.get('token')
+        new_password = request.data.get('new_password')
+        if not username or not token or not new_password:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.filter(username=username).first()
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, token):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

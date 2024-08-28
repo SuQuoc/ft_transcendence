@@ -1,5 +1,5 @@
 @base_url = https://localhost:8000
-@username = email@domain.at
+@username = user@domain.at
 
 # @name post_signup
 POST {{base_url}}/registration/signup/
@@ -67,6 +67,17 @@ Content-Type: application/json
 
 {
     "username": "{{username}}"
+}
+
+###
+
+POST {{base_url}}/registration/forgot_password_reset/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "token": "xxxxxxxxxxxxxxxxxx",
+    "new_password": "New1234!"
 }
 
 ###
