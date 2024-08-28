@@ -68,6 +68,7 @@ Content-Type: application/json
 {
     "username": "{{username}}"
 }
+
 ###
 
 GET {{base_url}}/registration/refresh_token/

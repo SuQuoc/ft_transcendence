@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import status
@@ -201,17 +202,15 @@ def refresh_token(request):
 def verify_token(request):
     return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
 
-def send_reset_email(recipient):
+def send_reset_email(recipient, token):
     try:
-        link = os.environ.get('SERVER_URL') + '/reset-password'
+        link = os.environ.get('SERVER_URL') + '/reset-password?token=' + token
         message = f"""
         Hello,
-        
+
         Please go to the following link to reset your password for Transcendence:
 
         {link}
-
-        Once there, enter the following code to reset your password: abcd
 
         Best regards,
         Your Transcendence team
@@ -241,7 +240,9 @@ def forgot_password(request):
         user = CustomUser.objects.filter(username=username).first()
         if not user:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        send_reset_email(user.username)
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(user)
+        send_reset_email(user.username, token)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
