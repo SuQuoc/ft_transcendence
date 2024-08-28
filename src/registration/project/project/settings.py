@@ -16,10 +16,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # [aguilmea] added manually
     'rest_framework_simplejwt.token_blacklist',  # [aguilmea] added manually
+    'corsheaders',  # [aguilmea] added manually
     'core_app',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # [aguilmea] added manually
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -118,5 +120,10 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://api.intra.42.fr",
+]
+
 
 # [aguilmea] end of added manually
