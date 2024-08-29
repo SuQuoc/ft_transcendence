@@ -1,10 +1,14 @@
 @base_url = https://localhost:8000
+@username = user@domain.at
 
 # @name post_signup
 POST {{base_url}}/registration/signup/
 Content-Type: application/json
 
-{"username": "email@domain.at", "password": "Pass1234!"}
+{
+    "username": "{{username}}",
+    "password": "Pass1234!"
+}
 
 ###
 
@@ -12,7 +16,10 @@ Content-Type: application/json
 POST {{base_url}}/registration/login/
 Content-Type: application/json
 
-{"username": "email@domain.at", "password": "Pass1234!"}
+{
+    "username": "{{username}}",
+    "password": "Pass1234!"
+}
 
 ###
 
@@ -52,6 +59,26 @@ Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
 {}
+
+###
+
+POST {{base_url}}/registration/forgot_password/
+Content-Type: application/json
+
+{
+    "username": "{{username}}"
+}
+
+###
+
+POST {{base_url}}/registration/forgot_password_reset/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "token": "xxxxxxxxxxxxxxxxxx",
+    "new_password": "New1234!"
+}
 
 ###
 

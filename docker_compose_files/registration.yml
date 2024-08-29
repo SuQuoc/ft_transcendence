@@ -41,10 +41,13 @@ services:
       DB_PORT: "${DB_PORT_REG:-5432}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DJANGO_DEBUG_REG:-False}
-      SERVER_URL: ${SERVER_URL_REG:-https://localhost:8000}
-      DOMAIN: ${DOMAIN_REG:-localhost}
+      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
+      DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
       FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
+      EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
+      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
     depends_on:
       db_registration:
         condition: service_healthy
