@@ -25,7 +25,7 @@ class TestCrud(MyTestSetUp):
             "displayname": self.displayname,
         }
         self.url = reverse("user-creation")
-        self.url_profile = reverse("profile", kwargs={'displayname': self.displayname})
+        self.url_profile = reverse("profile", kwargs={'user_id': self.user_id})
 
         self.headers = {
             # "HTTP_AUTHORIZATION": f"Bearer {self.access_token}",
@@ -100,10 +100,6 @@ class TestCrud(MyTestSetUp):
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
 
-        # request on old name
-        response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
     def test_editing_profile_img(self):
         self.test_success()
         with open(self.images["900kb"], 'rb') as image:
@@ -141,10 +137,11 @@ class TestCrud(MyTestSetUp):
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             response_json = response.json()
-            image_path = CustomUser.objects.get().image.path
+            default_image_path = CustomUser.objects.get().image.path
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_json, {'image': ['Max file size is 1MB']})
+        self.assertTrue(os.path.exists(default_image_path))
 
     def test_editing_profile_img_and_data(self):
         self.test_success()
@@ -165,19 +162,18 @@ class TestCrud(MyTestSetUp):
         self.assertEqual(CustomUser.objects.filter(displayname=self.data['displayname']).count(), 1)
 
         # delete the image after the test
-        self.url_profile = reverse("profile", kwargs={"displayname": NEW_NAME})
         self.delete()
 
     # Test profile deletion
     def test_user_deletion_with_default_image(self):
         self.test_success()
 
-        image_path = CustomUser.objects.get().image.path
+        default_image_path = CustomUser.objects.get().image.path
 
         response = self.delete()
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertTrue(os.path.exists(image_path))  # default image should not be deleted
+        self.assertTrue(os.path.exists(default_image_path))  # default image should not be deleted
 
     def test_user_deletion_with_custom_image(self):
         self.test_success()
