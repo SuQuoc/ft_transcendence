@@ -4,56 +4,26 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-
-class AccessTokenAuthentication(BaseAuthentication):
+class AccessTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        access_cookie = request.COOKIES.get('access')
-        if not access_cookie:
+        raw_token = request.COOKIES.get('access')
+        if not raw_token:
             return None
-        try:
-            payload = jwt.decode(
-                access_cookie,
-                settings.SIMPLE_JWT['VERIFYING_KEY'],
-                algorithms=settings.SIMPLE_JWT['ALGORITHM'],
-                options={"verify_exp": True},
-            )
-            user_id = payload.get('user_id')
-            if not user_id:
-                raise AuthenticationFailed('Invalid token: No user_id')
-            User = get_user_model()
-            try:
-                user = User.objects.get(pk=user_id)
-            except User.DoesNotExist:
-                raise AuthenticationFailed('No user found for this token')
-            return (user, None)
-        except InvalidTokenError:
-            raise AuthenticationFailed('Invalid token')
         
-class RefreshTokenAuthentication(BaseAuthentication):
-    def authenticate(self, request):
+        validated_token = self.get_validated_token(raw_token)
+        return self.get_user(validated_token), validated_token
 
-        refresh_cookie = request.COOKIES.get('refresh')
-        if not refresh_cookie:
+        
+class RefreshTokenAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+        raw_token = request.COOKIES.get('refresh')
+        if not raw_token:
             return None
-        try:
-            payload = jwt.decode(
-                refresh_cookie,
-                settings.SIMPLE_JWT['VERIFYING_KEY'],
-                algorithms=settings.SIMPLE_JWT['ALGORITHM'],
-                options={"verify_exp": True},
-            )
-            user_id = payload.get('user_id')
-            if not user_id:
-                raise AuthenticationFailed('Invalid token: No user_id')
-            User = get_user_model()
-            try:
-                user = User.objects.get(pk=user_id)
-            except User.DoesNotExist:
-                raise AuthenticationFailed('No user found for this token')
-            return (user, None)
-        except InvalidTokenError:
-            raise AuthenticationFailed('Invalid token')
+        
+        validated_token = self.get_validated_token(raw_token)
+        return self.get_user(validated_token), validated_token
         
 class NoTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):    

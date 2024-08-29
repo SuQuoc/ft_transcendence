@@ -9,13 +9,13 @@ from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
 ACCESS = "access"
 
-
+# raw_token = access token
 class CookieJWTAuthentication(JWTTokenUserAuthentication):
     def authenticate(self, request):
-        access_token = request.COOKIES.get(ACCESS)
-        if not access_token:
+        raw_token = request.COOKIES.get(ACCESS)
+        if not raw_token:
             return None
-        validated_token = self.get_validated_token(access_token)
+        validated_token = self.get_validated_token(raw_token)
         # enforce_csrf(request)
         # raise AuthenticationFailed('CreateUserAuth')
         return self.get_user(validated_token), validated_token

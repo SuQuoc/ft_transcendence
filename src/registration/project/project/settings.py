@@ -102,14 +102,10 @@ SIMPLE_JWT = {
     'ALGORITHM': 'RS256',
     'SIGNING_KEY': PRIVATE_KEY,
     'VERIFYING_KEY': PUBLIC_KEY,
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken", "rest_framework_simplejwt.tokens.RefreshToken", ),
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'core_app.authenticate.AccessTokenAuthentication',
-        'core_app.authenticate.RefreshTokenAuthentication',
-        'core_app.authenticate.NoTokenAuthentication',
-    ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
