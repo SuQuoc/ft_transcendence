@@ -2,11 +2,19 @@
 	--custom-bg-color: rgb(52, 52, 56);
 	
 	/* custom colors used primarily for buttons */
-	--custom-btn-text-color: orange;
-	--custom-outline-color: rgba(255, 166, 0, 0.63); /* the buttons don't use this */
-	--custom-btn-base-color: #53000e;
+	/* --custom-btn-text-color: orange;
+	--custom-outline-color: rgba(255, 166, 0, 0.63); */ /* the buttons don't use this */
+	/* --custom-btn-base-color: #53000e;
 	--custom-btn-hover-color: #42000b;
-	--custom-btn-click-color: #2b0007;
+	--custom-btn-click-color: #2b0007; */
+
+	--custom-btn-text-color: rgb(94, 169, 192);
+	--custom-outline-color: rgba(94, 169, 192, 0.411); /* the buttons don't use this */
+	--custom-outline-color-rgb : 94, 169, 192; /* the buttons use this one, it needs to be rgb */
+	--custom-btn-base-color: #252670;
+	--custom-btn-hover-color: #121472;
+	--custom-btn-click-color: #0c0d52;
+
 }
 
 html {
@@ -109,7 +117,7 @@ input[type="range"] {
 	--bs-btn-hover-color: var(--custom-btn-text-color);
 	--bs-btn-hover-bg: var(--custom-btn-hover-color);
 	--bs-btn-hover-border-color: var(--custom-btn-color);
-	--bs-btn-focus-shadow-rgb: 255,165,0; /* orange (--custom-btn-text-color) */
+	--bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
 	--bs-btn-active-color: var(--custom-btn-text-color);
 	--bs-btn-active-bg: var(--custom-btn-click-color);
 	--bs-btn-active-border-color: var(--custom-btn-color);
@@ -124,7 +132,7 @@ input[type="range"] {
 	--bs-btn-hover-color: var(--custom-btn-text-color);
 	--bs-btn-hover-bg: var(--custom-btn-base-color);
 	--bs-btn-hover-border-color: var(--custom-btn-base-color);
-	--bs-btn-focus-shadow-rgb: 255,165,0; /* orange (--custom-btn-text-color) */
+	--bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
 	--bs-btn-active-color: var(--custom-btn-text-color);
 	--bs-btn-active-bg: var(--custom-btn-base-color);
 	--bs-btn-active-border-color: var(--custom-btn-base-color);
