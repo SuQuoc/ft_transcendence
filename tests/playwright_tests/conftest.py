@@ -2,19 +2,8 @@ import re
 import pytest
 from playwright.sync_api import Page, Browser, BrowserContext, sync_playwright, expect
 import os
-
-
-
-
-
-
-from typing import Dict
-
 import pytest
-import requests
-from _pytest.fixtures import FixtureRequest, SubRequest
-from _pytest.nodes import Item
-from playwright.sync_api import Page, Playwright
+from playwright.sync_api import Page
 
 
 # Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36
