@@ -1,10 +1,11 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import authentication_classes , permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
+
+from ..authenticate import AccessTokenAuthentication, NoTokenAuthentication
 
 import os
 import random
@@ -21,6 +22,7 @@ def generate_code_challenge(code_verifier):
     return base64.urlsafe_b64encode(code_challenge).decode('utf-8').rstrip('=')
 
 @api_view(['GET'])
+@authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def send_oauth2_authorization_request(request):  # [aguilmea] this is the first part of the oauth2 flow - I prepare the url where the user should authenticate
     try:                        # [aguilmea] should it be done in the frontend? so that the state is verified there too?
@@ -45,8 +47,8 @@ def send_oauth2_authorization_request(request):  # [aguilmea] this is the first 
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated]) // [aguilmea] in my opinion we should have the cookies in the browser even if the request comes from 42 api - but for testing AllowAny
-@permission_classes([AllowAny])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def exchange_code_against_access_token(request):
     try:
         authorization_code = request.query_params.get("code", "")
@@ -82,6 +84,7 @@ def exchange_code_against_access_token(request):
 
 
 @api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def unset_oauth2(request):
     try:
@@ -91,7 +94,8 @@ def unset_oauth2(request):
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@authentication_classes([NoTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def login_oauth2(request):
     try:
         return Response(status=status.HTTP_200_OK)

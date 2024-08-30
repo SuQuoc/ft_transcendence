@@ -5,13 +5,12 @@ from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
-from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
+from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
 from ..models import CustomUser
 from ..serializers import UserSerializer
 
@@ -73,6 +72,7 @@ def generate_response_with_invalid_JWT(status_code, token_s):
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
+@permission_classes([AllowAny])
 def signup(request):
     try:
         user_s = UserSerializer(data=request.data)
@@ -109,6 +109,7 @@ def delete_user(request):
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
+@permission_classes([AllowAny])
 def login(request):
     try:
         username = request.data.get('username')
@@ -232,6 +233,7 @@ def send_reset_email(recipient, token):
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
+@permission_classes([AllowAny])
 def forgot_password(request):
     try:
         username = request.data.get('username')
@@ -255,6 +257,7 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
+@permission_classes([AllowAny])
 def forgot_password_reset(request):
     try:
         username = request.data.get('username')
