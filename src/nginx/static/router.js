@@ -48,25 +48,32 @@ const Router = {
 		// load event can be used to listen for initial page load. Don't know if it has the right timing here though
 		
 		// check initial URL
-		Router.go(location.pathname);
+		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 
 	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
+		let channel_name = "tournament";
+
+		if (type === "onFindOpponentPage")
+			channel_name = "match";
+
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + "tournaments" + "/";
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
 			window.app.socket = new WebSocket(ws_path);
+
+			// add event listeners
+			//window.app.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("socket created");
 		};
 
-		// does it make sense to have this here??
 		window.app.socket.onopen = () => {
-			window.app.socket.send(JSON.stringify({"type": type, "user_id": "123456"}));
+			window.app.socket.send(JSON.stringify({"type": type, "user_id": window.app.userData.username}));
 		};
 	},
 
-	//closes the window.app.socket if it is open
+	/** closes the window.app.socket if it is open */
 	closeWebSocket: () => {
 		if (window.app.socket) {
 			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
@@ -91,7 +98,7 @@ const Router = {
 
 	// changes the page main content and update the URL
 	go: async (route, addToHistory = true) => {
-		console.log(`Going to ${route}`);
+		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
 		//comment out to add token check
@@ -111,11 +118,8 @@ const Router = {
 			case "/":
 				pageElement = document.createElement("play-menu-home-page");
 				break;
-			case "/play":
-				pageElement = document.createElement("h1");
-				pageElement.textContent = "Play";
-				break;
 			case "/tournament":
+				Router.closeWebSocket(); //only closes the socket if it is open
 				Router.makeWebSocket("onTournamentPage");
 				pageElement = document.createElement("join-tournament-page");
 				break;
@@ -126,6 +130,16 @@ const Router = {
 			case "/tournament-waiting-room": // TODO: shouldn't log to history!!!!!
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-waiting-room-page");
+				break;
+			case "/match":
+				console.log("match page created");
+				Router.closeWebSocket(); //only closes the socket if it is open
+				Router.makeWebSocket("onFindOpponentPage");
+				pageElement = document.createElement("find-opponent-page");
+				break;
+			case "/pong":
+				pageElement = document.createElement("pong-page");
+				pageElement.innerHTML = "Pong Game";
 				break;
 			case "/login":
 				pageElement = document.createElement("login-page");
@@ -161,13 +175,14 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (!route.startsWith("/tournament")) {
+		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) {
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
+		console.log("history: ", history);
 	},
 
 
@@ -183,7 +198,7 @@ const Router = {
 		switch (data.type) {
 			case "joinTournament":
 				if (data.joined === "true")
-					Router.go("/tournament-lobby");
+					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 				else
 					Router.go("/tournament");
 				break;
@@ -191,7 +206,15 @@ const Router = {
 				console.log("unknown message type: ", data.type);
 				break;
 		}
-	}
+	},
+
+
+	// !!! when the socket closes normally, you also get sent to the home page
+	/** You get sent back to the home poge in case the Socket disconnects unexpectedly */
+	/* handleSocketUnexpectedDisconnect(event) {
+		console.log("socket unexpectdedly disconnected");
+		Router.go("/");
+	} */
 }
 
 export default Router;

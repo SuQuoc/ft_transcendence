@@ -1,5 +1,5 @@
 
-class Player
+export class Player
 {
     constructor(id, y, x, width, height, name)
     {

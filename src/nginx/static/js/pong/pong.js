@@ -1,19 +1,24 @@
+import {GameArea} from "./gameArea.js";
+import {Player} from "./player.js";
+import {key_event_handler} from "./keyEvents.js";
+
+
 // Basic Pong game with remote players
 // create the game with gameArea.js class
 
 // if daphne is separate how to connect?
 //window.location.host
 
-function startPong()
+export function startPong(chatSocket)
 {
-    var room_name = document.getElementById("room-name").value;
-    var room_size = document.getElementById("room-size").value;
+    /* var room_name = document.getElementById("room-name").value;
+    var room_size = document.getElementById("room-size").value; */
 
-    let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    /* let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + room_name + "/";
-    let chatSocket = new WebSocket(ws_path);
+    let chatSocket = new WebSocket(ws_path); */
 
-    sendRoomSizeMessage(chatSocket, room_size);
+    //sendRoomSizeMessage(chatSocket, room_size);
 
 
     var refresh_rate = 10;   // set refresh rate of the game
@@ -22,14 +27,21 @@ function startPong()
 
     let game_area = new GameArea(width, height, refresh_rate);
 
-    let player1 = new Player(id=0, y=300, x=0, width=20, height=100, "Lenox");
-    let player2 = new Player(id=0, y=300, x=100, width=20, height=100, "Eule");
-    let ball = new Player(id="ball", y=0, x=0, width=10, height=10, "Ball");
+    let player1 = new Player(0, 300, 0, 20, 100, "Lenox");
+    let player2 = new Player(0, 300, 100, 20, 100, "Eule");
+    let ball = new Player("ball", 0, 0, 10, 10, "Ball");
+
+    console.log("startPong");
 
     chatSocket.onmessage = function(e)
     {
-        update_game_data(player1, player2, ball, e);
+        const data = JSON.parse(e.data)
+        update_game_data(chatSocket, game_area, player1, player2, ball, data);
     };
+
+    game_area.start(player1, player2, ball);
+    let keys_handler = new key_event_handler(player1, player2, chatSocket);
+    keys_handler.key_event();
 
     /* game_area.start(player1, player2, ball);
     let keys_handler = new key_event_handler(player1, player2, chatSocket);
@@ -37,12 +49,13 @@ function startPong()
     // if i recv message
 }
 
-function update_game_data(chatSocket, game_area, player1, player2, ball, e)
+function update_game_data(chatSocket, game_area, player1, player2, ball, data)
 {
-    const data = JSON.parse(e.data)
+    console.log(data);
     if (data.type === "playerId")
     {
-        player1.id = data.playerId;
+        player1.id = data.player1;
+        player2.id = data.player2;
         return ;
     }
 
@@ -65,18 +78,17 @@ function update_game_data(chatSocket, game_area, player1, player2, ball, e)
         return ;
     }
 
-    if(data.type === "startGame" && data.startGame === true)
+    /* if(data.type === "startGame" && data.startGame === true)
     {
         game_area.start(player1, player2, ball);
         let keys_handler = new key_event_handler(player1, player2, chatSocket);
         keys_handler.key_event();
-    }
-
+    } */
 }
 
 //clear the frame and update it
 //gets called all x times from the game_area class
-function updateGameArea(game_data)
+export function updateGameArea(game_data)
 {
     game_data.clear();
     game_data.draw_middle_line("black", 6, 30, 1.5);
