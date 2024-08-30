@@ -49,24 +49,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         # create a random id
-        self.player_id = str(uuid.uuid4())
+        #self.player_id = str(uuid.uuid4())
         self.lobby = None
         # set up rooms
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f"chat_{self.room_name}"
+
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
-        self.player = PongPlayer(self.player_id, self.map_size)
+
+        self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
+    
+        if self.room_name == "match":
+            return
+
         self.sendtoClient: SendToClient = SendToClient(self.group_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         return
+
         # send to client that he has been accepted
         await self.send(text_data=json.dumps({"type": "playerId", "playerId": self.player_id}))
         # now lock and fill the players[id] dict
         await self.create_player_save_in_dict()
 
     async def create_player_save_in_dict(self):
-        self.player = PongPlayer(self.player_id, self.map_size)
+        self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
         lobby = None
         async with self.update_lock:
             lobby = self.joinTournamentPage.get(self.room_name, None)
@@ -122,7 +129,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     # ASYNC TASK WITH 0.05 S DELAY
-    async def game_loop(self):
+    """ async def game_loop(self):
         print("game loop started")
         ball = GameBall(x=(self.map_size.x / 2), y=(self.map_size.y / 2), map_size=self.map_size, width=self.ball_width, height=self.ball_height)
         print(self.match.len)
@@ -134,10 +141,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.sendToClient(self.match.player2, ball)
                 # [await self.sendToClient(player, ball) for player in self.players[self.room_name].values()]
             await asyncio.sleep(self.delay)
-            """ async with self.update_lock:
+            async with self.update_lock:
                 player_count = len(self.players[self.room_name]) """
 
-    async def sendToClient(self, player: PongPlayer, ball: GameBall):
+    """ async def sendToClient(self, player: PongPlayer, ball: GameBall):
         print("send to client")
         player.move(self.MOVE_SPEED)
         ball.paddlesHit(player)
@@ -154,7 +161,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "match_points_left": ball.match_points["left"],
                 "match_points_right": ball.match_points["right"],
             },
-        )
+        ) """
 
     async def disconnect(self, close_code):
 
@@ -164,7 +171,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 lobby_name = self.lobby.lobby_name
 
             if self.joinTournamentPage.get(lobby_name, None):
-                self.joinTournamentPage[lobby_name].removePlayer(self.player)
+                await self.joinTournamentPage[lobby_name].removePlayer(self.player, self.channel_name)
                 if self.joinTournamentPage[lobby_name].len == 0:
                     del self.joinTournamentPage[lobby_name]
                     self.joinTournamentPage.pop(lobby_name, None)
@@ -204,9 +211,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             case "leaveTournament":
                 await self.leaveTournament(msg)
+            
+            case "getUpdateLobbyPlayerList":
+                print("getUpdateLobbyPlayerList")
+                await self.sendtoClient.sendLobbyPlayerList(self.lobby)
 
             case None:
                 print("[Warning] Received message with None type")
+
+            case "onFindOpponentPage":
+                await self.lookForOpponent(msg)
+
+    async def lookForOpponent(self, msg):
+
+        self.player_id = msg["user_id"]
+        self.player.id = self.player_id
+        self.players[self.player_id] = self.player
+
+        match = Match(name=f"{self.player_id}_match")
+        await match.addPlayer(self.player, channel_name=self.channel_name)
+        if await match.findOpponent(self.players) is False:
+            del match
+            return
+
+        self.players.pop(self.player_id)
+        self.players.pop(match.player2.id)
+        print("match.name: ", match.name)
+        await self.channel_layer.group_send(match.name,{"type": "start.Pong"})
+        await self.channel_layer.group_send(match.name,{"type": "player.Id", "player1": match.player1.id, "player2": match.player2.id})
+        await match.startGame()
+        print("start game")
+
+    async def player_Id(self, e):
+        print("player id", self.room_name)
+        e["type"] = "playerId"
+        await self.send(text_data=json.dumps(e))
+    
+    async def start_Pong(self, e):
+        print("start pong", self.room_name)
+        e["type"] = "startPong"
+        await self.send(text_data=json.dumps(e))
 
     # JoinTournament
     async def joinTournament(self, msg):
@@ -221,12 +265,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Add player to the tournament
         self.lobby = self.joinTournamentPage[msg["tournament_name"]]
         status = "false"
-        if self.lobby.addPlayer(self.player):
+        if await self.lobby.addPlayer(self.player, self.channel_name):
             status = "true"
         await self.sendJoinTournament(status)
 
         # remove player to the tournaments joinTournamentPage group and send a update the lobby list 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
         print("Tournament joined", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
 
@@ -235,19 +280,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("leaveTournament")
         if self.lobby is None:
             return
-        self.lobby.removePlayer(self.player)
+        await self.lobby.removePlayer(self.player, self.channel_name)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
+        await self.sendtoClient.sendLobbyPlayerList(self.lobby)
 
     # Create a Tournament
     async def createTournament(self, msg):
         # send if tournament already exists ?
         self.lobby = Lobby(msg["tournament_name"], int(msg["max_player_num"]))
         self.joinTournamentPage[msg["tournament_name"]] = self.lobby
-        self.lobby.addPlayer(self.player)
+        await self.lobby.addPlayer(self.player, self.channel_name)
 
         # Add player to the channel group of the tournament
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
 
         print("Tournament created", self.lobby.lobby_name, self.lobby.len, self.lobby.max_len)
@@ -277,9 +324,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def start_game(self, e):
+    """ async def start_game(self, e):
         print("start game", self.room_name)
-        await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]}))
+        await self.send(text_data=json.dumps({"type": "startGame", "startGame": e["startGame"]})) """
 
     async def sendJoinTournament(self, e) -> None:
         print("sendJoinTournament")
@@ -288,6 +335,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "joinTournament",
                 "joined": e}
             ))
+        
+    async def update_LobbyPlayerList(self, e) -> None:
+        print("hi dude")
+        e["type"] = "updateLobbyPlayerList"
+        print(e)
+        await self.send(text_data=json.dumps(e))
 
 # Recurses
 
