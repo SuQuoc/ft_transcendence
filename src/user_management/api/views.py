@@ -37,7 +37,7 @@ class CustomUserProfile(generics.GenericAPIView):
     parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserProfileSerializer
-
+ 
     def get(self, request, user_id):
         stalked_user = get_object_or_404(CustomUser, user_id=user_id)
 
