@@ -20,7 +20,14 @@ jobs:
     - name: Makefile check
       run: make build_only
     - name: start servers
-      run: make &
+      run: | 
+        make &
+        while ! nc -z localhost 8000; do
+          echo "Waiting for server ..."
+          sleep 2
+        done
+    - name: run user_management api tests
+      run: make um_test
 
     - uses: actions/setup-python@v5
       with:
