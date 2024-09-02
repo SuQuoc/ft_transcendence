@@ -60,6 +60,7 @@ export class LoginPage extends ComponentBaseClass {
 			window.app.userData.email = username;
 
 			// Redirect to the home page or another page
+			// TODO: check if the user already has a displayname, if not redirect to /displayname
 			app.router.go('/');
 		} catch (error) {
 			console.error('Error during login:', error);

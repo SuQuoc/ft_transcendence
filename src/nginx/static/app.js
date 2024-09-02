@@ -4,12 +4,17 @@ import Router from './router.js';
 window.app = {
 	router: Router,
 	socket: null,
-	userData: {}
+	userData: {
+		displayName: null,
+		email: null,
+		profileImage: null,
+	}
 };
 
 // link custom web components
 import { FindOpponentPage } from './js/FindOpponentPage.js';
 import { LoginPage } from './js/LoginPage.js';
+import { SelectDisplaynamePage } from './js/SelectDisplaynamePage.js';
 import { SignupPage } from './js/SignupPage.js';
 import { UserProfile } from './js/UserProfile.js';
 import { JoinTournamentPage } from './js/JoinTournamentPage.js';

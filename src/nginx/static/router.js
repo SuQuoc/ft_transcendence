@@ -147,6 +147,9 @@ const Router = {
 			case "/signup":
 				pageElement = document.createElement("signup-page");
 				break;
+			case "/displayname":
+				pageElement = document.createElement("select-displayname-page");
+				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();
 				fragment.appendChild(document.createElement("friend-list"));

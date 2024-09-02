@@ -88,7 +88,7 @@ export class SignupPage extends ComponentBaseClass {
 			window.app.userData.username = email;
 			window.app.userData.email = email;
 
-			app.router.go('/');
+			app.router.go('/displayname', false);
 		} catch (error) {
 			console.error('Error during signup:', error);
 		} finally {
