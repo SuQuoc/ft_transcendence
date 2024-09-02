@@ -41,7 +41,7 @@ export class LoginPage extends ComponentBaseClass {
 		loginButton.disabled = true;
 		loginSpinner.style.display = 'inline-block';
 
-		const username = this.shadowRoot.getElementById('loginEmail').value;
+		const username = this.shadowRoot.getElementById('loginEmail').value; // why is it called username and not email?
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 
 		try {
@@ -56,11 +56,10 @@ export class LoginPage extends ComponentBaseClass {
 			if (!outhResponse.ok) {
 				throw new Error('Login failed');
 			}
-			window.app.userData.username = username; // this should probably not be here but on the displayname page. (Also, why is it window.app.userData.username and not window.app.userData.displyName? On the user profile window.app.userData.displayName is used)
 			window.app.userData.email = username; // and why is the email set to the username?
-
+			
 			// Check if the user already has a displayname
-			const displaynameResponse = await fetch ('/um/', {
+			const displaynameResponse = await fetch ('/um/profile/', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json'
@@ -72,9 +71,9 @@ export class LoginPage extends ComponentBaseClass {
 				window.app.router.go('/displayname'); // maybe this should be set to false?
 				console.log('displayname not ok:', displaynameResponse);
 			} else {
-				const displayname = await displaynameResponse.json();
-				console.log('displayname ok:', displayname);
-				window.app.userData.displayName = displayname;
+				const responseData = await displaynameResponse.json();
+				window.app.userData.username = responseData.displayname;
+				//window.app.userData.<image?> = responseData.image;
 				app.router.go('/');
 			}
 		} catch (error) {

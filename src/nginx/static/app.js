@@ -5,7 +5,7 @@ window.app = {
 	router: Router,
 	socket: null,
 	userData: {
-		displayName: null,
+		username: null, // maybe this should be changed to displayname
 		email: null,
 		profileImage: null,
 	}

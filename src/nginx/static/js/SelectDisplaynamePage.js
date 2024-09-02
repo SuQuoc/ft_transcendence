@@ -35,7 +35,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		const displayname = event.target.displayname.value;
 		console.log("displayname:", displayname);
 
-		// TODO: check if displayname is taken!!! (um api)
 		try {
 			const response = await fetch('/um/user-creation/', {
 				method: 'POST',
@@ -49,16 +48,16 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			if (response.ok) {
 				console.log("displayname ok");
 
-				window.app.userData.displayName = displayname;
+				window.app.userData.username = displayname;
 				window.app.router.go("/");
+			} else {
+				// if displayname is already taken
+				//this.popover(event.target.displayname, "Displayname already taken");
+				console.log("displayname already taken");
 			}
 		} catch (error) {
 			console.error('Error selecting displayname:', error);
 		}
-
-		// if displayname is already taken
-		//this.popover(event.target.displayname, "Displayname already taken");
-		console.log("displayname already taken");
 	}
 	
 
