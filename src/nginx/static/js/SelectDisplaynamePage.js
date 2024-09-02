@@ -32,13 +32,15 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	async handleSubmitDisplayname(event) {
 		event.preventDefault();
 		
-		let displayname = event.target.displayname.value;
+		const displayname = event.target.displayname.value;
+		console.log("displayname:", displayname);
 
 		// TODO: check if displayname is taken!!! (um api)
 		try {
-			const response = await fetch('/user-creation', {
+			const response = await fetch('/um/user-creation/', {
 				method: 'POST',
 				headers: {
+					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({ displayname })
