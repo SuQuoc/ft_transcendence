@@ -20,12 +20,14 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
         fields = ["displayname", "online", "image", "relationship"]
     
     def get_relationship(self, obj):
-        return self.context.get('relationship', "error: could not resolve [should never happen]")
+        return self.context.get('relationship', None)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if self.context.get('relationship', None) != "friend":
+        if self.get_relationship(instance) != "friend":
             representation.pop('online')
+            representation.pop('relationship')
+
         return representation
 
 
