@@ -29,15 +29,34 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 	/// ----- Event Handlers ----- ///
 	
-	handleSubmitDisplayname(event) {
+	async handleSubmitDisplayname(event) {
 		event.preventDefault();
 		
 		let displayname = event.target.displayname.value;
 
-		// TODO: check if displayname is taken!!!
+		// TODO: check if displayname is taken!!! (um api)
+		try {
+			const response = await fetch('/user-creation', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ displayname })
+			});
 
-		window.app.userData.displayName = displayname;
-		window.app.router.go("/");
+			if (response.ok) {
+				console.log("displayname ok");
+
+				window.app.userData.displayName = displayname;
+				window.app.router.go("/");
+			}
+		} catch (error) {
+			console.error('Error selecting displayname:', error);
+		}
+
+		// if displayname is already taken
+		//this.popover(event.target.displayname, "Displayname already taken");
+		console.log("displayname already taken");
 	}
 	
 
@@ -50,7 +69,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 					<h3 class="text-center text-white">Select a unique Displayname</h3>
 
 					<input name="displayname" id="displayName" type="text" class="form-control" placeholder="displayname" aria-describedby="displayNameHelp">
-					<div class="form-text text-white-50 mb-3" id="displayNameHelp">please select a unique displayname</div>
+					<div class="form-text text-white-50 mb-3" id="displayNameHelp">Please enter a unique displayname</div>
 					
 					<button type="submit" class="btn btn-custom w-100" id="displayNameSubmitButton" form="displayNameForm">submit</button>
 
