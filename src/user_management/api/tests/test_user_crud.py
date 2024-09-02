@@ -25,7 +25,7 @@ class TestCrud(MyTestSetUp):
             "displayname": self.displayname,
         }
         self.url = reverse("user-creation")
-        self.url_profile = reverse("profile", kwargs={'user_id': self.user_id})
+        self.url_profile = reverse("profile")
 
         self.headers = {
             # "HTTP_AUTHORIZATION": f"Bearer {self.access_token}",
