@@ -45,7 +45,7 @@ export class LoginPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 
 		try {
-			const response = await fetch('/registration/login', {
+			const outhResponse = await fetch('/registration/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -53,15 +53,30 @@ export class LoginPage extends ComponentBaseClass {
 				body: JSON.stringify({ username, password })
 			});
 
-			if (!response.ok) {
+			if (!outhResponse.ok) {
 				throw new Error('Login failed');
 			}
-			window.app.userData.username = username;
-			window.app.userData.email = username;
+			window.app.userData.username = username; // this should probably not be here but on the displayname page. (Also, why is it window.app.userData.username and not window.app.userData.displyName? On the user profile window.app.userData.displayName is used)
+			window.app.userData.email = username; // and why is the email set to the username?
 
-			// Redirect to the home page or another page
-			// TODO: check if the user already has a displayname, if not redirect to /displayname
-			app.router.go('/');
+			// Check if the user already has a displayname
+			const displaynameResponse = await fetch ('/um/', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			
+			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
+			if (!displaynameResponse.ok) {
+				window.app.router.go('/displayname'); // maybe this should be set to false?
+				console.log('displayname not ok:', displaynameResponse);
+			} else {
+				const displayname = await displaynameResponse.json();
+				console.log('displayname ok:', displayname);
+				window.app.userData.displayName = displayname;
+				app.router.go('/');
+			}
 		} catch (error) {
 			console.error('Error during login:', error);
 		} finally {
