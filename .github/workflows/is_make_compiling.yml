@@ -31,7 +31,6 @@ jobs:
     - name: run user_management api tests
       run: make um_test
 
-    - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
