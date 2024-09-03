@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
 from ..models import CustomUser
 from ..serializers import UserSerializer
-from .utils_jwt import generate_response_with_valid_JWT, generate_response_with_invalid_JWT
+from .utils_jwt import generate_response_with_valid_JWT
 import os
 
 @api_view(['POST'])
@@ -100,8 +100,10 @@ def change_password(request):
 @permission_classes([IsAuthenticated])
 def logout(request):
     try:
-        token_s = TokenObtainPairSerializer(data=request.data)
-        return generate_response_with_invalid_JWT(status.HTTP_200_OK, token_s)
+        response = Response(status=status.HTTP_200_OK)
+        response.delete_cookie('access')
+        response.delete_cookie('refresh')
+        return response
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
