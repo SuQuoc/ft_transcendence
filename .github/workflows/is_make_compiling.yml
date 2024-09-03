@@ -48,5 +48,5 @@ jobs:
     - name: playwright install
       run: playwright install
 
-    - name: playwright test
-      run: playwright test
+    - name: playwright tests
+      run: pytest ./tests/playwright_tests
