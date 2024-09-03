@@ -1,5 +1,6 @@
 import re
 
+from conftest import BASE_URL
 from playwright.sync_api import Browser
 from playwright.sync_api import BrowserContext
 from playwright.sync_api import expect
@@ -7,11 +8,12 @@ from playwright.sync_api import Page
 from playwright.sync_api import sync_playwright
 import pytest
 
-BASE_URL = "https://localhost:8000"
 
-
-def test_profile(page, login):
-    page.locator("#profileButton").click()
+class TestProfile:
+    def test_user_profile_dropdown(self, page: Page):
+        page.goto(BASE_URL)
+        page.locator("#userDropdown").click()
+        expect(page.locator("#displayName")).to_be_visible()
 
 
 # def test_friend_page(page: Page):

@@ -1,15 +1,18 @@
-import re
-import pytest
-from playwright.sync_api import Page, Browser, BrowserContext, sync_playwright, expect
 import os
-import pytest
-from playwright.sync_api import Page
+import re
 
+from playwright.sync_api import Browser
+from playwright.sync_api import BrowserContext
+from playwright.sync_api import expect
+from playwright.sync_api import Page
+from playwright.sync_api import sync_playwright
+import pytest
 
 # Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
+
 
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
@@ -27,7 +30,7 @@ def authenticate():
             page.locator("#signupPassword1").fill("12345678")
             page.locator("#signupPassword2").fill("12345678")
             page.locator("#signupSubmitButton").click()
-            #page.wait_for_url(f"{BASE_URL}", timeout=5000)
+            # page.wait_for_url(f"{BASE_URL}", timeout=5000)
             if page.url == f"{BASE_URL}":
                 print("Signup successful, proceeding with the next steps.")
             else:
@@ -41,8 +44,8 @@ def authenticate():
 
             # Save the authentication state
             context.storage_state(path=AUTH_STATE_PATH)
-            page.locator("#displayNameForm").fill("test1")
-            page.locator("#displayNameSubmitButton").click()
+            # page.locator("#displayNameForm").fill("test1")
+            # page.locator("#displayNameSubmitButton").click()
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -58,18 +61,16 @@ def context(authenticate):
     """
     with sync_playwright() as p:
         browser: Browser = p.chromium.launch()
-        context: BrowserContext = browser.new_context(
-            ignore_https_errors=True, 
-            storage_state=AUTH_STATE_PATH
-        )
+        context: BrowserContext = browser.new_context(ignore_https_errors=True, storage_state=AUTH_STATE_PATH)
         yield context
         context.close()
         browser.close()
 
+
 @pytest.fixture(scope="function")
 def page(context: BrowserContext):
     """
-    returns a Page as a logged in user 
+    returns a Page as a logged in user
     """
     page: Page = context.new_page()
     yield page
@@ -85,7 +86,7 @@ def login_page():
     with sync_playwright() as p:
         browser: Browser = p.chromium.launch()
         context: BrowserContext = browser.new_context(
-            ignore_https_errors=True, 
+            ignore_https_errors=True,
         )
         login_page: Page = context.new_page
         yield login_page
@@ -94,8 +95,8 @@ def login_page():
         browser.close()
 
 
-#@pytest.fixture(scope="function", autouse=True)
-#def goto(page: Page, request: SubRequest):
+# @pytest.fixture(scope="function", autouse=True)
+# def goto(page: Page, request: SubRequest):
 #    """Fixture to navigate to the base URL based on the user.
 #
 #    If the 'storage_state' is set in 'browser_context_args', it navigates to the inventory page,
@@ -116,10 +117,10 @@ def login_page():
 #        page.goto("/signup")
 #
 #
-#@pytest.fixture(scope="function")
-#def browser_context_args(
+# @pytest.fixture(scope="function")
+# def browser_context_args(
 #    browser_context_args: Dict, request: SubRequest
-#):
+# ):
 #    """This fixture allows setting browser context arguments for Playwright.
 #
 #    Args:
@@ -156,4 +157,3 @@ def login_page():
 #        }
 #    return context_args
 #
-
