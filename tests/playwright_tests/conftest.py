@@ -11,6 +11,7 @@ AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 
+# Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
 def authenticate():
     with sync_playwright() as p:
@@ -22,7 +23,7 @@ def authenticate():
         try:
             page.click("#loginGoToSignup")
             expect(page).to_have_url(f"{BASE_URL}/signup")
-            page.locator("#signupEmail").fill("play@wright.at")
+            page.locator("#signupEmail").fill("test1@test.at")
             page.locator("#signupPassword1").fill("12345678")
             page.locator("#signupPassword2").fill("12345678")
             page.locator("#signupSubmitButton").click()
@@ -32,7 +33,7 @@ def authenticate():
             else:
                 print("Trying login.")
                 page.goto(BASE_URL)
-                page.locator("#loginEmail").fill("play@wright.at")
+                page.locator("#loginEmail").fill("test1@test.at")
                 page.locator("#loginPassword").fill("12345678")
                 page.locator("#loginSubmitButton").click()
 
@@ -40,8 +41,9 @@ def authenticate():
 
             # Save the authentication state
             context.storage_state(path=AUTH_STATE_PATH)
-            print(f"Authentication state saved to {AUTH_STATE_PATH}")
-            #context.storage_state(path=AUTH_STATE_PATH)
+            page.locator("#displayNameForm").fill("test1")
+            page.locator("#displayNameSubmitButton").click()
+
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
@@ -51,6 +53,9 @@ def authenticate():
 
 @pytest.fixture(scope="function")
 def context(authenticate):
+    """
+    Sets up browser context to include auth cookies
+    """
     with sync_playwright() as p:
         browser: Browser = p.chromium.launch()
         context: BrowserContext = browser.new_context(
@@ -63,11 +68,30 @@ def context(authenticate):
 
 @pytest.fixture(scope="function")
 def page(context: BrowserContext):
+    """
+    returns a Page as a logged in user 
+    """
     page: Page = context.new_page()
     yield page
     page.close()
 
 
+# fixtures to TEST the signup, login process
+@pytest.fixture(scope="function")
+def login_page():
+    """
+    returns a page without auth cookies to test signup and login
+    """
+    with sync_playwright() as p:
+        browser: Browser = p.chromium.launch()
+        context: BrowserContext = browser.new_context(
+            ignore_https_errors=True, 
+        )
+        login_page: Page = context.new_page
+        yield login_page
+        login_page.close()
+        context.close()
+        browser.close()
 
 
 #@pytest.fixture(scope="function", autouse=True)
