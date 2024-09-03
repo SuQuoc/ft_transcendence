@@ -27,7 +27,7 @@ def basic_signup(request):
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def basic_delete_user(request):
+def delete_user(request):
 
     try:
         current_password = request.data.get('current_password')

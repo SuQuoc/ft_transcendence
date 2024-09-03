@@ -19,9 +19,10 @@ from core_app.views import oauth2, basic
 from django.urls import re_path
 
 urlpatterns = [
-    re_path('signup', basic.signup),
+    re_path('signup', basic.basic_signup),
+    re_path('login', basic.basic_login),
+
     re_path('delete_user', basic.delete_user),
-    re_path('login', basic.login),
     re_path('logout', basic.logout),
     re_path('change_password', basic.change_password),
     re_path('verify_token', basic.verify_token),
