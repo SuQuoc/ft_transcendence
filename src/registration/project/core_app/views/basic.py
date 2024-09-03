@@ -1,25 +1,19 @@
-from datetime import datetime, timezone
-
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.conf import settings
-from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
 from ..models import CustomUser
 from ..serializers import UserSerializer
-from .utils_jwt import generate_response_with_valid_JWT
-import os
+from .utils_jwt import generate_response_with_valid_JWT, send_reset_email
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
 @permission_classes([AllowAny])
-def signup(request):
+def basic_signup(request):
     try:
         user_s = UserSerializer(data=request.data)
         if not user_s.is_valid():
@@ -30,11 +24,10 @@ def signup(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def delete_user(request):
+def basic_delete_user(request):
 
     try:
         current_password = request.data.get('current_password')
@@ -44,7 +37,6 @@ def delete_user(request):
         user = request.user
         if not user.check_password(current_password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        refresh_token = RefreshToken(refresh)
         refresh_token.blacklist()
         user.delete()
         response = Response(status=status.HTTP_200_OK)
@@ -56,7 +48,7 @@ def delete_user(request):
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
 @permission_classes([AllowAny])
-def login(request):
+def basic_login(request):
     try:
         username = request.data.get('username')
         password = request.data.get('password')
@@ -90,10 +82,8 @@ def change_password(request):
         response.delete_cookie('access')
         response.delete_cookie('refresh')
         return response
-
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -106,7 +96,6 @@ def logout(request):
         return response
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 @authentication_classes([RefreshTokenAuthentication])
@@ -121,40 +110,11 @@ def refresh_token(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def verify_token(request):
     return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
-
-def send_reset_email(recipient, token):
-    try:
-        link = os.environ.get('SERVER_URL') + '/reset-password?token=' + token
-        message = f"""
-        Hello,
-
-        Please go to the following link to reset your password for Transcendence:
-
-        {link}
-
-        Best regards,
-        Your Transcendence team
-        """
-        send_mail(
-            "Reset your password for Transcendence",
-            message,
-            "Your Transcendence team",
-            [recipient],
-            fail_silently=False,
-            auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
-            auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
-            connection=None, # [aguilmea] optional email backend
-            html_message=None, # [aguilmea] will only be sent as plain text and not html
-        )
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -178,7 +138,6 @@ def forgot_password(request):
 # [aguilmea] https://simpleisbetterthancomplex.com/tutorial/2016/08/24/how-to-create-one-time-link.html
 # according to source code the function make_hash value is doing more but i do not understand why the uid will be hashed
 # do i really need a last login in my model? (needed by the PasswordResetTokenGenerator.make_token??)
-
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])

@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
+
+from django.core.mail import send_mail
+
 import os
 
 def generate_response_with_valid_JWT(status_code, token_s):
@@ -31,3 +34,29 @@ def generate_response_with_valid_JWT(status_code, token_s):
     return response
 
 
+def send_reset_email(recipient, token):
+    try:
+        link = os.environ.get('SERVER_URL') + '/reset-password?token=' + token
+        message = f"""
+        Hello,
+
+        Please go to the following link to reset your password for Transcendence:
+
+        {link}
+
+        Best regards,
+        Your Transcendence team
+        """
+        send_mail(
+            "Reset your password for Transcendence",
+            message,
+            "Your Transcendence team",
+            [recipient],
+            fail_silently=False,
+            auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
+            auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
+            connection=None, # [aguilmea] optional email backend
+            html_message=None, # [aguilmea] will only be sent as plain text and not html
+        )
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
