@@ -13,62 +13,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication, NoTokenAuthentication
 from ..models import CustomUser
 from ..serializers import UserSerializer
-
+from .utils_jwt import generate_response_with_valid_JWT, generate_response_with_invalid_JWT
 import os
-
-def generate_response_with_valid_JWT(status_code, token_s):
-    response = Response(status=status_code)
-    if not token_s.is_valid():
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    access_token = token_s.validated_data['access']
-    access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
-    response.set_cookie(
-        key='access',
-        value=access_token,
-        expires=access_token_expiration,
-        domain=os.environ.get('DOMAIN'),
-        httponly=True,
-        secure=True,
-        samesite = 'Strict')
-    refresh_token = token_s.validated_data['refresh']
-    refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
-    response.set_cookie(
-        key='refresh',
-        value=refresh_token,
-        expires=refresh_token_expiration,
-        domain=os.environ.get('DOMAIN'),
-        httponly=True,
-        secure=True,
-        samesite = 'Strict')
-    return response
-
-
-def generate_response_with_invalid_JWT(status_code, token_s):
-    response = Response(status=status_code)
-    if not token_s.is_valid():
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    access_token = token_s.validated_data['access']
-    access_token_expiration = datetime.now(timezone.utc)
-    response.set_cookie(
-        key='access',
-        value=access_token,
-        expires=access_token_expiration,
-        domain=os.environ.get('DOMAIN'),
-        httponly=True,
-        secure=True,
-        samesite = 'Strict')
-    refresh_token = token_s.validated_data['refresh']
-    refresh_token_expiration = datetime.now(timezone.utc)
-    response.set_cookie(
-        key='refresh',
-        value=refresh_token,
-        expires=refresh_token_expiration,
-        domain=os.environ.get('DOMAIN'),
-        httponly=True,
-        secure=True,
-        samesite = 'Strict')
-    return response
-
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -133,39 +79,16 @@ def change_password(request):
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
         refresh = request.COOKIES.get('refresh', None)
-        if not refresh:
-            return Response({'message' : 'bla'}, status=status.HTTP_401_UNAUTHORIZED)
-        if not current_password or not new_password:
+        if not refresh or not current_password or not new_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = request.user
-        if not user.check_password(current_password):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not user or not user.check_password(current_password):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.set_password(new_password)
         user.save()
-        refresh_token = RefreshToken(refresh)
-        refresh_token.blacklist()
-
-        new_refresh = RefreshToken.for_user(user)
-        new_access = new_refresh.access_token
-        
         response = Response(status=status.HTTP_200_OK)
-
-        access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
-        response.set_cookie(
-            key='access',
-            value=str(new_access),
-            expires=access_token_expiration,
-            httponly=True
-        )
-
-        refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
-        response.set_cookie(
-            key='refresh',
-            value=str(new_refresh),
-            expires=refresh_token_expiration,
-            httponly=True
-        )
-
+        response.delete_cookie('access')
+        response.delete_cookie('refresh')
         return response
 
     except Exception as e:
