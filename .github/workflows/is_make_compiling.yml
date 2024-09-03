@@ -9,12 +9,12 @@ on:
 
 
 jobs:
-  make_rule_check:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: generate keys
       run: make keys
     - name: Makefile check
@@ -29,15 +29,27 @@ jobs:
     - name: run user_management api tests
       run: make um_test
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.12'
+
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    # do we even need the following run, python, mariadb?
     - name: apt update and install python-dev, gcc and libmariadb-dev
       run: |
         sudo apt update
