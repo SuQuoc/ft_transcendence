@@ -80,7 +80,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				console.log("displayname ok");
 
 				window.app.userData.username = displayname;
-				window.app.router.go("/");
+				window.app.router.go("/", false);
 			} else {
 				// if displayname is already taken
 				this.displayname_taken_warning.style.display = "";

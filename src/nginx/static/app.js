@@ -8,6 +8,7 @@ window.app = {
 		username: null, // maybe this should be changed to displayname
 		email: null,
 		profileImage: null,
+		id: null, // temporary!! (i think)
 	}
 };
 
@@ -35,8 +36,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
 	// generate a random user id (temporary!!!)
-	window.app.userData.username = crypto.randomUUID();
-	console.log("User ID: ", window.app.userData.username);
+	window.app.userData.id = crypto.randomUUID();
+	console.log("User ID: ", window.app.userData.id);
 
 	// adds event listeners for routing
 	await app.router.init();

@@ -3,7 +3,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class LoginPage extends ComponentBaseClass {
 	constructor() {
-		super();
+		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /login to the history
 	}
 
 	connectedCallback() {
@@ -68,13 +68,13 @@ export class LoginPage extends ComponentBaseClass {
 			
 			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 			if (!displaynameResponse.ok) {
-				window.app.router.go('/displayname'); // maybe this should be set to false?
+				window.app.router.go('/displayname', false);
 				console.log('displayname not ok:', displaynameResponse);
 			} else {
 				const responseData = await displaynameResponse.json();
 				window.app.userData.username = responseData.displayname;
 				//window.app.userData.<image?> = responseData.image;
-				app.router.go('/');
+				app.router.go('/', false);
 			}
 		} catch (error) {
 			console.error('Error during login:', error);
