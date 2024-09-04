@@ -169,5 +169,5 @@ cython_debug/
 *.jpeg
 *.jpg
 
-!src/user_management/uploads/images/profile/default/*
 tests/playwright_tests/auth_state.json
+!src/user_management/uploads/images/profile/default/*
