@@ -6,6 +6,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		super();
 
 		this.handleSubmitDisplaynameVar = this.handleSubmitDisplayname.bind(this);
+		this.handleHidingDisplaynameTakenWarningVar = this.handleHidingDisplaynameTakenWarning.bind(this);
 	}
 
 	connectedCallback() {
@@ -13,10 +14,18 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 		console.log("SelectDisplaynamePage connectedCallback");
 		// getting elements
-		this.displayname_form = this.shadowRoot.getElementById("displayNameForm")
+		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
+		this.input_field = this.shadowRoot.getElementById("displayName");
+		this.displayname_taken_warning = this.shadowRoot.getElementById("displayNameTaken");
+		this.displayname_enter_warning = this.shadowRoot.getElementById("displayNameEnter");
+		this.displayname_whitespaces_warning = this.shadowRoot.getElementById("displayNameWhitespaces");
 		
 		// adding event listeners
-		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);	
+		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
+		this.input_field.addEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
+
+		// setting focus on displayname input when the page is loaded 
+		this.shadowRoot.getElementById("displayName").focus();
 	}
 	
 	disconnectedCallback() {
@@ -24,8 +33,25 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 		// removind event listeners
 		this.displayname_form.removeEventListener("submit", this.handleSubmitDisplaynameVar);
+		this.input_field.removeEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
 	}
 	
+
+	/// ----- Methods ----- ///
+
+	isDisplaynameValid(displayname) {
+		console.log("displayname.length: ", displayname.length);
+		if (displayname === "") {
+			this.displayname_enter_warning.style.display = "";
+			return false;
+		}
+		if (/\s/.test(displayname)) { // checks if the displayname has any whitespaces
+			this.displayname_whitespaces_warning.style.display = "";
+			return false;
+		}
+		return true;
+	}
+
 
 	/// ----- Event Handlers ----- ///
 	
@@ -34,6 +60,11 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		
 		const displayname = event.target.displayname.value;
 		console.log("displayname:", displayname);
+
+		// check if displayname is valid
+		if (!this.isDisplaynameValid(displayname)) {
+			return;
+		}
 
 		try {
 			const response = await fetch('/um/user-creation/', {
@@ -52,12 +83,18 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				window.app.router.go("/");
 			} else {
 				// if displayname is already taken
-				//this.popover(event.target.displayname, "Displayname already taken");
+				this.displayname_taken_warning.style.display = "";
 				console.log("displayname already taken");
 			}
 		} catch (error) {
 			console.error('Error selecting displayname:', error);
 		}
+	}
+
+	handleHidingDisplaynameTakenWarning() {
+		this.displayname_taken_warning.style.display = "none";
+		this.displayname_enter_warning.style.display = "none";
+		this.displayname_whitespaces_warning.style.display = "none";
 	}
 	
 
@@ -67,10 +104,21 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			<scripts-and-styles></scripts-and-styles>
 			<div class="p-3 rounded-3 bg-dark">
 				<form id="displayNameForm">
-					<h3 class="text-center text-white">Select a unique Displayname</h3>
+					<h3 class="text-center text-white mb-3">Enter a unique Displayname</h3>
 
-					<input name="displayname" id="displayName" type="text" class="form-control" placeholder="displayname" aria-describedby="displayNameHelp">
-					<div class="form-text text-white-50 mb-3" id="displayNameHelp">Please enter a unique displayname</div>
+					<label for="displayName" id="displayNameTaken" class="form-label text-danger" style="display: none;">This displayname is already taken</label>
+					<label for="displayName" id="displayNameEnter" class="form-label text-danger" style="display: none;">Please enter a displayname</label>
+					<label for="displayName" id="displayNameWhitespaces" class="form-label text-danger" style="display: none;">Whitespaces are not allowed</label>
+
+					<input name="displayname"
+							id="displayName"
+							type="text"
+							class="form-control"
+							maxlength="20"
+							placeholder="displayname"
+							aria-describedby="displayNameHelp"
+					>
+					<div class="form-text text-white-50 mb-3" id="displayNameHelp">Other users can see this name</div>
 					
 					<button type="submit" class="btn btn-custom w-100" id="displayNameSubmitButton" form="displayNameForm">submit</button>
 
