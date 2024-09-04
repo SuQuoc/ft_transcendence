@@ -53,11 +53,11 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Cache pip
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('tests/playwright_tests/playwright_requirements.txt') }}
+    #- name: Cache pip
+    #  uses: actions/cache@v3
+    #  with:
+    #    path: ~/.cache/pip
+    #    key: ${{ runner.os }}-pip-${{ hashFiles('tests/playwright_tests/playwright_requirements.txt') }}
 
     - name: Install dependencies
       run: |
