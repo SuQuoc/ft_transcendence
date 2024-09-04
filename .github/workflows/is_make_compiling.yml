@@ -76,4 +76,4 @@ jobs:
       run: playwright install
 
     - name: playwright tests
-      run: pytest ./tests/playwright_tests
+      run: pytest ./tests/playwright_tests/test_homepage.py

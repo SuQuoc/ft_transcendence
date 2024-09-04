@@ -25,31 +25,30 @@ def authenticate():
 
         try:
             page.click("#loginGoToSignup")
-            expect(page).to_have_url(f"{BASE_URL}/signup")
+            expect(page.locator("#signupForm")).to_be_visible()
             page.locator("#signupEmail").fill("test1@test.at")
             page.locator("#signupPassword1").fill("12345678")
             page.locator("#signupPassword2").fill("12345678")
             page.locator("#signupSubmitButton").click()
-            # page.wait_for_url(f"{BASE_URL}", timeout=5000)
-            if page.url == f"{BASE_URL}":
-                print("Signup successful, proceeding with the next steps.")
-            else:
-                print("Trying login.")
-                page.goto(BASE_URL)
-                page.locator("#loginEmail").fill("test1@test.at")
-                page.locator("#loginPassword").fill("12345678")
-                page.locator("#loginSubmitButton").click()
-
-            page.wait_for_selector("#navbar")
+            page.wait_for_selector("#navbar", timeout=5000)
+        except Exception as e:
+            print(f"Signup failed probably because user already exists ;) : {e}")
+            print("Trying login...")
+            page.goto(BASE_URL)
+            page.locator("#loginEmail").fill("test1@test.at")
+            page.locator("#loginPassword").fill("12345678")
+            page.locator("#loginSubmitButton").click()
+            try:
+                page.wait_for_selector("#navbar", timeout=5000)
+            except:
+                print(f"Error both signup and login failed to get auth cookies, your tests will fail haha: {e}")
 
             # Save the authentication state
-            context.storage_state(path=AUTH_STATE_PATH)
             # page.locator("#displayNameForm").fill("test1")
             # page.locator("#displayNameSubmitButton").click()
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
         finally:
+            context.storage_state(path=AUTH_STATE_PATH)
             context.close()
             browser.close()
 
@@ -74,7 +73,7 @@ def page(context: BrowserContext):
     """
     page: Page = context.new_page()
     page.goto(BASE_URL)
-    page.wait_for_selector("#navbar")
+    page.wait_for_selector("#navbar", timeout=5000)
     yield page
     page.close()
 
