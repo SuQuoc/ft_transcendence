@@ -60,7 +60,7 @@ const Router = {
 		}
 		
 		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ?!
-		
+		// we need to get email as well
 
 		// event handler for navigation links
 		document.querySelectorAll("a.nav-link").forEach(a => {
@@ -79,7 +79,6 @@ const Router = {
 		});
 		
 		// check initial URL
-		console.log ("######################location.pathname: ", location.pathname);
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 

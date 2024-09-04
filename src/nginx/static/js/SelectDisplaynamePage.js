@@ -12,7 +12,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 
-		console.log("SelectDisplaynamePage connectedCallback");
 		// getting elements
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
 		this.input_field = this.shadowRoot.getElementById("displayName");
@@ -40,7 +39,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	/// ----- Methods ----- ///
 
 	isDisplaynameValid(displayname) {
-		console.log("displayname.length: ", displayname.length);
 		if (displayname === "") {
 			this.displayname_enter_warning.style.display = "";
 			return false;
@@ -59,7 +57,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		event.preventDefault();
 		
 		const displayname = event.target.displayname.value;
-		console.log("displayname:", displayname);
 
 		// check if displayname is valid
 		if (!this.isDisplaynameValid(displayname)) {
@@ -77,8 +74,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			});
 
 			if (response.ok) {
-				console.log("displayname ok");
-
 				window.app.userData.username = displayname;
 				window.app.router.go("/", false);
 			} else {
