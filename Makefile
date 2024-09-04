@@ -3,7 +3,7 @@ DOCKER_COMPOSE = docker compose -f ./docker_compose_files/docker-compose.yml
 
 
 ###################### General #####################
-.PHONY: all up build_up build_no_cache down build_only rm_vol clean fclean re new keys
+.PHONY: all up build_up build_no_cache down build_only rm_vol clean fclean re new keys cache_clean
 
 all: up
 
@@ -38,13 +38,16 @@ new: fclean build_up
 keys:
 	bash ./src/common_files/jwt_create_keys.sh
 
+cache_clean:	game_cache_clean reg_cache_clean um_cache_clean
+
+
 ###################### Registration #####################
 .PHONY: reg_cache_clean
 
 reg_cache_clean:
 	rm -rf ./src/registration/project/core_app/__pycache__/
 	rm -rf ./src/registration/project/core_app/migrations/__pycache__/
-	rm -rf ./src/registration/project/core_app/migrations/0001_initial.py
+	find ./src/registration/project/core_app/migrations/ -type f ! -name '__init__.py' -delete
 	rm -rf ./src/registration/project/core_app/views/__pycache__/
 	rm -rf ./src/registration/project/project/__pycache__/
 
@@ -54,10 +57,11 @@ reg_cache_clean:
 
 game_cache_clean:
 	rm -rf ./src/game/__pycache__/
-	rm -rf ./src/pong/__pycache__/
-	rm -rf ./src/pong/game_core/__pycache__/
-	rm -rf ./src/pong/migrations/__pycache__/
-	rm -rf ./src/pong/migrations/0001_initial.py
+	rm -rf ./src/game/game/__pycache__/
+	rm -rf ./src/game/pong/__pycache__/
+	rm -rf ./src/game/pong/game_code/__pycache__/
+	rm -rf ./src/game/pong/migrations/__pycache__/
+	find ./src/game/pong/migrations/ -type f ! -name '__init__.py' -delete
 
 ###################### User Management #####################
 .PHONY: um_up um_down um_mm um_migrate um_shell um_cache_clean
@@ -94,11 +98,10 @@ um_cache_clean:
 	rm -rf ./src/user_management/api/management/__pycache__/
 	rm -rf ./src/user_management/api/management/commands/__pycache__/
 	rm -rf ./src/user_management/api/migrations/__pycache__/
-	rm -rf ./src/user_management/api/migrations/0001_initial.py
-	rm -rf ./src/user_management/api/migrations/0002_customuser_image.py
+	find ./src/user_management/api/migrations/ -type f ! -name '__init__.py' -delete
 	rm -rf ./src/user_management/friends/migrations/__pycache__/
 	rm -rf ./src/user_management/friends/__pycache__/
-	rm -rf ./src/user_management/friends/migrations/0001_initial.py
+	find ./src/user_management/friends/migrations/ -type f ! -name '__init__.py' -delete
 	rm -rf ./src/user_management/friends/tests/__pycache__/
 	rm -rf ./src/user_management/user_management/__pycache__/
 
