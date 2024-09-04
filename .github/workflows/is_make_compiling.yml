@@ -17,6 +17,24 @@ jobs:
     - name: generate keys
       run: make keys
 
+
+    #- name: Cache Docker layers
+    #  uses: actions/cache@v3
+    #  with:
+    #    path: /tmp/.buildx-cache
+    #    key: ${{ runner.os }}-buildx-${{ github.ref_name }}
+    #    restore-keys: |
+    #      ${{ runner.os }}-buildx-
+#
+    #- name: Build Docker image
+    #  run: |
+    #    docker buildx create --use
+    #    docker buildx build --cache-from=type=registry,ref=my-registry/my-image:cache --cache-to=type=registry,ref=my-registry/my-image:cache,mode=max --tag my-image:latest .
+
+
+
+
+
     - name: Makefile check
       run: make build_only
 
@@ -39,12 +57,12 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('tests/playwright_tests/playwright_requirements.txt') }}
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r tests/playwright_tests/playwright_requirements.txt
 
     # do we even need the following run, python, mariadb?
     - name: apt update and install python-dev, gcc and libmariadb-dev
