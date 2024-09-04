@@ -73,6 +73,8 @@ def page(context: BrowserContext):
     returns a Page as a logged in user
     """
     page: Page = context.new_page()
+    page.goto(BASE_URL)
+    page.wait_for_selector("#navbar")
     yield page
     page.close()
 

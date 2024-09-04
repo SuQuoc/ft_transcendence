@@ -8,7 +8,6 @@ import pytest
 
 class TestHome:
     def test_home_page_after_login(self, page: Page):
-        page.goto(BASE_URL)
         expect(page.locator("#playMenuGoToTournament")).to_be_visible()
 
     # @pytest.mark.parametrize(

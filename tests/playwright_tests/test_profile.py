@@ -11,7 +11,7 @@ import pytest
 
 class TestProfile:
     def test_user_profile_dropdown(self, page: Page):
-        page.goto(BASE_URL)
+
         page.locator("#userDropdown").click()
         expect(page.locator("#displayName")).to_be_visible()
 
