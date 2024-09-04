@@ -65,12 +65,12 @@ jobs:
         pip install -r tests/playwright_tests/playwright_requirements.txt
 
     # do we even need the following run, python, mariadb?
-    - name: apt update and install python-dev, gcc and libmariadb-dev
-      run: |
-        sudo apt update
-        sudo apt install gcc -y
-        sudo apt-get install libmariadb-dev -y
-        sudo apt-get install python3.10-dev -y
+    #- name: apt update and install python-dev, gcc and libmariadb-dev
+    #  run: |
+    #    sudo apt update
+    #    sudo apt install gcc -y
+    #    sudo apt-get install libmariadb-dev -y
+    #    sudo apt-get install python3.10-dev -y
 
     - name: playwright install
       run: playwright install
