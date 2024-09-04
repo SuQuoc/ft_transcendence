@@ -1,4 +1,4 @@
-name: test compilation
+name: running tests
 
 on:
   push:
