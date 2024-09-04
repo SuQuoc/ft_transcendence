@@ -21,9 +21,6 @@ def generate_code_challenge(code_verifier):
     code_challenge = hashlib.sha256(code_verifier.encode('utf-8')).digest()
     return base64.urlsafe_b64encode(code_challenge).decode('utf-8').rstrip('=')
 
-@api_view(['GET'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
 def send_oauth2_authorization_request(request):  # [aguilmea] this is the first part of the oauth2 flow - I prepare the url where the user should authenticate
     try:                        # [aguilmea] should it be done in the frontend? so that the state is verified there too?
         redirect_uri = os.environ.get('SERVER_URL') + '/registration/exchange_code_against_access_token'
@@ -44,11 +41,8 @@ def send_oauth2_authorization_request(request):  # [aguilmea] this is the first 
         }).prepare().url
         return HttpResponseRedirect(authorize_url)
     except Exception as e:
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
 def exchange_code_against_access_token(request):
     try:
         authorization_code = request.query_params.get("code", "")
@@ -57,7 +51,7 @@ def exchange_code_against_access_token(request):
         stored_state = request.session.get('oauth_state')
 
         if returned_state != stored_state:
-            return HttpResponseRedirect('/error?message=Failed to retrieve user information')
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
@@ -67,37 +61,66 @@ def exchange_code_against_access_token(request):
             'code_verifier': code_verifier,
             'redirect_uri': os.environ.get('SERVER_URL') + '/registration/set_oauth2'
         })
-        access_token = response.json().get('access_token')
-        headers = {'Authorization': f'Bearer {access_token}'}
-    
-        user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-        if (user_response.status_code != 200):
-            return HttpResponseRedirect('/error?message=Failed to retrieve user information')
-        user_details =user_response.json()
-        id = user_details.get('id')
-        setattr(request.user, 'ft_userid', id)
-        redirect_url = os.environ.get('SERVER_URL')
-        return HttpResponseRedirect(redirect_url)
+        ft_access_token = response.json().get('access_token')
+        request.session['ft_access_token'] = ft_access_token  
     
     except Exception as e:
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET'])
+@authentication_classes([NoTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def callback(request):
+    try:
+        ex = exchange_code_against_access_token(request)
+        if (ex.status_code != 200):
+            return ex.status_code
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def unset_oauth2(request):
+def set(request):
+    try:
+        send_oauth2_authorization_request(request)
+        ft_access_token = request.session.get('ft_access_token')
+        headers = {'Authorization': f'Bearer {ft_access_token}'}
+        user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
+        if (user_response.status_code != 200):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        user_details =user_response.json()
+        id = user_details.get('id')
+        setattr(request.user, 'ft_userid', id)
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def unset(request):
     try:
         setattr(request.user, 'ft_userid', None)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def login_oauth2(request):
+def login(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@authentication_classes([NoTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def signup(request):
+    try:
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
