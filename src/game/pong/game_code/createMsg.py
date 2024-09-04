@@ -58,3 +58,17 @@ class SendToClient:
         #        "tournaments": msg
         #    }
         #)
+
+    async def sendLobbyPlayerList(self, lobby: Lobby) -> None:
+        print("update.LobbyPlayerList")
+        channel_layer = get_channel_layer()
+        msg = {
+            i: {
+                "player_name": "1",
+            }
+            for i, player in enumerate(lobby.players.values())
+        }
+        msg["type"] = "update.LobbyPlayerList"
+        await channel_layer.group_send(
+            lobby.lobby_name, msg
+        )

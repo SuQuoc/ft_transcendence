@@ -15,7 +15,7 @@
 	integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
 	crossorigin="anonymous"/>
 	<!-- Custom CSS -->
-	<link href="/css/template.css" rel="stylesheet"/>
+	<link href="../css/template.css" rel="stylesheet"/>
 	<!-- Bootstrap Bundle with Popper -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -33,7 +33,7 @@
 
 <body class="d-flex flex-column vh-100">
 	<!-- Navbar -->
-	<nav class="navbar navbar-expand-sm navbar-dark bg-dark px-2" id="navbar" style="display:none;">
+	<nav class="navbar navbar-expand-sm navbar-dark bg-dark px-2" id="navbar">
 		<button type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
 			class="navbar-toggler" aria-controls="navbarNav" aria-expanded="false"
 			aria-label="toggle navigation">
@@ -67,12 +67,81 @@
 	<!-- Main Page -->
 	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
 		<!-- main page content -->
+
+
+		<!-- Lobby -->
+		<div class="d-flex flex-lg-row flex-column-reverse w-100 h-100">
+			<!-- lobby player sidebar -->
+			<div class="d-flex flex-lg-column flex-row
+						justify-content-between
+						lobby-player-sidebar-lg
+						overflow-auto
+						bg-dark shadow text-white
+						h-lg-100 p-2 gap-lg-0 gap-5"
+			>
+				<!-- leave button -->
+				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
+				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
+
+				<!-- number of players -->
+				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
+					<span class="d-lg-block d-none fs-4">Players:</span>
+					<div class="d-flex ms-lg-auto">
+						<span id="lobbyCurrentPlayerNum" class="fs-4">1</span>
+						<span class="fs-4">/</span>
+						<span id="lobbyMaxPlayerNum" class="fs-4">4</span>
+					</div>
+				</div>
+
+				<!-- player list -->
+				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2"></hr>
+				<div id="lobbyPlayerList"
+					class="d-flex flex-lg-column flex-row
+							align-self-lg-start align-self-center
+							gap-3 row-gap-2
+							order-lg-2"
+				>
+					<!-- tournament-lobby-player-elements: -->
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52"
+							alt="Profile image"
+							class="rounded-circle lobby-player-avatar"
+							name="lobby_player_avatar"
+						>
+						<span name="lobby_player_name">name</span>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle lobby-player-avatar" name="lobby_player_avatar">
+						<span name="lobby_player_name">userName</span>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle lobby-player-avatar" name="lobby_player_avatar">
+						<span name="lobby_player_name">Name</span>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle lobby-player-avatar" name="lobby_player_avatar">
+						<span name="lobby_player_name">name</span>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<img src="https://i.pravatar.cc/150?img=52" alt="Profile image" class="rounded-circle lobby-player-avatar" name="lobby_player_avatar">
+						<span name="lobby_player_name">name</span>
+					</div>
+				</div>
+
+			</div>
+			<!-- game -->
+			<div class="d-flex flex-grow-1 justify-content-center align-items-center align-self-">
+				Game
+			</div>
+		</div>
+
+
 	</main>
 
 
 
 	<!-- Footer -->
-	<footer class="mt-auto bg-dark pt-2" id="footer" style="display:none;">
+	<footer class="mt-auto bg-dark pt-2" id="footer">
 		<ul class="nav justify-content-center dark-footer-border-bottom pb-2 mb-2">
 			<a href="#" class="nav-link px-2 text-white-50">Home</a>
 			<a href="#" class="nav-link px-2 text-white-50">FAQs</a>
@@ -80,16 +149,6 @@
 		</ul>
 		<p class="text-center fst-italic text-white-50">42 Vienna</p>
 	</footer>
-
-
-	<!-- temporary ###Templates### for making new components -->
-		<template id="tournamentLobbyPageTemplate">
-			<scripts-and-styles></scripts-and-styles>
-			<h1 class="text-white">Tournament Lobby Page</h1>
-			<div id="lobbyPlayerList">
-			</div>
-			<button type="button" id="lobbyLeaveButton" class="btn btn-custom">leave</button>
-		</template>
 </body>
 
 </html>
