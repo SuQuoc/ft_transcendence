@@ -124,6 +124,7 @@ const Router = {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
+				addToHistory = false;
 			}
 		}
 

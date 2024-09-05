@@ -26,7 +26,7 @@ export class LoginPage extends ComponentBaseClass {
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <span id="errorMessage" class="text-danger"></span>
                     <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white">Sign up</a> here!</p>
-                    <button type="submit" class="btn btn-secondary w-100" form="loginForm" disabled>Log in</button>
+                    <button type="submit" class="btn btn-custom w-100" form="loginForm" disabled>Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
                     </div>
@@ -89,7 +89,7 @@ export class LoginPage extends ComponentBaseClass {
 			if (!response.ok) {
 				throw new Error('Login failed');
 			}
-			window.app.userData.username = username;
+			window.app.userData = window.app.userData || {};
 			window.app.userData.email = username;
 
 			// Redirect to the home page or another page

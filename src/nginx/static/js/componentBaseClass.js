@@ -61,5 +61,74 @@ export class ComponentBaseClass extends HTMLElement {
 	// the method where the HTML of the component is defined, must be overridden
 	getElementHTML() {
 		throw new Error("Must override method getElementHTML");
-	}
+	};
+
+	// validate the token and refresh it if necessary
+	async validateToken() {
+		try {
+			const response = await fetch("/registration/verify_token", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include"
+			});
+
+			if (response.status !== 200) {
+				throw new Error("Token is invalid");
+			}
+
+			return true;
+		} catch (error) {
+			console.error("Error validating token: ", error.message);
+
+			try {
+				const refreshResponse = await fetch("/registration/refresh_token", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					credentials: "include"
+				});
+
+				if (refreshResponse.status !== 200) {
+					throw new Error("Error refreshing token");
+				}
+				return true;
+			} catch (refreshError) {
+				console.error("Error refreshing token:", refreshError.message);
+				return false;
+			}
+		}
+	};
+
+	// boilerplate for making API calls, only requires the URL and request options
+	// example: method: 'POST', body
+	// important: only for API calls that require a valid token (so not for login/signup)
+	async apiFetch(url, options = {}) {
+		// Validate the token before making the API call
+		const tokenValid = await this.validateToken();
+		if (!tokenValid) {
+			throw new Error("Unable to refresh token");
+		}
+
+		// Make the API call
+		const response = await fetch(url, {
+			...options,
+			credentials: "include", // Ensure cookies are sent with the request
+			headers: {
+				...options.headers,
+				"Content-Type": "application/json"
+			}
+		});
+
+		// Handle response
+		if (!response.ok) {
+			throw new Error(`API call failed: ${response.statusText}`);
+		}
+
+		return response.json();
+	};
+
+
 }
