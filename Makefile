@@ -123,5 +123,5 @@ test: down
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done
-	pytest ./tests/playwright_tests/test_basic.py
+	pytest ./tests/playwright_tests
 	@make down
