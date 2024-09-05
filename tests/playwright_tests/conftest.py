@@ -61,9 +61,13 @@ def authenticate():
             context.close()
             browser.close()
 
+@pytest.fixture(scope="function", params=["chromium", "firefox", "webkit"])
+def browser_type(request):
+    return request.param
+
 
 @pytest.fixture(scope="function")
-def context(authenticate):
+def context(browser_type, authenticate):
     """
     Sets up browser context to include auth cookies
     """
