@@ -9,9 +9,6 @@ export class SignupPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.shadowRoot.getElementById('signupForm').addEventListener('submit', this.signup.bind(this));
-		//this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validatePasswords.bind(this));
-		//this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validatePasswords.bind(this));
-		//this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateEmail.bind(this));
 		this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
@@ -31,17 +28,18 @@ export class SignupPage extends ComponentBaseClass {
                         type="email"
                         class="form-control"
                         placeholder="name@example.com"
-                        aria-describedby="signupEmailHelp"
+                        aria-required="true"
+                        aria-describedby="errorMessageEmail"
                     />
-                    <div class="form-text text-white-50 mb-3" id="signupEmailHelp">
-                        We'll never share your email with a third party .....probably
-                    </div>
+                    <span id="errorMessageEmail" class="text-danger" style="display:block;"></span>
                     <!-- first Password -->
                     <label for="signupPassword1" class="form-label text-white-50">Password</label>
                     <input name="password"
                         id="signupPassword1"
                         type="password"
                         class="form-control mb-1"
+                        aria-required="true"
+                        aria-describedby="errorMessagePassword"
                     />
                     <!-- second Password -->
                     <label for="signupPassword2" class="form-label text-white-50">Password again</label>
@@ -49,7 +47,10 @@ export class SignupPage extends ComponentBaseClass {
                         id="signupPassword2"
                         type="password"
                         class="form-control mb-3"
+                        aria-required="true"
+                        aria-describedby="errorMessagePassword"
                     />
+                    <span id="errorMessagePassword" class="text-danger"></span>
                     <!-- change to login page -->
                     <p class="text-white-50 small m-0">Already signed up?
                         <a href="/login" class="text-decoration-none text-white">
@@ -67,56 +68,38 @@ export class SignupPage extends ComponentBaseClass {
 		return template;
 	}
 
-	validatePasswords() {
-		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
-		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
-		const passwordWarning = this.shadowRoot.getElementById('passwordWarning');
-
-		if (password1 !== password2) {
-			passwordWarning.style.display = 'block';
-		} else {
-			passwordWarning.style.display = 'none';
-		}
-	}
-
-	validateEmail() {
-		const email = this.shadowRoot.getElementById('signupEmail').value;
-		const emailWarning = this.shadowRoot.getElementById('emailWarning');
-		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-		if (!emailPattern.test(email)) {
-			emailWarning.style.display = 'block';
-		} else {
-			emailWarning.style.display = 'none';
-		}
-	}
-
 	validateForm() {
 		const email = this.shadowRoot.getElementById('signupEmail').value;
 		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
 		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
-		const emailWarning = this.shadowRoot.getElementById('emailWarning');
-		const passwordWarning = this.shadowRoot.getElementById('passwordWarning');
+		const emailWarning = this.shadowRoot.getElementById('errorMessageEmail');
+		const passwordWarning = this.shadowRoot.getElementById('errorMessagePassword');
 
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 		const passwordsMatch = password1 === password2;
 
 		if (emailValid && passwordsMatch) {
 			signupButton.disabled = false;
-			emailWarning.style.display = 'none';
-			passwordWarning.style.display = 'none';
+			emailWarning.textContent = '';
+			passwordWarning.textContent = '';
 		} else {
 			signupButton.disabled = true;
 			if (!emailValid) {
-				emailWarning.style.display = 'block';
+				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
+				emailWarning.textContent = 'Invalid email address';
 			} else {
-				emailWarning.style.display = 'none';
+				this.shadowRoot.getElementById('signupEmail').removeAttribute('aria-invalid');
+				emailWarning.textContent = '';
 			}
 			if (!passwordsMatch) {
-				passwordWarning.style.display = 'block';
+				this.shadowRoot.getElementById('signupPassword1').setAttribute('aria-invalid', 'true');
+				this.shadowRoot.getElementById('signupPassword2').setAttribute('aria-invalid', 'true');
+				passwordWarning.textContent = "Passwords don't match";
 			} else {
-				passwordWarning.style.display = 'none';
+				this.shadowRoot.getElementById('signupPassword1').removeAttribute('aria-invalid');
+				this.shadowRoot.getElementById('signupPassword2').removeAttribute('aria-invalid');
+				passwordWarning.textContent = '';
 			}
 		}
 	}
