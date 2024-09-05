@@ -4,12 +4,18 @@ import Router from './router.js';
 window.app = {
 	router: Router,
 	socket: null,
-	userData: {}
+	userData: {
+		username: null, // maybe this should be changed to displayname
+		email: null,
+		profileImage: null,
+		id: null, // temporary!! (i think)
+	}
 };
 
 // link custom web components
 import { FindOpponentPage } from './js/FindOpponentPage.js';
 import { LoginPage } from './js/LoginPage.js';
+import { SelectDisplaynamePage } from './js/SelectDisplaynamePage.js';
 import { SignupPage } from './js/SignupPage.js';
 import { UserProfile } from './js/UserProfile.js';
 import { JoinTournamentPage } from './js/JoinTournamentPage.js';
@@ -30,8 +36,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
 	// generate a random user id (temporary!!!)
-	window.app.userData.username = crypto.randomUUID();
-	console.log("User ID: ", window.app.userData.username);
+	window.app.userData.id = crypto.randomUUID();
+	console.log("User ID: ", window.app.userData.id);
 
 	// adds event listeners for routing
 	await app.router.init();

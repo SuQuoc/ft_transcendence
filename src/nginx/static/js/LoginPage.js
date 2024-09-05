@@ -3,7 +3,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class LoginPage extends ComponentBaseClass {
 	constructor() {
-		super();
+		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /login to the history
 	}
 
 	connectedCallback() {
@@ -41,11 +41,11 @@ export class LoginPage extends ComponentBaseClass {
 		loginButton.disabled = true;
 		loginSpinner.style.display = 'inline-block';
 
-		const username = this.shadowRoot.getElementById('loginEmail').value;
+		const username = this.shadowRoot.getElementById('loginEmail').value; // why is it called username and not email?
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 
 		try {
-			const response = await fetch('/registration/login', {
+			const outhResponse = await fetch('/registration/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -53,14 +53,29 @@ export class LoginPage extends ComponentBaseClass {
 				body: JSON.stringify({ username, password })
 			});
 
-			if (!response.ok) {
+			if (!outhResponse.ok) {
 				throw new Error('Login failed');
 			}
-			window.app.userData.username = username;
-			window.app.userData.email = username;
-
-			// Redirect to the home page or another page
-			app.router.go('/');
+			window.app.userData.email = username; // and why is the email set to the username?
+			
+			// Check if the user already has a displayname
+			const displaynameResponse = await fetch ('/um/profile/', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			
+			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
+			if (!displaynameResponse.ok) {
+				window.app.router.go('/displayname', false);
+				console.log('displayname not ok:', displaynameResponse);
+			} else {
+				const responseData = await displaynameResponse.json();
+				window.app.userData.username = responseData.displayname;
+				//window.app.userData.<image?> = responseData.image;
+				app.router.go('/', false);
+			}
 		} catch (error) {
 			console.error('Error during login:', error);
 		} finally {

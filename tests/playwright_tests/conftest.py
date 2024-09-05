@@ -28,6 +28,11 @@ def authenticate():
             page.locator("#signupPassword1").fill("12345678")
             page.locator("#signupPassword2").fill("12345678")
             page.locator("#signupSubmitButton").click()
+
+            page.wait_for_selector("#displayNameForm", timeout=5000)
+            page.locator("#displayNameInput").fill("test1")
+            page.locator("#displayNameSubmitButton").click()
+            
             page.wait_for_selector("#navbar", timeout=5000)
         except Exception as e:
             print(f"Signup failed probably because user already exists ;) : {e}")
