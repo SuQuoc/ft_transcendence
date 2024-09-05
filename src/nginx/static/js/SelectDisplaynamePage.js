@@ -14,7 +14,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 		// getting elements
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
-		this.input_field = this.shadowRoot.getElementById("displayName");
+		this.input_field = this.shadowRoot.getElementById("displayNameInput");
 		this.displayname_taken_warning = this.shadowRoot.getElementById("displayNameTaken");
 		this.displayname_enter_warning = this.shadowRoot.getElementById("displayNameEnter");
 		this.displayname_whitespaces_warning = this.shadowRoot.getElementById("displayNameWhitespaces");
@@ -24,7 +24,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.input_field.addEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
 
 		// setting focus on displayname input when the page is loaded 
-		this.shadowRoot.getElementById("displayName").focus();
+		this.shadowRoot.getElementById("displayNameInput").focus();
 	}
 	
 	disconnectedCallback() {
@@ -101,12 +101,12 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				<form id="displayNameForm">
 					<h3 class="text-center text-white mb-3">Enter a unique Displayname</h3>
 
-					<label for="displayName" id="displayNameTaken" class="form-label text-danger" style="display: none;">This displayname is already taken</label>
-					<label for="displayName" id="displayNameEnter" class="form-label text-danger" style="display: none;">Please enter a displayname</label>
-					<label for="displayName" id="displayNameWhitespaces" class="form-label text-danger" style="display: none;">Whitespaces are not allowed</label>
+					<label for="displayNameInput" id="displayNameTaken" class="form-label text-danger" style="display: none;">This displayname is already taken</label>
+					<label for="displayNameInput" id="displayNameEnter" class="form-label text-danger" style="display: none;">Please enter a displayname</label>
+					<label for="displayNameInput" id="displayNameWhitespaces" class="form-label text-danger" style="display: none;">Whitespaces are not allowed</label>
 
 					<input name="displayname"
-							id="displayName"
+							id="displayNameInput"
 							type="text"
 							class="form-control"
 							maxlength="20"
