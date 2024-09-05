@@ -1,18 +1,23 @@
+import os
 import uuid
-from api.models import CustomUser, UPLOAD_TO_PROFILE
+
+from api.models import CustomUser
+from api.models import UPLOAD_TO_PROFILE
+from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+from test_setup import MyTestSetUp
 from utils_jwt import generate_token
-import os
-from django.conf import settings
 
 UNDER_ONE_MB = "default/900kb.jpg"
 AROUND_ONE_MB = "default/1mb.jpg"
 OVER_ONE_MB = "default/1.8mb.jpg"
 
 NEW_NAME = "NewName"
-class TestCrud(APITestCase):
+
+
+class TestCrud(MyTestSetUp):
     def setUp(self):
         self.user_id = str(uuid.uuid4())
         self.displayname = "Test API"
@@ -20,16 +25,13 @@ class TestCrud(APITestCase):
             "displayname": self.displayname,
         }
         self.url = reverse("user-creation")
-        self.url_profile = reverse("profile", kwargs={'displayname': self.displayname})
+        self.url_profile = reverse("profile", kwargs={'user_id': self.user_id})
 
-        # JWT
-        # self.settings(SIMPLE_JWT = {"SIGNING_KEY": "testkey"})
-        self.access_token = generate_token(self.user_id)
         self.headers = {
-            "HTTP_AUTHORIZATION": f"Bearer {self.access_token}",
+            # "HTTP_AUTHORIZATION": f"Bearer {self.access_token}",
         }
-        self.access_token
 
+        self.setup_jwt_with_cookie(self.user_id)
 
         self.images = {
             "900kb": os.path.join(settings.MEDIA_ROOT, UPLOAD_TO_PROFILE, UNDER_ONE_MB),
@@ -46,7 +48,6 @@ class TestCrud(APITestCase):
     def patch(self, request, displayname):
         return self.client.patch(self.url_profile, format="json", secure=True, **self.headers)
 
-
     # TEST Profile creation
     def test_no_displayname(self):
         del self.data["displayname"]  #
@@ -54,13 +55,11 @@ class TestCrud(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # print(response.data)
 
-
     def test_displayname_too_long(self):
         self.data["displayname"] = "displayname too long ggggggggggggggggggggggggggg"
         response = self.post()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # print(response.data)
-
 
     def test_no_data(self):
         self.data = {}
@@ -91,7 +90,6 @@ class TestCrud(APITestCase):
         response = self.post()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-
     # Test Editing Profile
     def test_editing_profile_name(self):
         self.test_success()
@@ -102,18 +100,12 @@ class TestCrud(APITestCase):
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
 
-        # request on old name
-        response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-
     def test_editing_profile_img(self):
         self.test_success()
         with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             image_path = CustomUser.objects.get().image.path
-
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(os.path.exists(image_path))
@@ -145,10 +137,11 @@ class TestCrud(APITestCase):
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
             response_json = response.json()
-            image_path = CustomUser.objects.get().image.path
+            default_image_path = CustomUser.objects.get().image.path
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_json, {'image': ['Max file size is 1MB']})
+        self.assertTrue(os.path.exists(default_image_path))
 
     def test_editing_profile_img_and_data(self):
         self.test_success()
@@ -158,7 +151,6 @@ class TestCrud(APITestCase):
         with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-
 
         # user = CustomUser.objects.get()
         # image_path = user.image.path
@@ -170,20 +162,18 @@ class TestCrud(APITestCase):
         self.assertEqual(CustomUser.objects.filter(displayname=self.data['displayname']).count(), 1)
 
         # delete the image after the test
-        self.url_profile = reverse("profile", kwargs={"displayname": NEW_NAME})
         self.delete()
-
 
     # Test profile deletion
     def test_user_deletion_with_default_image(self):
         self.test_success()
 
-        image_path = CustomUser.objects.get().image.path
+        default_image_path = CustomUser.objects.get().image.path
 
         response = self.delete()
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertTrue(os.path.exists(image_path)) # default image should not be deleted
+        self.assertTrue(os.path.exists(default_image_path))  # default image should not be deleted
 
     def test_user_deletion_with_custom_image(self):
         self.test_success()
@@ -200,22 +190,20 @@ class TestCrud(APITestCase):
         self.assertFalse(os.path.exists(image_path))
 
 
+# def test_no_uid(self):
+#     del self.data["user_id"]  # This will remove the key "user_id" and its value from self.data
+#     response = self.post()
+#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+# redundant since no user_id already tested
+# def test_wrong_key_name(self):
+#     del self.data["user_id"]
+#     self.data["iser_id"] = self.user_id
+#     response = self.post()
+#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
- # def test_no_uid(self):
-    #     del self.data["user_id"]  # This will remove the key "user_id" and its value from self.data
-    #     response = self.post()
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    # redundant since no user_id already tested
-    # def test_wrong_key_name(self):
-    #     del self.data["user_id"]
-    #     self.data["iser_id"] = self.user_id
-    #     response = self.post()
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    # def test_invalid_uid(self):
-    #     self.data["user_id"] = "invalid user id"
-    #     response = self.post()
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #     # print(response.data)
+# def test_invalid_uid(self):
+#     self.data["user_id"] = "invalid user id"
+#     response = self.post()
+#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+#     # print(response.data)

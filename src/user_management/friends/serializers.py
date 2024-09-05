@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from .models import CustomUser
-from .models import FriendRequest
+from api.models import CustomUser
+from friends.models import FriendRequest
 
 
 class FriendRequestSendSerializer(serializers.ModelSerializer):
@@ -15,8 +15,17 @@ class FriendRequestSendSerializer(serializers.ModelSerializer):
 
 
 class FriendRequestAnswerSerializer(serializers.ModelSerializer):
-    friend_request_id = serializers.IntegerField(source='id')
+    ACCEPT = "accept"
+    DECLINE = "decline"
+    UNFRIEND = "unfriend"
 
+    friend_request_id = serializers.IntegerField(source='id') # renaming id to friend_request_id
+    action = serializers.CharField(write_only=True)
     class Meta:
         model = FriendRequest
-        fields = ["friend_request_id"]
+        fields = ["friend_request_id", "action"]
+
+    def validate_action(self, value):
+        if value not in [self.ACCEPT, self.DECLINE, self.UNFRIEND]:
+            raise serializers.ValidationError("Invalid action. Must be 'accept' or 'decline'.")
+        return value

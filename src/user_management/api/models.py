@@ -1,8 +1,6 @@
-
 from django.db import models
+from friends.models import FriendRequest
 from PIL import Image
-from django.templatetags.static import static
-
 
 # Create your models here.
 
@@ -13,13 +11,14 @@ DEFAULT_IMAGE_NAME = "default/default_avatar.png"
 # path = MEDIA_ROOT + Name of file
 # url  = MEDIA_URL  + Name of file
 def print_img(image):
-    print(f"""===================
+    print(
+        f"""===================
 image:      {image}
 image.path: {image.path}
 image.url:  {image.url}
 image.name: {image.name}
-===================""")
-
+==================="""
+    )
 
 
 class CustomUser(models.Model):
@@ -34,7 +33,7 @@ class CustomUser(models.Model):
         # the instance already exists in the database
         if self.pk:
             # "new image" is default one (user didnt change it)
-            if self.image.name.endswith(DEFAULT_IMAGE_NAME): #(security concerns ??)
+            if self.image.name.endswith(DEFAULT_IMAGE_NAME):  # (security concerns ??)
                 super().save(*args, **kwargs)
                 return
 
@@ -55,7 +54,6 @@ class CustomUser(models.Model):
             # print(f"\nafter super().save:")
             # print_img(self.image)
 
-
             img = Image.open(self.image.path)
             if img.height > 220 or img.width > 220:
                 output_size = (220, 220)
@@ -63,7 +61,6 @@ class CustomUser(models.Model):
                 img.save(self.image.path)
         else:
             super().save(*args, **kwargs)
-
 
     def delete(self, *args, **kwargs):
         if not self.image.name.endswith(DEFAULT_IMAGE_NAME):
@@ -74,7 +71,17 @@ class CustomUser(models.Model):
         super().delete(*args, **kwargs)
 
     def get_online_status(self):
-        return "true" if self.online else "false"
+        return "True" if self.online else "False"
+
+    # FriendRequests
+    def get_pending_received_friend_requests(user):
+        return FriendRequest.objects.filter(status=FriendRequest.PENDING, receiver=user)
+
+    def get_pending_requested_friend_requests(user):
+        return FriendRequest.objects.filter(status=FriendRequest.PENDING, sender=user)
 
     def __str__(self):
         return self.displayname
+
+    def get_friend_count(self):
+        return self.friend_list.get_friend_count()

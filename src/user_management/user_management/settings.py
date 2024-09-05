@@ -44,9 +44,11 @@ INSTALLED_APPS = [
     "friends",
     "rest_framework",
     "rest_framework_simplejwt",
+    'corsheaders',  # [aguilmea] added manually for cookies
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # added for cookies
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -130,7 +132,7 @@ STATIC_URL = "um/static/"  # had to add um/ before [probably of nginx config] to
 STATIC_ROOT = BASE_DIR / "/static/"
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-MEDIA_URL = "um/media/" # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
+MEDIA_URL = "um/media/"  # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
 MEDIA_ROOT = BASE_DIR / "uploads"
 
 
@@ -141,26 +143,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ADDED BY US--------------------------------------------- #
-CSRF_TRUSTED_ORIGINS = ["https://127.0.0.1:8000", "https://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
 
-# Security settings for development
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True  # Set to False for local development
-CSRF_COOKIE_SECURE = True  # Set to False for local development
+# Security settings for development - clarify if needed !!
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True  # Set to False for local development
+# CSRF_COOKIE_SECURE = True  # Set to False for local development
 
 # Allauth settings
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 # REST framework settings
 REST_FRAMEWORK = {
-    "DEFAULT_PARSER_CLASSES": [
-        "rest_framework.parsers.JSONParser",
-    ],
+    # "DEFAULT_PARSER_CLASSES": [
+    #   "rest_framework.parsers.JSONParser",
+    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
-        # 'jwt_auth.CustomJWTAuthentication', depreciated
+        'user_management.authenticate.CookieJWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -172,9 +174,16 @@ with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html?highlight=USER_ID_FIELD#user-id-field
-# SIMPLE_JWT = {
-#      'ALGORITHM': 'RS256',
-#      'VERIFYING_KEY': PUBLIC_KEY,
-#      # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
-#      #     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
-# }
+SIMPLE_JWT = {
+    # 'ALGORITHM': 'RS256',
+    # 'VERIFYING_KEY': PUBLIC_KEY,
+    # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
+    # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
+}
+
+
+CORS_ALLOWED_ORIGINS = [
+    os.environ.get('SERVER_URL'),
+]
+
+CORS_ALLOW_CREDENTIALS = True

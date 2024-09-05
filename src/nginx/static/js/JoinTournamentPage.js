@@ -108,13 +108,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "createTournament",
 											"tournament_name": tournament_name,
-											"creator_name": "display name",
+											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
 											"current_player_num": "1", // the creator is the first player
 											"max_player_num": number_of_players}));
 		
 		// goes to the tournament lobby
-		window.app.router.go("/tournament-lobby");
+		window.app.router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 	};
 
 
@@ -125,7 +125,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room");
+		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}
 
 
@@ -152,7 +152,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			<div class="d-flex flex-column-reverse flex-md-row
 						justify-content-center justify-content-evenly
 						align-items-md-start
-						vw-100 gap-3 gap-row-4 p-4"
+						vw-100 gap-3 row-gap-4 p-4"
 			>
 
 		
@@ -163,79 +163,80 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					<div id="noTournamentsToJoin" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div>
 					
 					<!-- Join Tournament elements will be added here -->
+				</div>
+					
+				<!-- Create Tournament Form -->
+				<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
+				<form id="createTournamentForm">
+				<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
+					
+					<!-- Tournament name -->
+					<label for="createName" class="form-label text-white-50">Tournament Name:</label>
+					<input name="create_name"
+					id="createName"
+					type="text"
+					class="form-control mb-3"
+					placeholder="tournament name"
+					value="tournament"
+					>
+					
+					<!-- Number of Players -->
+					<label for="createNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
+					<div class="d-flex justify-content-around  mb-3" id="createNumberOfPlayers" role="group">
+						<input
+						type="radio"
+						value="4"
+						class="btn-check"
+						name="number_of_players"
+						id="create4PlayerInput"
+						autocomplete="off"
+						checked
+						>
+						<label class="btn btn-outline-custom w-25" for="create4PlayerInput">4</label>
+						
+						<input
+						type="radio"
+						value="8"
+						class="btn-check"
+						name="number_of_players"
+						id="create8PlayerInput"
+						autocomplete="off"
+						>
+						<label class="btn btn-outline-custom w-25" for="create8PlayerInput">8</label>
+						
+						<input
+						type="radio"
+						value="16"
+						class="btn-check"
+						name="number_of_players"
+						id="create16PlayerInput"
+						autocomplete="off"
+						>
+						<label class="btn btn-outline-custom w-25" for="create16PlayerInput">16</label>
 					</div>
 					
-					<!-- Create Tournament Form -->
-					<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
-					<form id="createTournamentForm">
-					<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
-						
-						<!-- Tournament name -->
-						<label for="createName" class="form-label text-white-50">Tournament Name:</label>
-						<input name="create_name"
-						id="createName"
-						type="text"
-						class="form-control mb-3"
-						placeholder="tournament name"
+					<!-- Points required to win one round -->
+					<div class="d-flex flex-column mb-3">
+						<label for="createPointsToWin" class="form-label text-nowrap text-white-50 mb-4">Points to win one game:</label>
+						<div id="createDisplayLane" class="position-absolute mt-4">
+							<div id="createPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
+						</div>
+						<input type="range"
+						class="form-range range-input-slider"
+						id="createPointsToWin"
+						name="points_to_win"
+						min="1"
+						max="25"
+						step="1"
+						value="5"
 						>
-						
-						<!-- Number of Players -->
-						<label for="createNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
-						<div class="d-flex justify-content-around  mb-3" id="createNumberOfPlayers" role="group">
-							<input
-							type="radio"
-							value="4"
-							class="btn-check"
-							name="number_of_players"
-							id="create4PlayerInput"
-							autocomplete="off"
-							checked
-							>
-							<label class="btn btn-outline-secondary w-25" for="create4PlayerInput">4</label>
-							
-							<input
-							type="radio"
-							value="8"
-							class="btn-check"
-							name="number_of_players"
-							id="create8PlayerInput"
-							autocomplete="off"
-							>
-							<label class="btn btn-outline-secondary w-25" for="create8PlayerInput">8</label>
-							
-							<input
-							type="radio"
-							value="16"
-							class="btn-check"
-							name="number_of_players"
-							id="create16PlayerInput"
-							autocomplete="off"
-							>
-							<label class="btn btn-outline-secondary w-25" for="create16PlayerInput">16</label>
-						</div>
-						
-						<!-- Points required to win one round -->
-						<div class="d-flex flex-column mb-3">
-							<label for="createPointsToWin" class="form-label text-nowrap text-white-50 mb-4">Points to win one game:</label>
-							<div id="createDisplayLane" class="position-absolute mt-4">
-								<div id="createPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
-							</div>
-							<input type="range"
-							class="form-range range-input-slider"
-							id="createPointsToWin"
-							name="points_to_win"
-							min="1"
-							max="25"
-							step="1"
-							value="5"
-							>
-						</div>
-						
-						<!-- Submit the form (create a tournament) -->
-						<button type="submit" class="btn btn-secondary w-100">create</button>
-					</form>
-				</div>
+					</div>
+					
+					<!-- Submit the form (create a tournament) -->
+					<button id="createTournamentButton" type="submit" class="btn btn-custom w-100">create</button>
+				</form>
 			</div>
+		</div>
 		`;
 		return template;
 	}

@@ -1,4 +1,4 @@
-name: transcendence
+name: pong
 
 include:
     - user_management.yml
@@ -8,6 +8,7 @@ include:
 services:
 
   nginx:
+    container_name: pong_nginx
     build: ../src/nginx
     volumes:
       - ../src/nginx/static:/www/data

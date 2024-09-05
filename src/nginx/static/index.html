@@ -39,11 +39,10 @@
 			aria-label="toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
-		<a href="#" class="navbar-brand"></a>
 		<div class="collapse navbar-collapse justify-content-between" id="navbarNav">
 			<ul class="navbar-nav">
 				<a class="nav-link active" href="/">Home</a>
-				<a class="nav-link" href="/play">Play</a>
+				<a class="nav-link" href="/match">Match</a>
 				<a class="nav-link" href="/tournament">Tournament</a>
 			</ul>
 			<ul class="navbar-nav">
@@ -66,7 +65,7 @@
 
 
 	<!-- Main Page -->
-	<main id="main-content" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
+	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
 		<!-- main page content -->
 	</main>
 
@@ -84,6 +83,13 @@
 
 
 	<!-- temporary ###Templates### for making new components -->
+		<template id="tournamentLobbyPageTemplate">
+			<scripts-and-styles></scripts-and-styles>
+			<h1 class="text-white">Tournament Lobby Page</h1>
+			<div id="lobbyPlayerList">
+			</div>
+			<button type="button" id="lobbyLeaveButton" class="btn btn-custom">leave</button>
+		</template>
 </body>
 
 </html>

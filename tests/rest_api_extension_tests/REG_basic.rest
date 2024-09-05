@@ -1,0 +1,89 @@
+@base_url = https://localhost:8000
+@username = user@domain.at
+
+# @name post_signup
+POST {{base_url}}/registration/signup/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "Pass1234!"
+}
+
+###
+
+# @name post_login
+POST {{base_url}}/registration/login/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "Pass1234!"
+}
+
+###
+
+@SET_COOKIE = {{post_login.response.headers.Set-Cookie}}
+
+###
+
+@ACCESS_COOKIE = {{SET_COOKIE}}
+
+
+POST {{base_url}}/registration/delete_user/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{"current_password": "Pass1234!"}
+
+###
+
+GET {{base_url}}/registration/logout/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{}
+
+###
+
+POST {{base_url}}/registration/change_password/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{"current_password": "Pass1234!", "new_password": "Pass5678!"}
+
+###
+
+GET {{base_url}}/registration/verify_token/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{}
+
+###
+
+POST {{base_url}}/registration/forgot_password/
+Content-Type: application/json
+
+{
+    "username": "{{username}}"
+}
+
+###
+
+POST {{base_url}}/registration/forgot_password_reset/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "token": "xxxxxxxxxxxxxxxxxx",
+    "new_password": "New1234!"
+}
+
+###
+
+GET {{base_url}}/registration/refresh_token/
+Content-Type: application/json
+Cookie: refresh=x.x.x;y;z
+
+{}

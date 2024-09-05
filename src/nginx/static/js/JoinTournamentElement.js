@@ -31,7 +31,7 @@ export class JoinTournamentElement extends HTMLElement {
 
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",
 										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room");
+		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}
 
 	// the element with the info of the tournament and a button to join it
@@ -53,7 +53,7 @@ export class JoinTournamentElement extends HTMLElement {
 					<span class="text-white-50 fs-4">/</span>
 					<span name="join_max_player_num" class="text-white fs-4">4</span>
 				</div>
-				<button type="button" name="join_tournament_button" class="btn btn-secondary py-1 px-3">Join</button>
+				<button type="button" name="join_tournament_button" class="btn btn-custom py-1 px-3">Join</button>
 			</div>
 		`;
 		return template;

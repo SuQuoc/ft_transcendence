@@ -1,5 +1,6 @@
 services:
   db_user_management:
+    container_name: pong_um_db
     image: postgres:16
     environment:
       POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
@@ -25,11 +26,12 @@ services:
       - network_user_management
 
   user_management:
+    container_name: pong_um
     build: ../src/user_management
     volumes:
       - ../src/user_management:/user_management
     expose:
-      - "8000:8000"
+      - "8000/tcp"
     environment:
       POSTGRES_DB: "${POSTGRES_DB_MANAGEMENT:-default_db}"
       POSTGRES_USER: "${POSTGRES_USER_MANAGEMENT:-posty}"
@@ -45,6 +47,7 @@ services:
       DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
       DJ_SUDO_PASSWORD_MANAGEMENT: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
       JWT_SECRET: "${JWT_SECRET:-somesecret}"
+      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
     depends_on:
       db_user_management:
         condition: service_healthy

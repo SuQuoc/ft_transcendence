@@ -1,7 +1,7 @@
 services:
 
   db_registration:
-    container_name: db_registration
+    container_name: pong_reg_db
     image: postgres:16
     environment:
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
@@ -27,22 +27,27 @@ services:
       - network_registration
 
   registration:
-    container_name: registration
+    container_name: pong_reg
     build: ../src/registration
     volumes:
       - ../src/registration:/app
     expose:
-      - "8000:8000"
+      - "8000/tcp"
     environment:
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
       POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
       POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_access_password}"
       DB_HOST: "${DB_HOST_REG:-db_registration}"
       DB_PORT: "${DB_PORT_REG:-5432}"
-      JWT_SECRET: "${JWT_SECRET:-somesecret}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DJANGO_DEBUG_REG:-False}
-      SERVER_URL: ${SERVER_URL_REG:-http://localhost:8000}
+      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
+      DOMAIN: ${DOMAIN:-localhost}
+      FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
+      FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
+      EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
+      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
     depends_on:
       db_registration:
         condition: service_healthy
@@ -55,15 +60,3 @@ services:
     secrets:
       - public_key.pem
       - private_key.pem
-
-  nginx_registration:
-    container_name: nginx_registration
-    build: ../src/registration_nginx
-    ports:
-      - 8000:443
-    depends_on:
-      - registration
-    profiles:
-      - registration
-    networks:
-      - network_registration
