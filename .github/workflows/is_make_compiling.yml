@@ -1,4 +1,4 @@
-name: test compilation
+name: running tests
 
 on:
   push:
@@ -9,44 +9,53 @@ on:
 
 
 jobs:
-  make_rule_check:
-
+  build_start_test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+
     - name: generate keys
       run: make keys
+
     - name: Makefile check
       run: make build_only
+
     - name: start servers
-      run: | 
+      run: |
         make &
         while ! nc -z localhost 8000; do
           echo "Waiting for server ..."
           sleep 2
         done
+
     - name: run user_management api tests
       run: make um_test
 
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
-    
+        python-version: '3.12'
+
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('tests/playwright_tests/playwright_requirements.txt') }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: apt update and install python-dev, gcc and libmariadb-dev
-      run: |
-        sudo apt update
-        sudo apt install gcc -y
-        sudo apt-get install libmariadb-dev -y
-        sudo apt-get install python3.10-dev -y
+        pip install -r tests/playwright_tests/playwright_requirements.txt
+
+    # do we even need the following run, python, mariadb?
+    #- name: apt update and install python-dev, gcc and libmariadb-dev
+    #  run: |
+    #    sudo apt update
+    #    sudo apt install gcc -y
+    #    sudo apt-get install libmariadb-dev -y
+    #    sudo apt-get install python3.10-dev -y
 
     - name: playwright install
       run: playwright install
 
-    - name: playwright test
-      run: pytest ./tests/playwright_tests/test_basic.py
+    - name: playwright tests
+      run: pytest ./tests/playwright_tests
