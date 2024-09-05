@@ -39,7 +39,7 @@ def login(request):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-
+    
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -55,7 +55,7 @@ def forgot_password(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = CustomUser.objects.filter(username=username).first()
         if not user:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_200_OK) # [aguilmea] because
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
         send_reset_email(user.username, token)
