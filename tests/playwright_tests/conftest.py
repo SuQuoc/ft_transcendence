@@ -1,6 +1,4 @@
 import os
-import re
-
 from playwright.sync_api import Browser
 from playwright.sync_api import BrowserContext
 from playwright.sync_api import expect

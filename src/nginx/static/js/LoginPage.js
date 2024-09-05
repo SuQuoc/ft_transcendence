@@ -24,7 +24,7 @@ export class LoginPage extends ComponentBaseClass {
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3">
                     <p class="text-white-50 small m-0">No account yet? <a href="/signup" id="loginGoToSignup" class="text-decoration-none text-white">Sign up</a> here!</p>
-                    <button type="submit" id="loginSubmitButton" class="btn btn-secondary w-100" form="loginForm">Log in</button>
+                    <button type="submit" id="loginSubmitButton" class="btn btn-custom w-100" form="loginForm">Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
                     </div>

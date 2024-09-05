@@ -1,12 +1,6 @@
-import re
 
-from conftest import BASE_URL
-from playwright.sync_api import Browser
-from playwright.sync_api import BrowserContext
 from playwright.sync_api import expect
 from playwright.sync_api import Page
-from playwright.sync_api import sync_playwright
-import pytest
 
 
 class TestProfile:
