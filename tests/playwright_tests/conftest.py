@@ -12,6 +12,29 @@ BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 
 
+
+def signup(page: Page, email: str, password1: str, password2: str):
+    page.click("#loginGoToSignup")
+    expect(page.locator("#signupForm")).to_be_visible()
+    page.locator("#signupEmail").fill(email)
+    page.locator("#signupPassword1").fill(password1)
+    page.locator("#signupPassword2").fill(password2)
+    page.locator("#signupSubmitButton").click()
+
+
+def login(page: Page, email: str, password: str):
+    page.goto(BASE_URL)
+    page.locator("#loginEmail").fill(email)
+    page.locator("#loginPassword").fill(password)
+    page.locator("#loginSubmitButton").click()
+
+
+def set_display_name(page: Page, display_name: str):
+    page.wait_for_selector("#displayNameForm", timeout=5000)
+    page.locator("#displayNameInput").fill(display_name)
+    page.locator("#displayNameSubmitButton").click()
+    page.wait_for_selector("#navbar", timeout=5000)
+
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
 def authenticate():
@@ -22,42 +45,29 @@ def authenticate():
         page.goto(BASE_URL)
 
         try:
-            page.click("#loginGoToSignup")
-            expect(page.locator("#signupForm")).to_be_visible()
-            page.locator("#signupEmail").fill("test1@test.at")
-            page.locator("#signupPassword1").fill("12345678")
-            page.locator("#signupPassword2").fill("12345678")
-            page.locator("#signupSubmitButton").click()
-
-            page.wait_for_selector("#displayNameForm", timeout=5000)
-            page.locator("#displayNameInput").fill("test1")
-            page.locator("#displayNameSubmitButton").click()
-            
-            page.wait_for_selector("#navbar", timeout=5000)
+            signup(page, "test1@test.at", "12345678", "12345678")
+            set_display_name(page, "test1")
         except Exception as e:
             print(f"Signup failed probably because user already exists ;) : {e}")
             print("Trying login...")
-            page.goto(BASE_URL)
-            page.locator("#loginEmail").fill("test1@test.at")
-            page.locator("#loginPassword").fill("12345678")
-            page.locator("#loginSubmitButton").click()
             try:
+                login(page, "test1@test.at", "12345678")
                 page.wait_for_selector("#navbar", timeout=5000)
             except:
                 print(f"Error both signup and login failed to get auth cookies, your tests will fail haha: {e}")
-
-            # Save the authentication state
-            # page.locator("#displayNameForm").fill("test1")
-            # page.locator("#displayNameSubmitButton").click()
 
         finally:
             context.storage_state(path=AUTH_STATE_PATH)
             context.close()
             browser.close()
 
+@pytest.fixture(scope="function", params=["chromium", "firefox", "webkit"])
+def browser_type(request):
+    return request.param
+
 
 @pytest.fixture(scope="function")
-def context(authenticate):
+def context(browser_type, authenticate):
     """
     Sets up browser context to include auth cookies
     """
@@ -99,65 +109,3 @@ def login_page():
         browser.close()
 
 
-# @pytest.fixture(scope="function", autouse=True)
-# def goto(page: Page, request: SubRequest):
-#    """Fixture to navigate to the base URL based on the user.
-#
-#    If the 'storage_state' is set in 'browser_context_args', it navigates to the inventory page,
-#    otherwise, it navigates to the login page.
-#
-#    Args:
-#        page (Page): Playwright page object.
-#        request (SubRequest): Pytest request object to get the 'browser_context_args' fixture value.
-#            If 'browser_context_args' is set to a user parameter (e.g., 'standard_user'),
-#            the navigation is determined based on the user.
-#
-#    Example:
-#        @pytest.mark.parametrize('browser_context_args', ["standard_user"], indirect=True)
-#    """
-#    if request.getfixturevalue("browser_context_args").get("storage_state"):
-#        page.goto(f"{BASE_URL}")
-#    else:
-#        page.goto("/signup")
-#
-#
-# @pytest.fixture(scope="function")
-# def browser_context_args(
-#    browser_context_args: Dict, request: SubRequest
-# ):
-#    """This fixture allows setting browser context arguments for Playwright.
-#
-#    Args:
-#        browser_context_args (dict): Base browser context arguments.
-#        request (SubRequest): Pytest request object to get the 'browser_context_args' fixture value.
-#        base_url (str): The base URL for the application under test.
-#    Returns:
-#        dict: Updated browser context arguments.
-#    See Also:
-#        https://playwright.dev/python/docs/api/class-browser#browser-new-contex
-#
-#    Returns:
-#        dict: Updated browser context arguments.
-#    """
-#
-#    context_args = {
-#        **browser_context_args,
-#        "no_viewport": True,
-#        "user_agent": AUTOMATION_USER_AGENT,
-#        "ignore_https_errors": True,
-#    }
-#
-#    if hasattr(request, "param"):
-#        if request.param == "standard_user":
-#            pass
-#        context_args["storage_state"] = {
-#            "cookies": [
-#                {
-#                    "name": "session-username",
-#                    "value": request.param,
-#                    "url": "https://localhost:8000",
-#                }
-#            ]
-#        }
-#    return context_args
-#
