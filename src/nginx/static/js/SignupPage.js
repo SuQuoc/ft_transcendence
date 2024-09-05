@@ -9,6 +9,12 @@ export class SignupPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.shadowRoot.getElementById('signupForm').addEventListener('submit', this.signup.bind(this));
+		//this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validatePasswords.bind(this));
+		//this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validatePasswords.bind(this));
+		//this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateEmail.bind(this));
+		this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
 	}
 
 	getElementHTML() {
@@ -52,16 +58,75 @@ export class SignupPage extends ComponentBaseClass {
                         here!
                     </p>
                     <button type="submit" class="btn btn-secondary w-100" form="signupForm">Sign up</button>
+                    <div id="passwordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
+                    <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
+                    <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
                 </form>
             </div>
         `;
 		return template;
 	}
 
+	validatePasswords() {
+		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
+		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
+		const passwordWarning = this.shadowRoot.getElementById('passwordWarning');
+
+		if (password1 !== password2) {
+			passwordWarning.style.display = 'block';
+		} else {
+			passwordWarning.style.display = 'none';
+		}
+	}
+
+	validateEmail() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const emailWarning = this.shadowRoot.getElementById('emailWarning');
+		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+		if (!emailPattern.test(email)) {
+			emailWarning.style.display = 'block';
+		} else {
+			emailWarning.style.display = 'none';
+		}
+	}
+
+	validateForm() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
+		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
+		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const emailWarning = this.shadowRoot.getElementById('emailWarning');
+		const passwordWarning = this.shadowRoot.getElementById('passwordWarning');
+
+		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+		const passwordsMatch = password1 === password2;
+
+		if (emailValid && passwordsMatch) {
+			signupButton.disabled = false;
+			emailWarning.style.display = 'none';
+			passwordWarning.style.display = 'none';
+		} else {
+			signupButton.disabled = true;
+			if (!emailValid) {
+				emailWarning.style.display = 'block';
+			} else {
+				emailWarning.style.display = 'none';
+			}
+			if (!passwordsMatch) {
+				passwordWarning.style.display = 'block';
+			} else {
+				passwordWarning.style.display = 'none';
+			}
+		}
+	}
+
 	async signup(event) {
 		event.preventDefault();
 		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const signupError = this.shadowRoot.getElementById('signupError');
 		signupButton.disabled = true;
+		signupError.style.display = 'none';
 
 		const email = this.shadowRoot.getElementById('signupEmail').value;
 		const password = this.shadowRoot.getElementById('signupPassword1').value;
@@ -69,6 +134,12 @@ export class SignupPage extends ComponentBaseClass {
 
 		if (password !== password2) {
 			console.error('Passwords do not match');
+			signupButton.disabled = false;
+			return;
+		}
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			console.error('Invalid email address');
 			signupButton.disabled = false;
 			return;
 		}
@@ -91,6 +162,7 @@ export class SignupPage extends ComponentBaseClass {
 			app.router.go('/');
 		} catch (error) {
 			console.error('Error during signup:', error);
+			signupError.style.display = 'block';
 		} finally {
 			signupButton.disabled = false;
 		}
