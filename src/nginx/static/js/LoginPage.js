@@ -21,17 +21,15 @@ export class LoginPage extends ComponentBaseClass {
                 <form id="loginForm">
                     <h3 class="text-center text-white">Login</h3>
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="loginEmailHelp">
-                    <div class="form-text text-white-50 mb-3" id="loginEmailHelp">We'll never share your email with a third party.....</div>
+                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
-                    <input name="password" id="loginPassword" type="password" class="form-control mb-3">
+                    <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
+                    <span id="errorMessage" class="text-danger"></span>
                     <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white">Sign up</a> here!</p>
                     <button type="submit" class="btn btn-secondary w-100" form="loginForm" disabled>Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div id="loginError" class="alert alert-danger mt-3" style="display: none;">Couldn't login with provided data</div>
-                    <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
                 </form>
             </div>
         `;
@@ -40,14 +38,16 @@ export class LoginPage extends ComponentBaseClass {
 
 	validateEmail() {
 		const email = this.shadowRoot.getElementById('loginEmail').value;
-		const emailWarning = this.shadowRoot.getElementById('emailWarning');
+		const emailWarning = this.shadowRoot.getElementById('errorMessage');
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 		if (!emailPattern.test(email)) {
-			emailWarning.style.display = 'block';
+			emailWarning.textContent = 'Invalid email address';
+			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 			return false;
 		} else {
-			emailWarning.style.display = 'none';
+			emailWarning.textContent = '';
+			this.shadowRoot.getElementById('loginEmail').removeAttribute('aria-invalid');
 			return true;
 		}
 	}
@@ -70,21 +70,12 @@ export class LoginPage extends ComponentBaseClass {
 		event.preventDefault();
 		const loginButton = this.shadowRoot.querySelector('button[type="submit"]');
 		const loginSpinner = this.shadowRoot.getElementById('loginSpinner');
-		const loginError = this.shadowRoot.getElementById('loginError');
-		const emailWarning = this.shadowRoot.getElementById('emailWarning');
+		const loginError = this.shadowRoot.getElementById('errorMessage');
 		loginButton.style.display = 'none';
 		loginSpinner.style.display = 'inline-block';
-		loginError.style.display = 'none';
 
 		const username = this.shadowRoot.getElementById('loginEmail').value;
 		const password = this.shadowRoot.getElementById('loginPassword').value;
-
-		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
-			emailWarning.style.display = 'block';
-			loginButton.style.display = 'block';
-			loginSpinner.style.display = 'none';
-			return;
-		}
 
 		try {
 			const response = await fetch('/registration/login', {
@@ -105,7 +96,9 @@ export class LoginPage extends ComponentBaseClass {
 			app.router.go('/');
 		} catch (error) {
 			console.error('Error during login:', error);
-			loginError.style.display = 'block';
+			loginError.textContent = 'Could not log in';
+			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
+			this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
 			loginButton.style.display = 'block';
 		} finally {
 			loginSpinner.style.display = 'none';
