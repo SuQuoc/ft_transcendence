@@ -50,6 +50,18 @@ const getDisplayname = async () => {
 
 const Router = {
 	init: async () => {
+		// adding event listeners
+			// event handler for navigation links
+		document.querySelectorAll("a.nav-link").forEach(a => {
+			a.addEventListener("click", Router.handleNavLinks);
+		});
+			// event handler for url changes (back/forward)
+		window.addEventListener("popstate", Router.handlePopstate);
+
+
+		// !!! everything in this function below this line needs to stay at the bottom of the init function
+		// !!! if not, the event listeners might not be added
+
 		// check if the user is logged in
 		if (location.pathname !== "/login" && location.pathname !== "/signup") {
 			const tokenValid = await validateToken();
@@ -58,28 +70,10 @@ const Router = {
 				return;
 			}
 		}
-		
-		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ?!
-		// we need to get email as well
-
-		// event handler for navigation links
-		document.querySelectorAll("a.nav-link").forEach(a => {
-			a.addEventListener("click", (event) => {
-				event.preventDefault();
-				
-				const url = event.target.getAttribute("href");
-				Router.go(url);
-			});
-		});
-
-		// event handler for url changes (back/forward)
-		window.addEventListener("popstate", (event) => {
-			event.preventDefault();
-			Router.go(event.state.route, false);
-		});
+		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
+		// TODO: we need to get email and profile image as well
 		
 		// check initial URL
-		console.log("# router init: ", location.pathname);
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 
@@ -214,7 +208,6 @@ const Router = {
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 
-		console.log("#route: ", route, " | addToHistory: ", addToHistory);
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
@@ -244,6 +237,17 @@ const Router = {
 		}
 	},
 
+	handleNavLinks(event) {
+		event.preventDefault();
+				
+		const url = event.target.getAttribute("href");
+		Router.go(url);
+	},
+
+	handlePopstate(event) {
+		event.preventDefault();
+		Router.go(event.state.route, false);
+	},
 
 	// !!! when the socket closes normally, you also get sent to the home page
 	/** You get sent back to the home poge in case the Socket disconnects unexpectedly */
