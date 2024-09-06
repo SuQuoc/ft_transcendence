@@ -7,7 +7,7 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'password', 'enabled2fa', 'ft_userid']
+        fields = ['id', 'username', 'password', 'enabledtwofa', 'ft_userid']
         extra_kwargs = {
             'id': {'read_only': True},          # [aguilmea] read-only so it's not necessary for creation
             'password': {'write_only': True},   # [aguilmea] write-only so it's not returned in get requests
