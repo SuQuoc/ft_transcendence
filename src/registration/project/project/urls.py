@@ -15,23 +15,32 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import oauth2, basic
+from core_app.views import common, oauth2, basic
 from django.urls import re_path
 
 urlpatterns = [
+    # basic views
     re_path('signup', basic.signup),
-    re_path('delete_user', basic.delete_user),
     re_path('login', basic.login),
-    re_path('logout', basic.logout),
-    re_path('change_password', basic.change_password),
-    re_path('verify_token', basic.verify_token),
-    re_path('refresh_token', basic.refresh_token),
     re_path('forgot_password', basic.forgot_password),
     re_path('forgot_password_reset', basic.forgot_password_reset),
+
+    # common views
+    re_path('delete_user', common.delete_user),
+    re_path('logout', common.logout),
+    re_path('change_password', common.change_password),
+    re_path('verify_token', common.verify_token),
+    re_path('refresh_token', common.refresh_token),
     
-    re_path('send_oauth2_authorization_request', oauth2.send_oauth2_authorization_request),
-    re_path('exchange_code_against_access_token', oauth2.exchange_code_against_access_token),
-    re_path('unset_oauth2', oauth2.unset_oauth2),
-    re_path('login_oauth2', oauth2.login_oauth2),
-    # [aguilmea] I think i need to modify logout for oauth2 and not writte a own one
+    # oauth2 views
+    re_path('oauth2_callback', oauth2.callback),
+    re_path('oauth2_set', oauth2.set),
+    re_path('oauth2_unset', oauth2.unset),
+    re_path('oauth2_signup', oauth2.signup),
+    re_path('oauth2_login', oauth2.login),
+
+    # 2fa views
+    #re_path('2fa_enable', basic.enable_2fa),
+    #re_path('2fa_disable', basic.disable_2fa),
+    
 ]
