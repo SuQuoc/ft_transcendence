@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',  # [aguilmea] added manually
-    'rest_framework_simplejwt.token_blacklist',  # [aguilmea] added manually
     'corsheaders',  # [aguilmea] added manually
     'core_app',
 ]

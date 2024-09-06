@@ -7,6 +7,12 @@ from django.core.mail import send_mail
 
 import os
 
+def send_200_with_expired_cookies():
+    response = Response(status=status.HTTP_200_OK)
+    response.delete_cookie('access')
+    response.delete_cookie('refresh')
+    return response
+
 def generate_response_with_valid_JWT(status_code, token_s):
     response = Response(status=status_code)
     if not token_s.is_valid():

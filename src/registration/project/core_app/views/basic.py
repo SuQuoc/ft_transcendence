@@ -8,7 +8,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from ..authenticate import NoTokenAuthentication
 from ..models import CustomUser
 from ..serializers import UserSerializer
-from .utils_jwt import generate_response_with_valid_JWT, send_reset_email
+from .utils import generate_response_with_valid_JWT, send_reset_email
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -42,7 +42,6 @@ def login(request):
     
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 @api_view(['POST'])
