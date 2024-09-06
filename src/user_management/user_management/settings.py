@@ -169,6 +169,7 @@ REST_FRAMEWORK = {
     ],
 }
 
+# TODO !!! delete this line
 with open('/run/secrets/private_key.pem', 'r') as f:
     PRIVATE_KEY = f.read()
 
