@@ -165,8 +165,9 @@ cython_debug/
 **/migrations/
 *.pem
 
+tests/playwright_tests/auth_state.json
+
 *.png
 *.jpeg
 *.jpg
-
 !src/user_management/uploads/images/profile/default/*

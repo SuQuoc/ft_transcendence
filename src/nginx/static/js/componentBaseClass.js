@@ -1,5 +1,7 @@
 /**
- * Adds event listeners for links (a) within the shadow DOM that dispach a custom event that the router listens for.
+ * Adds event listeners for links (a tags) within the shadow DOM that dispach a custom event that the router listens for.
+ * You can pass a boolean to the constructor to determine if the component should add the URL to the history.
+ * The default is true.
  * 
  * Makes a shadow DOM and appends the content of the template from getElementHTML() to it.
  * 
@@ -8,12 +10,15 @@
  * If you want bootstrap and custom styles, you need to add the \<scripts-and-styles\> tag to the template.
  */
 export class ComponentBaseClass extends HTMLElement {
-	constructor() {
+	constructor(addToHistory = true) {
 		super(); // always call super() (it calls the constructor of the parent class)
 		
+		// adding addToHistory to the class
+		this.addToHistory = addToHistory;
+
 		// create a shadow DOM
 		this.root = this.attachShadow({mode: "open"}); // open mode allows us to access the shadow DOM from outside
-		this.handleLinkClick = this.handleLinkClick.bind(this); // bind the event handler to this instance of the class
+		this.handleLinkClick_var = this.handleLinkClick.bind(this); // bind the event handler to this instance of the class
 	};
 
 	// get's called when the component is attached to the DOM
@@ -27,7 +32,7 @@ export class ComponentBaseClass extends HTMLElement {
 		if (links.length === 0)
 			return;
 		links.forEach(a => {
-			a.addEventListener("click", this.handleLinkClick);
+			a.addEventListener("click", this.handleLinkClick_var);
 			console.log("added event listener ComponentBaseClass");
 		});
 	};
@@ -39,7 +44,7 @@ export class ComponentBaseClass extends HTMLElement {
 		if (links.length === 0)
 			return;
 		links.forEach(a => {
-			a.removeEventListener("click", this.handleLinkClick);
+			a.removeEventListener("click", this.handleLinkClick_var);
 			console.log("removed event listener ComponentBaseClass");
 		});
 	};
@@ -54,7 +59,7 @@ export class ComponentBaseClass extends HTMLElement {
 		console.log("link clicked in shadow DOM");
 
 		const url = event.target.getAttribute("href");
-		window.app.router.go(url);
+		window.app.router.go(url, this.addToHistory);
 	};
 
 

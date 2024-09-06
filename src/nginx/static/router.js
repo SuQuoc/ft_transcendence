@@ -19,6 +19,35 @@ const validateToken = async () => {
 	}
 }
 
+/** Checks if the displayname is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
+const getDisplayname = async () => {
+	if (window.app.userData.username) // if the displayname is already set we don't need to fetch it
+		return;
+
+	try {
+		// Check if the user already has a displayname
+		const response = await fetch ('/um/profile/', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		
+		// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
+		if (!response.ok) {
+			window.app.router.go('/displayname', false);
+			console.log('displayname not ok:', response);
+		} else {
+			const responseData = await response.json();
+			window.app.userData.username = responseData.displayname;
+			//window.app.userData.<image?> = responseData.image;
+			app.router.go('/', false); // maybe this should be set to false?
+		}
+	} catch (error) {
+		console.error('Error getting displayname (router):', error);
+	}
+}
+
 const Router = {
 	init: async () => {
 		// check if the user is logged in
@@ -29,7 +58,12 @@ const Router = {
 				return;
 			}
 		}
-		document.querySelectorAll("a").forEach(a => { // maybe we should select a.nav-links instead, but it should work this way as well
+		
+		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ?!
+		// we need to get email as well
+
+		// event handler for navigation links
+		document.querySelectorAll("a.nav-link").forEach(a => {
 			a.addEventListener("click", (event) => {
 				event.preventDefault();
 				
@@ -40,12 +74,9 @@ const Router = {
 
 		// event handler for url changes (back/forward)
 		window.addEventListener("popstate", (event) => {
-			event.preventDefault(); // not sure if needed
+			event.preventDefault();
 			Router.go(event.state.route, false);
 		});
-
-		// somewhere here we should check if the user is logged in and redirect to the login page if not
-		// load event can be used to listen for initial page load. Don't know if it has the right timing here though
 		
 		// check initial URL
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
@@ -85,7 +116,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup") {
+		if (route === "/login" || route === "/signup" || route === "/displayname") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
@@ -146,6 +177,9 @@ const Router = {
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
+				break;
+			case "/displayname":
+				pageElement = document.createElement("select-displayname-page");
 				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();

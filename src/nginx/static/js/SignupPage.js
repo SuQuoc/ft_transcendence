@@ -3,7 +3,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class SignupPage extends ComponentBaseClass {
 	constructor() {
-		super();
+		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
 	}
 
 	connectedCallback() {
@@ -85,10 +85,9 @@ export class SignupPage extends ComponentBaseClass {
 			if (!response.ok) {
 				throw new Error('Signup failed');
 			}
-			window.app.userData.username = email;
 			window.app.userData.email = email;
 
-			app.router.go('/');
+			app.router.go('/displayname', false);
 		} catch (error) {
 			console.error('Error during signup:', error);
 		} finally {
