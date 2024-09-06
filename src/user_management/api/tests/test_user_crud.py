@@ -158,8 +158,8 @@ class TestCrud(MyTestSetUp):
             response_json = response.json()
             default_image_path = CustomUser.objects.get().image.path
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_json, {'image': ['Max file size is 1MB']})
+        self.assertEqual(response.status_code, status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+        self.assertEqual(response_json, {'detail': 'Max file size is 1MB'})
         self.assertTrue(os.path.exists(default_image_path))
 
     def test_editing_profile_img_and_data(self):

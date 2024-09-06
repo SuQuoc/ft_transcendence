@@ -16,10 +16,13 @@ from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
+from .serializers import ImageTooLargeError
 
 
 def profile(request):
     return HttpResponse("This is the profile page")
+
+
 
 
 class CustomUserCreate(generics.CreateAPIView):
@@ -46,7 +49,11 @@ class CustomUserProfile(generics.GenericAPIView):
     def patch(self, request):
         user = get_user_from_jwt(request)
         serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ImageTooLargeError as e:
+            return Response({'detail': str(e)}, status=e.status_code)
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -103,7 +110,6 @@ def get_pending_friend_request(*, me: CustomUser, other: CustomUser) -> tuple[st
         return "received", fr_received.id
     else:
         return "", None
-
 
 
 # OLD BACKUP
