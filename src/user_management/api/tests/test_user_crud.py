@@ -20,6 +20,7 @@ NEW_NAME = "NewName"
 class TestCrud(MyTestSetUp):
     def setUp(self):
         self.user_id = str(uuid.uuid4())
+        self.fake_user_id = str(uuid.uuid4())
         self.displayname = "Test API"
         self.data = {
             "displayname": self.displayname,
@@ -48,9 +49,9 @@ class TestCrud(MyTestSetUp):
     def patch(self, request, displayname):
         return self.client.patch(self.url_profile, format="json", secure=True, **self.headers)
 
-    # TEST Profile creation
+    ### TEST Profile creation ###
     def test_no_displayname(self):
-        del self.data["displayname"]  #
+        del self.data["displayname"]
         response = self.post()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # print(response.data)
@@ -89,13 +90,31 @@ class TestCrud(MyTestSetUp):
         self.data["iser_id"] = "unrequired_data"
         response = self.post()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
 
-    # Test Editing Profile
+    ### Test Profile get - /profile GET ###
+    def test_successful_get(self):
+        self.test_success()
+        response = self.client.get(self.url_profile, format="json", secure=True, **self.headers)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {"displayname": self.displayname, "image": '/um/media/images/profile/default/default_avatar.png'})
+
+    def test_invalid_jwt_get(self):
+        self.test_success()
+        self.setup_jwt_with_cookie(self.fake_user_id)
+        response = self.client.get(self.url_profile, format="json", secure=True, **self.headers)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.setup_jwt_with_cookie(self.user_id) # set jwt back to the correct user
+
+
+    ### Test Editing Profile ###
     def test_editing_profile_name(self):
         self.test_success()
         self.data['displayname'] = NEW_NAME
         response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
@@ -156,7 +175,7 @@ class TestCrud(MyTestSetUp):
         # image_path = user.image.path
         # print(image_path)
         # response_json = response.json()
-        # print(response_json)
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.data['displayname']).count(), 1)
@@ -164,7 +183,7 @@ class TestCrud(MyTestSetUp):
         # delete the image after the test
         self.delete()
 
-    # Test profile deletion
+    ### Test profile deletion ###
     def test_user_deletion_with_default_image(self):
         self.test_success()
 

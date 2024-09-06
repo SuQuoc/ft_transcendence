@@ -36,14 +36,10 @@ class CustomUserCreate(generics.CreateAPIView):
 class CustomUserProfile(generics.GenericAPIView):
     parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserProfileSerializer
 
     def get(self, request):
-        try:
-            user = CustomUser.objects.get(user_id=request.user.user_id)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "No profile found."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.serializer_class(user)
+        user = get_user_from_jwt(request)
+        serializer = CustomUserProfileSerializer(user)
         return Response(serializer.data)
 
     # @parser_classes([MultiPartParser, FormParser])
