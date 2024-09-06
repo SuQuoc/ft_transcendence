@@ -180,7 +180,7 @@ with open('/run/secrets/public_key.pem', 'r') as f:
 SIMPLE_JWT = {
     'ALGORITHM': 'RS256', # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
     'VERIFYING_KEY': PUBLIC_KEY, # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
-    'SIGNING_KEY': PRIVATE_KEY, # TODO !!! delete this line
+    'SIGNING_KEY': PRIVATE_KEY, # todo !!! delete this line
     
     # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
