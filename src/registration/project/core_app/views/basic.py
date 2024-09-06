@@ -47,7 +47,7 @@ def login(request):
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
 @permission_classes([AllowAny])
-def forgot_password(request):
+def forgot_password_send_email(request):
     try:
         username = request.data.get('username')
         if not username:

@@ -42,7 +42,7 @@ def generate_response_with_valid_JWT(status_code, token_s):
 
 def send_reset_email(recipient, token):
     try:
-        link = os.environ.get('SERVER_URL') + '/reset-password?token=' + token
+        link = os.environ.get('SERVER_URL') + '/registration/forgot_password_reset?token=' + token
         message = f"""
         Hello,
 
