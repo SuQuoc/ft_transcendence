@@ -79,6 +79,7 @@ const Router = {
 		});
 		
 		// check initial URL
+		console.log("# router init: ", location.pathname);
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 
@@ -158,7 +159,7 @@ const Router = {
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-lobby-page");
 				break;
-			case "/tournament-waiting-room": // TODO: shouldn't log to history!!!!!
+			case "/tournament-waiting-room":
 				//protection (what if the socket is not open??!!!!)
 				pageElement = document.createElement("tournament-waiting-room-page");
 				break;
@@ -213,6 +214,7 @@ const Router = {
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 
+		console.log("#route: ", route, " | addToHistory: ", addToHistory);
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
@@ -234,7 +236,7 @@ const Router = {
 				if (data.joined === "true")
 					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 				else
-					Router.go("/tournament");
+					Router.go("/tournament", false); // should probably be false ??
 				break;
 			default:
 				console.log("unknown message type: ", data.type);

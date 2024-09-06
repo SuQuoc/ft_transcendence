@@ -24,6 +24,9 @@ export class JoinTournamentElement extends HTMLElement {
 
 	/// ----- Event Handlers ----- ///
 
+	// makes an event listener that listens for a message from the server to change the route (wether or not the client can join the tournament)
+	// then it sends a message to the server that the client wants to join the tournament
+	// and changes the route to the tournament waiting room where the client waits for the message from the server
 	handleJoinTournament(event) {
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		

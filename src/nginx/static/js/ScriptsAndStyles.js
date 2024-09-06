@@ -6,7 +6,7 @@ export class ScriptsAndStyles extends HTMLElement {
 		this.appendChild(content);
 	}
 
-	// do we need all the js in the shadow doms?????!!!!
+
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
