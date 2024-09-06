@@ -59,3 +59,4 @@ services:
       - network_user_management
     secrets:
       - public_key.pem
+      - private_key.pem # TODO !!! delete this line
