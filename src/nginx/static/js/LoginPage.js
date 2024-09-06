@@ -74,23 +74,23 @@ export class LoginPage extends ComponentBaseClass {
 		loginButton.style.display = 'none';
 		loginSpinner.style.display = 'inline-block';
 
-		const username = this.shadowRoot.getElementById('loginEmail').value; // why is it called username and not email?
+		const email = this.shadowRoot.getElementById('loginEmail').value;
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 
 		try {
-			const outhResponse = await fetch('/registration/login', {
+			const loginResponse = await fetch('/registration/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ username, password })
+				body: JSON.stringify({ "username": email, password })
 			});
 
-			if (!outhResponse.ok) {
+			if (!loginResponse.ok) {
 				throw new Error('Login failed');
 			}
             window.app.userData = window.app.userData || {};
-			window.app.userData.email = username; // and why is the email set to the username?
+			window.app.userData.email = email;
 
 			// Check if the user already has a displayname
 			const displaynameResponse = await fetch ('/um/profile/', {

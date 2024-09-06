@@ -89,7 +89,7 @@ export class ComponentBaseClass extends HTMLElement {
 
 			try {
 				const refreshResponse = await fetch("/registration/refresh_token", {
-					method: "POST",
+					method: "GET",
 					headers: {
 						"Content-Type": "application/json"
 					},
@@ -110,7 +110,7 @@ export class ComponentBaseClass extends HTMLElement {
 	// boilerplate for making API calls, only requires the URL and request options
 	// example: method: 'POST', body
 	// important: only for API calls that require a valid token (so not for login/signup)
-	async apiFetch(url, options = {}) {
+	async apiFetch(url, options = {}, type = "application/json") {
 		// Validate the token before making the API call
 		const tokenValid = await this.validateToken();
 		if (!tokenValid) {
@@ -123,7 +123,7 @@ export class ComponentBaseClass extends HTMLElement {
 			credentials: "include", // Ensure cookies are sent with the request
 			headers: {
 				...options.headers,
-				"Content-Type": "application/json"
+				"Content-Type": type
 			}
 		});
 
