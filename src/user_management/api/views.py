@@ -37,46 +37,26 @@ class CustomUserProfile(generics.GenericAPIView):
     parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserProfileSerializer
- 
-    def get(self, request, user_id):
-        stalked_user = get_object_or_404(CustomUser, user_id=user_id)
 
-        # print(f"TOKEN STUFF {token_user.user_id}")
-        user = get_user_from_jwt(request)
-        context = {}
-        if user == stalked_user:
-            context["relationship"] = "self"
-            context["self"] = True
-        elif stalked_user in user.friend_list.friends.all():
-            context["relationship"] = "friend"
-            context["friend"] = True
-        else:
-            context["relationship"] = "stranger"
-            context["stranger"] = True
-
-        serializer = self.serializer_class(stalked_user, context=context)
+    def get(self, request):
+        try:
+            user = CustomUser.objects.get(user_id=request.user.user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "No profile found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(user)
         return Response(serializer.data)
 
     # @parser_classes([MultiPartParser, FormParser])
-    def patch(self, request, user_id):
-        user_to_update = get_object_or_404(CustomUser, user_id=user_id)
-
+    def patch(self, request):
         user = get_user_from_jwt(request)
-        if user != user_to_update:
-            raise PermissionDenied("You do not have permission to edit this user's profile. U sus")
-
-        serializer = CustomUserEditSerializer(user_to_update, data=request.data, partial=True)
+        serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, request, user_id):
-        user_to_delete = get_object_or_404(CustomUser, user_id=user_id)
-
+    def delete(self, request):
         user = get_user_from_jwt(request)
-        if user != user_to_delete:
-            raise PermissionDenied("You do not have permission to delete this user's profile. U sus")
-        user_to_delete.delete()
+        user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -127,3 +107,52 @@ def get_pending_friend_request(*, me: CustomUser, other: CustomUser) -> tuple[st
         return "received", fr_received.id
     else:
         return "", None
+
+
+
+# OLD BACKUP
+""" class CustomUserProfile(generics.GenericAPIView):
+    parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserProfileSerializer
+
+    def get(self, request, user_id):
+        stalked_user = get_object_or_404(CustomUser, user_id=user_id)
+
+        # print(f"TOKEN STUFF {token_user.user_id}")
+        user = get_user_from_jwt(request)
+        context = {}
+        if user == stalked_user:
+            context["relationship"] = "self"
+            context["self"] = True
+        elif stalked_user in user.friend_list.friends.all():
+            context["relationship"] = "friend"
+            context["friend"] = True
+        else:
+            context["relationship"] = "stranger"
+            context["stranger"] = True
+
+        serializer = self.serializer_class(stalked_user, context=context)
+        return Response(serializer.data)
+
+    # @parser_classes([MultiPartParser, FormParser])
+    def patch(self, request, user_id):
+        user_to_update = get_object_or_404(CustomUser, user_id=user_id)
+
+        user = get_user_from_jwt(request)
+        if user != user_to_update:
+            raise PermissionDenied("You do not have permission to edit this user's profile. U sus")
+
+        serializer = CustomUserEditSerializer(user_to_update, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, user_id):
+        user_to_delete = get_object_or_404(CustomUser, user_id=user_id)
+
+        user = get_user_from_jwt(request)
+        if user != user_to_delete:
+            raise PermissionDenied("You do not have permission to delete this user's profile. U sus")
+        user_to_delete.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT) """
