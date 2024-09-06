@@ -17,16 +17,15 @@ Content-Type: application/json
 ###
 
 @SET_COOKIE = {{post_login.response.headers.Set-Cookie}}
-@ACCESS_COOKIE = {{SET_COOKIE.split(";")[0].split(",")[0].split("=")[1]}}
-@REFRESH_COOKIE = @ACCESS_COOKIE = {{SET_COOKIE.split(";")[0].split(",")[1].split("=")[1]}}
 
+@ACCESS_COOKIE = {{SET_COOKIE}}.split(';')[0]
 
 ###
 
 # @name get_oauth2_authorization_request
 GET {{base_url}}/registration/send_oauth2_authorization_request
 Content-Type: application/json
-Cookie: {{{{ACCESS_COOKIE}}}}
+Cookie: {{ACCESS_COOKIE}}
 
 {}
 

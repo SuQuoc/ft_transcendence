@@ -1,5 +1,8 @@
 @base_url = https://localhost:8000
 @username = user@domain.at
+@current_password = Pass1234!
+@new_password = Yo?4567
+
 
 # @name post_signup
 POST {{base_url}}/registration/signup/
@@ -7,7 +10,7 @@ Content-Type: application/json
 
 {
     "username": "{{username}}",
-    "password": "Pass1234!"
+    "password": "{{current_password}}"
 }
 
 ###
@@ -18,23 +21,21 @@ Content-Type: application/json
 
 {
     "username": "{{username}}",
-    "password": "Pass1234!"
+    "password": "{{current_password}}"
 }
 
 ###
 
-@SET_COOKIE = {{post_login.response.headers.Set-Cookie}}
+@ACCESS_COOKIE = {{post_login.response.headers.Set-Cookie}};
 
 ###
-
-@ACCESS_COOKIE = {{SET_COOKIE}}
 
 
 POST {{base_url}}/registration/delete_user/
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+Cookie: {{ACCESS_COOKIE}} 
 
-{"current_password": "Pass1234!"}
+{"password": "{{current_password}}"}
 
 ###
 
@@ -50,13 +51,13 @@ POST {{base_url}}/registration/change_password/
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
-{"current_password": "Pass1234!", "new_password": "Pass5678!"}
+{"current_password": "{{current_password}}", "new_password": "{{new_password}}"}
 
 ###
 
 GET {{base_url}}/registration/verify_token/
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+Cookie: {{ACCESS_COOKIE}} 
 
 {}
 
@@ -77,13 +78,13 @@ Content-Type: application/json
 {
     "username": "{{username}}",
     "token": "xxxxxxxxxxxxxxxxxx",
-    "new_password": "New1234!"
+    "new_password": "New#789!"
 }
 
 ###
 
 GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
-Cookie: refresh=x.x.x;y;z
+Cookie: {{REFRESH_COOKIE}}
 
 {}
