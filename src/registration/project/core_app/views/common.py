@@ -55,7 +55,7 @@ def change_password(request):
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def verify_token():
+def verify_token(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
