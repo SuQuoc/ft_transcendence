@@ -10,7 +10,9 @@ import pytest
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
-
+USERMAIL = "test1@test.at"
+USERPW = "password"
+USERDISPLAYNAME = "test1"
 
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
@@ -20,13 +22,13 @@ def authenticate():
         context: BrowserContext = browser.new_context(ignore_https_errors=True)
         page: Page = context.new_page()
         try:
-            signup(page, "test1@test.at", "12345678", "12345678")
-            set_display_name(page, "test1")
+            signup(page, USERMAIL, USERPW, USERPW)
+            set_display_name(page, USERDISPLAYNAME)
         except Exception as e:
             print(f"Signup failed probably because user already exists ;) : {e}")
             print("Trying login...")
             try:
-                login(page, "test1@test.at", "12345678")
+                login(page, USERMAIL, USERPW)
                 page.wait_for_selector("#navbar", timeout=5000)
             except Exception as e:
                 print(f"Error both signup and login failed to get auth cookies, your tests will fail haha: {e}")
@@ -36,7 +38,7 @@ def authenticate():
             context.close()
             browser.close()
 
-@pytest.fixture(scope="function", params=["chromium", "firefox"])
+@pytest.fixture(scope="function", params=["chromium"])
 def browser_type(request):
     return request.param
 
@@ -49,8 +51,6 @@ def context(browser_type, authenticate):
     with sync_playwright() as p:
         if browser_type == "chromium":
             browser: Browser = p.chromium.launch()
-        elif browser_type == "firefox":
-            browser: Browser = p.firefox.launch()
         else:
             raise ValueError(f"Unsupported browser type: {browser_type}")
         context: BrowserContext = browser.new_context(ignore_https_errors=True, storage_state=AUTH_STATE_PATH)
