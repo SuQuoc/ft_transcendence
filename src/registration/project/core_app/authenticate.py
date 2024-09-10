@@ -1,9 +1,3 @@
-from django.conf import settings
-from django.contrib.auth import get_user_model
-import jwt
-from jwt.exceptions import InvalidTokenError
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AccessTokenAuthentication(JWTAuthentication):
@@ -25,7 +19,7 @@ class RefreshTokenAuthentication(JWTAuthentication):
         validated_token = self.get_validated_token(raw_token)
         return self.get_user(validated_token), validated_token
         
-class NoTokenAuthentication(BaseAuthentication):
+class NoTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):    
         return (None, None)
 

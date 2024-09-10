@@ -15,10 +15,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		// getting elements
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
-		this.displayname_taken_warning = this.shadowRoot.getElementById("displayNameTaken");
-		this.displayname_enter_warning = this.shadowRoot.getElementById("displayNameEnter");
-		this.displayname_whitespaces_warning = this.shadowRoot.getElementById("displayNameWhitespaces");
-		
+		this.displayname_warning = this.shadowRoot.getElementById("displayNameWarning");
+
 		// adding event listeners
 		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
 		this.input_field.addEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
@@ -40,11 +38,15 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 	isDisplaynameValid(displayname) {
 		if (displayname === "") {
-			this.displayname_enter_warning.style.display = "";
+			this.displayname_warning.innerHTML = "Please enter a displayname";
+			this.displayname_warning.setAttribute("aria-invalid", "true");
+			this.displayname_warning.style.display = "";
 			return false;
 		}
 		if (/\s/.test(displayname)) { // checks if the displayname has any whitespaces
-			this.displayname_whitespaces_warning.style.display = "";
+			this.displayname_warning.innerHTML = "Whitespaces are not allowed";
+			this.displayname_warning.setAttribute("aria-invalid", "true");
+			this.displayname_warning.style.display = "";
 			return false;
 		}
 		return true;
@@ -78,7 +80,9 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				window.app.router.go("/", false);
 			} else {
 				// if displayname is already taken
-				this.displayname_taken_warning.style.display = "";
+				this.displayname_warning.innerHTML = "This displayname is already taken";
+				this.displayname_warning.setAttribute("aria-invalid", "true");
+				this.displayname_warning.style.display = "";
 				console.log("displayname already taken");
 			}
 		} catch (error) {
@@ -87,9 +91,9 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	}
 
 	handleHidingDisplaynameTakenWarning() {
-		this.displayname_taken_warning.style.display = "none";
-		this.displayname_enter_warning.style.display = "none";
-		this.displayname_whitespaces_warning.style.display = "none";
+		this.displayname_warning.style.display = "none";
+		this.displayname_warning.innerHTML = "";
+		this.displayname_warning.setAttribute("aria-invalid", "false");
 	}
 	
 
@@ -101,19 +105,22 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				<form id="displayNameForm">
 					<h3 class="text-center text-white mb-3">Enter a unique Displayname</h3>
 
-					<label for="displayNameInput" id="displayNameTaken" class="form-label text-danger" style="display: none;">This displayname is already taken</label>
-					<label for="displayNameInput" id="displayNameEnter" class="form-label text-danger" style="display: none;">Please enter a displayname</label>
-					<label for="displayNameInput" id="displayNameWhitespaces" class="form-label text-danger" style="display: none;">Whitespaces are not allowed</label>
-
+					<label for="displayNameInput"
+							id="displayNameWarning"
+							class="form-label text-danger"
+							aria-invalid="false"
+							style="display: none;">
+					</label>
 					<input name="displayname"
 							id="displayNameInput"
 							type="text"
 							class="form-control"
 							maxlength="20"
+							required
 							placeholder="displayname"
-							aria-describedby="displayNameHelp"
+							aria-describedby="displayNameWarning"
 					>
-					<div class="form-text text-white-50 mb-3" id="displayNameHelp">Other users can see this name</div>
+					<div class="form-text text-white-50 mb-3">Other users can see this name</div>
 					
 					<button type="submit" class="btn btn-custom w-100" id="displayNameSubmitButton" form="displayNameForm">submit</button>
 

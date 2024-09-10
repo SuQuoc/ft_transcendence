@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',  # [aguilmea] added manually
-    'rest_framework_simplejwt.token_blacklist',  # [aguilmea] added manually
     'corsheaders',  # [aguilmea] added manually
     'core_app',
 ]
@@ -108,6 +107,12 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

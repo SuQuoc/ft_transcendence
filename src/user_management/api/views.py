@@ -16,10 +16,13 @@ from .serializers import CustomUserCreateSerializer
 from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
+from .serializers import ImageTooLargeError
 
 
 def profile(request):
     return HttpResponse("This is the profile page")
+
+
 
 
 class CustomUserCreate(generics.CreateAPIView):
@@ -36,21 +39,21 @@ class CustomUserCreate(generics.CreateAPIView):
 class CustomUserProfile(generics.GenericAPIView):
     parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserProfileSerializer
 
     def get(self, request):
-        try:
-            user = CustomUser.objects.get(user_id=request.user.user_id)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "No profile found."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.serializer_class(user)
+        user = get_user_from_jwt(request)
+        serializer = CustomUserProfileSerializer(user)
         return Response(serializer.data)
 
     # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request):
         user = get_user_from_jwt(request)
         serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ImageTooLargeError as e:
+            return Response({'detail': str(e)}, status=e.status_code)
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -107,7 +110,6 @@ def get_pending_friend_request(*, me: CustomUser, other: CustomUser) -> tuple[st
         return "received", fr_received.id
     else:
         return "", None
-
 
 
 # OLD BACKUP
