@@ -25,7 +25,7 @@ class TestInputtingDisplayName:
                 set_display_name(page, "displayname")
                 expect(page.locator("#navbar")).to_be_visible()
             except:
-                print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later by fiona") # todo !!!
+                print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
                 expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
             
             finally:
@@ -35,38 +35,41 @@ class TestInputtingDisplayName:
 
     # taking the same displayname as the test above to test if i can take it as well (i shouldn't be able to)
     def test_displayname_warnings(self, login_page: Page):
-        signup(login_page, "displayname2@test.at", "password", "password")
-        expect(login_page.locator("#displayNameForm")).to_be_visible()
+        try:
+            signup(login_page, "displayname2@test.at", "password", "password")
+            expect(login_page.locator("#displayNameForm")).to_be_visible()
 
-        # checking the empty displayname warning (not really a warning, but the form shouldn't be submittable) (the warning is from html(?))
-        login_page.locator("#displayNameInput").fill("") # empty displayname
-        login_page.locator("#displayNameSubmitButton").click()
-        expect(login_page.locator("#displayNameForm")).to_be_visible()
+            # checking the empty displayname warning (not really a warning, but the form shouldn't be submittable) (the warning is from html(?))
+            login_page.locator("#displayNameInput").fill("") # empty displayname
+            login_page.locator("#displayNameSubmitButton").click()
+            expect(login_page.locator("#displayNameForm")).to_be_visible()
 
-        # maybe add a warning for this case later(?)(maybe)(not important)
-        
-        # checking that you can enter 20 characters max
-        login_page.locator("#displayNameInput").fill("abcdefghijklmnopqrstuvwxyz") # displayname with too many characters
-        expect(login_page.locator("#displayNameInput")).to_have_value("abcdefghijklmnopqrst")
+            # maybe add a warning for this case later(?)(maybe)(not important)
 
-        # checking the whitespace warning
-        login_page.locator("#displayNameInput").fill("ee ee") # displayname with spaces
-        login_page.locator("#displayNameSubmitButton").click()
-        expect(login_page.locator("#displayNameWarning")).to_be_visible()
-        expect(login_page.locator("#displayNameWarning")).to_have_text("Whitespaces are not allowed")
+            # checking that you can enter 20 characters max
+            login_page.locator("#displayNameInput").fill("abcdefghijklmnopqrstuvwxyz") # displayname with too many characters
+            expect(login_page.locator("#displayNameInput")).to_have_value("abcdefghijklmnopqrst")
 
-        # checking the taken displayname warning
-        login_page.locator("#displayNameInput").fill("displayname") # same displayname as function above
-        login_page.locator("#displayNameSubmitButton").click()
-        expect(login_page.locator("#displayNameWarning")).to_be_visible()
-        expect(login_page.locator("#displayNameWarning")).to_have_text("This displayname is already taken")
+            # checking the whitespace warning
+            login_page.locator("#displayNameInput").fill("ee ee") # displayname with spaces
+            login_page.locator("#displayNameSubmitButton").click()
+            expect(login_page.locator("#displayNameWarning")).to_be_visible()
+            expect(login_page.locator("#displayNameWarning")).to_have_text("Whitespaces are not allowed")
 
-        # checking if the warning is gone after changing the displayname
-        login_page.locator("#displayNameInput").fill("displayname2")
-        expect(login_page.locator("#displayNameWarning")).to_be_hidden()
-        login_page.locator("#displayNameSubmitButton").click()
-        expect(login_page.locator("#navbar")).to_be_visible()
+            # checking the taken displayname warning
+            login_page.locator("#displayNameInput").fill("displayname") # same displayname as function above
+            login_page.locator("#displayNameSubmitButton").click()
+            expect(login_page.locator("#displayNameWarning")).to_be_visible()
+            expect(login_page.locator("#displayNameWarning")).to_have_text("This displayname is already taken")
 
+            # checking if the warning is gone after changing the displayname
+            login_page.locator("#displayNameInput").fill("displayname2")
+            expect(login_page.locator("#displayNameWarning")).to_be_hidden()
+            login_page.locator("#displayNameSubmitButton").click()
+            expect(login_page.locator("#navbar")).to_be_visible()
+        except:
+            print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
+            expect(login_page.locator("#FAIL")).to_be_visible() # causing an intended failure
 
 
     
