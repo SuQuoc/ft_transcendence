@@ -12,29 +12,6 @@ BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 
 
-
-def signup(page: Page, email: str, password1: str, password2: str):
-    page.click("#loginGoToSignup")
-    expect(page.locator("#signupForm")).to_be_visible()
-    page.locator("#signupEmail").fill(email)
-    page.locator("#signupPassword1").fill(password1)
-    page.locator("#signupPassword2").fill(password2)
-    page.locator("#signupSubmitButton").click()
-
-
-def login(page: Page, email: str, password: str):
-    page.goto(BASE_URL)
-    page.locator("#loginEmail").fill(email)
-    page.locator("#loginPassword").fill(password)
-    page.locator("#loginSubmitButton").click()
-
-
-def set_display_name(page: Page, display_name: str):
-    page.wait_for_selector("#displayNameForm", timeout=5000)
-    page.locator("#displayNameInput").fill(display_name)
-    page.locator("#displayNameSubmitButton").click()
-    page.wait_for_selector("#navbar", timeout=5000)
-
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
 def authenticate():
@@ -42,8 +19,6 @@ def authenticate():
         browser: Browser = p.chromium.launch()
         context: BrowserContext = browser.new_context(ignore_https_errors=True)
         page: Page = context.new_page()
-        page.goto(BASE_URL)
-
         try:
             signup(page, "test1@test.at", "12345678", "12345678")
             set_display_name(page, "test1")
@@ -53,7 +28,7 @@ def authenticate():
             try:
                 login(page, "test1@test.at", "12345678")
                 page.wait_for_selector("#navbar", timeout=5000)
-            except:
+            except Exception as e:
                 print(f"Error both signup and login failed to get auth cookies, your tests will fail haha: {e}")
 
         finally:
@@ -61,7 +36,7 @@ def authenticate():
             context.close()
             browser.close()
 
-@pytest.fixture(scope="function", params=["chromium", "firefox", "webkit"])
+@pytest.fixture(scope="function", params=["chromium", "firefox"])
 def browser_type(request):
     return request.param
 
@@ -72,7 +47,12 @@ def context(browser_type, authenticate):
     Sets up browser context to include auth cookies
     """
     with sync_playwright() as p:
-        browser: Browser = p.chromium.launch()
+        if browser_type == "chromium":
+            browser: Browser = p.chromium.launch()
+        elif browser_type == "firefox":
+            browser: Browser = p.firefox.launch()
+        else:
+            raise ValueError(f"Unsupported browser type: {browser_type}")
         context: BrowserContext = browser.new_context(ignore_https_errors=True, storage_state=AUTH_STATE_PATH)
         yield context
         context.close()
@@ -98,14 +78,38 @@ def login_page():
     returns a page without auth cookies to test signup and login
     """
     with sync_playwright() as p:
-        browser: Browser = p.chromium.launch()
-        context: BrowserContext = browser.new_context(
-            ignore_https_errors=True,
-        )
-        login_page: Page = context.new_page
+        browser: Browser = p.chromium.launch() # only testing with one browser because we cant do signup with same user twice
+        context: BrowserContext = browser.new_context(ignore_https_errors=True)
+        login_page: Page = context.new_page()
         yield login_page
         login_page.close()
         context.close()
         browser.close()
+
+
+### utils ##############################
+def signup(page: Page, email: str, password1: str, password2: str):
+    page.goto(BASE_URL)
+    page.click("#loginGoToSignup")
+    expect(page.locator("#signupForm")).to_be_visible()
+    page.locator("#signupEmail").fill(email)
+    page.locator("#signupPassword1").fill(password1)
+    page.locator("#signupPassword2").fill(password2)
+    page.locator("#signupSubmitButton").click()
+
+
+def login(page: Page, email: str, password: str):
+    page.goto(BASE_URL)
+    page.locator("#loginEmail").fill(email)
+    page.locator("#loginPassword").fill(password)
+    page.locator("#loginSubmitButton").click()
+
+
+def set_display_name(page: Page, display_name: str):
+    page.wait_for_selector("#displayNameForm", timeout=5000)
+    page.locator("#displayNameInput").fill(display_name)
+    page.locator("#displayNameSubmitButton").click()
+    page.wait_for_selector("#navbar", timeout=5000)
+############################################
 
 
