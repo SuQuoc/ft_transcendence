@@ -39,10 +39,9 @@ urlpatterns = [
     re_path('oauth2_signup', oauth2.signup),
     re_path('oauth2_login', oauth2.login),
 
-    # 2fa views
-    re_path('twofa_enable_send_email', twofa.enable_send_email),
-    re_path('twofa_enable_confirm', twofa.enable_confirm),
-    re_path('twofa_disable_send_email', twofa.disable_send_email),
-    re_path('twofa_disable_confirm', twofa.disable_confirm),
-    
+    # twofa views
+    re_path('twofa_send_email', twofa.send_email),
+    re_path('twofa_confirm', twofa.confirm),
+
+
 ]
