@@ -18,7 +18,7 @@ def callback(request):
             return ex.status_code
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'oauth2_callback error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -36,7 +36,7 @@ def set(request):
         setattr(request.user, 'ft_userid', id)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'oauth2_set error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -46,7 +46,7 @@ def unset(request):
         setattr(request.user, 'ft_userid', None)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'oauth2_unset error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -55,7 +55,7 @@ def signup(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'oauth2_signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -64,5 +64,5 @@ def login(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'oauth2_login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

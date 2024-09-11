@@ -22,7 +22,7 @@ def signup(request):
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_201_CREATED, token_s)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -41,7 +41,7 @@ def login(request):
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -60,7 +60,7 @@ def forgot_password_send_email(request):
         send_reset_email(user.username, token)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'forgot_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # [aguilmea] https://simpleisbetterthancomplex.com/tutorial/2016/08/24/how-to-create-one-time-link.html
