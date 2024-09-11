@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
-class CustomUser(AbstractUser):
+class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     username = models.EmailField(max_length=254, unique=True)
@@ -30,7 +30,7 @@ class OneTimePassword(models.Model):
         ('reset_password', 'reset the login password'),
     ]
 
-    related_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='otp')
+    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='otp')
     action = models.CharField(max_length=16, choices=ACTION_CHOICES)
     password = models.CharField(max_length=16)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))

@@ -1,12 +1,12 @@
 # [aguilmea] file was created manually
 from rest_framework import serializers
 
-from .models import CustomUser, OneTimePassword
+from .models import RegistrationUser, OneTimePassword
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
+        model = RegistrationUser
         fields = ['id', 'username', 'password', 'twofa_enabled', 'ft_userid']
         extra_kwargs = {
             'id': {'read_only': True},
@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # validate_password(validated_data['password'], user=None) # [aguilmea] not setup yet to make testing easier
         password = validated_data.pop('password') 
-        user = CustomUser(**validated_data)
+        user = RegistrationUser(**validated_data)
         user.set_password(password)
         user.save()  
         return user 

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from ..authenticate import NoTokenAuthentication
-from ..models import CustomUser
+from ..models import RegistrationUser
 from ..serializers import UserSerializer
 from .utils import generate_response_with_valid_JWT, send_reset_email
 
@@ -34,7 +34,7 @@ def login(request):
         password = request.data.get('password')
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=username).first()
+        user = RegistrationUser.objects.filter(username=username).first()
         if user is None or not user.check_password(password):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenObtainPairSerializer(data=request.data)
@@ -52,7 +52,7 @@ def forgot_password_send_email(request):
         username = request.data.get('username')
         if not username:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=username).first()
+        user = RegistrationUser.objects.filter(username=username).first()
         if not user:
             return Response(status=status.HTTP_200_OK) # [aguilmea] because
         token_generator = PasswordResetTokenGenerator()
@@ -77,7 +77,7 @@ def forgot_password_reset(request):
         new_password = request.data.get('new_password')
         if not username or not token or not new_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.filter(username=username).first()
+        user = RegistrationUser.objects.filter(username=username).first()
         if not user:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token_generator = PasswordResetTokenGenerator()
