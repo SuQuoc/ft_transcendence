@@ -1,19 +1,20 @@
 # [aguilmea] file was created manually
 from rest_framework import serializers
 
-from .models import CustomUser
+from .models import CustomUser, OneTimePassword
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'password', 'enabledtwofa', 'ft_userid']
+        fields = ['id', 'username', 'password', 'twofa_enabled', 'ft_userid']
         extra_kwargs = {
-            'id': {'read_only': True},          # [aguilmea] read-only so it's not necessary for creation
-            'password': {'write_only': True},   # [aguilmea] write-only so it's not returned in get requests
-        }                                       # [aguilmea] I should have a regex or something like that just like in CustomUser model
+            'id': {'read_only': True},
+            'password': {'write_only': True},
+        }
 
     def create(self, validated_data):
+        # validate_password(validated_data['password'], user=None) # [aguilmea] not setup yet to make testing easier
         password = validated_data.pop('password') 
         user = CustomUser(**validated_data)
         user.set_password(password)
@@ -25,7 +26,15 @@ class UserSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items(): 
             setattr(instance, attr, value)
         if password:
+            # validate password(password, user=instance) # [aguilmea] not setup yet to make testing easier
             instance.set_password(password) 
         instance.save()
         return instance
 
+class OneTimePasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OneTimePassword
+        fields = ['related_user', 'action', 'password', 'expire']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
