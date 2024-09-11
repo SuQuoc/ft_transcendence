@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import common, oauth2, basic, twofa
+from core_app.views import common, oauth2, basic, otp
 from django.urls import re_path
 
 urlpatterns = [
@@ -40,8 +40,8 @@ urlpatterns = [
     re_path('oauth2_login', oauth2.login),
 
     # twofa views
-    re_path('twofa_send_email', twofa.send_email),
-    re_path('twofa_confirm', twofa.confirm),
+    re_path('twofa_send_email', otp.send_email),
+    re_path('twofa_confirm', otp.confirm),
 
 
 ]

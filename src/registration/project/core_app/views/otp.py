@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from ..authenticate import AccessTokenAuthentication
 from ..models import OneTimePassword
-from .utils_twofa import send_twofa_email
+from .utils_otp import send_twofa_email
 from ..serializers import OneTimePasswordSerializer
 
 import random
