@@ -85,6 +85,6 @@ Content-Type: application/json
 
 GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
-Cookie: {{REFRESH_COOKIE}}
+Cookie: REFRESH_COOKIE
 
 {}
