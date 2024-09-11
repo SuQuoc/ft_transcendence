@@ -29,7 +29,7 @@ Content-Type: application/json
 
 
 
-POST {{base_url}}/registration/twofa_send_email/
+POST {{base_url}}/registration/otp_send_email/
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
@@ -37,7 +37,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/twofa_confirm/
+POST {{base_url}}/registration/otp_confirm/
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}} 
 
