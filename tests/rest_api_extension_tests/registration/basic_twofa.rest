@@ -1,5 +1,5 @@
 @base_url = https://localhost:8000
-@username = user@domain.at
+@username = annie.guilmeau@gmail.com
 @current_password = Pass1234!
 
 # @name post_signup
@@ -39,9 +39,27 @@ Cookie: {{ACCESS_COOKIE}}
 
 POST {{base_url}}/registration/otp_confirm/
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}} 
+Cookie: {{ACCESS_COOKIE}}
 
-{"action": "twofa_enable", "otp": "5QDRJ8X6QP3CHNB3"}
+{"action": "twofa_enable", "otp": "2IHFP1LVS4D49JWG"}
 
 ###
 
+
+# @name post_login
+POST {{base_url}}/registration/login/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "{{current_password}}"
+}
+
+###
+
+POST {{base_url}}/registration/otp_confirm/
+Content-Type: application/json
+
+{"action": "twofa_enable", "otp": "5V0GSX0BKL525D6P"}
+
+###

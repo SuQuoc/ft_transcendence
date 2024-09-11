@@ -9,6 +9,7 @@ from ..authenticate import NoTokenAuthentication
 from ..models import RegistrationUser
 from ..serializers import UserSerializer
 from .utils import generate_response_with_valid_JWT, send_reset_email
+from .utils_otp import create_one_time_password, send_twofa_email
 
 @api_view(['POST'])
 @authentication_classes([NoTokenAuthentication])
@@ -37,6 +38,10 @@ def login(request):
         user = RegistrationUser.objects.filter(username=username).first()
         if user is None or not user.check_password(password):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if user.twofa_enabled is True:
+            password = create_one_time_password(user.id, 'twofa_login')
+            send_twofa_email(user.username, 'twofa_login', password) # I need to pass the password to the function because in the future i want to hash it
+            return Response(status=status.HTTP_202_ACCEPTED)
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     
