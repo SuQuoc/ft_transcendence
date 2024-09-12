@@ -35,5 +35,10 @@ class OneTimePassword(models.Model):
     password = models.CharField(max_length=16)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
+    def delete(self):
+        self.expire = timezone.now()
+        self.save()
+        return self
+
     def __str__(self):
         return f"{self.related_user.username} {self.action}"

@@ -1,21 +1,24 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ..authenticate import NoTokenAuthentication
-from ..models import RegistrationUser
+from ..authenticate import CredentialsAuthentication, NoExistingUserAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
 from ..serializers import UserSerializer
 from .utils import generate_response_with_valid_JWT, send_reset_email
 from .utils_otp import create_one_time_password, send_twofa_email
 
 @api_view(['POST'])
-@authentication_classes([NoTokenAuthentication])
+@authentication_classes([NoExistingUserAuthentication])
 @permission_classes([AllowAny])
 def signup(request):
     try:
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if username is None or password is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user_s = UserSerializer(data=request.data)
         if not user_s.is_valid():
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -27,17 +30,11 @@ def signup(request):
 
 
 @api_view(['POST'])
-@authentication_classes([NoTokenAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([CredentialsAuthentication])
+@permission_classes([IsAuthenticated])
 def login(request):
     try:
-        username = request.data.get('username')
-        password = request.data.get('password')
-        if not username or not password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = RegistrationUser.objects.filter(username=username).first()
-        if user is None or not user.check_password(password):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        user = request.user
         if user.twofa_enabled is True:
             password = create_one_time_password(user.id, 'twofa_login')
             send_twofa_email(user.username, 'twofa_login', password) # I need to pass the password to the function because in the future i want to hash it
@@ -50,16 +47,11 @@ def login(request):
 
 
 @api_view(['POST'])
-@authentication_classes([NoTokenAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([UsernameAuthentication])
+@permission_classes([IsAuthenticated])
 def forgot_password_send_email(request):
     try:
-        username = request.data.get('username')
-        if not username:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = RegistrationUser.objects.filter(username=username).first()
-        if not user:
-            return Response(status=status.HTTP_200_OK) # [aguilmea] because
+        user = request.user
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
         send_reset_email(user.username, token)
@@ -73,20 +65,16 @@ def forgot_password_send_email(request):
 # do i really need a last login in my model? (needed by the PasswordResetTokenGenerator.make_token??)
 
 @api_view(['POST'])
-@authentication_classes([NoTokenAuthentication])
-@permission_classes([AllowAny])
+@authentication_classes([OneTimePasswordAuthentication])
+@permission_classes([IsAuthenticated])
 def forgot_password_reset(request):
     try:
-        username = request.data.get('username')
         token = request.data.get('token')
         new_password = request.data.get('new_password')
-        if not username or not token or not new_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = RegistrationUser.objects.filter(username=username).first()
-        if not user:
+        if not token or not new_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token_generator = PasswordResetTokenGenerator()
-        if not token_generator.check_token(user, token):
+        if not token_generator.check_token(request.user, token):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user.set_password(new_password)
         user.save()

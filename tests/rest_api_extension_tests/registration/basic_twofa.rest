@@ -37,16 +37,18 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/otp_confirm/
+POST {{base_url}}/registration/otp_confirm_twofa/
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
-{"action": "twofa_enable", "otp": "2IHFP1LVS4D49JWG"}
+{
+    "action": "twofa_enable",
+    "otp": "GQQYN0QKZIU5R62L"
+}
 
 ###
 
 
-# @name post_login
 POST {{base_url}}/registration/login/
 Content-Type: application/json
 
@@ -57,9 +59,21 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/otp_confirm/
+POST {{base_url}}/registration/otp_confirm_login/
 Content-Type: application/json
 
-{"action": "twofa_enable", "otp": "5V0GSX0BKL525D6P"}
+{
+    "username": "{{username}}",
+    "otp": "xxxxxxxxxxxxxx"
+}
+
+###
+
+
+POST {{base_url}}/registration/delete_user/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}} 
+
+{"password": "{{current_password}}"}
 
 ###

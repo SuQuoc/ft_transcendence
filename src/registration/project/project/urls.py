@@ -41,7 +41,8 @@ urlpatterns = [
 
     # twofa views
     re_path('otp_send_email', otp.send_email),
-    re_path('otp_confirm', otp.confirm),
+    re_path('otp_confirm_twofa', otp.confirm_twofa),
+    re_path('otp_confirm_login', otp.confirm_login),
 
 
 ]
