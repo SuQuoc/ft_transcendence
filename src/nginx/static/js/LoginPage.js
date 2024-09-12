@@ -21,12 +21,12 @@ export class LoginPage extends ComponentBaseClass {
                 <form id="loginForm">
                     <h3 class="text-center text-white">Login</h3>
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
+                    <input name="email" id="loginEmail" type="email" class="form-control mb-3" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <span id="errorMessage" class="text-danger"></span>
-                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white">Sign up</a> here!</p>
-                    <button type="submit" class="btn btn-custom w-100" form="loginForm" disabled>Log in</button>
+                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
+                    <button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
                     <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>
                     </div>
