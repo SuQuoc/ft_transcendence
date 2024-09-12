@@ -89,26 +89,13 @@ paths:
         '500':
           description: Internal server error
   /registration/logout:
-    post:
+    get:
       tags:
         - registration
       summary: Logs user out, invalidates refresh token
       description: tbd
       security:
         - bearerAuth: []
-      requestBody:
-        description: Object containing current refresh token of user
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Token'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Token'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Token'
-        required: true
       responses:
         '205':
           description: Successfully logged user out
@@ -153,9 +140,16 @@ paths:
       tags:
         - registration
       summary: Checks if JWT (access token) is still valid
-      description: tbd
+      description: Used to check validity of an access token stored on the browser. Returns 200 if valid, otherwise it'll return 401, both for missing and invalid values.
       security:
         - bearerAuth: []
+      parameters:
+        - in: header
+          name: access_token
+          schema:
+            type: string
+            format: uuid
+          required: true
       responses:
         '200':
           description: Token is valid
@@ -285,6 +279,74 @@ paths:
           description: Invalid Authentication supplied
         '404':
           description: No matching users found
+  /um/profile/:
+    get:
+      tags:
+        - um
+      summary: returns displayname, online status and image of user
+      description: TBD
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChange'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserChange'
+        '400':
+          description: Invalid Authentication supplied
+    patch:
+      tags:
+        - um
+      summary: changes displayname or image of user (or both)
+      description: TBD
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing elements to change
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                displayname:
+                  type: string
+                  description: New display name for the resource
+                image:
+                  type: string
+                  format: binary
+                  description: Image file to upload
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChange'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserChange'
+        '400':
+          description: Invalid Authentication supplied
+        '413':
+          description: Content too large (image exceeded upload limit of 1 MB)
+    delete:
+      tags:
+        - um
+      summary: deletes user object from user management microservice
+      description: TBD
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid Authentication supplied
 
 components:
   schemas:
@@ -343,25 +405,19 @@ components:
       items:
         type: object
         properties:
-          user:
-            type: object
-            properties:
-              uid:
-                type: string
-                format: uuid
-              displayname:
-                type: string
-                minLength: 1
-                example: "Max Mustermann"
-              img:
-                type: string
-                example: "https://i.pravatar.cc/15"
-                nullable: true
-              online:
-                type: boolean
-                format: string
-                example: "true"
-                nullable: true
+          displayname:
+            type: string
+            minLength: 1
+            example: "Max Mustermann"
+          image:
+            type: string
+            example: "https://i.pravatar.cc/15"
+            nullable: true
+          online:
+            type: boolean
+            format: string
+            example: "true"
+            nullable: true
           relationship:
             type: string
             description: relationship between users
@@ -376,6 +432,19 @@ components:
             format: string
             nullable: true
             description: id for friendship request, null if relationship set to stranger
+    UserChange:
+      type: array
+      items:
+        type: object
+        properties:
+          displayname:
+            type: string
+            minLength: 1
+            example: "Max Mustermann"
+          image:
+            type: string
+            example: "https://i.pravatar.cc/15"
+            nullable: true
   securitySchemes:
     bearerAuth:
       type: http

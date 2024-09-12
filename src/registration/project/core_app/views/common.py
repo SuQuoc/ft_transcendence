@@ -21,7 +21,7 @@ def delete_user(request):
         user.delete()
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'delete_user error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -30,7 +30,7 @@ def logout(request):
     try:
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'logout error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -50,7 +50,7 @@ def change_password(request):
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -59,7 +59,7 @@ def verify_token(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'verify_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([RefreshTokenAuthentication])
@@ -72,4 +72,4 @@ def refresh_token(request):
         token_s = TokenRefreshSerializer(data={'refresh': refresh_token})      
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

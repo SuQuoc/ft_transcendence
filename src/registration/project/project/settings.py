@@ -76,7 +76,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = "core_app.CustomUser"
+AUTH_USER_MODEL = "core_app.RegistrationUser"
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -94,7 +94,7 @@ with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,

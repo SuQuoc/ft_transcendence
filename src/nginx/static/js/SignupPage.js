@@ -9,6 +9,9 @@ export class SignupPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.shadowRoot.getElementById('signupForm').addEventListener('submit', this.signup.bind(this));
+		this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
 	}
 
 	getElementHTML() {
@@ -25,17 +28,18 @@ export class SignupPage extends ComponentBaseClass {
                         type="email"
                         class="form-control"
                         placeholder="name@example.com"
-                        aria-describedby="signupEmailHelp"
+                        aria-required="true"
+                        aria-describedby="errorMessageEmail"
                     />
-                    <div class="form-text text-white-50 mb-3" id="signupEmailHelp">
-                        We'll never share your email with a third party .....probably
-                    </div>
+                    <span id="errorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
                     <!-- first Password -->
                     <label for="signupPassword1" class="form-label text-white-50">Password</label>
                     <input name="password"
                         id="signupPassword1"
                         type="password"
                         class="form-control mb-1"
+                        aria-required="true"
+                        aria-describedby="errorMessagePassword"
                     />
                     <!-- second Password -->
                     <label for="signupPassword2" class="form-label text-white-50">Password again</label>
@@ -43,7 +47,10 @@ export class SignupPage extends ComponentBaseClass {
                         id="signupPassword2"
                         type="password"
                         class="form-control mb-3"
+                        aria-required="true"
+                        aria-describedby="errorMessagePassword"
                     />
+                    <span id="errorMessagePassword" class="text-danger mb-3"></span>
                     <!-- change to login page -->
                     <p class="text-white-50 small m-0">Already signed up?
                         <a href="/login" class="text-decoration-none text-white">
@@ -52,16 +59,57 @@ export class SignupPage extends ComponentBaseClass {
                         here!
                     </p>
                     <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton">Sign up</button>
+                    <div id="passwordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
+                    <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
+                    <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
                 </form>
             </div>
         `;
 		return template;
 	}
 
+	validateForm() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
+		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
+		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const emailWarning = this.shadowRoot.getElementById('errorMessageEmail');
+		const passwordWarning = this.shadowRoot.getElementById('errorMessagePassword');
+
+		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+		const passwordsMatch = password1 === password2;
+
+		if (emailValid && passwordsMatch) {
+			signupButton.disabled = false;
+			emailWarning.textContent = '';
+			passwordWarning.textContent = '';
+		} else {
+			signupButton.disabled = true;
+			if (!emailValid) {
+				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
+				emailWarning.textContent = 'Invalid email address';
+			} else {
+				this.shadowRoot.getElementById('signupEmail').removeAttribute('aria-invalid');
+				emailWarning.textContent = '';
+			}
+			if (!passwordsMatch) {
+				this.shadowRoot.getElementById('signupPassword1').setAttribute('aria-invalid', 'true');
+				this.shadowRoot.getElementById('signupPassword2').setAttribute('aria-invalid', 'true');
+				passwordWarning.textContent = "Passwords don't match";
+			} else {
+				this.shadowRoot.getElementById('signupPassword1').removeAttribute('aria-invalid');
+				this.shadowRoot.getElementById('signupPassword2').removeAttribute('aria-invalid');
+				passwordWarning.textContent = '';
+			}
+		}
+	}
+
 	async signup(event) {
 		event.preventDefault();
 		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const signupError = this.shadowRoot.getElementById('signupError');
 		signupButton.disabled = true;
+		signupError.style.display = 'none';
 
 		const email = this.shadowRoot.getElementById('signupEmail').value;
 		const password = this.shadowRoot.getElementById('signupPassword1').value;
@@ -69,6 +117,12 @@ export class SignupPage extends ComponentBaseClass {
 
 		if (password !== password2) {
 			console.error('Passwords do not match');
+			signupButton.disabled = false;
+			return;
+		}
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			console.error('Invalid email address');
 			signupButton.disabled = false;
 			return;
 		}
@@ -83,6 +137,7 @@ export class SignupPage extends ComponentBaseClass {
 			});
 
 			if (!response.ok) {
+				console.log(response);
 				throw new Error('Signup failed');
 			}
 			window.app.userData.email = email;
@@ -90,6 +145,7 @@ export class SignupPage extends ComponentBaseClass {
 			app.router.go('/displayname', false);
 		} catch (error) {
 			console.error('Error during signup:', error);
+			signupError.style.display = 'block';
 		} finally {
 			signupButton.disabled = false;
 		}

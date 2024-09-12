@@ -63,7 +63,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/forgot_password/
+POST {{base_url}}/registration/forgot_password_send_email/
 Content-Type: application/json
 
 {
@@ -85,6 +85,6 @@ Content-Type: application/json
 
 GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
-Cookie: {{REFRESH_COOKIE}}
+Cookie: REFRESH_COOKIE
 
 {}

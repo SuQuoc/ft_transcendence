@@ -31,7 +31,7 @@ clean: down
 fclean: down rm_vol
 	docker system prune -af
 
-re: down rm_vol build_up
+re: down rm_vol cache_clean build_up
 
 new: fclean build_up
 
@@ -106,7 +106,7 @@ um_cache_clean:
 	rm -rf ./src/user_management/user_management/__pycache__/
 
 ###################### Game #####################
-.PHONY: registration_up registration_down
+.PHONY: registration_up registration_down test test_running
 
 game_up:
 	@${DOCKER_COMPOSE} --profile game build
@@ -125,3 +125,6 @@ test: down
 	done
 	pytest ./tests/playwright_tests
 	@make down
+
+test_running:
+	pytest ./tests/playwright_tests

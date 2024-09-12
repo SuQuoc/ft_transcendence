@@ -63,5 +63,114 @@ export class ComponentBaseClass extends HTMLElement {
 	// the method where the HTML of the component is defined, must be overridden
 	getElementHTML() {
 		throw new Error("Must override method getElementHTML");
-	}
+	};
+
+	/**
+	 * Validates the token and refreshes it if necessary.
+	 * @returns {Promise<boolean>}
+	 */
+	async validateToken() {
+		try {
+			const response = await fetch("/registration/verify_token", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include"
+			});
+
+			if (response.status !== 200) {
+				throw new Error("Token is invalid");
+			}
+
+			return true;
+		} catch (error) {
+			console.error("Error validating token, trying to refresh: ", error.message);
+			try {
+				const refreshResponse = await fetch("/registration/refresh_token", {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					credentials: "include"
+				});
+
+				if (refreshResponse.status !== 200) {
+					throw new Error("Error refreshing token");
+				}
+				return true;
+			} catch (refreshError) {
+				console.error("Error refreshing token:", refreshError.message);
+				return false;
+			}
+		}
+	};
+
+	/**
+	 * Makes an API call with the given URL and options.
+	 * important: please only use if you have a valid token, otherwise use regular fetch
+	 *
+	 * @param {string} url - The URL to make the API call to.
+	 * @param {object} options - The options for the fetch call, e.g. method (GET, POST), body.
+	 * @param {string} type - The content type of the request.
+	 * @returns {object} - The response from the API call.
+	 */
+	async apiFetch(url, options = {}, type = "application/json") {
+		// Validate the token before making the API call
+		const tokenValid = await this.validateToken();
+		if (!tokenValid) {
+			throw new Error("Unable to refresh token");
+		}
+
+		// Set headers conditionally
+		const headers = {
+			...options.headers,
+		};
+		if (!(options.body instanceof FormData)) {
+			headers["Content-Type"] = type;
+		}
+
+		// Make the API call
+		const response = await fetch(url, {
+			...options,
+			credentials: "include", // Ensure cookies are sent with the request
+			headers: headers
+		});
+
+		// Handle response
+		if (!response.ok) {
+			throw new Error(`API call failed: ${response.statusText}`);
+		}
+
+		return response.json();
+	};
+
+	/*
+	async apiFetch(url, options = {}, type = "application/json") {
+		// Validate the token before making the API call
+		const tokenValid = await this.validateToken();
+		if (!tokenValid) {
+			throw new Error("Unable to refresh token");
+		}
+
+		// Make the API call
+		const response = await fetch(url, {
+			...options,
+			credentials: "include", // Ensure cookies are sent with the request
+			headers: {
+				...options.headers,
+				"Content-Type": type
+			}
+		});
+
+		// Handle response
+		if (!response.ok) {
+			throw new Error(`API call failed: ${response.statusText}`);
+		}
+
+		return response.json();
+	};
+	 */
+
+
 }
