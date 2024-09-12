@@ -31,7 +31,7 @@ clean: down
 fclean: down rm_vol
 	docker system prune -af
 
-re: down rm_vol build_up
+re: down rm_vol cache_clean build_up
 
 new: fclean build_up
 
