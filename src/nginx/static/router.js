@@ -10,12 +10,30 @@ const validateToken = async () => {
 		});
 
 		if (response.status !== 200) {
-			throw new Error("Error verifying token");
+			throw new Error("Token is invalid");
 		}
+
 		return true;
 	} catch (error) {
-		console.error("Error validating token:", error.message);
-		return false;
+		console.error("Error validating token: ", error.message);
+
+		try {
+			const refreshResponse = await fetch("/registration/refresh_token", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include"
+			});
+
+			if (refreshResponse.status !== 200) {
+				throw new Error("Error refreshing token");
+			}
+			return true;
+		} catch (refreshError) {
+			console.error("Error refreshing token:", refreshError.message);
+			return false;
+		}
 	}
 }
 
@@ -137,6 +155,7 @@ const Router = {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
+				addToHistory = false;
 			}
 		}
 

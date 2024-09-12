@@ -16,41 +16,42 @@ export class UserProfile extends ComponentBaseClass {
         template.innerHTML = `
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
       <style>
-        .form-container {
-          padding: 1rem;
-          width: 100vw;
-          max-width: 400px;
-        }
-        .form-container form {
-          margin-bottom: 1rem;
-        }
-        .form-container button {
-          width: 100%;
-        }
-        .profile-image {
-          width: 100%;
-          max-width: 150px;
-          height: auto;
-          cursor: pointer;
-          display: block;
-          margin: 0 auto 1rem;
-          border-radius: 50%;
-        }
-        .warning {
-          border-color: red;
-        }
-        .warning-message {
-          color: red;
-          display: none;
-        }
-        .spinner-border {
-          display: none;
-          width: 1rem;
-          height: 1rem;
-          border-width: 0.2em;
-        }
-      </style>
-      <div class="form-container bg-dark text-white">
+      .form-container {
+        padding: 1rem;
+        width: 100vw;
+        max-width: 400px;
+      }
+      .form-container form {
+        margin-bottom: 1rem;
+      }
+      .form-container button {
+        width: 100%;
+      }
+      .profile-image {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        cursor: pointer;
+        display: block;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+      }
+      .warning {
+        border-color: red;
+      }
+      .warning-message {
+        color: red;
+        display: none;
+      }
+      .spinner-border {
+        display: none;
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.2em;
+      }
+    </style>
+    <div class="form-container bg-dark text-white">
+    <div id="userManagement">
         <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
         <div id="imageWarning" class="mt-2"></div>
         <input type="file" id="imageUpload" style="display: none;">
@@ -70,17 +71,26 @@ export class UserProfile extends ComponentBaseClass {
         </form>
         <hr>
         <form id="passwordForm">
-          <div class="mb-3">
+          <div class="mb-3 input-group">
             <label for="oldPassword" class="form-label">Old Password</label>
-            <input type="password" class="form-control" id="oldPassword">
+            <div class="input-group">
+              <input type="password" class="form-control" id="oldPassword" name="current-password" autocomplete="current-password">
+              <span class="input-group-text" id="oldPasswordToggle">Show</span>
+            </div>
           </div>
-          <div class="mb-3">
+          <div class="mb-3 input-group">
             <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" class="form-control" id="newPassword">
+            <div class="input-group">
+              <input type="password" class="form-control" id="newPassword" name="new-password" autocomplete="new-password">
+              <span class="input-group-text" id="newPasswordToggle">Show</span>
+            </div>
           </div>
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPassword">
+            <div class="input-group">
+              <input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
+              <span class="input-group-text" id="confirmPasswordToggle">Show</span>
+            </div>
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
           </div>
           <button type="button" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
@@ -88,6 +98,17 @@ export class UserProfile extends ComponentBaseClass {
             <span class="visually-hidden">Loading...</span>
           </div>
         </form>
+        <hr>
+        <button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
+        </div>
+        <button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
+        <div id="deleteUserConfirmation" style="display: none;">
+            <div class="mb-3">
+                <label for="deleteUserPassword" class="form-label">Enter Current Password</label>
+                <input type="password" class="form-control" id="deleteUserPassword" placeholder="Current password" aria-placeholder="Current Password">
+            </div>
+            <button type="button" class="btn btn-danger" id="confirmDeleteUserButton">Confirm Delete</button>
+        </div>
       </div>
     `;
         return template;
@@ -101,11 +122,89 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('confirmPassword').addEventListener('input', this.validatePasswords.bind(this));
         this.shadowRoot.getElementById('profileImage').addEventListener('click', () => this.shadowRoot.getElementById('imageUpload').click());
         this.shadowRoot.getElementById('imageUpload').addEventListener('change', this.handleImageUpload.bind(this));
+        this.shadowRoot.getElementById('oldPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('oldPassword', 'oldPasswordToggle'));
+        this.shadowRoot.getElementById('newPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('newPassword', 'newPasswordToggle'));
+        this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
+        this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
+        this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
 
-        this.observer.observe(this);
         this.shadowRoot.addEventListener('click', (event) => {
             event.stopPropagation();
         });
+        this.observer.observe(this);
+    }
+
+    /**
+     * Temporary function for deleting a user, should be replaced with a single API call to /registration/delete_user
+     * @returns {Promise<void>}
+     */
+    async handleDeleteUser() {
+        const userManagement = this.shadowRoot.getElementById('userManagement');
+        const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
+        const deleteUserButton = this.shadowRoot.getElementById('deleteUserButton');
+        const confirmDeleteUserButton = this.shadowRoot.getElementById('confirmDeleteUserButton');
+        const deleteUserPassword = this.shadowRoot.getElementById('deleteUserPassword');
+
+        if (deleteUserConfirmation.style.display === 'none') {
+            deleteUserConfirmation.style.display = 'block';
+            userManagement.style.display = 'none';
+            deleteUserButton.textContent = 'Cancel';
+        } else {
+            deleteUserConfirmation.style.display = 'none';
+            userManagement.style.display = 'block';
+            deleteUserButton.textContent = 'Delete User';
+        }
+
+        confirmDeleteUserButton.addEventListener('click', async () => {
+            const password = deleteUserPassword.value;
+            if (!password) {
+                deleteUserPassword.classList.add('warning');
+                return;
+            } else {
+                deleteUserPassword.classList.remove('warning');
+            }
+
+            try {
+                const response = await fetch('/um/profile', { method: 'DELETE' });
+                if (!response.ok) {
+                    throw new Error('Error deleting user from user management');
+                }
+                const response_reg = await fetch('/registration/delete_user', {
+                    method: 'POST',
+                    cache: 'no-store',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_password: password })
+                });
+                if (!response_reg.ok) {
+                    throw new Error('Error deleting user from registration');
+                }
+                console.log('User deleted');
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
+        });
+    }
+
+    async handleLogout() {
+        await fetch('/registration/logout', { method: 'GET' })
+            .then(() => {
+                window.app.router.go('/login', true);
+            })
+            .catch((error) => {
+                console.error('Error logging out:', error);
+            });
+    }
+
+    togglePasswordVisibility(passwordFieldId, toggleButtonId) {
+        const passwordField = this.shadowRoot.getElementById(passwordFieldId);
+        const toggleButton = this.shadowRoot.getElementById(toggleButtonId);
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleButton.textContent = 'Hide';
+        } else {
+            passwordField.type = 'password';
+            toggleButton.textContent = 'Show';
+        }
     }
 
     handleVisibilityChange(entries) {
@@ -121,43 +220,28 @@ export class UserProfile extends ComponentBaseClass {
         this.observer.unobserve(this);
     }
 
-    async loadUserData() {
+     async loadUserData() {
         try {
             // Fetch user data from global app object or API
-            const userData = await this.fetchUserData();
-            this.shadowRoot.getElementById('displayName').value = userData.displayName;
-            this.shadowRoot.getElementById('email').value = userData.email;
-            this.shadowRoot.getElementById('profileImage').src = userData.profileImage;
+            const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
+            this.shadowRoot.getElementById('displayName').value = response.displayname;
+            if (!('email' in response)) {
+                this.shadowRoot.getElementById('email').value = window.app.userData.email;
+            }
+
+            // Check if the image URL is reachable
+            const imageUrl = response.image;
+            const image = new Image();
+            image.onload = () => {
+                this.shadowRoot.getElementById('profileImage').src = imageUrl;
+            };
+            image.onerror = () => {
+                this.shadowRoot.getElementById('profileImage').src = 'https://i.pravatar.cc/300';
+            };
+            image.src = imageUrl;
         } catch (error) {
             console.error('Error loading user data:', error);
         }
-    }
-
-    async fetchUserData() {
-        // TODO: implement logic to get user data from global app object and API
-        /*
-        const response = await fetch('/api/user', {cache: 'no-store'});
-        if (!response.ok) {
-            throw new Error("Couldn't retrieve user data");
-        }
-        return await response.json();
-        */
-        //TODO: check why there's apparently an timing issue, only works with this workaround
-        if (!window.app) {
-            await new Promise(resolve => {
-                const checkApp = setInterval(() => {
-                    if (window.app) {
-                        clearInterval(checkApp);
-                        resolve();
-                    }
-                }, 50);
-            });
-        }
-        console.log("Fetching user data, window.app:", window.app);
-        if (!window.app) {
-            throw new Error("window.app is not initialized");
-        }
-        return { displayName: app.userData.username, email: app.userData.email, profileImage: 'https://i.pravatar.cc/300?img=52' };
     }
 
     handleImageUpload(event) {
@@ -186,7 +270,7 @@ export class UserProfile extends ComponentBaseClass {
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.shadowRoot.getElementById('profileImage').src = e.target.result;
-                this.selectedImage = file;
+                window.app.userData.profileImage = e.target.result;
             };
             //TODO: Add API call to upload image, use base64 string to transmit
             reader.readAsDataURL(file);
@@ -200,37 +284,23 @@ export class UserProfile extends ComponentBaseClass {
         saveSpinner.style.display = 'inline-block';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
-        const email = this.shadowRoot.getElementById('email').value;
-        const profileImage = this.selectedImage;
+        //const profileImage = this.selectedImage;
+        const profileImage = window.app.userData.profileImage;
 
-        // Simulate API call, can be removed later
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        //TODO: Add API call to save profile
-        /*
         const formData = new FormData();
         formData.append('displayName', displayName);
-        formData.append('email', email);
         if (profileImage) {
             formData.append('profileImage', profileImage);
         }
 
         try {
-            const response = await fetch('/api/user/profile', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save profile');
-            }
-
-            const result = await response.json();
-            console.log('Profile saved:', result);
+            const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
+            window.app.userData.username = response.displayname;
+            window.app.userData.profileImage = response.image;
+            console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);
         }
-        */
 
         saveButton.disabled = false;
         saveSpinner.style.display = 'none';
@@ -270,10 +340,13 @@ export class UserProfile extends ComponentBaseClass {
         }
 
         // Simulate API call, can be removed later
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        //TODO: Add API call to change password
-        console.log('Password changed:', { oldPassword, newPassword });
+        //await new Promise(resolve => setTimeout(resolve, 500));
+        try {
+            await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({"current_password": oldPassword, "new_password": newPassword})});
+            console.log('Changed password');
+        } catch (error) {
+            console.error('Error changing password: ', error);
+        }
 
         changeButton.disabled = false;
         changeSpinner.style.display = 'none';

@@ -57,12 +57,11 @@ export class FriendSearch extends ComponentBaseClass {
 
         try {
             //TODO: Add API call to search for users, no-store prevents caching https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
-            const response = await fetch(`./js/friends.json`, { cache : "no-store" });
-            const data = await response.json();
+            const response = await this.apiFetch(`/um/search?query=${query}`, { method: "GET", cache: "no-store" });
+            //const response = await fetch(`./js/friends.json`, { cache : "no-store" });
+            console.log(response);
             this.results.clear();
-            console.log(data);
-            data.forEach(user => this.results.set(user.uid, user));
-            console.log(this.results);
+            response.forEach(user => this.results.set(user.user_id, user));
             this.updateResults();
         } catch (e) {
             console.error('Error fetching search results:', e.message);
