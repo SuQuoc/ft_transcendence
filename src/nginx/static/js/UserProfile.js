@@ -183,7 +183,7 @@ export class UserProfile extends ComponentBaseClass {
     async handleLogout() {
         await fetch('/registration/logout', { method: 'GET' })
             .then(() => {
-                this.router.go('/login', true);
+                window.app.router.go('/login', true);
             })
             .catch((error) => {
                 console.error('Error logging out:', error);
@@ -220,7 +220,9 @@ export class UserProfile extends ComponentBaseClass {
             // Fetch user data from global app object or API
             const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
             this.shadowRoot.getElementById('displayName').value = response.displayname;
-            //this.shadowRoot.getElementById('email').value = userData.email;
+            if (!('email' in response)) {
+                this.shadowRoot.getElementById('email').value = window.app.userData.email;
+            }
 
             // Check if the image URL is reachable
             const imageUrl = response.image;
