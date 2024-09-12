@@ -50,7 +50,8 @@ export class UserProfile extends ComponentBaseClass {
         border-width: 0.2em;
       }
     </style>
-      <div class="form-container bg-dark text-white">
+    <div class="form-container bg-dark text-white">
+    <div id="userManagement">
         <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
         <div id="imageWarning" class="mt-2"></div>
         <input type="file" id="imageUpload" style="display: none;">
@@ -99,6 +100,7 @@ export class UserProfile extends ComponentBaseClass {
         </form>
         <hr>
         <button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
+        </div>
         <button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
         <div id="deleteUserConfirmation" style="display: none;">
             <div class="mb-3">
@@ -137,6 +139,7 @@ export class UserProfile extends ComponentBaseClass {
      * @returns {Promise<void>}
      */
     async handleDeleteUser() {
+        const userManagement = this.shadowRoot.getElementById('userManagement');
         const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
         const deleteUserButton = this.shadowRoot.getElementById('deleteUserButton');
         const confirmDeleteUserButton = this.shadowRoot.getElementById('confirmDeleteUserButton');
@@ -144,9 +147,11 @@ export class UserProfile extends ComponentBaseClass {
 
         if (deleteUserConfirmation.style.display === 'none') {
             deleteUserConfirmation.style.display = 'block';
+            userManagement.style.display = 'none';
             deleteUserButton.textContent = 'Cancel';
         } else {
             deleteUserConfirmation.style.display = 'none';
+            userManagement.style.display = 'block';
             deleteUserButton.textContent = 'Delete User';
         }
 
@@ -265,7 +270,7 @@ export class UserProfile extends ComponentBaseClass {
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.shadowRoot.getElementById('profileImage').src = e.target.result;
-                this.selectedImage = file;
+                window.app.userData.profileImage = e.target.result;
             };
             //TODO: Add API call to upload image, use base64 string to transmit
             reader.readAsDataURL(file);
@@ -279,7 +284,8 @@ export class UserProfile extends ComponentBaseClass {
         saveSpinner.style.display = 'inline-block';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
-        const profileImage = this.selectedImage;
+        //const profileImage = this.selectedImage;
+        const profileImage = window.app.userData.profileImage;
 
         const formData = new FormData();
         formData.append('displayName', displayName);
@@ -288,11 +294,10 @@ export class UserProfile extends ComponentBaseClass {
         }
 
         try {
-            console.log(formData);
-            await this.apiFetch('/um/profile', {method: 'PATCH', body: formData});
-            window.app.userData.username = displayName;
-            window.app.userData.image = URL.createObjectURL(profileImage);
-            console.log('Profile saved: ', formData);
+            const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
+            window.app.userData.username = response.displayname;
+            window.app.userData.profileImage = response.image;
+            console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);
         }

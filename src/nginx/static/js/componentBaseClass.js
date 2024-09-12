@@ -88,8 +88,7 @@ export class ComponentBaseClass extends HTMLElement {
 
 			return true;
 		} catch (error) {
-			console.error("Error validating token: ", error.message);
-
+			console.error("Error validating token, trying to refresh: ", error.message);
 			try {
 				const refreshResponse = await fetch("/registration/refresh_token", {
 					method: "GET",
@@ -126,6 +125,37 @@ export class ComponentBaseClass extends HTMLElement {
 			throw new Error("Unable to refresh token");
 		}
 
+		// Set headers conditionally
+		const headers = {
+			...options.headers,
+		};
+		if (!(options.body instanceof FormData)) {
+			headers["Content-Type"] = type;
+		}
+
+		// Make the API call
+		const response = await fetch(url, {
+			...options,
+			credentials: "include", // Ensure cookies are sent with the request
+			headers: headers
+		});
+
+		// Handle response
+		if (!response.ok) {
+			throw new Error(`API call failed: ${response.statusText}`);
+		}
+
+		return response.json();
+	};
+
+	/*
+	async apiFetch(url, options = {}, type = "application/json") {
+		// Validate the token before making the API call
+		const tokenValid = await this.validateToken();
+		if (!tokenValid) {
+			throw new Error("Unable to refresh token");
+		}
+
 		// Make the API call
 		const response = await fetch(url, {
 			...options,
@@ -143,6 +173,7 @@ export class ComponentBaseClass extends HTMLElement {
 
 		return response.json();
 	};
+	 */
 
 
 }
