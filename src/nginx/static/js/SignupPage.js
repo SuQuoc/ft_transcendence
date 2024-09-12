@@ -31,7 +31,7 @@ export class SignupPage extends ComponentBaseClass {
                         aria-required="true"
                         aria-describedby="errorMessageEmail"
                     />
-                    <span id="errorMessageEmail" class="text-danger" style="display:block;"></span>
+                    <span id="errorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
                     <!-- first Password -->
                     <label for="signupPassword1" class="form-label text-white-50">Password</label>
                     <input name="password"
@@ -50,7 +50,7 @@ export class SignupPage extends ComponentBaseClass {
                         aria-required="true"
                         aria-describedby="errorMessagePassword"
                     />
-                    <span id="errorMessagePassword" class="text-danger"></span>
+                    <span id="errorMessagePassword" class="text-danger mb-3"></span>
                     <!-- change to login page -->
                     <p class="text-white-50 small m-0">Already signed up?
                         <a href="/login" class="text-decoration-none text-white">
@@ -58,7 +58,7 @@ export class SignupPage extends ComponentBaseClass {
                         </a>
                         here!
                     </p>
-                    <button type="submit" class="btn btn-custom w-100" form="signupForm">Sign up</button>
+                    <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton">Sign up</button>
                     <div id="passwordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
                     <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
                     <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>

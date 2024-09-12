@@ -68,7 +68,10 @@ export class ComponentBaseClass extends HTMLElement {
 		throw new Error("Must override method getElementHTML");
 	};
 
-	// validate the token and refresh it if necessary
+	/**
+	 * Validates the token and refreshes it if necessary.
+	 * @returns {Promise<boolean>}
+	 */
 	async validateToken() {
 		try {
 			const response = await fetch("/registration/verify_token", {
@@ -107,9 +110,15 @@ export class ComponentBaseClass extends HTMLElement {
 		}
 	};
 
-	// boilerplate for making API calls, only requires the URL and request options
-	// example: method: 'POST', body
-	// important: only for API calls that require a valid token (so not for login/signup)
+	/**
+	 * Makes an API call with the given URL and options.
+	 * important: please only use if you have a valid token, otherwise use regular fetch
+	 *
+	 * @param {string} url - The URL to make the API call to.
+	 * @param {object} options - The options for the fetch call, e.g. method (GET, POST), body.
+	 * @param {string} type - The content type of the request.
+	 * @returns {object} - The response from the API call.
+	 */
 	async apiFetch(url, options = {}, type = "application/json") {
 		// Validate the token before making the API call
 		const tokenValid = await this.validateToken();

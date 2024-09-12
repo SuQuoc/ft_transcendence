@@ -73,21 +73,21 @@ export class UserProfile extends ComponentBaseClass {
           <div class="mb-3 input-group">
             <label for="oldPassword" class="form-label">Old Password</label>
             <div class="input-group">
-              <input type="password" class="form-control" id="oldPassword">
+              <input type="password" class="form-control" id="oldPassword" name="current-password" autocomplete="current-password">
               <span class="input-group-text" id="oldPasswordToggle">Show</span>
             </div>
           </div>
           <div class="mb-3 input-group">
             <label for="newPassword" class="form-label">New Password</label>
             <div class="input-group">
-              <input type="password" class="form-control" id="newPassword">
+              <input type="password" class="form-control" id="newPassword" name="new-password" autocomplete="new-password">
               <span class="input-group-text" id="newPasswordToggle">Show</span>
             </div>
           </div>
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirm New Password</label>
             <div class="input-group">
-              <input type="password" class="form-control" id="confirmPassword">
+              <input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
               <span class="input-group-text" id="confirmPasswordToggle">Show</span>
             </div>
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
@@ -97,6 +97,16 @@ export class UserProfile extends ComponentBaseClass {
             <span class="visually-hidden">Loading...</span>
           </div>
         </form>
+        <hr>
+        <button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
+        <button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
+        <div id="deleteUserConfirmation" style="display: none;">
+            <div class="mb-3">
+                <label for="deleteUserPassword" class="form-label">Enter Current Password</label>
+                <input type="password" class="form-control" id="deleteUserPassword" placeholder="Current password" aria-placeholder="Current Password">
+            </div>
+            <button type="button" class="btn btn-danger" id="confirmDeleteUserButton">Confirm Delete</button>
+        </div>
       </div>
     `;
         return template;
@@ -113,11 +123,71 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('oldPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('oldPassword', 'oldPasswordToggle'));
         this.shadowRoot.getElementById('newPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('newPassword', 'newPasswordToggle'));
         this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
+        this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
+        this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
 
         this.shadowRoot.addEventListener('click', (event) => {
             event.stopPropagation();
         });
         this.observer.observe(this);
+    }
+
+    /**
+     * Temporary function for deleting a user, should be replaced with a single API call to /registration/delete_user
+     * @returns {Promise<void>}
+     */
+    async handleDeleteUser() {
+        const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
+        const deleteUserButton = this.shadowRoot.getElementById('deleteUserButton');
+        const confirmDeleteUserButton = this.shadowRoot.getElementById('confirmDeleteUserButton');
+        const deleteUserPassword = this.shadowRoot.getElementById('deleteUserPassword');
+
+        if (deleteUserConfirmation.style.display === 'none') {
+            deleteUserConfirmation.style.display = 'block';
+            deleteUserButton.textContent = 'Cancel';
+        } else {
+            deleteUserConfirmation.style.display = 'none';
+            deleteUserButton.textContent = 'Delete User';
+        }
+
+        confirmDeleteUserButton.addEventListener('click', async () => {
+            const password = deleteUserPassword.value;
+            if (!password) {
+                deleteUserPassword.classList.add('warning');
+                return;
+            } else {
+                deleteUserPassword.classList.remove('warning');
+            }
+
+            try {
+                const response = await fetch('/um/profile', { method: 'DELETE' });
+                if (!response.ok) {
+                    throw new Error('Error deleting user from user management');
+                }
+                const response_reg = await fetch('/registration/delete_user', {
+                    method: 'POST',
+                    cache: 'no-store',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_password: password })
+                });
+                if (!response_reg.ok) {
+                    throw new Error('Error deleting user from registration');
+                }
+                console.log('User deleted');
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
+        });
+    }
+
+    async handleLogout() {
+        await fetch('/registration/logout', { method: 'GET' })
+            .then(() => {
+                this.router.go('/login', true);
+            })
+            .catch((error) => {
+                console.error('Error logging out:', error);
+            });
     }
 
     togglePasswordVisibility(passwordFieldId, toggleButtonId) {
@@ -209,9 +279,6 @@ export class UserProfile extends ComponentBaseClass {
         const displayName = this.shadowRoot.getElementById('displayName').value;
         const profileImage = this.selectedImage;
 
-        // Simulate API call, can be removed later
-        //await new Promise(resolve => setTimeout(resolve, 500));
-
         const formData = new FormData();
         formData.append('displayName', displayName);
         if (profileImage) {
@@ -219,7 +286,10 @@ export class UserProfile extends ComponentBaseClass {
         }
 
         try {
+            console.log(formData);
             await this.apiFetch('/um/profile', {method: 'PATCH', body: formData});
+            window.app.userData.username = displayName;
+            window.app.userData.image = URL.createObjectURL(profileImage);
             console.log('Profile saved: ', formData);
         } catch (error) {
             console.error('Error saving profile:', error);

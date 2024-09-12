@@ -80,6 +80,9 @@ export class FriendList extends ComponentBaseClass {
 	setupEventListeners() {
 		const buttons = this.shadowRoot.querySelectorAll('.btn');
 		buttons.forEach((button) => {
+			if ((button.id === 'friends-button' && (this.hasAttribute('friends') || this.attributes.length == 0)) || (button.id === 'requested-button' && this.hasAttribute('requested'))) {
+				button.classList.add('active');
+			}
 			button.addEventListener('click', (event) => {
 				const clickedButton = event.target;
 				buttons.forEach(btn => btn.classList.remove('active'));
