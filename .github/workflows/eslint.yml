@@ -11,7 +11,7 @@ on:
       - main
 
 jobs:
-  prettier:
+  eslint:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
