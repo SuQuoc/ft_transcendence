@@ -5,6 +5,7 @@ from django.conf import settings
 
 from django.core.mail import send_mail
 
+import requests
 import os
 
 def send_200_with_expired_cookies():
@@ -42,7 +43,7 @@ def generate_response_with_valid_JWT(status_code, token_s):
 
 def send_reset_email(recipient, token):
     try:
-        link = os.environ.get('SERVER_URL') + '/reset-password?token=' + token
+        link = os.environ.get('SERVER_URL') + '/registration/forgot_password_reset?token=' + token
         message = f"""
         Hello,
 
@@ -66,3 +67,15 @@ def send_reset_email(recipient, token):
         )
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def send_delete_request_to_um(request):
+    request_uri = 'http://usermanagement:8000/um/profile/'
+    headers = {
+        'Content-Type': 'application/json',
+        'Cookie': 'access=' + request.COOKIES.get('access')
+    }
+    response = requests.delete(request_uri, headers=headers)
+    if response.status_code != 204:
+        raise Exception('Error deleting user in UM')
+    return Response(status=status.HTTP_200_OK)

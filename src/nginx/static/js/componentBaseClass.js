@@ -33,7 +33,6 @@ export class ComponentBaseClass extends HTMLElement {
 			return;
 		links.forEach(a => {
 			a.addEventListener("click", this.handleLinkClick_var);
-			console.log("added event listener ComponentBaseClass");
 		});
 	};
 
@@ -45,7 +44,6 @@ export class ComponentBaseClass extends HTMLElement {
 			return;
 		links.forEach(a => {
 			a.removeEventListener("click", this.handleLinkClick_var);
-			console.log("removed event listener ComponentBaseClass");
 		});
 	};
 
@@ -56,7 +54,6 @@ export class ComponentBaseClass extends HTMLElement {
 	// the router listens for the custom event
 	handleLinkClick(event) {
 		event.preventDefault();
-		console.log("link clicked in shadow DOM");
 
 		const url = event.target.getAttribute("href");
 		window.app.router.go(url, this.addToHistory);

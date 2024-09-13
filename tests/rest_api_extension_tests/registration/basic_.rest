@@ -1,7 +1,9 @@
 @base_url = https://localhost:8000
 @username = user@domain.at
+@displayname = ProCoder
 @current_password = Pass1234!
 @new_password = Yo?4567
+
 
 
 # @name post_signup
@@ -30,6 +32,15 @@ Content-Type: application/json
 
 ###
 
+POST {{base_url}}/um/user-creation/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+    "displayname": "{{displayname}}"
+}
+
+###
 
 POST {{base_url}}/registration/delete_user/
 Content-Type: application/json
@@ -63,7 +74,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/forgot_password/
+POST {{base_url}}/registration/forgot_password_send_email/
 Content-Type: application/json
 
 {
@@ -85,6 +96,6 @@ Content-Type: application/json
 
 GET {{base_url}}/registration/refresh_token/
 Content-Type: application/json
-Cookie: {{REFRESH_COOKIE}}
+Cookie: REFRESH_COOKIE
 
 {}

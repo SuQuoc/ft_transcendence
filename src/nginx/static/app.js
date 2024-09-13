@@ -41,7 +41,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 	// replaces the "null" state the browser pushes to the history when the page is loaded
 	if (!history.state)
 		history.replaceState({route: location.pathname}, "", location.pathname);
-
 	// generate a random user id (temporary!!!)
 	window.app.userData.id = crypto.randomUUID();
 	console.log("User ID: ", window.app.userData.id);

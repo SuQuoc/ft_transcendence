@@ -63,7 +63,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 	
 	/** hides or shows a text that says "no tournaments to join" */
-	noTournamentsToJoin() { // not working!!!!!
+	noTournamentsToJoin() { // not working!!!!! TODO: fix this
 		const tournament_elements = this.root.querySelectorAll("join-tournament-element");
 		console.log("tournament_elements: ", tournament_elements);
 
@@ -115,6 +115,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		// goes to the tournament lobby
 		window.app.router.go("/tournament-lobby", false); // false means it doesn't get added to the history
+		// TODO: should go to the tournament waiting room first !!
 	};
 
 

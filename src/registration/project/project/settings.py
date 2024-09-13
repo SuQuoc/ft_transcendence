@@ -76,7 +76,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = "core_app.CustomUser"
+AUTH_USER_MODEL = "core_app.RegistrationUser"
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

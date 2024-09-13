@@ -31,7 +31,7 @@ clean: down
 fclean: down rm_vol
 	docker system prune -af
 
-re: down rm_vol build_up
+re: down rm_vol cache_clean build_up
 
 new: fclean build_up
 
@@ -74,23 +74,23 @@ um_down:
 	@${DOCKER_COMPOSE} --profile user_management down
 
 um_mm:
-	${DOCKER_COMPOSE} exec user_management python manage.py makemigrations
+	${DOCKER_COMPOSE} exec usermanagement python manage.py makemigrations
 
 
 um_migrate:
-	${DOCKER_COMPOSE} exec user_management python manage.py migrate
+	${DOCKER_COMPOSE} exec usermanagement python manage.py migrate
 
 um_shell:
-	${DOCKER_COMPOSE} exec user_management python manage.py shell
+	${DOCKER_COMPOSE} exec usermanagement python manage.py shell
 
 um_exec:
-	${DOCKER_COMPOSE} exec user_management bash
+	${DOCKER_COMPOSE} exec usermanagement bash
 
 um_db_exec:
 	${DOCKER_COMPOSE} exec db_user_management bash
 
 um_test:
-	${DOCKER_COMPOSE} exec user_management python manage.py test
+	${DOCKER_COMPOSE} exec usermanagement python manage.py test
 
 um_cache_clean:
 	rm -rf ./src/user_management/__pycache__/
@@ -106,7 +106,7 @@ um_cache_clean:
 	rm -rf ./src/user_management/user_management/__pycache__/
 
 ###################### Game #####################
-.PHONY: registration_up registration_down
+.PHONY: registration_up registration_down test test_running
 
 game_up:
 	@${DOCKER_COMPOSE} --profile game build
@@ -125,3 +125,6 @@ test: down
 	done
 	pytest ./tests/playwright_tests
 	@make down
+
+test_running:
+	pytest ./tests/playwright_tests

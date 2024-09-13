@@ -57,6 +57,7 @@ services:
       - all
     networks:
       - network_registration
+      - network_django
     secrets:
       - public_key.pem
       - private_key.pem

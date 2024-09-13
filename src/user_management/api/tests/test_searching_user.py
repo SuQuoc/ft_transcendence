@@ -59,7 +59,7 @@ class SearchTest(MyTestSetUp):
         url = create_url_with_query_params(self.url, {"term": "friend"})
         response = self.client.get(url, secure=True, **self.headers)
         response_json = response.json()
-        print(json.dumps(response_json, indent=4))
+        # print(json.dumps(response_json, indent=4))
 
         self.assertEqual(response_json[0]['relationship'], "friend")
         self.assertEqual(response_json[1]['relationship'], "friend")

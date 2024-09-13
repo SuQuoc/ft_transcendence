@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
+from rest_framework.exceptions import APIException
 from .models import CustomUser
 
 MEGABYTE_LIMIT = 1
@@ -31,6 +31,11 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
         return representation
 
 
+class ImageTooLargeError(APIException):
+    status_code = 413
+    default_detail = 'A custom validation error occurred.'
+    default_code = 'custom_validation_error'
+
 def profile_image_validator(image):
     filesize = image.size
 
@@ -39,7 +44,7 @@ def profile_image_validator(image):
     #     raise ValidationError(f"You need to upload an image with {REQUIRED_WIDTH}x{REQUIRED_HEIGHT} dimensions")
 
     if filesize > MEGABYTE_LIMIT * 1024 * 1024:
-        raise ValidationError(f"Max file size is {MEGABYTE_LIMIT}MB")
+        raise ImageTooLargeError(f"Max file size is {MEGABYTE_LIMIT}MB")
 
 
 
@@ -72,11 +77,14 @@ class UserRelationSerializer(serializers.ModelSerializer):
         if representation.get('online') is None:
             representation.pop('online')
         return representation
-
-
+    
 class CustomUserEditSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(validators=[profile_image_validator])
 
     class Meta:
         model = CustomUser
         fields = ["displayname", "image"]
+
+
+
+
