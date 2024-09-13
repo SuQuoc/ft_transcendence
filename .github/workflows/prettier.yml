@@ -23,13 +23,13 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Install Prettier
         run: npm install prettier
 
       - name: Validate Prettier Configuration
-        run: prettier --check **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
+        run: npx prettier --check **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
 
       - name: Prettier Action
         uses: creyD/prettier_action@v4.3
