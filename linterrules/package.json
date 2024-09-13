@@ -4,7 +4,7 @@
   "description": "a pong game",
   "main": "app.js",
   "scripts": {
-    "lint": "eslint 'src/**/*.js' --fix --config linterrules/.eslintrc.json"
+    "lint": "eslint 'src/**/*.js' --fix --config linterrules/eslint.config.js"
   },
   "author": "42 Vienna",
   "license": "MIT",
