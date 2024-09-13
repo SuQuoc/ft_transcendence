@@ -58,7 +58,7 @@ export class SignupPage extends ComponentBaseClass {
                         </a>
                         here!
                     </p>
-                    <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton">Sign up</button>
+                    <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
                     <div id="passwordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
                     <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
                     <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
