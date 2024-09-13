@@ -1,43 +1,61 @@
 export class JoinTournamentElement extends HTMLElement {
-	constructor() {
-		super();
+    constructor() {
+        super()
 
-		this.handleJoinTournamentVar = this.handleJoinTournament.bind(this);
-	}
-	// when the component is attached to the DOM
-	connectedCallback() {
-		const template = this.getElementHTML();
-		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
-		this.appendChild(content);
+        this.handleJoinTournamentVar = this.handleJoinTournament.bind(this)
+    }
+    // when the component is attached to the DOM
+    connectedCallback() {
+        const template = this.getElementHTML()
+        const content = template.content.cloneNode(true) // true so it makes a deep copy/clone (clones other templates inside this one)
+        this.appendChild(content)
 
-		this.join_tournament_button = this.querySelector("[name='join_tournament_button']");
+        this.join_tournament_button = this.querySelector(
+            "[name='join_tournament_button']"
+        )
 
-		// add event listeners
-		this.join_tournament_button.addEventListener("click", this.handleJoinTournamentVar);
-	}
+        // add event listeners
+        this.join_tournament_button.addEventListener(
+            'click',
+            this.handleJoinTournamentVar
+        )
+    }
 
-	disconnectedCallback() {
-		// remove event listeners
-		this.join_tournament_button.removeEventListener("click", this.handleJoinTournamentVar);
-	}
+    disconnectedCallback() {
+        // remove event listeners
+        this.join_tournament_button.removeEventListener(
+            'click',
+            this.handleJoinTournamentVar
+        )
+    }
 
+    /// ----- Event Handlers ----- ///
 
-	/// ----- Event Handlers ----- ///
+    handleJoinTournament(event) {
+        let tournament_name =
+            event.target.parentElement.querySelector(
+                "[name='join_name']"
+            ).innerHTML
 
-	handleJoinTournament(event) {
-		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
-		
-		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
+        window.app.socket.addEventListener(
+            'message',
+            window.app.router.handleSocketMessageChangeRoute,
+            { once: true }
+        )
 
-		window.app.socket.send(JSON.stringify({"type": "joinTournament",
-										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
-	}
+        window.app.socket.send(
+            JSON.stringify({
+                type: 'joinTournament',
+                tournament_name: tournament_name,
+            })
+        )
+        window.app.router.go('/tournament-waiting-room', false) // false means it doesn't get added to the history
+    }
 
-	// the element with the info of the tournament and a button to join it
-	getElementHTML() {
-		const template = document.createElement('template');
-		template.innerHTML = `
+    // the element with the info of the tournament and a button to join it
+    getElementHTML() {
+        const template = document.createElement('template')
+        template.innerHTML = `
 			<div class="bg-dark d-flex flex-row align-items-center rounded-3 gap-3 p-2">
 				<div class="d-flex flex-column lh-1 text-break">
 					<span name="join_name" class="text-white">tournament name</span>
@@ -55,9 +73,9 @@ export class JoinTournamentElement extends HTMLElement {
 				</div>
 				<button type="button" name="join_tournament_button" class="btn btn-custom py-1 px-3">Join</button>
 			</div>
-		`;
-		return template;
-	}
+		`
+        return template
+    }
 }
 
-customElements.define('join-tournament-element', JoinTournamentElement);
+customElements.define('join-tournament-element', JoinTournamentElement)

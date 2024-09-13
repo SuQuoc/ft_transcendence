@@ -1,77 +1,90 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js'
 
-import { TournamentLobbyPlayerElement } from "./TournamentLobbyPlayerElement.js";
+import { TournamentLobbyPlayerElement } from './TournamentLobbyPlayerElement.js'
 
 export class TournamentLobbyPage extends ComponentBaseClass {
-	constructor() {
-		super();
-		// Binds the method to this class instance so it can be used in the event listener
-		this.handleRecievedMessageVar = this.handleRecievedMessage.bind(this);
-	}
-	connectedCallback() {
-		super.connectedCallback();
+    constructor() {
+        super()
+        // Binds the method to this class instance so it can be used in the event listener
+        this.handleRecievedMessageVar = this.handleRecievedMessage.bind(this)
+    }
+    connectedCallback() {
+        super.connectedCallback()
 
-		// adding classes
-		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
+        // adding classes
+        this.classList.add(
+            'd-flex',
+            'flex-lg-row',
+            'flex-column-reverse',
+            'w-100',
+            'h-100'
+        )
 
-		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
-		this.player_list = this.root.getElementById("lobbyPlayerList");
-		this.leave_button = this.root.getElementById("lobbyLeaveButton");
+        // getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+        this.player_list = this.root.getElementById('lobbyPlayerList')
+        this.leave_button = this.root.getElementById('lobbyLeaveButton')
 
-		// adding event listeners
-		this.leave_button.addEventListener("click", this.handleLeaveLobby);
-		window.app.socket.addEventListener("message", this.handleRecievedMessageVar);
+        // adding event listeners
+        this.leave_button.addEventListener('click', this.handleLeaveLobby)
+        window.app.socket.addEventListener(
+            'message',
+            this.handleRecievedMessageVar
+        )
 
-		// gets the player list when the page is loaded
-		window.app.socket.send(JSON.stringify({type: "getUpdateLobbyPlayerList"}));
-	}
+        // gets the player list when the page is loaded
+        window.app.socket.send(
+            JSON.stringify({ type: 'getUpdateLobbyPlayerList' })
+        )
+    }
 
-	disconnectedCallback() {
-		super.disconnectedCallback();
+    disconnectedCallback() {
+        super.disconnectedCallback()
 
-		// removing event listeners
-		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
-		window.app.socket.removeEventListener("message", this.handleRecievedMessageVar);
-	}
+        // removing event listeners
+        this.leave_button.removeEventListener('click', this.handleLeaveLobby)
+        window.app.socket.removeEventListener(
+            'message',
+            this.handleRecievedMessageVar
+        )
+    }
 
+    /// ----- Methods ----- ///
 
-	/// ----- Methods ----- ///
+    addPlayerElement(player_name) {
+        let element = new TournamentLobbyPlayerElement()
 
-	addPlayerElement(player_name) {
-		let element = new TournamentLobbyPlayerElement();
+        this.player_list.appendChild(element)
+        element.querySelector("[name='lobby_player_name']").innerText =
+            player_name
 
-		this.player_list.appendChild(element);
-		element.querySelector("[name='lobby_player_name']").innerText = player_name;
+        //TODO: change avatar
+    }
 
-		//TODO: change avatar
-	}
+    /// ----- Event Handlers ----- ///
 
+    handleLeaveLobby(event) {
+        window.app.socket.send(JSON.stringify({ type: 'leaveTournament' }))
+        window.app.router.go('/tournament', false) // isn't added to the history
+    }
 
-	/// ----- Event Handlers ----- ///
+    /** gets called when the websocket receives a message */
+    handleRecievedMessage(event) {
+        const data = JSON.parse(event.data)
 
-	handleLeaveLobby(event) {
-		window.app.socket.send(JSON.stringify({type: "leaveTournament"}));
-		window.app.router.go("/tournament", false); // isn't added to the history
-	}
+        console.log('received message in tournament-lobby-page: ', data)
 
-	/** gets called when the websocket receives a message */
-	handleRecievedMessage(event) {
-		const data = JSON.parse(event.data);
-		
-		console.log("received message in tournament-lobby-page: ", data);
-		
-		this.root.getElementById("lobbyPlayerList").innerHTML = "";
-		if (data.type === "updateLobbyPlayerList") {
-			for (let key in data) {
-				if (data[key].player_name)
-					this.addPlayerElement(data[key].player_name);
-			}
-		}
-	}
+        this.root.getElementById('lobbyPlayerList').innerHTML = ''
+        if (data.type === 'updateLobbyPlayerList') {
+            for (let key in data) {
+                if (data[key].player_name)
+                    this.addPlayerElement(data[key].player_name)
+            }
+        }
+    }
 
-	getElementHTML() {
-		const template = document.createElement('template');
-		template.innerHTML = `
+    getElementHTML() {
+        const template = document.createElement('template')
+        template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
 			
 			<!-- lobby player sidebar -->
@@ -113,9 +126,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			<div class="d-flex flex-grow-1 justify-content-center align-items-center align-self-">
 				Game
 			</div>
-		`;
-		return template;
-	}
+		`
+        return template
+    }
 }
 
-customElements.define('tournament-lobby-page', TournamentLobbyPage);
+customElements.define('tournament-lobby-page', TournamentLobbyPage)

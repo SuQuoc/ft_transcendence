@@ -1,105 +1,119 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js'
 
 export class SelectDisplaynamePage extends ComponentBaseClass {
+    constructor() {
+        super()
 
-	constructor() {
-		super();
+        this.handleSubmitDisplaynameVar =
+            this.handleSubmitDisplayname.bind(this)
+        this.handleHidingDisplaynameTakenWarningVar =
+            this.handleHidingDisplaynameTakenWarning.bind(this)
+    }
 
-		this.handleSubmitDisplaynameVar = this.handleSubmitDisplayname.bind(this);
-		this.handleHidingDisplaynameTakenWarningVar = this.handleHidingDisplaynameTakenWarning.bind(this);
-	}
+    connectedCallback() {
+        super.connectedCallback()
 
-	connectedCallback() {
-		super.connectedCallback();
+        // getting elements
+        this.displayname_form =
+            this.shadowRoot.getElementById('displayNameForm')
+        this.input_field = this.shadowRoot.getElementById('displayNameInput')
+        this.displayname_warning =
+            this.shadowRoot.getElementById('displayNameWarning')
 
-		// getting elements
-		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
-		this.input_field = this.shadowRoot.getElementById("displayNameInput");
-		this.displayname_warning = this.shadowRoot.getElementById("displayNameWarning");
+        // adding event listeners
+        this.displayname_form.addEventListener(
+            'submit',
+            this.handleSubmitDisplaynameVar
+        )
+        this.input_field.addEventListener(
+            'input',
+            this.handleHidingDisplaynameTakenWarningVar
+        )
 
-		// adding event listeners
-		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
-		this.input_field.addEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
+        // setting focus on displayname input when the page is loaded
+        this.shadowRoot.getElementById('displayNameInput').focus()
+    }
 
-		// setting focus on displayname input when the page is loaded 
-		this.shadowRoot.getElementById("displayNameInput").focus();
-	}
-	
-	disconnectedCallback() {
-		super.disconnectedCallback();
+    disconnectedCallback() {
+        super.disconnectedCallback()
 
-		// removind event listeners
-		this.displayname_form.removeEventListener("submit", this.handleSubmitDisplaynameVar);
-		this.input_field.removeEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
-	}
-	
+        // removind event listeners
+        this.displayname_form.removeEventListener(
+            'submit',
+            this.handleSubmitDisplaynameVar
+        )
+        this.input_field.removeEventListener(
+            'input',
+            this.handleHidingDisplaynameTakenWarningVar
+        )
+    }
 
-	/// ----- Methods ----- ///
+    /// ----- Methods ----- ///
 
-	isDisplaynameValid(displayname) {
-		if (displayname === "") {
-			this.displayname_warning.innerHTML = "Please enter a displayname";
-			this.displayname_warning.setAttribute("aria-invalid", "true");
-			this.displayname_warning.style.display = "";
-			return false;
-		}
-		if (/\s/.test(displayname)) { // checks if the displayname has any whitespaces
-			this.displayname_warning.innerHTML = "Whitespaces are not allowed";
-			this.displayname_warning.setAttribute("aria-invalid", "true");
-			this.displayname_warning.style.display = "";
-			return false;
-		}
-		return true;
-	}
+    isDisplaynameValid(displayname) {
+        if (displayname === '') {
+            this.displayname_warning.innerHTML = 'Please enter a displayname'
+            this.displayname_warning.setAttribute('aria-invalid', 'true')
+            this.displayname_warning.style.display = ''
+            return false
+        }
+        if (/\s/.test(displayname)) {
+            // checks if the displayname has any whitespaces
+            this.displayname_warning.innerHTML = 'Whitespaces are not allowed'
+            this.displayname_warning.setAttribute('aria-invalid', 'true')
+            this.displayname_warning.style.display = ''
+            return false
+        }
+        return true
+    }
 
+    /// ----- Event Handlers ----- ///
 
-	/// ----- Event Handlers ----- ///
-	
-	async handleSubmitDisplayname(event) {
-		event.preventDefault();
-		
-		const displayname = event.target.displayname.value;
+    async handleSubmitDisplayname(event) {
+        event.preventDefault()
 
-		// check if displayname is valid
-		if (!this.isDisplaynameValid(displayname)) {
-			return;
-		}
+        const displayname = event.target.displayname.value
 
-		try {
-			const response = await fetch('/um/user-creation/', {
-				method: 'POST',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ displayname })
-			});
+        // check if displayname is valid
+        if (!this.isDisplaynameValid(displayname)) {
+            return
+        }
 
-			if (response.ok) {
-				window.app.userData.username = displayname;
-				window.app.router.go("/", false);
-			} else {
-				// if displayname is already taken
-				this.displayname_warning.innerHTML = "This displayname is already taken";
-				this.displayname_warning.setAttribute("aria-invalid", "true");
-				this.displayname_warning.style.display = "";
-				console.log("displayname already taken");
-			}
-		} catch (error) {
-			console.error('Error selecting displayname:', error);
-		}
-	}
+        try {
+            const response = await fetch('/um/user-creation/', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ displayname }),
+            })
 
-	handleHidingDisplaynameTakenWarning() {
-		this.displayname_warning.style.display = "none";
-		this.displayname_warning.innerHTML = "";
-		this.displayname_warning.setAttribute("aria-invalid", "false");
-	}
-	
+            if (response.ok) {
+                window.app.userData.username = displayname
+                window.app.router.go('/', false)
+            } else {
+                // if displayname is already taken
+                this.displayname_warning.innerHTML =
+                    'This displayname is already taken'
+                this.displayname_warning.setAttribute('aria-invalid', 'true')
+                this.displayname_warning.style.display = ''
+                console.log('displayname already taken')
+            }
+        } catch (error) {
+            console.error('Error selecting displayname:', error)
+        }
+    }
 
-	getElementHTML() {
-		const template = document.createElement('template');
-		template.innerHTML = `
+    handleHidingDisplaynameTakenWarning() {
+        this.displayname_warning.style.display = 'none'
+        this.displayname_warning.innerHTML = ''
+        this.displayname_warning.setAttribute('aria-invalid', 'false')
+    }
+
+    getElementHTML() {
+        const template = document.createElement('template')
+        template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
 			<div class="p-3 rounded-3 bg-dark">
 				<form id="displayNameForm">
@@ -129,9 +143,9 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 					</div>
 				</form>
 			</div>
-		`;
-		return template;
-	};
+		`
+        return template
+    }
 }
 
-customElements.define('select-displayname-page', SelectDisplaynamePage);
+customElements.define('select-displayname-page', SelectDisplaynamePage)

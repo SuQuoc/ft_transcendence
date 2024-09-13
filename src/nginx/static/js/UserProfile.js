@@ -1,18 +1,21 @@
-import { ComponentBaseClass } from './componentBaseClass.js';
+import { ComponentBaseClass } from './componentBaseClass.js'
 
 export class UserProfile extends ComponentBaseClass {
     constructor() {
-        super();
+        super()
         //done to check on visibility of the element
-        this.observer = new IntersectionObserver(this.handleVisibilityChange.bind(this), {
-            root: null,
-            threshold: 0.1
-        });
+        this.observer = new IntersectionObserver(
+            this.handleVisibilityChange.bind(this),
+            {
+                root: null,
+                threshold: 0.1,
+            }
+        )
     }
 
     // Update the getElementHTML method to include a spinner
     getElementHTML() {
-        const template = document.createElement('template');
+        const template = document.createElement('template')
         template.innerHTML = `
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
       <style>
@@ -110,28 +113,67 @@ export class UserProfile extends ComponentBaseClass {
             <button type="button" class="btn btn-danger" id="confirmDeleteUserButton">Confirm Delete</button>
         </div>
       </div>
-    `;
-        return template;
+    `
+        return template
     }
 
     connectedCallback() {
-        super.connectedCallback();
-        this.shadowRoot.getElementById('saveProfile').addEventListener('click', this.saveProfile.bind(this));
-        this.shadowRoot.getElementById('changePassword').addEventListener('click', this.changePassword.bind(this));
-        this.shadowRoot.getElementById('newPassword').addEventListener('input', this.validatePasswords.bind(this));
-        this.shadowRoot.getElementById('confirmPassword').addEventListener('input', this.validatePasswords.bind(this));
-        this.shadowRoot.getElementById('profileImage').addEventListener('click', () => this.shadowRoot.getElementById('imageUpload').click());
-        this.shadowRoot.getElementById('imageUpload').addEventListener('change', this.handleImageUpload.bind(this));
-        this.shadowRoot.getElementById('oldPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('oldPassword', 'oldPasswordToggle'));
-        this.shadowRoot.getElementById('newPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('newPassword', 'newPasswordToggle'));
-        this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
-        this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
-        this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
+        super.connectedCallback()
+        this.shadowRoot
+            .getElementById('saveProfile')
+            .addEventListener('click', this.saveProfile.bind(this))
+        this.shadowRoot
+            .getElementById('changePassword')
+            .addEventListener('click', this.changePassword.bind(this))
+        this.shadowRoot
+            .getElementById('newPassword')
+            .addEventListener('input', this.validatePasswords.bind(this))
+        this.shadowRoot
+            .getElementById('confirmPassword')
+            .addEventListener('input', this.validatePasswords.bind(this))
+        this.shadowRoot
+            .getElementById('profileImage')
+            .addEventListener('click', () =>
+                this.shadowRoot.getElementById('imageUpload').click()
+            )
+        this.shadowRoot
+            .getElementById('imageUpload')
+            .addEventListener('change', this.handleImageUpload.bind(this))
+        this.shadowRoot
+            .getElementById('oldPasswordToggle')
+            .addEventListener('click', () =>
+                this.togglePasswordVisibility(
+                    'oldPassword',
+                    'oldPasswordToggle'
+                )
+            )
+        this.shadowRoot
+            .getElementById('newPasswordToggle')
+            .addEventListener('click', () =>
+                this.togglePasswordVisibility(
+                    'newPassword',
+                    'newPasswordToggle'
+                )
+            )
+        this.shadowRoot
+            .getElementById('confirmPasswordToggle')
+            .addEventListener('click', () =>
+                this.togglePasswordVisibility(
+                    'confirmPassword',
+                    'confirmPasswordToggle'
+                )
+            )
+        this.shadowRoot
+            .getElementById('logoutButton')
+            .addEventListener('click', this.handleLogout.bind(this))
+        this.shadowRoot
+            .getElementById('deleteUserButton')
+            .addEventListener('click', this.handleDeleteUser.bind(this))
 
         this.shadowRoot.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
-        this.observer.observe(this);
+            event.stopPropagation()
+        })
+        this.observer.observe(this)
     }
 
     /**
@@ -139,218 +181,258 @@ export class UserProfile extends ComponentBaseClass {
      * @returns {Promise<void>}
      */
     async handleDeleteUser() {
-        const userManagement = this.shadowRoot.getElementById('userManagement');
-        const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
-        const deleteUserButton = this.shadowRoot.getElementById('deleteUserButton');
-        const confirmDeleteUserButton = this.shadowRoot.getElementById('confirmDeleteUserButton');
-        const deleteUserPassword = this.shadowRoot.getElementById('deleteUserPassword');
+        const userManagement = this.shadowRoot.getElementById('userManagement')
+        const deleteUserConfirmation = this.shadowRoot.getElementById(
+            'deleteUserConfirmation'
+        )
+        const deleteUserButton =
+            this.shadowRoot.getElementById('deleteUserButton')
+        const confirmDeleteUserButton = this.shadowRoot.getElementById(
+            'confirmDeleteUserButton'
+        )
+        const deleteUserPassword =
+            this.shadowRoot.getElementById('deleteUserPassword')
 
         if (deleteUserConfirmation.style.display === 'none') {
-            deleteUserConfirmation.style.display = 'block';
-            userManagement.style.display = 'none';
-            deleteUserButton.textContent = 'Cancel';
+            deleteUserConfirmation.style.display = 'block'
+            userManagement.style.display = 'none'
+            deleteUserButton.textContent = 'Cancel'
         } else {
-            deleteUserConfirmation.style.display = 'none';
-            userManagement.style.display = 'block';
-            deleteUserButton.textContent = 'Delete User';
+            deleteUserConfirmation.style.display = 'none'
+            userManagement.style.display = 'block'
+            deleteUserButton.textContent = 'Delete User'
         }
 
         confirmDeleteUserButton.addEventListener('click', async () => {
-            const password = deleteUserPassword.value;
+            const password = deleteUserPassword.value
             if (!password) {
-                deleteUserPassword.classList.add('warning');
-                return;
+                deleteUserPassword.classList.add('warning')
+                return
             } else {
-                deleteUserPassword.classList.remove('warning');
+                deleteUserPassword.classList.remove('warning')
             }
 
             try {
-                const response = await fetch('/um/profile', { method: 'DELETE' });
+                const response = await fetch('/um/profile', {
+                    method: 'DELETE',
+                })
                 if (!response.ok) {
-                    throw new Error('Error deleting user from user management');
+                    throw new Error('Error deleting user from user management')
                 }
                 const response_reg = await fetch('/registration/delete_user', {
                     method: 'POST',
                     cache: 'no-store',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current_password: password })
-                });
+                    body: JSON.stringify({ current_password: password }),
+                })
                 if (!response_reg.ok) {
-                    throw new Error('Error deleting user from registration');
+                    throw new Error('Error deleting user from registration')
                 }
-                console.log('User deleted');
+                console.log('User deleted')
             } catch (error) {
-                console.error('Error deleting user:', error);
+                console.error('Error deleting user:', error)
             }
-        });
+        })
     }
 
     async handleLogout() {
         await fetch('/registration/logout', { method: 'GET' })
             .then(() => {
-                window.app.router.go('/login', true);
+                window.app.router.go('/login', true)
             })
             .catch((error) => {
-                console.error('Error logging out:', error);
-            });
+                console.error('Error logging out:', error)
+            })
     }
 
     togglePasswordVisibility(passwordFieldId, toggleButtonId) {
-        const passwordField = this.shadowRoot.getElementById(passwordFieldId);
-        const toggleButton = this.shadowRoot.getElementById(toggleButtonId);
+        const passwordField = this.shadowRoot.getElementById(passwordFieldId)
+        const toggleButton = this.shadowRoot.getElementById(toggleButtonId)
         if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            toggleButton.textContent = 'Hide';
+            passwordField.type = 'text'
+            toggleButton.textContent = 'Hide'
         } else {
-            passwordField.type = 'password';
-            toggleButton.textContent = 'Show';
+            passwordField.type = 'password'
+            toggleButton.textContent = 'Show'
         }
     }
 
     handleVisibilityChange(entries) {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                this.loadUserData();
+                this.loadUserData()
             }
-        });
+        })
     }
 
     disconnectedCallback() {
-        super.disconnectedCallback();
-        this.observer.unobserve(this);
+        super.disconnectedCallback()
+        this.observer.unobserve(this)
     }
 
-     async loadUserData() {
+    async loadUserData() {
         try {
             // Fetch user data from global app object or API
-            const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
-            this.shadowRoot.getElementById('displayName').value = response.displayname;
+            const response = await this.apiFetch('/um/profile', {
+                method: 'GET',
+                cache: 'no-store',
+            })
+            this.shadowRoot.getElementById('displayName').value =
+                response.displayname
             if (!('email' in response)) {
-                this.shadowRoot.getElementById('email').value = window.app.userData.email;
+                this.shadowRoot.getElementById('email').value =
+                    window.app.userData.email
             }
 
             // Check if the image URL is reachable
-            const imageUrl = response.image;
-            const image = new Image();
+            const imageUrl = response.image
+            const image = new Image()
             image.onload = () => {
-                this.shadowRoot.getElementById('profileImage').src = imageUrl;
-            };
+                this.shadowRoot.getElementById('profileImage').src = imageUrl
+            }
             image.onerror = () => {
-                this.shadowRoot.getElementById('profileImage').src = 'https://i.pravatar.cc/300';
-            };
-            image.src = imageUrl;
+                this.shadowRoot.getElementById('profileImage').src =
+                    'https://i.pravatar.cc/300'
+            }
+            image.src = imageUrl
         } catch (error) {
-            console.error('Error loading user data:', error);
+            console.error('Error loading user data:', error)
         }
     }
 
     handleImageUpload(event) {
-        const file = event.target.files[0];
-        const allowedTypes = ['image/jpeg', 'image/png'];
-        const maxSize = 1024 * 1024; // 1MB
-        console.log('Image selected:', file);
+        const file = event.target.files[0]
+        const allowedTypes = ['image/jpeg', 'image/png']
+        const maxSize = 1024 * 1024 // 1MB
+        console.log('Image selected:', file)
 
-        const warningMessage = this.shadowRoot.getElementById('imageWarning');
-        warningMessage.textContent = '';
-        warningMessage.classList.remove('alert', 'alert-danger');
+        const warningMessage = this.shadowRoot.getElementById('imageWarning')
+        warningMessage.textContent = ''
+        warningMessage.classList.remove('alert', 'alert-danger')
 
         if (file) {
             if (!allowedTypes.includes(file.type)) {
-                warningMessage.textContent = 'Only JPEG and PNG files are allowed.';
-                warningMessage.classList.add('alert', 'alert-danger');
-                return;
+                warningMessage.textContent =
+                    'Only JPEG and PNG files are allowed.'
+                warningMessage.classList.add('alert', 'alert-danger')
+                return
             }
 
             if (file.size > maxSize) {
-                warningMessage.textContent = 'File size must be less than 1MB.';
-                warningMessage.classList.add('alert', 'alert-danger');
-                return;
+                warningMessage.textContent = 'File size must be less than 1MB.'
+                warningMessage.classList.add('alert', 'alert-danger')
+                return
             }
 
-            const reader = new FileReader();
+            const reader = new FileReader()
             reader.onload = (e) => {
-                this.shadowRoot.getElementById('profileImage').src = e.target.result;
-                window.app.userData.profileImage = e.target.result;
-            };
+                this.shadowRoot.getElementById('profileImage').src =
+                    e.target.result
+                window.app.userData.profileImage = e.target.result
+            }
             //TODO: Add API call to upload image, use base64 string to transmit
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(file)
         }
     }
 
     async saveProfile() {
-        const saveButton = this.shadowRoot.getElementById('saveProfile');
-        const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');
-        saveButton.disabled = true;
-        saveSpinner.style.display = 'inline-block';
+        const saveButton = this.shadowRoot.getElementById('saveProfile')
+        const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner')
+        saveButton.disabled = true
+        saveSpinner.style.display = 'inline-block'
 
-        const displayName = this.shadowRoot.getElementById('displayName').value;
+        const displayName = this.shadowRoot.getElementById('displayName').value
         //const profileImage = this.selectedImage;
-        const profileImage = window.app.userData.profileImage;
+        const profileImage = window.app.userData.profileImage
 
-        const formData = new FormData();
-        formData.append('displayName', displayName);
+        const formData = new FormData()
+        formData.append('displayName', displayName)
         if (profileImage) {
-            formData.append('profileImage', profileImage);
+            formData.append('profileImage', profileImage)
         }
 
         try {
-            const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
-            window.app.userData.username = response.displayname;
-            window.app.userData.profileImage = response.image;
-            console.log('Profile saved');
+            const response = await this.apiFetch(
+                '/um/profile',
+                { method: 'PATCH', body: formData },
+                'multipart/form-data'
+            )
+            window.app.userData.username = response.displayname
+            window.app.userData.profileImage = response.image
+            console.log('Profile saved')
         } catch (error) {
-            console.error('Error saving profile:', error);
+            console.error('Error saving profile:', error)
         }
 
-        saveButton.disabled = false;
-        saveSpinner.style.display = 'none';
+        saveButton.disabled = false
+        saveSpinner.style.display = 'none'
     }
 
     validatePasswords() {
-        const newPassword = this.shadowRoot.getElementById('newPassword').value;
-        const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
-        const changePasswordButton = this.shadowRoot.getElementById('changePassword');
-        const passwordWarning = this.shadowRoot.getElementById('passwordWarning');
+        const newPassword = this.shadowRoot.getElementById('newPassword').value
+        const confirmPassword =
+            this.shadowRoot.getElementById('confirmPassword').value
+        const changePasswordButton =
+            this.shadowRoot.getElementById('changePassword')
+        const passwordWarning =
+            this.shadowRoot.getElementById('passwordWarning')
 
         if (newPassword !== confirmPassword) {
-            this.shadowRoot.getElementById('newPassword').classList.add('warning');
-            this.shadowRoot.getElementById('confirmPassword').classList.add('warning');
-            passwordWarning.style.display = 'block';
-            changePasswordButton.disabled = true;
+            this.shadowRoot
+                .getElementById('newPassword')
+                .classList.add('warning')
+            this.shadowRoot
+                .getElementById('confirmPassword')
+                .classList.add('warning')
+            passwordWarning.style.display = 'block'
+            changePasswordButton.disabled = true
         } else {
-            this.shadowRoot.getElementById('newPassword').classList.remove('warning');
-            this.shadowRoot.getElementById('confirmPassword').classList.remove('warning');
-            passwordWarning.style.display = 'none';
-            changePasswordButton.disabled = false;
+            this.shadowRoot
+                .getElementById('newPassword')
+                .classList.remove('warning')
+            this.shadowRoot
+                .getElementById('confirmPassword')
+                .classList.remove('warning')
+            passwordWarning.style.display = 'none'
+            changePasswordButton.disabled = false
         }
     }
 
     // Update the changePassword method to show/hide the spinner and disable/enable the button
     async changePassword() {
-        const changeButton = this.shadowRoot.getElementById('changePassword');
-        const changeSpinner = this.shadowRoot.getElementById('changePasswordSpinner');
-        changeButton.disabled = true;
-        changeSpinner.style.display = 'inline-block';
+        const changeButton = this.shadowRoot.getElementById('changePassword')
+        const changeSpinner = this.shadowRoot.getElementById(
+            'changePasswordSpinner'
+        )
+        changeButton.disabled = true
+        changeSpinner.style.display = 'inline-block'
 
-        const oldPassword = this.shadowRoot.getElementById('oldPassword').value;
-        const newPassword = this.shadowRoot.getElementById('newPassword').value;
-        const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
+        const oldPassword = this.shadowRoot.getElementById('oldPassword').value
+        const newPassword = this.shadowRoot.getElementById('newPassword').value
+        const confirmPassword =
+            this.shadowRoot.getElementById('confirmPassword').value
         if (newPassword !== confirmPassword) {
-            return;
+            return
         }
 
         // Simulate API call, can be removed later
         //await new Promise(resolve => setTimeout(resolve, 500));
         try {
-            await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({"current_password": oldPassword, "new_password": newPassword})});
-            console.log('Changed password');
+            await this.apiFetch('/registration/change_password', {
+                method: 'POST',
+                body: JSON.stringify({
+                    current_password: oldPassword,
+                    new_password: newPassword,
+                }),
+            })
+            console.log('Changed password')
         } catch (error) {
-            console.error('Error changing password: ', error);
+            console.error('Error changing password: ', error)
         }
 
-        changeButton.disabled = false;
-        changeSpinner.style.display = 'none';
+        changeButton.disabled = false
+        changeSpinner.style.display = 'none'
     }
 }
 
-customElements.define('user-profile', UserProfile);
+customElements.define('user-profile', UserProfile)

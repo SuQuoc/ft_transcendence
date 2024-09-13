@@ -1,79 +1,114 @@
 <!doctype html>
 <html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-	<!-- Required meta tags -->
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	
-	<!-- Bootstrap CSS -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet"
-	integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-	crossorigin="anonymous"/>
-	<!-- Custom CSS -->
-	<link href="../css/template.css" rel="stylesheet"/>
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <!-- Custom CSS -->
+        <link href="../css/template.css" rel="stylesheet" />
 
-	<!-- Bootstrap Bundle with Popper -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-		crossorigin="anonymous"
-		defer></script>
+        <!-- Bootstrap Bundle with Popper -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+            defer
+        ></script>
 
-	<title>Signup Page</title>
-</head>
+        <title>Signup Page</title>
+    </head>
 
-<body class="d-flex flex-column vh-100">
-	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
-		<!-- Signup Page -->
-		<div class="p-3 rounded-3 bg-dark">
-			<form id="signupForm">
-				<h3 class="text-center text-white">Signup</h3>
-				<!-- Username -->
-				<label for="signupUser" class="form-label text-white-50">Username</label>
-				<input name="username"
-					id="signupUser"
-					type="text"
-					class="form-control mb-3"
-				/>
-				<!-- Email -->
-				<label for="signupEmail" class="form-label text-white-50">Email adress</label>
-				<input name="email"
-					id="signupEmail"
-					type="email"
-					class="form-control"
-					placeholder="name@example.com"
-					aria-describedby="signupEmailHelp"
-				/>
-				<div class="form-text text-white-50 mb-3" id="signupEmailHelp">
-					We'll never share your email with a third party .....probably
-				</div>
-				<!-- first Password -->
-				<label for="signupPassword1" class="form-label text-white-50">Password</label>
-				<input name="password"
-					id="signupPassword1"
-					type="password"
-					class="form-control mb-1"
-				/>
-				<!-- second Password -->
-				<label for="signupPassword2" class="form-label text-white-50">Password again</label>
-				<input name="password2"
-					id="signupPassword2"
-					type="password"
-					class="form-control mb-3"
-				/>
-                <!-- change to login page -->
-				<p class="text-white-50 small m-0">Already signed up? 
-					<!-- the link may be wrong if the port changes. it also only works if the server is running -->
-					<a href="https://localhost:8000/prototypes/login_page.html" class="text-decoration-none text-white">
-						Log in 
-					</a>
-					here!
-				</p>
-				<button type="submit" class="btn btn-custom w-100" form="signupForm">Sign up</button>
-			</form>
-		</div>
-	</main>
-</body>
-
+    <body class="d-flex flex-column vh-100">
+        <main
+            id="mainContent"
+            class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap"
+        >
+            <!-- Signup Page -->
+            <div class="p-3 rounded-3 bg-dark">
+                <form id="signupForm">
+                    <h3 class="text-center text-white">Signup</h3>
+                    <!-- Username -->
+                    <label for="signupUser" class="form-label text-white-50"
+                        >Username</label
+                    >
+                    <input
+                        name="username"
+                        id="signupUser"
+                        type="text"
+                        class="form-control mb-3"
+                    />
+                    <!-- Email -->
+                    <label for="signupEmail" class="form-label text-white-50"
+                        >Email adress</label
+                    >
+                    <input
+                        name="email"
+                        id="signupEmail"
+                        type="email"
+                        class="form-control"
+                        placeholder="name@example.com"
+                        aria-describedby="signupEmailHelp"
+                    />
+                    <div
+                        class="form-text text-white-50 mb-3"
+                        id="signupEmailHelp"
+                    >
+                        We'll never share your email with a third party
+                        .....probably
+                    </div>
+                    <!-- first Password -->
+                    <label
+                        for="signupPassword1"
+                        class="form-label text-white-50"
+                        >Password</label
+                    >
+                    <input
+                        name="password"
+                        id="signupPassword1"
+                        type="password"
+                        class="form-control mb-1"
+                    />
+                    <!-- second Password -->
+                    <label
+                        for="signupPassword2"
+                        class="form-label text-white-50"
+                        >Password again</label
+                    >
+                    <input
+                        name="password2"
+                        id="signupPassword2"
+                        type="password"
+                        class="form-control mb-3"
+                    />
+                    <!-- change to login page -->
+                    <p class="text-white-50 small m-0">
+                        Already signed up?
+                        <!-- the link may be wrong if the port changes. it also only works if the server is running -->
+                        <a
+                            href="https://localhost:8000/prototypes/login_page.html"
+                            class="text-decoration-none text-white"
+                        >
+                            Log in
+                        </a>
+                        here!
+                    </p>
+                    <button
+                        type="submit"
+                        class="btn btn-custom w-100"
+                        form="signupForm"
+                    >
+                        Sign up
+                    </button>
+                </form>
+            </div>
+        </main>
+    </body>
 </html>

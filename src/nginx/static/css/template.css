@@ -1,144 +1,146 @@
 :root {
-	--custom-bg-color: rgb(52, 52, 56);
-	
-	/* custom colors used primarily for buttons */
-	/* --custom-btn-text-color: orange;
+    --custom-bg-color: rgb(52, 52, 56);
+
+    /* custom colors used primarily for buttons */
+    /* --custom-btn-text-color: orange;
 	--custom-outline-color: rgba(255, 166, 0, 0.63); */ /* the buttons don't use this */
-	/* --custom-btn-base-color: #53000e;
+    /* --custom-btn-base-color: #53000e;
 	--custom-btn-hover-color: #42000b;
 	--custom-btn-click-color: #2b0007; */
 
-	--custom-btn-text-color: rgb(94, 169, 192);
-	--custom-outline-color: rgba(94, 169, 192, 0.411); /* the buttons don't use this */
-	--custom-outline-color-rgb : 94, 169, 192; /* the buttons use this one, it needs to be rgb */
-	--custom-btn-base-color: #252670;
-	--custom-btn-hover-color: #121472;
-	--custom-btn-click-color: #0c0d52;
-
+    --custom-btn-text-color: rgb(94, 169, 192);
+    --custom-outline-color: rgba(
+        94,
+        169,
+        192,
+        0.411
+    ); /* the buttons don't use this */
+    --custom-outline-color-rgb: 94, 169, 192; /* the buttons use this one, it needs to be rgb */
+    --custom-btn-base-color: #252670;
+    --custom-btn-hover-color: #121472;
+    --custom-btn-click-color: #0c0d52;
 }
 
 html {
-	min-height: 100%;
+    min-height: 100%;
 }
 
 body {
-	background: var(--custom-bg-color);
+    background: var(--custom-bg-color);
 }
-
 
 .dark-footer-border-bottom {
-	border-bottom: 1px solid var(--custom-bg-color);
+    border-bottom: 1px solid var(--custom-bg-color);
 }
-
 
 /* for text in join-tournament-element */
 .extra-small {
-    font-size: 0.70rem;
+    font-size: 0.7rem;
 }
 
 .tournament-max-width {
-	max-width: 1000px;
+    max-width: 1000px;
 }
 
 .lobby-player-avatar {
-	width: 30px;
-	height: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 @media (min-width: 992px) {
-	.lobby-player-sidebar-lg {
-		width: 200px;
-	}
+    .lobby-player-sidebar-lg {
+        width: 200px;
+    }
 }
 .lobby-player-sidebar-lg {
-	border-top: var(--custom-bg-color) 2px solid;
-	border-bottom: var(--custom-bg-color) 2px solid;
+    border-top: var(--custom-bg-color) 2px solid;
+    border-bottom: var(--custom-bg-color) 2px solid;
 }
-
 
 /*  Style the thumb of the range input slider */
 /* it wouldn't let me stack the pseudo elements */
 .range-input-slider::-webkit-slider-thumb {
-	background-color: var(--custom-btn-base-color);
+    background-color: var(--custom-btn-base-color);
     border: 1px solid var(--custom-btn-text-color);
-	cursor: pointer;
-	height: 16px;
-	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
+    cursor: pointer;
+    height: 16px;
+    width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
 }
 .range-input-slider::-moz-range-thumb {
-	background-color: var(--custom-btn-base-color);
+    background-color: var(--custom-btn-base-color);
     border: 1px solid var(--custom-btn-text-color);
-	cursor: pointer;
-	height: 16px;
-	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
+    cursor: pointer;
+    height: 16px;
+    width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
 }
 .range-input-slider::-ms-thumb {
-	background-color: var(--custom-btn-base-color);
+    background-color: var(--custom-btn-base-color);
     border: 1px solid var(--custom-btn-text-color);
-	cursor: pointer;
-	height: 16px;
-	width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
+    cursor: pointer;
+    height: 16px;
+    width: 16px; /* is also set as "this.thumb_width" in "JoinTournamentPage.js" to calculate the position of the value display. So if you change it, change it there as well. */
 }
-
 
 /* only needed when you use custom colors */
 /* ###################################### */
-input[type="range"]:focus::-webkit-slider-thumb {
-	background: var(--custom-btn-hover-color);
-	outline: 2px solid var(--custom-outline-color);
+input[type='range']:focus::-webkit-slider-thumb {
+    background: var(--custom-btn-hover-color);
+    outline: 2px solid var(--custom-outline-color);
 }
-input[type="range"]:focus::-moz-range-thumb {
-	background: var(--custom-btn-hover-color);
-	outline: 3px solid var(--custom-outline-color);
+input[type='range']:focus::-moz-range-thumb {
+    background: var(--custom-btn-hover-color);
+    outline: 3px solid var(--custom-outline-color);
 }
-input[type="range"]:focus::-ms-thumb {
-	background: var(--custom-btn-hover-color);
-	outline: 2px solid var(--custom-outline-color);
+input[type='range']:focus::-ms-thumb {
+    background: var(--custom-btn-hover-color);
+    outline: 2px solid var(--custom-outline-color);
 }
 
 input:focus {
-	outline: 4px solid var(--custom-outline-color) !important; /* the !important is needed to override the default outline */
-	border-color: var(--custom-btn-text-color) !important; /* the !important is needed to override the default outline */
+    outline: 4px solid var(--custom-outline-color) !important; /* the !important is needed to override the default outline */
+    border-color: var(
+        --custom-btn-text-color
+    ) !important; /* the !important is needed to override the default outline */
 }
 
-input[type="range"] {
-	outline: none !important; /* the !important is needed to override my custom outline for input:focus which is also important */
+input[type='range'] {
+    outline: none !important; /* the !important is needed to override my custom outline for input:focus which is also important */
 }
 .nav-link:focus-visible {
-	outline: 4px solid var(--custom-outline-color);
+    outline: 4px solid var(--custom-outline-color);
 }
 /* ###################################### */
 
 /* custom button colors */
 .btn-custom {
-	--bs-btn-color: var(--custom-btn-text-color);
-	--bs-btn-bg: var(--custom-btn-base-color);
-	--bs-btn-border-color: var(--custom-btn-base-color);
-	--bs-btn-hover-color: var(--custom-btn-text-color);
-	--bs-btn-hover-bg: var(--custom-btn-hover-color);
-	--bs-btn-hover-border-color: var(--custom-btn-color);
-	--bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
-	--bs-btn-active-color: var(--custom-btn-text-color);
-	--bs-btn-active-bg: var(--custom-btn-click-color);
-	--bs-btn-active-border-color: var(--custom-btn-color);
-	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-	--bs-btn-disabled-color: var(--custom-btn-text-color);
-	--bs-btn-disabled-bg: var(--custom-btn-base-color);
-	--bs-btn-disabled-border-color: var(--custom-btn-base-color);
+    --bs-btn-color: var(--custom-btn-text-color);
+    --bs-btn-bg: var(--custom-btn-base-color);
+    --bs-btn-border-color: var(--custom-btn-base-color);
+    --bs-btn-hover-color: var(--custom-btn-text-color);
+    --bs-btn-hover-bg: var(--custom-btn-hover-color);
+    --bs-btn-hover-border-color: var(--custom-btn-color);
+    --bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
+    --bs-btn-active-color: var(--custom-btn-text-color);
+    --bs-btn-active-bg: var(--custom-btn-click-color);
+    --bs-btn-active-border-color: var(--custom-btn-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--custom-btn-text-color);
+    --bs-btn-disabled-bg: var(--custom-btn-base-color);
+    --bs-btn-disabled-border-color: var(--custom-btn-base-color);
 }
 .btn-outline-custom {
-	--bs-btn-color: var(--custom-btn-text-color);
-	--bs-btn-border-color: var(--custom-btn-text-color);
-	--bs-btn-hover-color: var(--custom-btn-text-color);
-	--bs-btn-hover-bg: var(--custom-btn-base-color);
-	--bs-btn-hover-border-color: var(--custom-btn-base-color);
-	--bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
-	--bs-btn-active-color: var(--custom-btn-text-color);
-	--bs-btn-active-bg: var(--custom-btn-base-color);
-	--bs-btn-active-border-color: var(--custom-btn-base-color);
-	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-	--bs-btn-disabled-color: var(--custom-btn-text-color);
-	--bs-btn-disabled-bg: transparent;
-	--bs-btn-disabled-border-color: var(--custom-btn-text-color);
-	--bs-gradient: none;
+    --bs-btn-color: var(--custom-btn-text-color);
+    --bs-btn-border-color: var(--custom-btn-text-color);
+    --bs-btn-hover-color: var(--custom-btn-text-color);
+    --bs-btn-hover-bg: var(--custom-btn-base-color);
+    --bs-btn-hover-border-color: var(--custom-btn-base-color);
+    --bs-btn-focus-shadow-rgb: var(--custom-outline-color-rgb);
+    --bs-btn-active-color: var(--custom-btn-text-color);
+    --bs-btn-active-bg: var(--custom-btn-base-color);
+    --bs-btn-active-border-color: var(--custom-btn-base-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--custom-btn-text-color);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--custom-btn-text-color);
+    --bs-gradient: none;
 }
