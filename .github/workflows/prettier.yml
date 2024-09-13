@@ -20,6 +20,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install npm v8
+        run: npm i -g npm@8
+
       - name: Prettier Action
         uses: creyD/prettier_action@v4.3
         with:
