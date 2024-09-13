@@ -16,12 +16,13 @@ services:
       - 8000:443
     depends_on:
       - registration
-      - user_management
+      - usermanagement
       - game
     networks:
       - network_game
       - network_user_management
       - network_registration
+      - network_django
     profiles:
       - all
     restart: on-failure
@@ -37,6 +38,8 @@ networks:
   network_registration:
     driver: bridge
   network_user_management:
+    driver: bridge
+  network_django:
     driver: bridge
 
 secrets:
