@@ -20,17 +20,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Prettier
-        run: npm install prettier
-
-      - name: Validate Prettier Configuration
-        run: npx prettier --write **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
-
       - name: Prettier Action
         uses: creyD/prettier_action@v4.3
         with:
