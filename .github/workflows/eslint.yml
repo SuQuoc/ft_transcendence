@@ -1,0 +1,40 @@
+name: ESLint for FE (JS/HTML/CSS)
+
+on:
+  push:
+    branches:
+      - frontend
+      - frontend/*
+      - frontend/**
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install dependencies
+        run: npm install
+      - name: Run ESLint
+        run: npx eslint 'src/**/*.js' --fix --config linterrules/.eslintrc.json
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m 'ESLint fixes by GitHub Actions'
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
