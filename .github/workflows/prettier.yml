@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - frontend
-      - frontend/michael
-      - frontend/fiona
+      - frontend/*
+      - frontend/**
       - prettier-test
 
 jobs:
