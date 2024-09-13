@@ -83,7 +83,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 						h-lg-100 p-2 gap-lg-0 gap-5"
 			>
 				<!-- leave button -->
-				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
+				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3">
 				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
 
 				<!-- number of players -->
@@ -97,7 +97,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 				</div>
 
 				<!-- player list -->
-				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2"></hr>
+				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2">
 				<div id="lobbyPlayerList"
 					class="d-flex flex-lg-column flex-row
 							align-self-lg-start align-self-center
