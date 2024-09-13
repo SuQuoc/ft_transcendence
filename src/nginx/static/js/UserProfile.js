@@ -59,6 +59,7 @@ export class UserProfile extends ComponentBaseClass {
           <div class="mb-3">
             <label for="displayName" class="form-label">Display Name</label>
             <input type="text" class="form-control" id="displayName">
+            <div class="warning-message" id="displayNameWarning">Error changing display name</div>
           </div>
           <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
@@ -92,6 +93,7 @@ export class UserProfile extends ComponentBaseClass {
               <span class="input-group-text" id="confirmPasswordToggle">Show</span>
             </div>
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
+            <div class="warning-message" id="changePasswordWarning">Error changing password</div>
           </div>
           <button type="button" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
           <div class="spinner-border text-light" role="status" id="changePasswordSpinner">
@@ -274,8 +276,10 @@ export class UserProfile extends ComponentBaseClass {
     async saveProfile() {
         const saveButton = this.shadowRoot.getElementById('saveProfile');
         const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');
+        const displayNameWarning = this.shadowRoot.getElementById('displayNameWarning');
         saveButton.disabled = true;
         saveSpinner.style.display = 'inline-block';
+        displayNameWarning.style.display = 'none';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
         const formData = new FormData();
@@ -288,6 +292,7 @@ export class UserProfile extends ComponentBaseClass {
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);
+            displayNameWarning.style.display = 'block';
         }
 
         saveButton.disabled = false;
@@ -317,8 +322,10 @@ export class UserProfile extends ComponentBaseClass {
     async changePassword() {
         const changeButton = this.shadowRoot.getElementById('changePassword');
         const changeSpinner = this.shadowRoot.getElementById('changePasswordSpinner');
+        const changePasswordWarning = this.shadowRoot.getElementById('changePasswordWarning');
         changeButton.disabled = true;
         changeSpinner.style.display = 'inline-block';
+        changePasswordWarning.style.display = 'none';
 
         const oldPassword = this.shadowRoot.getElementById('oldPassword').value;
         const newPassword = this.shadowRoot.getElementById('newPassword').value;
@@ -327,8 +334,6 @@ export class UserProfile extends ComponentBaseClass {
             return;
         }
 
-        // Simulate API call, can be removed later
-        //await new Promise(resolve => setTimeout(resolve, 500));
         try {
             await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({"current_password": oldPassword, "new_password": newPassword})});
             this.shadowRoot.getElementById('oldPassword').value = '';
@@ -337,6 +342,7 @@ export class UserProfile extends ComponentBaseClass {
             console.log('Changed password');
         } catch (error) {
             console.error('Error changing password: ', error);
+            changePasswordWarning.style.display = 'block';
         }
 
         changeButton.disabled = false;
