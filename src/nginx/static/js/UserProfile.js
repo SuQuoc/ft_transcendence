@@ -331,6 +331,9 @@ export class UserProfile extends ComponentBaseClass {
         //await new Promise(resolve => setTimeout(resolve, 500));
         try {
             await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({"current_password": oldPassword, "new_password": newPassword})});
+            this.shadowRoot.getElementById('oldPassword').value = '';
+            this.shadowRoot.getElementById('newPassword').value = '';
+            this.shadowRoot.getElementById('confirmPassword').value = '';
             console.log('Changed password');
         } catch (error) {
             console.error('Error changing password: ', error);
