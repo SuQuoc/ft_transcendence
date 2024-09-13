@@ -12,6 +12,10 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
 
+    permissions:
+        contents: write
+        workflows: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
