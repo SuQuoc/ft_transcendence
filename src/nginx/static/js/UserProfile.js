@@ -224,21 +224,20 @@ export class UserProfile extends ComponentBaseClass {
         try {
             // Fetch user data from global app object or API
             const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
-            this.shadowRoot.getElementById('displayName').value = response.displayname;
-            if (!('email' in response)) {
-                this.shadowRoot.getElementById('email').value = window.app.userData.email;
+            if ('displayname' in response) {
+                window.app.userData.username = response.displayname;
             }
+            if ('email' in response) {
+                window.app.userData.email = response.email;
+            }
+            this.shadowRoot.getElementById('displayName').value = window.app.userData.username;
+            this.shadowRoot.getElementById('email').value = window.app.userData.email;
 
-            // Check if the image URL is reachable
-            const imageUrl = response.image;
-            const image = new Image();
-            image.onload = () => {
-                this.shadowRoot.getElementById('profileImage').src = imageUrl;
+            const profileImage = this.shadowRoot.getElementById('profileImage');
+            profileImage.src = response.image;
+            profileImage.onerror = () => {
+                profileImage.src = 'https://i.pravatar.cc/300';
             };
-            image.onerror = () => {
-                this.shadowRoot.getElementById('profileImage').src = 'https://i.pravatar.cc/300';
-            };
-            image.src = imageUrl;
         } catch (error) {
             console.error('Error loading user data:', error);
         }
