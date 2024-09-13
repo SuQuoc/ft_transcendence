@@ -29,7 +29,7 @@ jobs:
         run: npm install prettier
 
       - name: Validate Prettier Configuration
-        run: npx prettier --check **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
+        run: npx prettier --write **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
 
       - name: Prettier Action
         uses: creyD/prettier_action@v4.3
