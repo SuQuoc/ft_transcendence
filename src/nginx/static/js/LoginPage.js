@@ -108,7 +108,7 @@ export class LoginPage extends ComponentBaseClass {
 				const responseData = await displaynameResponse.json();
 				window.app.userData.username = responseData.displayname;
 				//window.app.userData.<image?> = responseData.image;
-				app.router.go('/', false);
+				app.router.go("/", false);
 			}
 		} catch (error) {
 			console.error('Error during login:', error);
