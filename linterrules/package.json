@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "a pong game",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint 'src/**/*.js' --fix --config linterrules/eslint.config.js"
   },

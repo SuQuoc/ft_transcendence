@@ -30,7 +30,7 @@ jobs:
         run: npm install
         working-directory: ./linterrules
       - name: Run ESLint
-        run: npx eslint 'src/**/*.js' --fix --config linterrules/.eslint.config.js
+        run: npx eslint 'src/**/*.js' --fix --config linterrules/eslint.config.js
       - name: Commit changes
         run: |
           git add .
