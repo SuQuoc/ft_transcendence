@@ -22,5 +22,5 @@ jobs:
       - name: Prettier Action
         uses: creyD/prettier_action@v4.3
         with:
-          prettier_options: --write **/*.{js,yaml,yml,css,html} --config linterrules/.prettierrc.json
+          prettier_options: --write **/*.{js,css,html} --config linterrules/.prettierrc.json
           github_token: ${{ secrets.GITHUB_TOKEN }}
