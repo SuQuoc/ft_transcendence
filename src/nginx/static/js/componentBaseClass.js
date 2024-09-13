@@ -142,7 +142,10 @@ export class ComponentBaseClass extends HTMLElement {
 			throw new Error(`API call failed: ${response.statusText}`);
 		}
 
-		return response.json();
+		const contentType = response.headers.get('content-type');
+		if (contentType && contentType.includes('application/json')) {
+			return response.json();
+		}
 	};
 
 	/*

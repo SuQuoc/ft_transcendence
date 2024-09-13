@@ -165,20 +165,9 @@ export class UserProfile extends ComponentBaseClass {
             }
 
             try {
-                const response = await fetch('/um/profile', { method: 'DELETE' });
-                if (!response.ok) {
-                    throw new Error('Error deleting user from user management');
-                }
-                const response_reg = await fetch('/registration/delete_user', {
-                    method: 'POST',
-                    cache: 'no-store',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current_password: password })
-                });
-                if (!response_reg.ok) {
-                    throw new Error('Error deleting user from registration');
-                }
+                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password }) });
                 console.log('User deleted');
+                window.app.router.go('/login', true);
             } catch (error) {
                 console.error('Error deleting user:', error);
             }
