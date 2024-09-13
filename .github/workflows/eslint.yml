@@ -6,6 +6,7 @@ on:
       - frontend
       - frontend/*
       - frontend/**
+      - eslint-test
   pull_request:
     branches:
       - main
