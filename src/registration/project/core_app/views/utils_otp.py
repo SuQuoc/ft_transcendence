@@ -11,7 +11,7 @@ import os
 # [aguilmea] i do not pass the token as a parameter so it is more secure but it is not the easiest way for the user
 # I am not sure if i should send the link or if the user should stay on the page
 # FE should handle the get request and send me a post request (more secured) so that i can answer with a response
-def send_twofa_email(username, action, password):
+def send_otp_email(username, action, password):
     try:
         subject = ' Confirm your action for your Transcendence account'
         link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'

@@ -1,6 +1,7 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import RegistrationUser, OneTimePassword
 from django.utils import timezone
+from rest_framework.authentication import BaseAuthentication
 
 class AccessTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):
@@ -19,7 +20,7 @@ class RefreshTokenAuthentication(JWTAuthentication):
         validated_token = self.get_validated_token(raw_token)
         return self.get_user(validated_token), validated_token # do i need the second argument
         
-class CredentialsAuthentication(JWTAuthentication):
+class CredentialsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -28,11 +29,11 @@ class CredentialsAuthentication(JWTAuthentication):
             return None
         return user, None
     
-class NoExistingUserAuthentication(JWTAuthentication):
+class NoExistingUserAuthentication(BaseException):
     def authenticate(self, request, username=None, password=None):
         return None
 
-class OneTimePasswordAuthentication(JWTAuthentication):
+class OneTimePasswordAuthentication(BaseAuthentication):
     def authenticate(self, request, password=None):
         otp = request.data.get('otp')
         username = request.data.get('username')
@@ -49,7 +50,7 @@ class OneTimePasswordAuthentication(JWTAuthentication):
         return user, None
 
 
-class UsernameAuthentication(JWTAuthentication):
+class UsernameAuthentication(BaseAuthentication):
     def authenticate(self, request, password=None):
         username = request.data.get('username')
         if not username:

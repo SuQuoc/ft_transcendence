@@ -11,6 +11,7 @@ class RegistrationUser(AbstractUser):
     username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128, blank=True)
     
+    email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
     
     ft_userid = models.PositiveIntegerField(unique=True, null=True) #[aguilmea] I added this field to store the 42 intra userid, not sure if it is okay without encrypting it but i guess since it is not a credential
@@ -20,14 +21,18 @@ class RegistrationUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+    def set_verified(self):
+        self.email_verified = True
+        self.save()
+        return self
 
 class OneTimePassword(models.Model):
 
     ACTION_CHOICES = [
-        ('twofa_enable', 'enable the two factor authentication'),
-        ('twofa_disable', 'disable the two factor authentication'),
-        ('twofa_login', 'login'),
-        ('reset_password', 'reset the login password'),
+        ('login', 'login'),
+        ('signup', 'signup'),
+        ('password', 'reset the login password'),
     ]
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='otp')

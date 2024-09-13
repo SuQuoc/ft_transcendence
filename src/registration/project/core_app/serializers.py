@@ -7,7 +7,7 @@ from .models import RegistrationUser, OneTimePassword
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationUser
-        fields = ['id', 'username', 'password', 'twofa_enabled', 'ft_userid']
+        fields = ['id', 'username', 'password']
         extra_kwargs = {
             'id': {'read_only': True},
             'password': {'write_only': True},
