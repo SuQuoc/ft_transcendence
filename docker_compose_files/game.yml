@@ -59,6 +59,7 @@ services:
     restart: on-failure
     networks:
       - network_game
+      - network_django
     profiles:
       - all
       - game

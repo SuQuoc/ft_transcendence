@@ -74,23 +74,23 @@ um_down:
 	@${DOCKER_COMPOSE} --profile user_management down
 
 um_mm:
-	${DOCKER_COMPOSE} exec user_management python manage.py makemigrations
+	${DOCKER_COMPOSE} exec usermanagement python manage.py makemigrations
 
 
 um_migrate:
-	${DOCKER_COMPOSE} exec user_management python manage.py migrate
+	${DOCKER_COMPOSE} exec usermanagement python manage.py migrate
 
 um_shell:
-	${DOCKER_COMPOSE} exec user_management python manage.py shell
+	${DOCKER_COMPOSE} exec usermanagement python manage.py shell
 
 um_exec:
-	${DOCKER_COMPOSE} exec user_management bash
+	${DOCKER_COMPOSE} exec usermanagement bash
 
 um_db_exec:
 	${DOCKER_COMPOSE} exec db_user_management bash
 
 um_test:
-	${DOCKER_COMPOSE} exec user_management python manage.py test
+	${DOCKER_COMPOSE} exec usermanagement python manage.py test
 
 um_cache_clean:
 	rm -rf ./src/user_management/__pycache__/

@@ -1,5 +1,5 @@
 services:
-  db_user_management:
+  db_usermanagement:
     container_name: pong_um_db
     image: postgres:16
     environment:
@@ -25,7 +25,7 @@ services:
     networks:
       - network_user_management
 
-  user_management:
+  usermanagement:
     container_name: pong_um
     build: ../src/user_management
     volumes:
@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_MANAGEMENT:-insecurepass}"
       POSTGRES_ACCESS_USER: "${POSTGRES_ACCESS_USER_MANAGEMENT:-accessy}"
       POSTGRES_ACCESS_PASSWORD: "${POSTGRES_ACCESS_PASSWORD_MANAGEMENT:-accesspass}"
-      DB_HOST: "${DB_HOST_MANAGEMENT:-db_user_management}"
+      DB_HOST: "${DB_HOST_MANAGEMENT:-db_usermanagement}"
       DB_PORT: "${DB_PORT_MANAGEMENT:-5432}"
       DJ_SECRET_KEY: ${DJ_SECRET_KEY_MANAGEMENT:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DEBUG:-False}
@@ -49,7 +49,7 @@ services:
       JWT_SECRET: "${JWT_SECRET:-somesecret}"
       SERVER_URL: ${SERVER_URL:-https://localhost:8000}
     depends_on:
-      db_user_management:
+      db_usermanagement:
         condition: service_healthy
     restart: on-failure
     profiles:
@@ -57,6 +57,7 @@ services:
       - all
     networks:
       - network_user_management
+      - network_django
     secrets:
       - public_key.pem
       - private_key.pem # TODO !!! delete this line

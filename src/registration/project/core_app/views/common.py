@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
-from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies
+from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -15,6 +15,11 @@ def delete_user(request):
         current_password = request.data.get('password')
         if not current_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
+            # return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        response = send_delete_request_to_um(request)
+        if response.status_code != 200:
+            return response
         user = request.user
         if not user.check_password(current_password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
