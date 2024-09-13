@@ -236,7 +236,7 @@ export class UserProfile extends ComponentBaseClass {
             const profileImage = this.shadowRoot.getElementById('profileImage');
             profileImage.src = response.image;
             profileImage.onerror = () => {
-                profileImage.src = 'https://i.pravatar.cc/300';
+                profileImage.src = 'https://i.pravatar.cc/150?img=3';
             };
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -247,7 +247,6 @@ export class UserProfile extends ComponentBaseClass {
         const file = event.target.files[0];
         const allowedTypes = ['image/jpeg', 'image/png'];
         const maxSize = 1024 * 1024; // 1MB
-        console.log('Image selected:', file);
 
         const warningMessage = this.shadowRoot.getElementById('imageWarning');
         warningMessage.textContent = '';
@@ -271,8 +270,15 @@ export class UserProfile extends ComponentBaseClass {
                 this.shadowRoot.getElementById('profileImage').src = e.target.result;
                 window.app.userData.profileImage = e.target.result;
             };
-            //TODO: Add API call to upload image, use base64 string to transmit
-            reader.readAsDataURL(file);
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                this.apiFetch('/um/profile', { method: 'PATCH', body: formData }, 'multipart/form-data');
+                reader.readAsDataURL(file);
+            } catch {
+                warningMessage.textContent = 'Error uploading image.';
+                warningMessage.classList.add('alert', 'alert-danger');
+            }
         }
     }
 
@@ -283,14 +289,8 @@ export class UserProfile extends ComponentBaseClass {
         saveSpinner.style.display = 'inline-block';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
-        //const profileImage = this.selectedImage;
-        const profileImage = window.app.userData.profileImage;
-
         const formData = new FormData();
-        formData.append('displayName', displayName);
-        if (profileImage) {
-            formData.append('profileImage', profileImage);
-        }
+        formData.append('displayname', displayName);
 
         try {
             const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
