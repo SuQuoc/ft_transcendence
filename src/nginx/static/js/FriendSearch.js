@@ -73,6 +73,7 @@ export class FriendSearch extends ComponentBaseClass {
         resultsElement.innerHTML = '';
 
         this.results.forEach(user => {
+            console.log("User: ", user);
             const item = document.createElement('li');
             item.innerHTML = `
         <span>${user.displayname}</span>
