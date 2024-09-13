@@ -9,7 +9,7 @@ window.app = {
 		email: null,
 		profileImage: null,
 		id: null, // temporary!! (i think)
-	}
+	},
 };
 
 // link custom web components
@@ -27,16 +27,14 @@ import { FriendSearch } from './js/FriendSearch.js';
 import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
 import { TournamentWaitingRoomPage } from './js/TournamentWaitingRoomPage.js';
 
-
-console.log("app.js loaded");
+console.log('app.js loaded');
 // it's better to wait for the DOM to load before running any JS
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener('DOMContentLoaded', async () => {
 	// replaces the "null" state the browser pushes to the history when the page is loaded
-	if (!history.state)
-		history.replaceState({route: location.pathname}, "", location.pathname);
+	if (!history.state) history.replaceState({ route: location.pathname }, '', location.pathname);
 	// generate a random user id (temporary!!!)
 	window.app.userData.id = crypto.randomUUID();
-	console.log("User ID: ", window.app.userData.id);
+	console.log('User ID: ', window.app.userData.id);
 
 	// adds event listeners for routing
 	await app.router.init();

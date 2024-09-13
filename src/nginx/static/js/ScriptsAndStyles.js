@@ -6,7 +6,6 @@ export class ScriptsAndStyles extends HTMLElement {
 		this.appendChild(content);
 	}
 
-
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `

@@ -1,24 +1,24 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class FindOpponentPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
-		
-		// add event listeners
-		window.app.socket.addEventListener("message", this.handleSocketMessageStartPong, {once: true});
-	}
 
+		// add event listeners
+		window.app.socket.addEventListener('message', this.handleSocketMessageStartPong, {
+			once: true,
+		});
+	}
 
 	/// ----- Event Handlers ----- ///
 
 	handleSocketMessageStartPong(event) {
 		const data = JSON.parse(event.data);
 
-		if (data.type === "startPong") {
-			window.app.router.go("/pong", false);
+		if (data.type === 'startPong') {
+			window.app.router.go('/pong', false);
 		}
 	}
-
 
 	getElementHTML() {
 		const template = document.createElement('template');

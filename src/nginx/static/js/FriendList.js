@@ -1,4 +1,4 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class FriendList extends ComponentBaseClass {
 	static get observedAttributes() {
@@ -80,12 +80,16 @@ export class FriendList extends ComponentBaseClass {
 	setupEventListeners() {
 		const buttons = this.shadowRoot.querySelectorAll('.btn');
 		buttons.forEach((button) => {
-			if ((button.id === 'friends-button' && (this.hasAttribute('friends') || this.attributes.length == 0)) || (button.id === 'requested-button' && this.hasAttribute('requested'))) {
+			if (
+				(button.id === 'friends-button' &&
+					(this.hasAttribute('friends') || this.attributes.length == 0)) ||
+				(button.id === 'requested-button' && this.hasAttribute('requested'))
+			) {
 				button.classList.add('active');
 			}
 			button.addEventListener('click', (event) => {
 				const clickedButton = event.target;
-				buttons.forEach(btn => btn.classList.remove('active'));
+				buttons.forEach((btn) => btn.classList.remove('active'));
 				clickedButton.classList.add('active');
 				clickedButton.setAttribute('aria-current', 'page');
 
@@ -128,7 +132,7 @@ export class FriendList extends ComponentBaseClass {
 		this.requested.clear();
 		this.received.clear();
 		console.log(data);
-		data.forEach(item => {
+		data.forEach((item) => {
 			if (item.relationship === 'friend') {
 				this.friends.set(item.user.uid, item);
 			} else if (item.relationship === 'requested') {
@@ -144,7 +148,12 @@ export class FriendList extends ComponentBaseClass {
 		listElement.innerHTML = '';
 
 		if (this.hasAttribute('friends') || !this.hasAttribute('requested')) {
-			this.updateItems(listElement, this.friends, 'No friends', this.createFriendListItem.bind(this));
+			this.updateItems(
+				listElement,
+				this.friends,
+				'No friends',
+				this.createFriendListItem.bind(this)
+			);
 		} else if (this.hasAttribute('requested')) {
 			if (this.requested.size === 0 && this.received.size === 0) {
 				const item = document.createElement('li');
@@ -153,11 +162,22 @@ export class FriendList extends ComponentBaseClass {
 				listElement.appendChild(item);
 			} else {
 				if (this.requested.size > 0) {
-					this.updateItems(listElement, this.requested, '', this.createRequestedListItem.bind(this));
+					this.updateItems(
+						listElement,
+						this.requested,
+						'',
+						this.createRequestedListItem.bind(this)
+					);
 				}
 				if (this.received.size > 0) {
-					this.updateItems(listElement, this.received, '', this.createReceivedListItem.bind(this));
-				}			}
+					this.updateItems(
+						listElement,
+						this.received,
+						'',
+						this.createReceivedListItem.bind(this)
+					);
+				}
+			}
 		}
 	}
 

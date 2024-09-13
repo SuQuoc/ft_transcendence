@@ -1,4 +1,4 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class PlayMenuHomePage extends ComponentBaseClass {
 	getElementHTML() {

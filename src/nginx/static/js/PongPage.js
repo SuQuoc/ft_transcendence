@@ -1,6 +1,6 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
-import { startPong } from "./pong/pong.js";
+import { startPong } from './pong/pong.js';
 
 export class PongPage extends ComponentBaseClass {
 	connectedCallback() {

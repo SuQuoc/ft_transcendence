@@ -1,4 +1,4 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 // TODO: add a loading screen instead of text (not important)
 

@@ -1,5 +1,5 @@
 // Update the SignupPage class
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class SignupPage extends ComponentBaseClass {
 	constructor() {
@@ -8,10 +8,18 @@ export class SignupPage extends ComponentBaseClass {
 
 	connectedCallback() {
 		super.connectedCallback();
-		this.shadowRoot.getElementById('signupForm').addEventListener('submit', this.signup.bind(this));
-		this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById('signupForm')
+			.addEventListener('submit', this.signup.bind(this));
+		this.shadowRoot
+			.getElementById('signupPassword1')
+			.addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById('signupPassword2')
+			.addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById('signupEmail')
+			.addEventListener('input', this.validateForm.bind(this));
 	}
 
 	getElementHTML() {
@@ -93,8 +101,12 @@ export class SignupPage extends ComponentBaseClass {
 				emailWarning.textContent = '';
 			}
 			if (!passwordsMatch) {
-				this.shadowRoot.getElementById('signupPassword1').setAttribute('aria-invalid', 'true');
-				this.shadowRoot.getElementById('signupPassword2').setAttribute('aria-invalid', 'true');
+				this.shadowRoot
+					.getElementById('signupPassword1')
+					.setAttribute('aria-invalid', 'true');
+				this.shadowRoot
+					.getElementById('signupPassword2')
+					.setAttribute('aria-invalid', 'true');
 				passwordWarning.textContent = "Passwords don't match";
 			} else {
 				this.shadowRoot.getElementById('signupPassword1').removeAttribute('aria-invalid');
@@ -131,9 +143,9 @@ export class SignupPage extends ComponentBaseClass {
 			const response = await fetch('/registration/signup', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ username: email, password })
+				body: JSON.stringify({ username: email, password }),
 			});
 
 			if (!response.ok) {

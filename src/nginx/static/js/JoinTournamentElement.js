@@ -13,14 +13,13 @@ export class JoinTournamentElement extends HTMLElement {
 		this.join_tournament_button = this.querySelector("[name='join_tournament_button']");
 
 		// add event listeners
-		this.join_tournament_button.addEventListener("click", this.handleJoinTournamentVar);
+		this.join_tournament_button.addEventListener('click', this.handleJoinTournamentVar);
 	}
 
 	disconnectedCallback() {
 		// remove event listeners
-		this.join_tournament_button.removeEventListener("click", this.handleJoinTournamentVar);
+		this.join_tournament_button.removeEventListener('click', this.handleJoinTournamentVar);
 	}
-
 
 	/// ----- Event Handlers ----- ///
 
@@ -28,13 +27,19 @@ export class JoinTournamentElement extends HTMLElement {
 	// then it sends a message to the server that the client wants to join the tournament
 	// and changes the route to the tournament waiting room where the client waits for the message from the server
 	handleJoinTournament(event) {
-		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
-		
-		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
+		let tournament_name =
+			event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 
-		window.app.socket.send(JSON.stringify({"type": "joinTournament",
-										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
+		window.app.socket.addEventListener(
+			'message',
+			window.app.router.handleSocketMessageChangeRoute,
+			{ once: true }
+		);
+
+		window.app.socket.send(
+			JSON.stringify({ type: 'joinTournament', tournament_name: tournament_name })
+		);
+		window.app.router.go('/tournament-waiting-room', false); // false means it doesn't get added to the history
 	}
 
 	// the element with the info of the tournament and a button to join it

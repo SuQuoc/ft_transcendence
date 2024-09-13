@@ -2,13 +2,13 @@
 	<label for="email">Email Address</label>
 	<input type="email" id="email" name="email" aria-describedby="email-error" />
 	<span id="email-error" class="error-message"></span>
-  </div>
-  
-  <script>
-  function validateEmail(email) {
+</div>
+
+<script>
+	 function validateEmail(email) {
 	// Validation logic here
 	const isValid = /* ... */;
-	
+
 	if (!isValid) {
 	  const errorMessage = "Please enter a valid email address";
 	  document.getElementById("email").setAttribute("aria-invalid", "true");
@@ -17,5 +17,5 @@
 	  document.getElementById("email").removeAttribute("aria-invalid");
 	  document.getElementById("email-error").textContent = "";
 	}
-  }
-  </script>
+	 }
+</script>

@@ -1,5 +1,5 @@
 // Update the LoginPage class
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class LoginPage extends ComponentBaseClass {
 	constructor() {
@@ -8,9 +8,15 @@ export class LoginPage extends ComponentBaseClass {
 
 	connectedCallback() {
 		super.connectedCallback();
-		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
-		this.shadowRoot.getElementById('loginEmail').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('loginPassword').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById('loginForm')
+			.addEventListener('submit', this.login.bind(this));
+		this.shadowRoot
+			.getElementById('loginEmail')
+			.addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById('loginPassword')
+			.addEventListener('input', this.validateForm.bind(this));
 	}
 
 	getElementHTML() {
@@ -81,23 +87,23 @@ export class LoginPage extends ComponentBaseClass {
 			const loginResponse = await fetch('/registration/login', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ "username": email, password })
+				body: JSON.stringify({ username: email, password }),
 			});
 
 			if (!loginResponse.ok) {
 				throw new Error('Login failed');
 			}
-            window.app.userData = window.app.userData || {};
+			window.app.userData = window.app.userData || {};
 			window.app.userData.email = email;
 
 			// Check if the user already has a displayname
-			const displaynameResponse = await fetch ('/um/profile/', {
+			const displaynameResponse = await fetch('/um/profile/', {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
@@ -108,7 +114,7 @@ export class LoginPage extends ComponentBaseClass {
 				const responseData = await displaynameResponse.json();
 				window.app.userData.username = responseData.displayname;
 				//window.app.userData.<image?> = responseData.image;
-				app.router.go("/", false);
+				app.router.go('/', false);
 			}
 		} catch (error) {
 			console.error('Error during login:', error);

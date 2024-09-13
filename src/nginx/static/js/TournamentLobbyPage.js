@@ -1,6 +1,6 @@
-import { ComponentBaseClass } from "./componentBaseClass.js";
+import { ComponentBaseClass } from './componentBaseClass.js';
 
-import { TournamentLobbyPlayerElement } from "./TournamentLobbyPlayerElement.js";
+import { TournamentLobbyPlayerElement } from './TournamentLobbyPlayerElement.js';
 
 export class TournamentLobbyPage extends ComponentBaseClass {
 	constructor() {
@@ -12,28 +12,27 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super.connectedCallback();
 
 		// adding classes
-		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
+		this.classList.add('d-flex', 'flex-lg-row', 'flex-column-reverse', 'w-100', 'h-100');
 
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
-		this.player_list = this.root.getElementById("lobbyPlayerList");
-		this.leave_button = this.root.getElementById("lobbyLeaveButton");
+		this.player_list = this.root.getElementById('lobbyPlayerList');
+		this.leave_button = this.root.getElementById('lobbyLeaveButton');
 
 		// adding event listeners
-		this.leave_button.addEventListener("click", this.handleLeaveLobby);
-		window.app.socket.addEventListener("message", this.handleRecievedMessageVar);
+		this.leave_button.addEventListener('click', this.handleLeaveLobby);
+		window.app.socket.addEventListener('message', this.handleRecievedMessageVar);
 
 		// gets the player list when the page is loaded
-		window.app.socket.send(JSON.stringify({type: "getUpdateLobbyPlayerList"}));
+		window.app.socket.send(JSON.stringify({ type: 'getUpdateLobbyPlayerList' }));
 	}
 
 	disconnectedCallback() {
 		super.disconnectedCallback();
 
 		// removing event listeners
-		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
-		window.app.socket.removeEventListener("message", this.handleRecievedMessageVar);
+		this.leave_button.removeEventListener('click', this.handleLeaveLobby);
+		window.app.socket.removeEventListener('message', this.handleRecievedMessageVar);
 	}
-
 
 	/// ----- Methods ----- ///
 
@@ -46,25 +45,23 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		//TODO: change avatar
 	}
 
-
 	/// ----- Event Handlers ----- ///
 
 	handleLeaveLobby(event) {
-		window.app.socket.send(JSON.stringify({type: "leaveTournament"}));
-		window.app.router.go("/tournament", false); // isn't added to the history
+		window.app.socket.send(JSON.stringify({ type: 'leaveTournament' }));
+		window.app.router.go('/tournament', false); // isn't added to the history
 	}
 
 	/** gets called when the websocket receives a message */
 	handleRecievedMessage(event) {
 		const data = JSON.parse(event.data);
-		
-		console.log("received message in tournament-lobby-page: ", data);
-		
-		this.root.getElementById("lobbyPlayerList").innerHTML = "";
-		if (data.type === "updateLobbyPlayerList") {
+
+		console.log('received message in tournament-lobby-page: ', data);
+
+		this.root.getElementById('lobbyPlayerList').innerHTML = '';
+		if (data.type === 'updateLobbyPlayerList') {
 			for (let key in data) {
-				if (data[key].player_name)
-					this.addPlayerElement(data[key].player_name);
+				if (data[key].player_name) this.addPlayerElement(data[key].player_name);
 			}
 		}
 	}
