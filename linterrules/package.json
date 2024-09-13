@@ -1,0 +1,16 @@
+{
+  "name": "transcendence",
+  "version": "1.0.0",
+  "description": "a pong game",
+  "main": "app.js",
+  "scripts": {
+    "lint": "eslint 'src/**/*.js' --fix --config linterrules/.eslintrc.json"
+  },
+  "author": "42 Vienna",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.10.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3"
+  }
+}
