@@ -16,37 +16,36 @@ Including another URLconf
 """
 
 from core_app.views import common, oauth2, basic, otp, test
-from django.urls import re_path
+from django.urls import path
 
 urlpatterns = [
     # basic views
-    re_path('basic_signup', basic.signup),
-    re_path('basic_login', basic.login),
-    re_path('forgot_password_send_email', basic.forgot_password_send_email),
-    re_path('forgot_password_reset', basic.forgot_password_reset),
+    path('registration/basic_signup/', basic.signup),
+    path('registration/basic_login/', basic.login),
+    path('registration/forgot_password/', basic.forgot_password_send_email),
 
     #test views
-    re_path('signup', test.signup),
-    re_path('login', test.login),
+    path('registration/signup/', test.signup),
+    path('registration/login/', test.login),
 
     # common views
-    re_path('delete_user', common.delete_user),
-    re_path('logout', common.logout),
-    re_path('change_password', common.change_password),
-    re_path('verify_token', common.verify_token),
-    re_path('refresh_token', common.refresh_token),
+    path('registration/delete_user/', common.delete_user),
+    path('registration/logout/', common.logout),
+    path('registration/change_password/', common.change_password),
+    path('registration/verify_token/', common.verify_token),
+    path('registration/refresh_token/', common.refresh_token),
     
     # oauth2 views
-    re_path('oauth2_callback', oauth2.callback),
-    re_path('oauth2_set', oauth2.set),
-    re_path('oauth2_unset', oauth2.unset),
-    re_path('oauth2_signup', oauth2.signup),
-    re_path('oauth2_login', oauth2.login),
+    path('registration/oauth2_callback/', oauth2.callback),
+    path('registration/oauth2_set/', oauth2.set),
+    path('registration/oauth2_unset/', oauth2.unset),
+    path('registration/oauth2_signup/', oauth2.signup),
+    path('registration/oauth2_login/', oauth2.login),
 
     # twofa views
-    re_path('otp_send_email', otp.send_email),
-    re_path('otp_confirm_twofa', otp.confirm_twofa),
-    re_path('otp_confirm_login', otp.confirm_login),
+    path('registration/otp_send_email/', otp.send_email),
+    path('registration/otp_confirm_twofa/', otp.confirm_twofa),
+    path('registration/otp_confirm_login/', otp.confirm_login),
 
 
 ]
