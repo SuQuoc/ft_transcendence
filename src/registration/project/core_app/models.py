@@ -35,7 +35,9 @@ class OneTimePassword(models.Model):
     ACTION_CHOICES = [
         ('login', 'login'),
         ('signup', 'signup'),
-        ('password', 'reset the login password'),
+        ('reset_password', 'reset_password'),
+        ('change_password', 'change_password'),
+        ('change_email', 'change_email'),
     ]
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='otp')
