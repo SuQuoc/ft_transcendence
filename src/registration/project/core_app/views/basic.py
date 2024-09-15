@@ -4,13 +4,12 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.authentication import BasicAuthentication
 
 from ..authenticate import CredentialsAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser
 from .utils import generate_response_with_valid_JWT, send_reset_email
-from .utils_otp import create_one_time_password, send_otp_email
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -19,22 +18,26 @@ def signup(request):
         username = request.data.get('username')
         password = request.data.get('password')
         if not username or not password:
-            return Response({'test 0'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
         if user is None:
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
-                return Response({'test 1'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             user = user_s.create(request.data)
             otp = create_one_time_password(user.id, 'signup')
             send_otp_email(username, 'signup', otp) # I need to pass the password to the function because in the future i want to hash it
-            return Response({'password': password}, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         elif not user.check_password(password):
-            return Response({'password': password}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            user.set_verified()
-            token_s = TokenObtainPairSerializer(data=request.data)
-            return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        otp = request.data.get('otp')
+        if not otp:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not check_one_time_password(user, 'signup', otp):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user.set_verified( )
+        token_s = TokenObtainPairSerializer(data=request.data)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -47,7 +50,7 @@ def login(request):
         user = request.user
         if user.twofa_enabled is True:
             password = create_one_time_password(user.id, 'twofa_login')
-            send_twofa_email(user.username, 'twofa_login', password) # I need to pass the password to the function because in the future i want to hash it
+            send_otp_email(user.username, 'twofa_login', password) # I need to pass the password to the function because in the future i want to hash it
             return Response(status=status.HTTP_202_ACCEPTED)
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
