@@ -29,7 +29,7 @@ class CredentialsAuthentication(BaseAuthentication):
             return None
         return user, None
     
-class NoExistingUserAuthentication(BaseException):
+class NoExistingUserAuthentication(BaseAuthentication):
     def authenticate(self, request, username=None, password=None):
         return None
 
