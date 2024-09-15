@@ -26,7 +26,7 @@ class RegistrationUser(AbstractUser):
         self.email_verified = True
         self.save()
         return self
-
+    
     def is_verified(self):
         return self.email_verified
 
@@ -37,7 +37,7 @@ class OneTimePassword(models.Model):
         ('signup', 'signup'),
         ('reset_password', 'reset_password'),
         ('change_password', 'change_password'),
-        ('change_email', 'change_email'),
+        ('change_username', 'change_username'),
         ('delete_user', 'delete_user'),
     ]
 
@@ -50,6 +50,11 @@ class OneTimePassword(models.Model):
         self.expire = timezone.now()
         self.save()
         return self
+
+    def save(self, *args, **kwargs):
+        if not self.pk: # [aguilmea] if it is a new object, I want to delete all the old ones
+            OneTimePassword.objects.filter(related_user=self.related_user).delete()
+        super().save(*args, **kwargs) # calls the parent method
 
     def __str__(self):
         return f"{self.related_user.username} {self.action}"

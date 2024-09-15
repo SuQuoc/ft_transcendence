@@ -44,6 +44,8 @@ def send_otp_email(username, action, password):
 
 def create_one_time_password(related_user, action):
     try:
+        for otp in OneTimePassword.objects.filter(related_user=related_user):
+            otp.delete()
         password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
         otp_data = {
             'related_user': related_user,

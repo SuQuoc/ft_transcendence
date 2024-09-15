@@ -29,11 +29,12 @@ urlpatterns = [
     path('registration/login/', test.login),
 
     # common views
+    path('registration/change_password/', common.change_password),
+    path('registration/change_username/', common.change_username),
     path('registration/delete_user/', common.delete_user),
     path('registration/logout/', common.logout),
-    path('registration/change_password/', common.change_password),
-    path('registration/verify_token/', common.verify_token),
     path('registration/refresh_token/', common.refresh_token),
+    path('registration/verify_token/', common.verify_token),
     
     # oauth2 views
     path('registration/oauth2_callback/', oauth2.callback),
