@@ -16,12 +16,3 @@ Content-Type: application/json
     "password": "{{current_password1}}",
     "otp": "HY4WP5MD3V5DUYFB"
 }
-###
-
-POST {{base_url}}/registration/basic_signup/
-Content-Type: application/json
-
-{
-    "username": "{{username2-1}}",
-    "password": "{{current_password2}}"
-}

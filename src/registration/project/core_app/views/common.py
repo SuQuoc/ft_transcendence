@@ -14,16 +14,23 @@ from .utils_otp import create_one_time_password, send_otp_email, check_one_time_
 def delete_user(request):
     try:
         current_password = request.data.get('password')
+        otp = request.data.get('otp')
+        user = request.user
         if not current_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(current_password):
+            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if otp is None:
+            otp = create_one_time_password(user.id, 'delete_user')
+            send_otp_email(user.username, 'delete_user', otp)
+            return Response({3}, status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'delete_user', otp):
+            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
         #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
-            # return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         response = send_delete_request_to_um(request)
         if response.status_code != 200:
-            return response
-        user = request.user
-        if not user.check_password(current_password):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({5}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         user.delete()
         return send_200_with_expired_cookies()
     except Exception as e:

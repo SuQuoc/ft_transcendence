@@ -1,0 +1,68 @@
+# @name signup
+POST {{base_url}}/registration/signup/
+Content-Type: application/json
+
+{
+    "username": "{{username5}}",
+    "password": "{{current_password5}}"
+}
+
+###
+
+@ACCESS_COOKIE = {{signup.response.headers.Set-Cookie}};
+
+###
+
+POST {{base_url}}/um/user-creation/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+    "displayname": "{{displayname5}}"
+}
+
+###
+
+POST {{base_url}}/registration/delete_user/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}} 
+
+{"password": "{{current_password5}}"}
+
+###
+
+# @name login
+POST {{base_url}}/registration/login/
+Content-Type: application/json
+
+{
+    "username": "{{username5}}",
+    "password": "{{current_password5}}"
+}
+
+###
+
+@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+
+###
+
+POST {{base_url}}/registration/delete_user/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}} 
+
+{
+    "password": "{{current_password5}}",
+    "otp": "WL6LIQJENPYP5L31"
+}
+
+###
+
+POST {{base_url}}/registration/login/
+Content-Type: application/json
+
+{
+    "username": "{{username5}}",
+    "password": "{{current_password5}}"
+}
+
+###
