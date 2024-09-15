@@ -1,10 +1,10 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ..authenticate import NoExistingUserAuthentication, CredentialsAuthentication
+from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from .utils import generate_response_with_valid_JWT
 
@@ -20,6 +20,8 @@ def signup(request):
         if not user_s.is_valid():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
+        user = user_s.instance
+        user.set_verified()
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_201_CREATED, token_s)
     except Exception as e:
@@ -27,7 +29,7 @@ def signup(request):
     
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def login(request):
     try:
         token_s = TokenObtainPairSerializer(data=request.data)
