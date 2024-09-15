@@ -27,6 +27,9 @@ class RegistrationUser(AbstractUser):
         self.save()
         return self
 
+    def is_verified(self):
+        return self.email_verified
+
 class OneTimePassword(models.Model):
 
     ACTION_CHOICES = [

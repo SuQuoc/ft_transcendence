@@ -17,6 +17,7 @@ def signup(request):
     try:
         username = request.data.get('username')
         password = request.data.get('password')
+        otp = request.data.get('otp')
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
@@ -26,13 +27,16 @@ def signup(request):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             user = user_s.create(request.data)
             otp = create_one_time_password(user.id, 'signup')
-            send_otp_email(username, 'signup', otp) # I need to pass the password to the function because in the future i want to hash it
+            send_otp_email(username, 'signup', otp)
             return Response(status=status.HTTP_201_CREATED)
-        elif not user.check_password(password):
+        if user.is_verified() is True:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        otp = request.data.get('otp')
+        if not user.check_password(password):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            otp = create_one_time_password(user.id, 'signup')
+            send_otp_email(username, 'signup', otp)
+            return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user.set_verified( )
@@ -48,13 +52,17 @@ def signup(request):
 def login(request):
     try:
         user = request.user
-        if user.twofa_enabled is True:
-            password = create_one_time_password(user.id, 'twofa_login')
-            send_otp_email(user.username, 'twofa_login', password) # I need to pass the password to the function because in the future i want to hash it
+        if not user.is_verified():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        otp = request.data.get('otp')
+        if not otp:
+            otp = create_one_time_password(user.id, 'login')
+            send_otp_email(user.username, 'login', otp)
             return Response(status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'login', otp):
+           return Response(status=status.HTTP_400_BAD_REQUEST)
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-    
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
