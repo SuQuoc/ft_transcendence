@@ -59,7 +59,7 @@ class SearchTest(MyTestSetUp):
         url = create_url_with_query_params(self.url, {"term": "friend"})
         response = self.client.get(url, secure=True, **self.headers)
         response_json = response.json()
-        # print(json.dumps(response_json, indent=4))
+        #print(json.dumps(response_json, indent=4))
 
         self.assertEqual(response_json[0]['relationship'], "friend")
         self.assertEqual(response_json[1]['relationship'], "friend")
@@ -80,16 +80,18 @@ class SearchTest(MyTestSetUp):
         response_json = response.json()
         # print(json.dumps(response_json, indent=4))
 
-        self.assertNotIn('relationship', response_json[0])
-        self.assertNotIn('relationship', response_json[1])
+        self.assertEqual(response_json[0]['relationship'], "stranger") # if i declined
+        self.assertEqual(response_json[1]['relationship'], "stranger") # if other declined
+
 
     def test_search_stranger(self):
         url = create_url_with_query_params(self.url, {"term": "Stranger"})
         response = self.client.get(url, secure=True, **self.headers)
         response_json = response.json()
-        # print(json.dumps(response_json, indent=4))
+        #print(json.dumps(response_json, indent=4))
 
-        self.assertNotIn('relationship', response_json[0])
+
+        self.assertEqual(response_json[0]['relationship'], "stranger")
 
 
 def create_url_with_query_params(base_url, query_params):

@@ -114,7 +114,7 @@ class TestCrud(MyTestSetUp):
         self.test_success()
         self.data['displayname'] = NEW_NAME
         response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-        print(response.json())
+        # print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
@@ -175,7 +175,7 @@ class TestCrud(MyTestSetUp):
         # image_path = user.image.path
         # print(image_path)
         # response_json = response.json()
-        print(response.json())
+        # print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.data['displayname']).count(), 1)

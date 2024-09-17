@@ -60,7 +60,7 @@ class UserRelationSerializer(serializers.ModelSerializer):
 
     def get_relationship(self, obj):
         relationships = self.context.get('relationships', {})
-        return relationships.get(obj.user_id, None)
+        return relationships.get(obj.user_id, None) # view always provides user_id in dict so None should never happen
     
     def get_friend_request_id(self, obj):
         friend_request_id = self.context.get('friend_requests', {})
@@ -72,8 +72,8 @@ class UserRelationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if representation.get('relationship') is None:
-            representation.pop('relationship')
+        # if representation.get('relationship') is None: SHOULD NEVER HAPPEN
+        #     representation.pop('relationship')
         if representation.get('online') is None:
             representation.pop('online')
         return representation
