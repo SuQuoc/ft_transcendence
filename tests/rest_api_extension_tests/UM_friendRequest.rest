@@ -39,3 +39,9 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 
+###
+
+GET {{baseUrl}}/um/search?term=Mario
+Content-Type: application/json
+Cookie: {{cookie}}
+
