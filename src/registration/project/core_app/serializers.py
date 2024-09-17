@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # validate_password(validated_data['password'], user=None) # [aguilmea] not setup yet to make testing easier
-        validated_data.pop('otp')
+        validated_data.pop('otp', None)
         password = validated_data.pop('password')
         user = RegistrationUser(**validated_data)
         user.set_password(password)
