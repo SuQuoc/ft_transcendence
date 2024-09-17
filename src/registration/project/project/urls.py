@@ -21,6 +21,8 @@ from django.urls import path
 urlpatterns = [
     # basic views
     path('registration/basic_signup/', basic.signup),
+    path('registration/basic_signup_change_password/', basic.signup_change_password),
+    path('registration/basic_signup_change_username/', basic.signup_change_username),
     path('registration/basic_login/', basic.login),
     path('registration/forgot_password/', basic.forgot_password_send_email),
 

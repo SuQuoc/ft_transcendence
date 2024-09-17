@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from ..authenticate import CredentialsAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
 from ..serializers import UserSerializer
-from ..models import RegistrationUser
+from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT, send_reset_email
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
@@ -21,13 +21,13 @@ def signup(request):
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
-        if user is None:
+        if not user or user is None:
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             user = user_s.create(request.data)
-            otp = create_one_time_password(user.id, 'signup')
-            send_otp_email(username, 'signup', otp)
+            created_otp = create_one_time_password(user.id, 'signup')
+            send_otp_email(username, 'signup', created_otp)
             return Response(status=status.HTTP_201_CREATED)
         if user.is_verified() is True:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -42,6 +42,51 @@ def signup(request):
         user.set_verified( )
         token_s = TokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+    except Exception as e:
+        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_change_password(request):
+    try:
+        username = request.data.get('username')
+        password = request.data.get('new_password')
+        if not username or not password:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = RegistrationUser.objects.filter(username=username).first()
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if user.is_verified():
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        otp = create_one_time_password(user.id, 'signup')
+        send_otp_email(username, 'signup', otp)
+        user.set_password(password)
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_change_username(request):
+    try:
+        current_username = request.data.get('current_username')
+        new_username = request.data.get('new_username')
+        if not current_username or not new_username:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if (RegistrationUser.objects.filter(username=new_username).exists()):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = RegistrationUser.objects.filter(username=current_username).first()
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if user.is_verified():
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        OneTimePassword.objects.filter(related_user=user).delete()
+        user.username = new_username
+        user.save()
+        otp = create_one_time_password(user.id, 'signup')
+        send_otp_email(new_username, 'signup', otp)
+        return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
