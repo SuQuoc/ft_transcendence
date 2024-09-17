@@ -20,15 +20,17 @@ from django.urls import path
 
 urlpatterns = [
     # basic views
+    path('registration/basic_login/', basic.login),
+    path('registration/basic_forgot_password/', basic.forgot_password),
     path('registration/basic_signup/', basic.signup),
     path('registration/basic_signup_change_password/', basic.signup_change_password),
     path('registration/basic_signup_change_username/', basic.signup_change_username),
-    path('registration/basic_login/', basic.login),
-    path('registration/forgot_password/', basic.forgot_password_send_email),
 
     #test views
     path('registration/signup/', test.signup),
     path('registration/login/', test.login),
+    path('registration/forgot_reset/', basic.forgot_password_send_email), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+    path('registration/forgot_password_send_email/', basic.forgot_password_send_email),
 
     # common views
     path('registration/change_password/', common.change_password),
