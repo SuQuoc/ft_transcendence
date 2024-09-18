@@ -59,7 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
-    
+
         if self.room_name == "match":
             return
 
@@ -83,7 +83,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Now using a lobby class in a dict for better control
             self.lobby = Lobby(lobby_name=self.room_name, max_len=2)
             self.match: Match = self.lobby.addPlayer(self.player)
-            
+
             await self.channel_layer.group_add(
                 self.match.name,  # Replace with the actual group name
                 self.channel_name
@@ -94,7 +94,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         async with self.update_lock:
-            
+
             self.lobby = self.joinTournamentPage[self.room_name]
             self.match: Match = self.lobby.addPlayer(self.player)
 
@@ -211,7 +211,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             case "leaveTournament":
                 await self.leaveTournament(msg)
-            
+
             case "getUpdateLobbyPlayerList":
                 print("getUpdateLobbyPlayerList")
                 await self.sendtoClient.sendLobbyPlayerList(self.lobby)
@@ -246,7 +246,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("player id", self.room_name)
         e["type"] = "playerId"
         await self.send(text_data=json.dumps(e))
-    
+
     async def start_Pong(self, e):
         print("start pong", self.room_name)
         e["type"] = "startPong"
@@ -269,7 +269,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             status = "true"
         await self.sendJoinTournament(status)
 
-        # remove player to the tournaments joinTournamentPage group and send a update the lobby list 
+        # remove player to the tournaments joinTournamentPage group and send a update the lobby list
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
@@ -335,7 +335,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "joinTournament",
                 "joined": e}
             ))
-        
+
     async def update_LobbyPlayerList(self, e) -> None:
         print("hi dude")
         e["type"] = "updateLobbyPlayerList"
@@ -346,3 +346,161 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 # https://channels.readthedocs.io/en/latest/tutorial/part_3.html#rewrite-the-consumer-to-be-asynchronous
 # https://circumeo.io/blog/entry/django-websockets/
+
+
+LOOBIES = "lobbies"
+from django.core.cache import cache  # Import Django's cache
+
+class LobbiesConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        self.lobby_name = self.scope["url_route"]["kwargs"]["lobby_name"]
+        #self.group_name = "group_%s" % self.room_name # django groups, a group of related channels
+
+        await self.channel_layer.group_add(LOOBIES, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self):
+        current_room = cache.get(f'user_{self.channel_name}_room')
+        if current_room:
+            await self.leave_lobby(current_room)
+
+
+        await self.channel_layer.group_discard(LOOBIES, self.channel_name)
+
+
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        type = text_data_json['type']
+
+        if type == 'create_lobby':
+            room_name = text_data_json.get('room_name')
+            await self.create_lobby(room_name)
+
+        elif type == 'join_lobby':
+            room_name = text_data_json.get('room_name')
+
+
+
+
+    async def create_lobby(self, room_name):
+        if not room_name:
+            raise ValueError("Room name is required for creating a lobby")
+
+        # Initialize lobbies in the cache
+        lobbies = cache.get('lobbies', {})
+        if room_name in lobbies:
+            raise ValueError(f"Lobby '{room_name}' already exists.")
+
+        # Add the new lobby to the list of known lobbies
+        lobbies[room_name] = set()
+        cache.set('lobbies', lobbies)
+
+        # Set initial room size to 0
+        cache.set(f'lobby_{room_name}_size', 0)
+
+        # Notify others about the new lobby
+        await self.channel_layer.group_send(
+            LOOBIES,
+            {'type': 'new_room', 'room_name': room_name}
+        )
+
+        return
+        await self.send(text_data=json.dumps({
+            'type': 'lobby_created',
+            'room_name': room_name
+        }))
+
+    async def join_lobby(self, room_name):
+                    # Check if the lobby exists
+            if room_name not in lobbies:
+                raise ValueError(f"Lobby room '{room_name}' does not exist.")
+
+
+            lobbies = cache.get('lobbies', {})
+
+            # Check if the user is already in a room
+            current_room = cache.get(f'user_{self.channel_name}_room')
+            if current_room:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': f"You are already in a lobby: '{current_room}'. Leave that lobby before joining a new one."
+                }))
+                return
+
+            # Add the user to the new lobby
+            lobbies[room_name].add(self.channel_name)
+            cache.set('lobbies', lobbies)
+
+            # Store the user's current room in the cache
+            cache.set(f'user_{self.channel_name}_room', room_name)
+
+            # Update room size
+            room_size = cache.get(f'lobby_{room_name}_size', 0) + 1
+            cache.set(f'lobby_{room_name}_size', room_size)
+
+
+            # Notify others about the updated room size
+            await self.channel_layer.group_send(
+                'lobbies',
+                {
+                    'type': 'room_size_update',
+                    'room_name': room_name,
+                    'size': room_size
+                }
+            )
+
+
+            # Add user to the lobby group
+            await self.channel_layer.group_add(
+                f'lobby_{room_name}',
+                self.channel_name
+            )
+
+    async def leave_lobby(self, room_name):
+        """Helper method to remove a user from a lobby."""
+        lobbies = cache.get('lobbies', {})
+        if room_name in lobbies:
+            # Remove the user from the lobby
+            lobbies[room_name].discard(self.channel_name)
+            cache.set('lobbies', lobbies)
+
+            # Remove the user's current room entry in the cache
+            cache.delete(f'user_{self.channel_name}_room')
+
+            # Update room size
+            room_size = max(0, cache.get(f'lobby_{room_name}_size', 0) - 1)
+            cache.set(f'lobby_{room_name}_size', room_size)
+
+            # Notify others about the updated room size
+            await self.channel_layer.group_send(
+                'lobbies',
+                {
+                    'type': 'room_size_update',
+                    'room_name': room_name,
+                    'size': room_size
+                }
+            )
+
+            # Remove user from the lobby group
+            await self.channel_layer.group_discard(
+                f'lobby_{room_name}',
+                self.channel_name
+            )
+
+
+    async def new_room(self, event):
+        room_name = event['room_name']
+        await self.send(text_data=json.dumps({
+            'type': 'new_room',
+            'room_name': room_name
+        }))
+
+    async def room_size_update(self, event):
+        room_name = event['room_name']
+        size = event['size']
+        await self.send(text_data=json.dumps({
+            'type': 'room_size_update',
+            'room_name': room_name,
+            'size': size
+        }))
