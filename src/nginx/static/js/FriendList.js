@@ -114,7 +114,8 @@ export class FriendList extends ComponentBaseClass {
 
 	async fetchFriendList() {
 		try {
-			const response = await fetch('./js/friends.json', { cache: 'no-store' });
+			const response = await this.apiFetch('/um/friends', { method: 'GET', cache: 'no-store' });
+			//const response = await fetch('./js/friends.json', { cache: 'no-store' });
 			const data = await response.json();
 			this.processFriendData(data);
 			this.updateList();
@@ -127,7 +128,6 @@ export class FriendList extends ComponentBaseClass {
 		this.friends.clear();
 		this.requested.clear();
 		this.received.clear();
-		console.log(data);
 		data.forEach(item => {
 			if (item.relationship === 'friend') {
 				this.friends.set(item.user.uid, item);

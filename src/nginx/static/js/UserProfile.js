@@ -282,13 +282,19 @@ export class UserProfile extends ComponentBaseClass {
         displayNameWarning.style.display = 'none';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
+        const imageUpload = this.shadowRoot.getElementById('imageUpload');
         const formData = new FormData();
         formData.append('displayname', displayName);
+
+        if (imageUpload.files.length > 0) {
+            const imageFile = imageUpload.files[0];
+            formData.append('image', imageFile);
+        }
 
         try {
             const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
             window.app.userData.username = response.displayname;
-            window.app.userData.profileImage = response.image;
+            //window.app.userData.profileImage = response.image;
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);

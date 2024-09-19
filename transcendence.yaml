@@ -249,7 +249,7 @@ paths:
           description: Invalid Authentication supplied
         '404':
           description: No matching users found
-  /um/friends/{uid}:
+  /um/friends/:
     get:
       tags:
         - um
@@ -257,14 +257,6 @@ paths:
       description: This endpoint is used to get an object containing all current friends of a user including also friend requests sent and received by the user. This is mostly used for updating the information on the users profile page.
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: uid
-          schema:
-            type: string
-          required: true
-          description: Numeric ID of the user to get
-          example: "0123456"
       responses:
         '200':
           description: Successful operation
@@ -347,6 +339,64 @@ paths:
           description: Successful operation
         '400':
           description: Invalid Authentication supplied
+  /um/profile/send:
+    post:
+      tags:
+        - um
+      summary: creates friend request for user
+      description: TBD
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing elements to change
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver:
+                  type: string
+                  example: displayname1
+                  description: contains displayname of user to send friend request to
+        required: true
+      responses:
+        '201':
+          description: Successful operation, created friend request
+        '202':
+          description: Friend request already created before
+        '404':
+          description: Invalid display name
+  /um/profile/answer:
+    post:
+      tags:
+        - um
+      summary: changes state of friendship request
+      description: TBD
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Object containing elements to change
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                friend_request_id:
+                  type: integer
+                  example: 123456
+                  description: contains unique id of friend request to modify
+                action:
+                  type: string
+                  enum: ['unfriend', 'accept', 'decline']
+                  description: defines new state of friend request
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid change requested
+        '404':
+          description: Not found
 
 components:
   schemas:
@@ -405,6 +455,9 @@ components:
       items:
         type: object
         properties:
+          user_id:
+            type: string
+            example: 0123456
           displayname:
             type: string
             minLength: 1
@@ -418,6 +471,7 @@ components:
             format: string
             example: "true"
             nullable: true
+            description: only returned if user is friends with the other user
           relationship:
             type: string
             description: relationship between users

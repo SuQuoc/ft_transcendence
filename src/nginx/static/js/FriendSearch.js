@@ -3,7 +3,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class FriendSearch extends ComponentBaseClass {
     constructor() {
         super();
-        this.results = new Map();
+        this.results = [];
     }
 
     getElementHTML() {
@@ -57,11 +57,8 @@ export class FriendSearch extends ComponentBaseClass {
 
         try {
             //TODO: Add API call to search for users, no-store prevents caching https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
-            const response = await this.apiFetch(`/um/search?term=${query}`, { method: "GET", cache: "no-store" });
-            //const response = await fetch(`./js/friends.json`, { cache : "no-store" });
-            console.log(response);
-            this.results.clear();
-            response.forEach(user => this.results.set(user.user_id, user));
+            this.results = [];
+            this.results = await this.apiFetch(`/um/search?term=${query}`, { method: "GET", cache: "no-store" });
             this.updateResults();
         } catch (e) {
             console.error('Error fetching search results:', e.message);
@@ -76,36 +73,39 @@ export class FriendSearch extends ComponentBaseClass {
             console.log("User: ", user);
             const item = document.createElement('li');
             item.innerHTML = `
-        <span>${user.displayname}</span>
-        <div>
-          ${user.relationship === 'friend' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${user.relationship === 'requested' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${user.relationship === 'received' ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ''}
-          ${user.relationship === 'stranger' ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
-        </div>
-      `;
+            <span>${user.displayname}</span>
+            <div>
+              ${user.relationship === 'friend' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
+              ${user.relationship === 'requested' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
+              ${user.relationship === 'received' ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ''}
+              ${user.relationship === 'stranger' ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
+            </div>
+          `;
 
-            if (user.relationship === 'friend') {
-                item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriend(user.uid));
-            } else if (user.relationship === 'requested') {
-                item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriendRequest(user.uid));
-            } else if (user.relationship === 'received') {
-                item.querySelector('.btn-success').addEventListener('click', () => this.acceptFriendRequest(user.uid));
-                item.querySelector('.btn-danger').addEventListener('click', () => this.declineFriendRequest(user.uid));
-            } else {
-                item.querySelector('.btn-primary').addEventListener('click', () => this.sendFriendRequest(user.uid));
-            }
-
-            resultsElement.appendChild(item);
+        if (user.relationship === 'friend') {
+            item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriend(user.uid));
+        } else if (user.relationship === 'requested') {
+            item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriendRequest(user.uid));
+        } else if (user.relationship === 'received') {
+            item.querySelector('.btn-success').addEventListener('click', () => this.acceptFriendRequest(user.uid));
+            item.querySelector('.btn-danger').addEventListener('click', () => this.declineFriendRequest(user.uid));
+        } else {
+            item.querySelector('.btn-primary').addEventListener('click', () => this.sendFriendRequest(user.uid));
+        }
+        resultsElement.appendChild(item);
         });
     }
 
     async removeFriend(uid) {
         // TODO: Add API call to remove friend
+        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "unfriend" } });
         this.results.delete(uid);
         this.updateResults();
     }
 
+    /*
+    TODO: remove ability to cancel friend request
+    */
     async removeFriendRequest(uid) {
         // TODO: Add API call to remove friend request
         this.results.delete(uid);
@@ -114,18 +114,21 @@ export class FriendSearch extends ComponentBaseClass {
 
     async acceptFriendRequest(uid) {
         // TODO: Add API call to accept friend request
+        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "accept" } });
         this.results.delete(uid);
         this.updateResults();
     }
 
     async declineFriendRequest(uid) {
         // TODO: Add API call to decline friend request
+        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "decline" } });
         this.results.delete(uid);
         this.updateResults();
     }
 
-    async sendFriendRequest(uid) {
+    async sendFriendRequest(displayname) {
         // TODO: Add API call to send friend request
+        const response = await this.apiFetch(`/um/friends/send`, { method: "POST", requestBody: { receiver: displayname} });
         this.results.delete(uid);
         this.updateResults();
     }

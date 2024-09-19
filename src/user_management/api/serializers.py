@@ -14,11 +14,11 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
     relationship = serializers.SerializerMethodField(required=False)
-    
+
     class Meta:
         model = CustomUser
         fields = ["displayname", "online", "image", "relationship"]
-    
+
     def get_relationship(self, obj):
         return self.context.get('relationship', None)
 
@@ -61,7 +61,7 @@ class UserRelationSerializer(serializers.ModelSerializer):
     def get_relationship(self, obj):
         relationships = self.context.get('relationships', {})
         return relationships.get(obj.user_id, None) # view always provides user_id in dict so None should never happen
-    
+
     def get_friend_request_id(self, obj):
         friend_request_id = self.context.get('friend_requests', {})
         return friend_request_id.get(obj.user_id, None)
@@ -77,14 +77,10 @@ class UserRelationSerializer(serializers.ModelSerializer):
         if representation.get('online') is None:
             representation.pop('online')
         return representation
-    
+
 class CustomUserEditSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(validators=[profile_image_validator])
 
     class Meta:
         model = CustomUser
         fields = ["displayname", "image"]
-
-
-
-
