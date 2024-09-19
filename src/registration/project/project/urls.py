@@ -20,25 +20,30 @@ from django.urls import path
 
 urlpatterns = [
     # basic views
-    path('registration/basic_login/', basic.login),
-    path('registration/basic_forgot_password/', basic.forgot_password),
-    path('registration/basic_signup/', basic.signup),
-    path('registration/basic_signup_change_password/', basic.signup_change_password),
-    path('registration/basic_signup_change_username/', basic.signup_change_username),
+    path('registration/basic_login', basic.login),
+    path('registration/basic_forgot_password', basic.forgot_password),
+    path('registration/basic_signup', basic.signup),
+    path('registration/basic_signup_change_password', basic.signup_change_password),
+    path('registration/basic_signup_change_username', basic.signup_change_username),
 
     #test views
-    path('registration/signup/', test.signup),
-    path('registration/login/', test.login),
-    path('registration/forgot_reset/', basic.forgot_password_send_email), # [aguilmea] to be deleted as soon as frontend changed the endpoint
-    path('registration/forgot_password_send_email/', basic.forgot_password_send_email),
+    path('registration/signup', test.signup),
+    path('registration/login', test.login),
+    #path('registration/forgot_reset/', basic.forgot_password_send_email), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+    #path('registration/forgot_password_send_email/', basic.forgot_password_send_email),
+    #test views
+    path('signup', test.signup),
+    path('login', test.login),
+    path('forgot_reset', basic.forgot_password_send_email),
+    path('forgot_password_send_email', basic.forgot_password_send_email),
 
     # common views
-    path('registration/change_password/', common.change_password),
-    path('registration/change_username/', common.change_username),
-    path('registration/delete_user/', common.delete_user),
-    path('registration/logout/', common.logout),
-    path('registration/refresh_token/', common.refresh_token),
-    path('registration/verify_token/', common.verify_token),
+    path('registration/change_password', common.change_password),
+    path('registration/change_username', common.change_username),
+    path('registration/delete_user', common.delete_user),
+    path('registration/logout', common.logout),
+    path('registration/refresh_token', common.refresh_token),
+    path('registration/verify_token', common.verify_token),
     
     # oauth2 views
     path('registration/oauth2_callback/', oauth2.callback),
@@ -48,9 +53,9 @@ urlpatterns = [
     path('registration/oauth2_login/', oauth2.login),
 
     # twofa views
-    path('registration/otp_send_email/', otp.send_email),
-    path('registration/otp_confirm_twofa/', otp.confirm_twofa),
-    path('registration/otp_confirm_login/', otp.confirm_login),
+    path('registration/otp_send_email', otp.send_email),
+    path('registration/otp_confirm_twofa', otp.confirm_twofa),
+    path('registration/otp_confirm_login', otp.confirm_login),
 
 
 ]
