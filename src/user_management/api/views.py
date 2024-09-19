@@ -69,11 +69,15 @@ class SearchUserView(generics.ListAPIView):
     def get(self, request):
         user = get_user_from_jwt(request)
 
-        searchterm = request.query_params.get("term", "")
+        searchterm = request.query_params.get("term", None)
+        if searchterm is None:
+            return Response({"detail": "Please provide valid query key"}, status=status.HTTP_400_BAD_REQUEST)
+        if searchterm == "":
+            return Response({"detail": "Search term is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         results = CustomUser.objects.filter(displayname__icontains=searchterm)[:5]
         if not results:
-            return Response({"detail": "No users found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({}, status=status.HTTP_200_OK)
 
         relationships = {}
         online_status = {}
@@ -88,8 +92,8 @@ class SearchUserView(generics.ListAPIView):
                 if friend_request_relation:
                     relationships[found_u.user_id] = friend_request_relation
                     friend_requests[found_u.user_id] = friend_request_id
-                # else:
-                #    relationships[found_u.user_id] = "stranger"
+                else:
+                   relationships[found_u.user_id] = "stranger"
 
         context = {
             "relationships": relationships,
