@@ -27,13 +27,8 @@ urlpatterns = [
     path('registration/basic_signup_change_username', basic.signup_change_username),
 
     #test views
-    path('registration/signup', test.signup),
-    path('registration/login', test.login),
-    #path('registration/forgot_reset/', basic.forgot_password_send_email), # [aguilmea] to be deleted as soon as frontend changed the endpoint
-    #path('registration/forgot_password_send_email/', basic.forgot_password_send_email),
-    #test views
-    path('signup', test.signup),
-    path('login', test.login),
+    path('registration/signup', test.signup), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+    path('registration/login', test.login), # [aguilmea] to be deleted as soon as frontend changed the endpoint
     path('forgot_reset', basic.forgot_password_send_email),
     path('forgot_password_send_email', basic.forgot_password_send_email),
 
