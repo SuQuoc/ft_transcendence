@@ -1,5 +1,5 @@
 # @name signup
-POST {{base_url}}/registration/signup/
+POST {{base_url}}/registration/signup
 Content-Type: application/json
 
 {
@@ -13,7 +13,7 @@ Content-Type: application/json
 
 ###
 
-GET {{base_url}}/registration/logout/
+GET {{base_url}}/registration/logout
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 

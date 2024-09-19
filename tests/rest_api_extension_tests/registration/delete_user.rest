@@ -1,5 +1,5 @@
 # @name signup
-POST {{base_url}}/registration/signup/
+POST {{base_url}}/registration/signup
 Content-Type: application/json
 
 {
@@ -13,7 +13,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/um/user-creation/
+POST {{base_url}}/um/user-creation
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
@@ -23,7 +23,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/delete_user/
+POST {{base_url}}/registration/delete_user
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}} 
 
@@ -32,7 +32,7 @@ Cookie: {{ACCESS_COOKIE}}
 ###
 
 # @name login
-POST {{base_url}}/registration/login/
+POST {{base_url}}/registration/login
 Content-Type: application/json
 
 {
@@ -46,7 +46,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/delete_user/
+POST {{base_url}}/registration/delete_user
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}} 
 
@@ -57,7 +57,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-POST {{base_url}}/registration/login/
+POST {{base_url}}/registration/login
 Content-Type: application/json
 
 {

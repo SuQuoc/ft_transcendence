@@ -1,4 +1,3 @@
-
 POST {{base_url}}/registration/signup/
 Content-Type: application/json
 
@@ -9,7 +8,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/basic_login/
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -19,7 +18,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/basic_login/
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -30,7 +29,7 @@ Content-Type: application/json
 
 #######################################################################################
 
-POST {{base_url}}/registration/basic_signup/
+POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
 
 {
@@ -40,7 +39,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/basic_login/
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
