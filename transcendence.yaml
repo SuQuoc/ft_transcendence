@@ -109,30 +109,35 @@ paths:
     post:
       tags:
         - registration
-      summary: Changes password for user
+      summary: If a verified user wants to change their password
       description: tbd
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
-        description: Object containing current and new password of user
+        description: Object containing password to change to, otp needs to be sent in 2nd step
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChangePassword'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/ChangePassword'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ChangePassword'
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username of user
+                  format: email
+                new_password:
+                  type: string
+                  description: New password for user
+                  format: password
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
         required: true
       responses:
         '200':
           description: Successfully changed password
         '400':
-          description: Invalid request body
-        '401':
-          description: Unauthorized token
+          description: Bad request
         '500':
           description: Internal server error
   /registration/verify_token:
@@ -196,28 +201,235 @@ paths:
     post:
       tags:
         - registration
-      summary: Deletes user from database
+      summary: If a user wants to delete their verified account
       description: tbd
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
-        description: Object containing current password of user
+        description: Object containing password and OTP for account to be deleted, OTP needs to be sent in 2nd step
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteUser'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/DeleteUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/DeleteUser'
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: New password for user
+                  format: password
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
         required: true
       responses:
         '200':
-          description: Successfully deleted account
+          description: Successfully changed password
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /registration/basic_login:
+    post:
+      tags:
+        - registration
+      summary: Simple login, without OAuth
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing data needed for login
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: E-Mail-Address of user
+                  format: email
+                password:
+                  type: string
+                  description: Password associated with user
+                  format: password
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
+        required: true
+      responses:
+        '200':
+          description: Successfully logged in
+        '202':
+          description: OTP required
         '400':
           description: Invalid request body
+        '500':
+          description: Internal server error
+  /registration/basic_signup:
+    post:
+      tags:
+        - registration
+      summary: Simple signup, without OAuth
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing data needed for signup
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: E-Mail-Address of user
+                  format: email
+                password:
+                  type: string
+                  description: Password associated with user
+                  format: password
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
+        required: true
+      responses:
+        '200':
+          description: Successfully signed up
+        '201':
+          description: User not verified for OTP
+        '202':
+          description: OTP required
+        '400':
+          description: Invalid request body
+        '500':
+          description: Internal server error
+  /registration/basic_signup_change_password:
+    post:
+      tags:
+        - registration
+      summary: If a non-verified user wants to change their password during signup
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing password to change to
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username of user
+                  format: email
+                new_password:
+                  type: string
+                  description: New password for user
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: Successfully changed password
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /registration/basic_signup_change_username:
+    post:
+      tags:
+        - registration
+      summary: If a non-verified user wants to change their username during signup
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing usernames to change
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_username:
+                  type: string
+                  description: Current Username of user
+                  format: email
+                new_username:
+                  type: string
+                  description: New Username of user
+                  format: email
+        required: true
+      responses:
+        '200':
+          description: Successfully changed username
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /registration/basic_forgot_password:
+    post:
+      tags:
+        - registration
+      summary: To trigger the forgot password process for non-Oauth users
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing username of user, step 1 only needs to contain username, step 2 needs to contain username, OTP and new password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username of user
+                  format: email
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
+                new_password:
+                  type: string
+                  description: New password for user
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: Successfully changed password
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /registration/change_username:
+    post:
+      tags:
+        - registration
+      summary: If a user wants to change their email address/username after verification
+      description: tbd
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Object containing password to change to, OTP needs to be sent in 2nd step
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_username:
+                  type: string
+                  description: Username of user
+                  format: email
+                otp:
+                  type: string
+                  example: asdfasdfasfd
+                  description: OTP for 2FA
+        required: true
+      responses:
+        '200':
+          description: Successfully changed username
+        '400':
+          description: Bad request
         '500':
           description: Internal server error
   /um/search:
@@ -400,24 +612,6 @@ paths:
 
 components:
   schemas:
-    ChangePassword:
-      type: object
-      properties:
-        current_password:
-          type: string
-          format: password
-          description: Current password of user
-        new_password:
-          type: string
-          format: password
-          description: New password for user
-    DeleteUser:
-      type: object
-      properties:
-        current_password:
-          type: string
-          format: password
-          description: current password of the user to confirm they're the owner of the account
     Token:
       type: object
       properties:
