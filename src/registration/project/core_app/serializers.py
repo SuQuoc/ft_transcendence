@@ -1,7 +1,7 @@
 # [aguilmea] file was created manually
 from rest_framework import serializers
 
-from .models import RegistrationUser, OneTimePassword
+from .models import RegistrationUser, OneTimePassword, OauthTwo
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,4 +38,15 @@ class OneTimePasswordSerializer(serializers.ModelSerializer):
         fields = ['related_user', 'action', 'password', 'expire']
         extra_kwargs = {
             'password': {'write_only': True},
+        }
+
+class OauthTwoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OauthTwo
+        fields = ['related_user', 'code_verifier', 'code_challenge', 'state']
+    #    fields = ['code_verifier', 'code_challenge']
+        extra_kwargs = {
+            'code_verifier': {'write_only': True},
+            'code_challenge': {'write_only': True},
+            'state': {'write_only': True},
         }

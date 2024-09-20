@@ -41,7 +41,7 @@ class OneTimePassword(models.Model):
         ('delete_user', 'delete_user'),
     ]
 
-    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='otp')
+    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
     action = models.CharField(max_length=16, choices=ACTION_CHOICES)
     password = models.CharField(max_length=16)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
@@ -58,3 +58,10 @@ class OneTimePassword(models.Model):
 
     def __str__(self):
         return f"{self.related_user.username} {self.action}"
+
+class OauthTwo(models.Model):
+
+    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OauthTwo_related_user')
+    code_verifier = models.CharField(max_length=128)
+    code_challenge = models.CharField(max_length=128)
+    state = models.CharField(max_length=128)

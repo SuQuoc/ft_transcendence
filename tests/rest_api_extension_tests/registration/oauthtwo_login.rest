@@ -1,5 +1,3 @@
-@base_url = https://localhost:8000
-
 # @name post_signup
 POST {{base_url}}/registration/signup
 Content-Type: application/json
@@ -22,8 +20,7 @@ Content-Type: application/json
 
 ###
 
-# @name get_oauth2_authorization_request
-GET {{base_url}}/registration/send_oauth2_authorization_request
+GET {{base_url}}/registration/oauthtwo_send_authorization_request
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
@@ -45,7 +42,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-GET {{base_url}}/registration/unset_oauth2/
+GET {{base_url}}/registration/oauthtwo_unset
 Content-Type: application/json
 Cookie: access=a,b,c refresh=x,y,z
 
@@ -53,7 +50,7 @@ Cookie: access=a,b,c refresh=x,y,z
 
 ###
 
-GET {{base_url}}/registration/login_oauth2/
+GET {{base_url}}/registration/oauthtwo_login
 Content-Type: application/json
 Cookie: access=a,b,c refresh=x,y,z
 

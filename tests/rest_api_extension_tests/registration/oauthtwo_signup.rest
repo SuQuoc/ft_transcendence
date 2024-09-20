@@ -1,0 +1,24 @@
+
+# @name post_signup
+POST {{base_url}}/registration/oauthtwo_signup
+Content-Type: application/json
+
+{}
+
+###
+
+POST {{base_url}}/registration/login
+Content-Type: application/json
+
+{"username": "name@student.42vienna.com", "password": "Pass1234!"}
+
+###
+
+# @name post_login
+POST {{base_url}}/registration/oauthtwo_login
+Content-Type: application/json
+
+{}
+
+###
+

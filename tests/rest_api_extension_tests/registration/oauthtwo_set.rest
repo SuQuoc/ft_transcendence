@@ -1,0 +1,48 @@
+POST {{base_url}}/registration/signup
+Content-Type: application/json
+
+{
+    "username": "{{username3}}",
+    "password": "{{current_password3}}"
+}
+
+###
+
+# @name post_login
+POST {{base_url}}/registration/login
+Content-Type: application/json
+
+{
+    "username": "{{username3}}",
+    "password": "{{current_password3}}"
+}
+
+###
+
+@ACCESS_COOKIE = {{post_login.response.headers.Set-Cookie}}
+
+###
+
+
+GET {{base_url}}/registration/oauthtwo_send_authorization_request
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{}
+
+###
+
+
+POST {{base_url}}/registration/oauthtwo_set
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{}
+
+###
+
+POST {{base_url}}/registration/oauthtwo_login
+Content-Type: application/json
+
+{}
+
