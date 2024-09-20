@@ -10,6 +10,7 @@ export class FriendList extends ComponentBaseClass {
 		this.friends = new Map();
 		this.requested = new Map();
 		this.received = new Map();
+		this.result = [];
 		this.debouncedFetchFriendList = this.debounce(this.fetchFriendList.bind(this), 10);
 	}
 
@@ -114,29 +115,12 @@ export class FriendList extends ComponentBaseClass {
 
 	async fetchFriendList() {
 		try {
-			const response = await this.apiFetch('/um/friends', { method: 'GET', cache: 'no-store' });
-			//const response = await fetch('./js/friends.json', { cache: 'no-store' });
-			const data = await response.json();
-			this.processFriendData(data);
+			this.result = await this.apiFetch('/um/friends', { method: 'GET', cache: 'no-store' });
+			//this.processFriendData(response);
 			this.updateList();
 		} catch (e) {
 			console.error('Error fetching friend list:', e.message);
 		}
-	}
-
-	processFriendData(data) {
-		this.friends.clear();
-		this.requested.clear();
-		this.received.clear();
-		data.forEach(item => {
-			if (item.relationship === 'friend') {
-				this.friends.set(item.user.uid, item);
-			} else if (item.relationship === 'requested') {
-				this.requested.set(item.user.uid, item);
-			} else if (item.relationship === 'received') {
-				this.received.set(item.user.uid, item);
-			}
-		});
 	}
 
 	updateList() {
@@ -144,37 +128,28 @@ export class FriendList extends ComponentBaseClass {
 		listElement.innerHTML = '';
 
 		if (this.hasAttribute('friends') || !this.hasAttribute('requested')) {
-			this.updateItems(listElement, this.friends, 'No friends', this.createFriendListItem.bind(this));
+			this.updateItems(listElement, 'No friends', this.createFriendListItem.bind(this), ['friend']);
 		} else if (this.hasAttribute('requested')) {
-			if (this.requested.size === 0 && this.received.size === 0) {
-				const item = document.createElement('li');
-				item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
-				item.innerHTML = `<span class="text-white">No friend requests</span>`;
-				listElement.appendChild(item);
-			} else {
-				if (this.requested.size > 0) {
-					this.updateItems(listElement, this.requested, '', this.createRequestedListItem.bind(this));
-				}
-				if (this.received.size > 0) {
-					this.updateItems(listElement, this.received, '', this.createReceivedListItem.bind(this));
-				}			}
+			this.updateItems(listElement, 'No friend requests', this.createRequestItem.bind(this), ['requested', 'received']);
 		}
 	}
 
-	updateItems(listElement, items, emptyMessage, createListItem) {
-		if (items.size < 1) {
+	updateItems(listElement, emptyMessage, createListItem, types) {
+		const fragment = document.createDocumentFragment();
+		let n = 0;
+		this.result.forEach(item => {
+			if (types.includes(item.relationship)) {
+				const itemElement = createListItem(item, item.relationship);
+				fragment.appendChild(itemElement);
+				n++;
+			}
+		});
+		if (n === 0) {
 			const item = document.createElement('li');
 			item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
 			item.innerHTML = `<span class="text-white">${emptyMessage}</span>`;
-			listElement.appendChild(item);
-			return;
-		}
-
-		const fragment = document.createDocumentFragment();
-		items.forEach((itemData, key) => {
-			const item = createListItem(itemData);
 			fragment.appendChild(item);
-		});
+		}
 		listElement.appendChild(fragment);
 	}
 
@@ -184,69 +159,55 @@ export class FriendList extends ComponentBaseClass {
 		item.innerHTML = `
       <button class="btn btn-danger btn-sm">X</button>
       <div class="friend-img-container">
-        <img src="${itemData.user.img}" alt="Profile image of ${itemData.user.displayname}" class="friend-img">
-        <span class="friend-status ${itemData.user.online ? 'online' : 'offline'}"></span>
+        <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
+        <span class="friend-status ${itemData.online ? 'online' : 'offline'}"></span>
       </div>
-      <span class="text-white">${itemData.user.displayname}</span>
+      <span class="text-white">${itemData.displayname}</span>
     `;
 		item.querySelector('.btn-danger').addEventListener('click', () => {
-			this.removeFriend(itemData.user.uid);
+			this.changeFriendRequest(itemData.friend_request_id, 'unfriend');
 		});
 		return item;
 	}
 
-	createRequestedListItem(itemData) {
+	createRequestItem(itemData, action) {
 		const item = document.createElement('li');
 		item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
 		item.innerHTML = `
-      <button class="btn btn-success btn-sm disabled">✓</button>
-      <button class="btn btn-danger btn-sm">X</button>
-      <span class="text-white">${itemData.user.displayname}</span>
-    `;
-		item.querySelector('.btn-danger').addEventListener('click', () => {
-			this.removeFriendRequest(itemData.user.uid);
-		});
+	  		<button class="btn btn-success btn-sm">✓</button>
+	  		<button class="btn btn-danger btn-sm">X</button>
+	  		<span class="text-white">${itemData.displayname}</span>
+		`;
+		if (action === 'received') {
+			item.querySelector('.btn-success').addEventListener('click', () => {
+				this.changeFriendRequest(itemData.friend_request_id, 'accept');
+			});
+			item.querySelector('.btn-danger').addEventListener('click', () => {
+				this.changeFriendRequest(itemData.friends_request_id, 'decline');
+			});
+		} else if (action === 'requested') {
+			item.querySelector('.btn-success').classList.add('disabled');
+			item.querySelector('.btn-danger').classList.add('disabled');
+		}
 		return item;
 	}
 
-	createReceivedListItem(itemData) {
-		const item = document.createElement('li');
-		item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
-		item.innerHTML = `
-      <button class="btn btn-success btn-sm">✓</button>
-      <button class="btn btn-danger btn-sm">X</button>
-      <span class="text-white">${itemData.user.displayname}</span>
-    `;
-		item.querySelector('.btn-success').addEventListener('click', () => {
-			this.acceptFriendRequest(itemData.user.uid);
-		});
-		item.querySelector('.btn-danger').addEventListener('click', () => {
-			this.declineFriendRequest(itemData.user.uid);
-		});
-		return item;
-	}
+	async changeFriendRequest(fid, newStatus) {
+		const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", body: JSON.stringify({ friend_request_id: fid, action: newStatus }) });
+		if (response.error) {
+			console.error('Error changing friend request:', response.error);
+			return;
+		}
 
-	async removeFriend(uid) {
-		// TODO: Add API call to remove friend
-		this.friends.delete(uid);
-		this.updateList();
-	}
-
-	async removeFriendRequest(uid) {
-		// TODO: Add API call to remove friend request
-		this.requested.delete(uid);
-		this.updateList();
-	}
-
-	async acceptFriendRequest(uid) {
-		// TODO: Add API call to accept friend request
-		this.received.delete(uid);
-		this.updateList();
-	}
-
-	async declineFriendRequest(uid) {
-		// TODO: Add API call to decline friend request
-		this.received.delete(uid);
+		for (const user of this.result) {
+			if (user.friend_request_id === fid) {
+				if (newStatus === 'decline' || newStatus === 'unfriend') {
+					user.relationship = 'stranger';
+				} else if (newStatus === 'accept') {
+					user.relationship = 'friend';
+				}
+			}
+		}
 		this.updateList();
 	}
 

@@ -44,7 +44,7 @@ const getDisplayname = async () => {
 
 	try {
 		// Check if the user already has a displayname
-		const response = await fetch ('/um/profile/', {
+		const response = await fetch ('/um/profile', {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
