@@ -555,7 +555,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid Authentication supplied
-  /um/profile/send:
+  /um/friends/send:
     post:
       tags:
         - um
@@ -582,7 +582,7 @@ paths:
           description: Friend request already created before
         '404':
           description: Invalid display name
-  /um/profile/answer:
+  /um/friends/answer:
     post:
       tags:
         - um
