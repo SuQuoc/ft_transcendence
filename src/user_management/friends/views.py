@@ -39,12 +39,12 @@ class SendFriendRequestView(generics.GenericAPIView):
                 return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
             if friend_request.status in (FriendRequest.UNFRIENDED, FriendRequest.DECLINED):
                 friend_request.set_sender_and_receiver(sender=sender, receiver=receiver)
-                return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
+                return Response({"message": "friend request sent"}, status=status.HTTP_202_ACCEPTED)
             if friend_request.status == FriendRequest.PENDING:
                 if friend_request.sender == sender:
-                    return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
+                    return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_202_ACCEPTED)  # maybe 409 Conflict more fitting ??
                 else:
-                    return Response({"message": "The other person send u a request already, check inbox"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
+                    return Response({"message": "The other person send u a request already, check friend requests"}, status=status.HTTP_202_OK)  # maybe 409 Conflict more fitting ??
             elif friend_request.status == FriendRequest.ACCEPTED:
                 return Response({"error": "You are best buds"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -103,10 +103,10 @@ class AnswerFriendRequestView(generics.GenericAPIView):
 class ListFriendRelationsView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
 
-    def get(self, request, user_id):
+    def get(self, request):
         user = get_user_from_jwt(request)
-        if user.user_id != user_id:
-            raise PermissionDenied("My friendlist is private, keep your nose out")
+        # if user.user_id != user_id:
+        #     raise PermissionDenied("My friendlist is private, keep your nose out")
 
         relationships = {}
         online_status = {}

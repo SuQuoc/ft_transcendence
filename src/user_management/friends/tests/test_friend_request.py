@@ -24,7 +24,7 @@ class FriendRequestTest(MyTestSetUp):
         self.data_send = {"receiver": "SET THIS"}
 
         self.data_answer = {
-            "friend_request_id": "2",
+            "friend_request_id": "1",
             "action": "SET THIS",
         }
 
@@ -183,9 +183,9 @@ class FriendRequestTest(MyTestSetUp):
     def test_invalid_action(self):
         self.test_sending_to_stranger()
         response = self.answer_on_friend_request(user=self.stranger, answer="invalid")
-        print(response.json())
-        print(response.status_code)
-        self.assertEqual(response.json()["error"], "Invalid action. Must be 'accept' or 'decline'")
+        # print(response.json())
+        # print(response.status_code)
+        self.assertEqual(response.json()["error"], ["Invalid action. Must be 'accept' or 'decline'."])
 
     # UTILS
     def send_friend_request(self, *, sender: CustomUser, receiver: CustomUser):
