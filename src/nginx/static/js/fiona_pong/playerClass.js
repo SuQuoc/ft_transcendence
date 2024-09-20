@@ -30,7 +30,7 @@ class Player {
 	 * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
 	*/
 	clear(ctx) {
-		ctx.clearRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2); // the -1 and +2 are because there was a border left
+		ctx.clearRect(this.x - 2, this.y - 2, this.width + 5, this.height + 5); // the -1 and +2 are because there was a border left (the smaller the canvas the higher these numbers have to be)
 	}
 
 	/** Moves the player up by the speed variable set in the constructor.

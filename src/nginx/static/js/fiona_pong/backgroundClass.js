@@ -53,7 +53,7 @@ class Background {
 	drawMiddleLine(ctx) {
 		ctx.strokeStyle = this.color;
 		ctx.beginPath();
-		ctx.setLineDash([5, 5]);
+		ctx.setLineDash([8, 8]);
 		ctx.moveTo(this.canvas_middle, 0);
 		ctx.lineTo(this.canvas_middle, this.canvas_height);
 		ctx.stroke();
