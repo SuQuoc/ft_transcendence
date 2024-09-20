@@ -73,7 +73,7 @@ class FriendRequestTest(MyTestSetUp):
 
         count = FriendRequest.objects.filter(sender=self.user1, receiver=self.stranger, status=FriendRequest.PENDING).count()
         self.assertEqual(count, 1)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 202)
         self.assertEqual(response_json["message"], "friend request already sent, be patient")
 
     def test_sending_to_friend(self):
@@ -155,7 +155,7 @@ class FriendRequestTest(MyTestSetUp):
         self.test_sending_to_stranger()
         response = self.send_friend_request(sender=self.stranger, receiver=self.user1)
 
-        self.assertEqual(response.json()["message"], "The other person send u a request already, check inbox")
+        self.assertEqual(response.json()["message"], "The other person send u a request already, check friend requests")
 
     def test_reverse_friend_request_after_unfriending(self):
         self.test_sender_unfriends()
@@ -177,6 +177,15 @@ class FriendRequestTest(MyTestSetUp):
         self.assertEqual(count1, 1)
         self.assertEqual(self.user1.get_friend_count(), 1)
         self.assertEqual(self.stranger.get_friend_count(), 1)
+
+
+    # INVALID
+    def test_invalid_action(self):
+        self.test_sending_to_stranger()
+        response = self.answer_on_friend_request(user=self.stranger, answer="invalid")
+        # print(response.json())
+        # print(response.status_code)
+        self.assertEqual(response.json()["error"], ["Invalid action. Must be 'accept' or 'decline'."])
 
     # UTILS
     def send_friend_request(self, *, sender: CustomUser, receiver: CustomUser):

@@ -12,6 +12,9 @@ from .models import FriendRequest
 from .serializers import FriendRequestAnswerSerializer
 from .serializers import FriendRequestSendSerializer
 
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
+from rest_framework import serializers
+
 
 class SendFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestSendSerializer
@@ -36,12 +39,12 @@ class SendFriendRequestView(generics.GenericAPIView):
                 return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
             if friend_request.status in (FriendRequest.UNFRIENDED, FriendRequest.DECLINED):
                 friend_request.set_sender_and_receiver(sender=sender, receiver=receiver)
-                return Response({"message": "friend request sent"}, status=status.HTTP_201_CREATED)
+                return Response({"message": "friend request sent"}, status=status.HTTP_202_ACCEPTED)
             if friend_request.status == FriendRequest.PENDING:
                 if friend_request.sender == sender:
-                    return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
+                    return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_202_ACCEPTED)  # maybe 409 Conflict more fitting ??
                 else:
-                    return Response({"message": "The other person send u a request already, check inbox"}, status=status.HTTP_200_OK)  # maybe 409 Conflict more fitting ??
+                    return Response({"message": "The other person send u a request already, check friend requests"}, status=status.HTTP_202_ACCEPTED)  # maybe 409 Conflict more fitting ??
             elif friend_request.status == FriendRequest.ACCEPTED:
                 return Response({"error": "You are best buds"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -53,21 +56,26 @@ class AnswerFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestAnswerSerializer
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
+        try:
+            user = get_user_from_jwt(request)
+            #raise AuthenticationFailed
+        
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
             friend_request_id = serializer.validated_data.get("id")
             action = serializer.validated_data.get("action")
+            
             friend_request = get_object_or_404(FriendRequest, id=friend_request_id)
-
-            user = get_user_from_jwt(request)
-
             if friend_request.receiver != user and action != self.serializer_class.UNFRIEND:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
-
             response = self.act_on_friend_request(friend_request, action)
             return response
-        else:
-            raise ValidationError(serializer.errors)
+        
+        except AuthenticationFailed as e:
+            return Response({"error": str(e)}, status=e.status_code)
+        except serializers.ValidationError as e: 
+            return Response({"error": e.detail["action"]}, status=e.status_code) # all validation errors return HTTP_400
 
     def act_on_friend_request(self, friend_request: FriendRequest, action: str):
         # return Response({"test": "TEST"}, status=status.HTTP_400_BAD_REQUEST)
@@ -95,10 +103,10 @@ class AnswerFriendRequestView(generics.GenericAPIView):
 class ListFriendRelationsView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
 
-    def get(self, request, user_id):
+    def get(self, request):
         user = get_user_from_jwt(request)
-        if user.user_id != user_id:
-            raise PermissionDenied("My friendlist is private, keep your nose out")
+        # if user.user_id != user_id:
+        #     raise PermissionDenied("My friendlist is private, keep your nose out")
 
         relationships = {}
         online_status = {}
