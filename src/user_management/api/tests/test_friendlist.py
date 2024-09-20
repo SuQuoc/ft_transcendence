@@ -48,12 +48,14 @@ class ViewingFriendPageTest(MyTestSetUp):
             # 'HTTP_AUTHORIZATION': f'Bearer {self.access_token}',
         }
 
-        self.url = reverse("friends", kwargs={'user_id': self.user_objs[ME].user_id})
+        self.url = reverse("friends")
 
     def test_friends(self):
         response = self.client.get(self.url, secure=True, **self.headers)
         response_json = response.json()
 
+        print(json.dumps(response_json, indent=4))
+        
         expected = [
             {
                 "displayname": I_FRIEND_U,
