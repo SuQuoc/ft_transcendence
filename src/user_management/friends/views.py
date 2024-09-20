@@ -12,6 +12,9 @@ from .models import FriendRequest
 from .serializers import FriendRequestAnswerSerializer
 from .serializers import FriendRequestSendSerializer
 
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
+from rest_framework import serializers
+
 
 class SendFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestSendSerializer
@@ -53,21 +56,26 @@ class AnswerFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestAnswerSerializer
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
+        try:
+            user = get_user_from_jwt(request)
+            #raise AuthenticationFailed
+        
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
             friend_request_id = serializer.validated_data.get("id")
             action = serializer.validated_data.get("action")
+            
             friend_request = get_object_or_404(FriendRequest, id=friend_request_id)
-
-            user = get_user_from_jwt(request)
-
             if friend_request.receiver != user and action != self.serializer_class.UNFRIEND:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
-
             response = self.act_on_friend_request(friend_request, action)
             return response
-        else:
-            raise ValidationError(serializer.errors)
+        
+        except AuthenticationFailed as e:
+            return Response({"error": str(e)}, status=e.status_code)
+        except serializers.ValidationError as e: 
+            return Response({"error": e.detail["action"]}, status=e.status_code) # all validation errors return HTTP_400
 
     def act_on_friend_request(self, friend_request: FriendRequest, action: str):
         # return Response({"test": "TEST"}, status=status.HTTP_400_BAD_REQUEST)

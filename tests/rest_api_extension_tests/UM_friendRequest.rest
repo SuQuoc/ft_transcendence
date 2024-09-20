@@ -45,3 +45,19 @@ GET {{baseUrl}}/um/search?term=Mario
 Content-Type: application/json
 Cookie: {{cookie}}
 
+###
+
+GET {{baseUrl}}/um/friends/
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+###
+
+POST {{baseUrl}}/um/friends/send
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "receiver": "fdsdsfsdfsdfsd"
+}
