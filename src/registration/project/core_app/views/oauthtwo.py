@@ -30,7 +30,7 @@ def callback(request):
 def send_authorization_request(request):  # [aguilmea] this is the first part of the oauth2 flow - I prepare the url where the user should authenticate
     try:
         user = request.user
-        redirect_uri = os.environ.get('SERVER_URL') + '/registration/exchange_code_against_access_token'
+        redirect_uri = os.environ.get('SERVER_URL') + '/callback'
         generate_code_verifier_and_challenge(request.user.id)
         state = OauthTwo.objects.get(related_user=user).state
         code_chalenge = OauthTwo.objects.get(related_user=user).code_challenge
