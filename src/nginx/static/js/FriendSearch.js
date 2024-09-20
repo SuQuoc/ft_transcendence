@@ -30,6 +30,7 @@ export class FriendSearch extends ComponentBaseClass {
           justify-content: space-between;
           padding: 0.5rem;
           border-bottom: 1px solid #ccc;
+          color:white;
         }
       </style>
       <div class="search-container">
@@ -56,7 +57,6 @@ export class FriendSearch extends ComponentBaseClass {
         if (!query) return;
 
         try {
-            //TODO: Add API call to search for users, no-store prevents caching https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
             this.results = [];
             this.results = await this.apiFetch(`/um/search?term=${query}`, { method: "GET", cache: "no-store" });
             this.updateResults();
@@ -76,60 +76,53 @@ export class FriendSearch extends ComponentBaseClass {
             <span>${user.displayname}</span>
             <div>
               ${user.relationship === 'friend' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
-              ${user.relationship === 'requested' ? '<button class="btn btn-danger btn-sm">X</button>' : ''}
+              ${user.relationship === 'requested' ? '<span>Request Sent</span>' : ''}
               ${user.relationship === 'received' ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ''}
-              ${user.relationship === 'stranger' ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
+              ${user.relationship === 'stranger' && user.displayname !== window.app.userData.username ? '<button class="btn btn-primary btn-sm">+</button>' : ''}
             </div>
           `;
 
         if (user.relationship === 'friend') {
-            item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriend(user.uid));
-        } else if (user.relationship === 'requested') {
-            item.querySelector('.btn-danger').addEventListener('click', () => this.removeFriendRequest(user.uid));
+            item.querySelector('.btn-danger').addEventListener('click', () => this.changeFriendRequest(user.friend_request_id, 'unfriend'));
         } else if (user.relationship === 'received') {
-            item.querySelector('.btn-success').addEventListener('click', () => this.acceptFriendRequest(user.uid));
-            item.querySelector('.btn-danger').addEventListener('click', () => this.declineFriendRequest(user.uid));
-        } else {
-            item.querySelector('.btn-primary').addEventListener('click', () => this.sendFriendRequest(user.uid));
+            item.querySelector('.btn-success').addEventListener('click', () => this.changeFriendRequest(user.friend_request_id, 'accept'));
+            item.querySelector('.btn-danger').addEventListener('click', () => this.changeFriendRequest(user.friend_request_id, 'decline'));
+        } else if (user.relationship === 'stranger' && user.displayname !== window.app.userData.username) {
+            item.querySelector('.btn-primary').addEventListener('click', () => this.sendFriendRequest(user.displayname));
         }
         resultsElement.appendChild(item);
         });
     }
 
-    async removeFriend(uid) {
-        // TODO: Add API call to remove friend
-        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "unfriend" } });
-        this.results.delete(uid);
-        this.updateResults();
-    }
-
-    /*
-    TODO: remove ability to cancel friend request
-    */
-    async removeFriendRequest(uid) {
-        // TODO: Add API call to remove friend request
-        this.results.delete(uid);
-        this.updateResults();
-    }
-
-    async acceptFriendRequest(uid) {
-        // TODO: Add API call to accept friend request
-        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "accept" } });
-        this.results.delete(uid);
-        this.updateResults();
-    }
-
-    async declineFriendRequest(uid) {
-        // TODO: Add API call to decline friend request
-        const response = await this.apiFetch(`/um/friends/answer`, { method: "POST", requestBody: { friend_request_id: uid, action: "decline" } });
-        this.results.delete(uid);
+    async changeFriendRequest(fid, newStatus) {
+        const response = await this.apiFetch(`/um/friends/answer/`, { method: "POST", body: JSON.stringify({ friend_request_id: fid, action: newStatus }) });
+        if (response.error) {
+            console.error('Error changing friend request:', response.error);
+            return;
+        }
+        for (const user of this.results) {
+            if (user.friend_request_id === fid) {
+                if (newStatus === 'decline' || newStatus === 'unfriend') {
+                    user.relationship = 'stranger';
+                } else if (newStatus === 'accept') {
+                    user.relationship = 'friend';
+                }
+            }
+        }
         this.updateResults();
     }
 
     async sendFriendRequest(displayname) {
-        // TODO: Add API call to send friend request
-        const response = await this.apiFetch(`/um/friends/send`, { method: "POST", requestBody: { receiver: displayname} });
-        this.results.delete(uid);
+        const response = await this.apiFetch(`/um/friends/send/`, { method: "POST", body: JSON.stringify({ receiver: displayname}) });
+        if (response.error) {
+            console.error('Error sending friend request:', response.error);
+            return;
+        }
+        for (const user of this.results) {
+            if (user.displayname === displayname) {
+                user.relationship = 'requested';
+            }
+        }
         this.updateResults();
     }
 }

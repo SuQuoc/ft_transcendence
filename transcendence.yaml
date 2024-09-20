@@ -17,6 +17,10 @@ tags:
     description: Required for registration/signup and login.
   - name: um
     description: Everything related to managing the user
+  - name: basic registration
+    description: registration without OAuth
+  - name: 2fa
+    description: Two factor authentication
 paths:
   /registration/signup:
     post:
@@ -206,7 +210,7 @@ paths:
       security:
         - bearerAuth: [ ]
       requestBody:
-        description: Object containing password and OTP for account to be deleted, OTP needs to be sent in 2nd step
+        description: Object containing password and OTP for account to be deleted
         content:
           application/json:
             schema:
@@ -231,7 +235,7 @@ paths:
   /registration/basic_login:
     post:
       tags:
-        - registration
+        - basic registration
       summary: Simple login, without OAuth
       description: tbd
       security:
@@ -268,7 +272,7 @@ paths:
   /registration/basic_signup:
     post:
       tags:
-        - registration
+        - basic registration
       summary: Simple signup, without OAuth
       description: tbd
       security:
@@ -307,7 +311,7 @@ paths:
   /registration/basic_signup_change_password:
     post:
       tags:
-        - registration
+        - basic registration
       summary: If a non-verified user wants to change their password during signup
       description: tbd
       security:
@@ -338,7 +342,7 @@ paths:
   /registration/basic_signup_change_username:
     post:
       tags:
-        - registration
+        - basic registration
       summary: If a non-verified user wants to change their username during signup
       description: tbd
       security:
@@ -369,13 +373,13 @@ paths:
   /registration/basic_forgot_password:
     post:
       tags:
-        - registration
+        - basic registration
       summary: To trigger the forgot password process for non-Oauth users
       description: tbd
       security:
         - bearerAuth: [ ]
       requestBody:
-        description: Object containing username of user, step 1 only needs to contain username, step 2 needs to contain username, OTP and new password
+        description: Object containing username of user
         content:
           application/json:
             schema:
@@ -410,7 +414,7 @@ paths:
       security:
         - bearerAuth: [ ]
       requestBody:
-        description: Object containing password to change to, OTP needs to be sent in 2nd step
+        description: Object containing password to change to
         content:
           application/json:
             schema:
