@@ -1,4 +1,4 @@
-POST {{base_url}}/registration/signup/
+POST {{base_url}}/registration/signup
 Content-Type: application/json
 
 {
