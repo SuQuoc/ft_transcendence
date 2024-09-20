@@ -81,7 +81,7 @@ export class FriendList extends ComponentBaseClass {
 	setupEventListeners() {
 		const buttons = this.shadowRoot.querySelectorAll('.btn');
 		buttons.forEach((button) => {
-			if ((button.id === 'friends-button' && (this.hasAttribute('friends') || this.attributes.length == 0)) || (button.id === 'requested-button' && this.hasAttribute('requested'))) {
+			if ((button.id === 'friends-button' && (this.hasAttribute('friends') || this.attributes.length === 0)) || (button.id === 'requested-button' && this.hasAttribute('requested'))) {
 				button.classList.add('active');
 			}
 			button.addEventListener('click', (event) => {
@@ -183,7 +183,7 @@ export class FriendList extends ComponentBaseClass {
 				this.changeFriendRequest(itemData.friend_request_id, 'accept');
 			});
 			item.querySelector('.btn-danger').addEventListener('click', () => {
-				this.changeFriendRequest(itemData.friends_request_id, 'decline');
+				this.changeFriendRequest(itemData.friend_request_id, 'decline');
 			});
 		} else if (action === 'requested') {
 			item.querySelector('.btn-success').classList.add('disabled');
