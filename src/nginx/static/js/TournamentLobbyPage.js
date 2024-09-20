@@ -1,6 +1,6 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
-
 import { TournamentLobbyPlayerElement } from "./TournamentLobbyPlayerElement.js";
+import { PongCanvasElement } from "./fiona_pong/PongCanvasElement.js";
 
 export class TournamentLobbyPage extends ComponentBaseClass {
 	constructor() {
@@ -110,9 +110,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 			</div>
 			<!-- game -->
-			<div class="d-flex flex-grow-1 justify-content-center align-items-center align-self-">
-				Game
-			</div>
+			<pong-canvas-element class="d-flex flex-grow-1 w-100 h-100 p-lg-4 p-md-3"></pong-canvas-element>
 		`;
 		return template;
 	}

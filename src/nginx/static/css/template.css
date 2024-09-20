@@ -14,7 +14,6 @@
 	--custom-btn-base-color: #252670;
 	--custom-btn-hover-color: #121472;
 	--custom-btn-click-color: #0c0d52;
-
 }
 
 html {
@@ -38,6 +37,13 @@ body {
 
 .tournament-max-width {
 	max-width: 1000px;
+}
+
+.canvas-container {
+	width: 100%;
+	height: 100%;
+	max-width: 100vw;
+	max-height: 100vh;
 }
 
 .lobby-player-avatar {
