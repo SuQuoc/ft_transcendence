@@ -44,7 +44,7 @@ class SendFriendRequestView(generics.GenericAPIView):
                 if friend_request.sender == sender:
                     return Response({"message": "friend request already sent, be patient"}, status=status.HTTP_202_ACCEPTED)  # maybe 409 Conflict more fitting ??
                 else:
-                    return Response({"message": "The other person send u a request already, check friend requests"}, status=status.HTTP_202_OK)  # maybe 409 Conflict more fitting ??
+                    return Response({"message": "The other person send u a request already, check friend requests"}, status=status.HTTP_202_ACCEPTED)  # maybe 409 Conflict more fitting ??
             elif friend_request.status == FriendRequest.ACCEPTED:
                 return Response({"error": "You are best buds"}, status=status.HTTP_400_BAD_REQUEST)
         else:
