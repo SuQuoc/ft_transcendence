@@ -20,7 +20,7 @@ NEW_NAME = "NewName"
 class TestCrud(MyTestSetUp):
     def setUp(self):
         self.user_id = str(uuid.uuid4())
-        self.fake_user_id = str(uuid.uuid4())
+        self.user_id2 = str(uuid.uuid4())
         self.displayname = "Test API"
         self.data = {
             "displayname": self.displayname,
@@ -75,7 +75,7 @@ class TestCrud(MyTestSetUp):
         self.assertEqual(CustomUser.objects.count(), 1)
         # print(response.data)
 
-    # Succesful api call
+        # Succesful create api call
     def test_success(self):
         # print(f"q: uuid: {self.user_id}, data.user_id {self.data["user_id"]}")
         response = self.post()
@@ -83,14 +83,7 @@ class TestCrud(MyTestSetUp):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.count(), 1)
         self.assertEqual(CustomUser.objects.get().displayname, self.displayname)
-        self.assertEqual(str(CustomUser.objects.get().user_id), self.user_id)
-
-    # This test is redundant, learned that the serializer just checks if all required fields are present
-    def test_additional_unrequired_data(self):
-        self.data["iser_id"] = "unrequired_data"
-        response = self.post()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    
+        self.assertEqual(str(CustomUser.objects.get().user_id), self.user_id)    
 
     ### Test Profile get - /profile GET ###
     def test_successful_get(self):
@@ -102,7 +95,7 @@ class TestCrud(MyTestSetUp):
 
     def test_invalid_jwt_get(self):
         self.test_success()
-        self.setup_jwt_with_cookie(self.fake_user_id)
+        self.setup_jwt_with_cookie(self.user_id2)
         response = self.client.get(self.url_profile, format="json", secure=True, **self.headers)
         
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -115,18 +108,41 @@ class TestCrud(MyTestSetUp):
         self.data['displayname'] = NEW_NAME
         response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
         # print(response.json())
-        # print(response.json())
         # print(response.status_code)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
 
+    def test_editing_profile_name_with_current_name(self):
+        self.test_success()
+        response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+        # print(response.json())
+        # print(response.status_code)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_editing_profile_name_with_already_taken(self):
+        self.test_success()
+        
+        # creating 2nd user
+        data = {"displayname": "Test API 2"}
+        self.setup_jwt_with_cookie(self.user_id2)
+        self.client.post(self.url, data, format="json", secure=True, **self.headers)
+
+        # editing 2nd user to have the same name as 1st user
+        response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+        self.setup_jwt_with_cookie(self.user_id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {'displayname': ['custom user with this displayname already exists.']})
+
+
+
     def test_editing_profile_img(self):
         self.test_success()
         with open(self.images["900kb"], 'rb') as image:
-            self.data['image'] = image
-            response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+            data = {'image': image}
+            response = self.client.patch(self.url_profile, data, format='multipart', secure=True, **self.headers)
             image_path = CustomUser.objects.get().image.path
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -139,13 +155,13 @@ class TestCrud(MyTestSetUp):
         self.test_success()
 
         with open(self.images["900kb"], 'rb') as image:
-            self.data['image'] = image
-            response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+            data = {'image': image}
+            response = self.client.patch(self.url_profile, data, format='multipart', secure=True, **self.headers)
             old_image_path = CustomUser.objects.get().image.path
 
         with open(self.images["1mb"], 'rb') as image:
-            self.data['image'] = image
-            response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+            data = {'image': image}
+            response = self.client.patch(self.url_profile, data, format='multipart', secure=True, **self.headers)
             image_path = CustomUser.objects.get().image.path
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -156,8 +172,8 @@ class TestCrud(MyTestSetUp):
     def test_editing_profile_img_too_big(self):
         self.test_success()
         with open(self.images["1.8mb"], 'rb') as image:
-            self.data['image'] = image
-            response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
+            data = {'image': image}
+            response = self.client.patch(self.url_profile, data, format='multipart', secure=True, **self.headers)
             response_json = response.json()
             default_image_path = CustomUser.objects.get().image.path
 
@@ -165,7 +181,7 @@ class TestCrud(MyTestSetUp):
         self.assertEqual(response_json, {'error': 'Max file size is 1MB'})
         self.assertTrue(os.path.exists(default_image_path))
 
-    def test_editing_profile_img_and_data(self):
+    def test_editing_profile_img_and_name(self):
         self.test_success()
 
         self.data['displayname'] = NEW_NAME
@@ -173,18 +189,28 @@ class TestCrud(MyTestSetUp):
         with open(self.images["900kb"], 'rb') as image:
             self.data['image'] = image
             response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
-
+        
         # user = CustomUser.objects.get()
         # image_path = user.image.path
         # print(image_path)
         # response_json = response.json()
-        # print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.data['displayname']).count(), 1)
 
         # delete the image after the test
         self.delete()
+
+
+    ### Invalid Edit
+    def test_invalid_edit(self):
+        self.test_success()
+        data = {'InvalidKey': 'Some Value TEST'}
+        response = self.client.patch(self.url_profile, data, format='multipart', secure=True, **self.headers)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 1)
+
 
     ### Test profile deletion ###
     def test_user_deletion_with_default_image(self):
@@ -212,20 +238,11 @@ class TestCrud(MyTestSetUp):
         self.assertFalse(os.path.exists(image_path))
 
 
-# def test_no_uid(self):
-#     del self.data["user_id"]  # This will remove the key "user_id" and its value from self.data
-#     response = self.post()
-#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # This test is redundant, learned that the serializer just checks if all required fields are present
+    def test_additional_unrequired_data(self):
+        self.data["iser_id"] = "unrequired_data"
+        response = self.post()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-# redundant since no user_id already tested
-# def test_wrong_key_name(self):
-#     del self.data["user_id"]
-#     self.data["iser_id"] = self.user_id
-#     response = self.post()
-#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-# def test_invalid_uid(self):
-#     self.data["user_id"] = "invalid user id"
-#     response = self.post()
-#     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#     # print(response.data)
+
