@@ -115,6 +115,9 @@ class TestCrud(MyTestSetUp):
         self.data['displayname'] = NEW_NAME
         response = self.client.patch(self.url_profile, self.data, format='multipart', secure=True, **self.headers)
         # print(response.json())
+        # print(response.json())
+        # print(response.status_code)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.filter(displayname=NEW_NAME).count(), 1)
         self.assertEqual(CustomUser.objects.filter(displayname=self.displayname).count(), 0)
@@ -159,7 +162,7 @@ class TestCrud(MyTestSetUp):
             default_image_path = CustomUser.objects.get().image.path
 
         self.assertEqual(response.status_code, status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
-        self.assertEqual(response_json, {'detail': 'Max file size is 1MB'})
+        self.assertEqual(response_json, {'error': 'Max file size is 1MB'})
         self.assertTrue(os.path.exists(default_image_path))
 
     def test_editing_profile_img_and_data(self):

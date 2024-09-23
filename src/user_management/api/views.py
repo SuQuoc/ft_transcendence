@@ -19,6 +19,7 @@ from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
 
 
+
 def profile(request):
     return HttpResponse("This is the profile page")
 
@@ -51,9 +52,12 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
         try:
             serializer.is_valid(raise_exception=True)
+            #return Response({'error': "test"}, status=status.HTTP_400_BAD_REQUEST)
         except ImageTooLargeError as e:
-            return Response({'detail': str(e)}, status=e.status_code)
-
+            return Response({'error': str(e)}, status=e.status_code)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -71,9 +75,9 @@ class SearchUserView(generics.ListAPIView):
 
         searchterm = request.query_params.get("term", None)
         if searchterm is None:
-            return Response({"detail": "Please provide valid query key"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please provide valid query key"}, status=status.HTTP_400_BAD_REQUEST)
         if searchterm == "":
-            return Response({"detail": "Search term is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Search term is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         results = CustomUser.objects.filter(displayname__icontains=searchterm)[:5]
         if not results:
