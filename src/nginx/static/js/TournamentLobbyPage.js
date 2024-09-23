@@ -6,7 +6,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	constructor() {
 		super();
 		// Binds the method to this class instance so it can be used in the event listener
-		this.handleRecievedMessageVar = this.handleRecievedMessage.bind(this);
+		this.handleRecievedMessage_var = this.handleRecievedMessage.bind(this);
+		this.handlePongFullScreen_var = this.handlePongFullScreen.bind(this);
 	}
 	connectedCallback() {
 		super.connectedCallback();
@@ -15,12 +16,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
 
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+		this.navbar = document.getElementById('navbar');
+		this.footer = document.getElementById('footer');
+		this.canvas = this.root.querySelector("pong-canvas-element");
+		this.player_sidebar = this.root.getElementById("lobbyPlayerSidebar");
 		this.player_list = this.root.getElementById("lobbyPlayerList");
 		this.leave_button = this.root.getElementById("lobbyLeaveButton");
 
 		// adding event listeners
+		this.canvas.addEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
-		window.app.socket.addEventListener("message", this.handleRecievedMessageVar);
+		window.app.socket.addEventListener("message", this.handleRecievedMessage_var);
 
 		// gets the player list when the page is loaded
 		window.app.socket.send(JSON.stringify({type: "getUpdateLobbyPlayerList"}));
@@ -30,8 +36,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super.disconnectedCallback();
 
 		// removing event listeners
+		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var); // maybe we need an extra event for touchscreens !!!!!???
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
-		window.app.socket.removeEventListener("message", this.handleRecievedMessageVar);
+		window.app.socket.removeEventListener("message", this.handleRecievedMessage_var);
 	}
 
 
@@ -69,6 +76,23 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 	}
 
+	handlePongFullScreen() {
+		if (this.navbar.style.display === "none") {
+			this.navbar.style.display = "";
+			this.footer.style.display = "";
+			this.player_sidebar.style.display = "";
+			this.player_sidebar.classList.add('d-flex');
+		} else {
+			this.navbar.style.display = "none";
+			this.footer.style.display = "none";
+			this.player_sidebar.style.display = "none";
+			this.player_sidebar.classList.remove('d-flex'); // if this class isn't removed, the display: none; is overwritten as flex
+		}
+		this.canvas.handleCanvasResize();
+		this.canvas.handleBackgroundCanvasResize();
+	}
+
+
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
@@ -81,6 +105,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 						overflow-auto
 						bg-dark shadow text-white
 						h-lg-100 p-2 gap-lg-0 gap-5"
+				id="lobbyPlayerSidebar"
 			>
 				<!-- leave button -->
 				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
