@@ -61,7 +61,13 @@ class OneTimePassword(models.Model):
 
 class OauthTwo(models.Model):
 
-    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OauthTwo_related_user')
-    code_verifier = models.CharField(max_length=128)
-    code_challenge = models.CharField(max_length=128)
-    state = models.CharField(max_length=128)
+    NEXT_STEP_CHOICES = [
+        ('login', 'login'),
+        ('signup', 'signup'),
+        ('set_oauth2', 'set_oauth2'),
+        ('unset_oauth2', 'unset_oauth2'),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    state_end = models.CharField(max_length=92) #128 -36 (36 is the length of the uuid of the Oauth2 object)
+    next_step = models.CharField(max_length=16, choices=NEXT_STEP_CHOICES, editable=False)
+    related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, null=True, related_name='OauthTwo_related_user')
