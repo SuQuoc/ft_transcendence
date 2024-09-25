@@ -9,7 +9,8 @@ export class PongCanvasElement extends HTMLElement {
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleCanvasResize_var = this.handleCanvasResize.bind(this);
 		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
-		this.handlePlayerMove_var = this.handlePlayerMove.bind(this);
+		this.handlePlayerMoveKey_var = this.handlePlayerMoveKey.bind(this);
+		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
 	}
 
 	connectedCallback() {
@@ -32,14 +33,18 @@ export class PongCanvasElement extends HTMLElement {
 		// maybe should be this or this.canvas not window !!??
 		window.addEventListener('resize', this.handleCanvasResize_var);
 		window.addEventListener('resize', this.handleBackgroundCanvasResize_var);
-		window.addEventListener('keydown', this.handlePlayerMove_var);
+		window.addEventListener('keydown', this.handlePlayerMoveKey_var);
+		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.addEventListener('touchstart', this.handlePlayerMoveTouch_var);
 	}
 
 	disconnectedCallback() {
 		// remove event listeners
 		window.removeEventListener('resize', this.handleCanvasResize_var);
 		window.removeEventListener('resize', this.handleBackgroundCanvasResize_var);
-		window.removeEventListener('keydown', this.handlePlayerMove_var);
+		window.removeEventListener('keydown', this.handlePlayerMoveKey_var);
+		this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.removeEventListener('touchstart', this.handlePlayerMoveTouch_var);
 	}
 
 
@@ -59,6 +64,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.canvas =			this.querySelector('#pongGameCanvas');
 		this.bg_ctx = 			this.bg_canvas.getContext('2d');
 		this.ctx =				this.canvas.getContext('2d');
+		this.scale =			1;
 		this.ratio =			0.6;
 		this.width_unscaled =	1000;
 		this.height_unscaled =	this.width_unscaled * this.ratio;
@@ -72,6 +78,7 @@ export class PongCanvasElement extends HTMLElement {
 
 	scaleCanvas(ctx, canvas_width, canvas_width_unscaled) {
 		const scale = canvas_width / canvas_width_unscaled;
+		this.scale = scale;
 	
 		ctx.scale(scale, scale);
 	}
@@ -111,7 +118,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.background.drawBackground(this.bg_ctx, '0', '0');
 	}
 	
-	handlePlayerMove(event) {
+	handlePlayerMoveKey(event) {
 		const keys = new Set(['ArrowUp', 'ArrowDown', 'w', 's']);
 	
 		if (keys.has(event.key)) {
@@ -131,11 +138,26 @@ export class PongCanvasElement extends HTMLElement {
 			}
 		}
 	}
+	handlePlayerMoveTouch(event) {
+		let touch_y = event.touches[0].clientY;
+		let player_middle = this.player_right.height * this.scale / 2;
+		let y_min = this.canvas.offsetTop + player_middle;
+		let y_max = this.canvas.offsetTop + this.canvas.height - player_middle;
+
+		
+		this.player_right.clear(this.ctx);
+		if (touch_y < y_min)
+			this.player_right.draw(this.ctx, 0);
+		else if (touch_y > y_max)
+			this.player_right.draw(this.ctx, this.height_unscaled - this.player_right.height);
+		else 
+			this.player_right.draw(this.ctx, (touch_y - y_min) / this.scale);
+	}
 
 
 	getElementHTML() {
 		const template = document.createElement('template');
-		template.classList.add("w-100", "h-100"); // maybe the whole element should be a div and not a template
+		template.classList.add("w-100", "h-100");
 		template.innerHTML = `
 			<div id="pongCanvasContainer" class="canvas-container d-flex justify-content-center align-items-center w-100 h-100">
 				<canvas id="pongBackgroundCanvas" class="position-absolute bg-dark shadow" width="1000" height="600"></canvas>

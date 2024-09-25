@@ -16,10 +16,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
 
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
-		this.navbar = document.getElementById('navbar');
-		this.footer = document.getElementById('footer');
 		this.canvas = this.root.querySelector("pong-canvas-element");
-		this.player_sidebar = this.root.getElementById("lobbyPlayerSidebar");
 		this.player_list = this.root.getElementById("lobbyPlayerList");
 		this.leave_button = this.root.getElementById("lobbyLeaveButton");
 
@@ -36,7 +33,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super.disconnectedCallback();
 
 		// removing event listeners
-		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var); // maybe we need an extra event for touchscreens !!!!!???
+		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
 		window.app.socket.removeEventListener("message", this.handleRecievedMessage_var);
 	}
@@ -77,17 +74,16 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	}
 
 	handlePongFullScreen() {
-		if (this.navbar.style.display === "none") {
-			this.navbar.style.display = "";
-			this.footer.style.display = "";
-			this.player_sidebar.style.display = "";
-			this.player_sidebar.classList.add('d-flex');
-		} else {
-			this.navbar.style.display = "none";
-			this.footer.style.display = "none";
-			this.player_sidebar.style.display = "none";
-			this.player_sidebar.classList.remove('d-flex'); // if this class isn't removed, the display: none; is overwritten as flex
+		if (this.canvas.requestFullscreen) {
+			this.canvas.requestFullscreen();
+		} else if (this.canvas.mozRequestFullScreen) { // Firefox
+			this.canvas.mozRequestFullScreen();
+		} else if (this.canvas.webkitRequestFullscreen) { // Chrome, Safari and Opera
+			this.canvas.webkitRequestFullscreen();
+		} else if (this.canvas.msRequestFullscreen) { // IE/Edge
+			this.canvas.msRequestFullscreen();
 		}
+
 		this.canvas.handleCanvasResize();
 		this.canvas.handleBackgroundCanvasResize();
 	}
@@ -135,7 +131,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 			</div>
 			<!-- game -->
-			<pong-canvas-element class="d-flex flex-grow-1 w-100 h-100 p-lg-4 p-md-3"></pong-canvas-element>
+			<pong-canvas-element class="d-flex flex-grow-1 bg-custom w-100 h-100 p-lg-4 p-md-3 p-1"></pong-canvas-element>
 		`;
 		return template;
 	}

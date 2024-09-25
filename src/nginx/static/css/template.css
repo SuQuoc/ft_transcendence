@@ -24,6 +24,9 @@ body {
 	background: var(--custom-bg-color);
 }
 
+.bg-custom {
+	background: var(--custom-bg-color);
+}
 
 .dark-footer-border-bottom {
 	border-bottom: 1px solid var(--custom-bg-color);
