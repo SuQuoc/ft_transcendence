@@ -15,34 +15,42 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import common, oauth2, basic, otp
-from django.urls import re_path
+from core_app.views import common, oauth2, basic, otp, test
+from django.urls import path
 
 urlpatterns = [
     # basic views
-    re_path('signup', basic.signup),
-    re_path('login', basic.login),
-    re_path('forgot_password_send_email', basic.forgot_password_send_email),
-    re_path('forgot_password_reset', basic.forgot_password_reset),
+    path('registration/basic_login', basic.login),
+    path('registration/basic_forgot_password', basic.forgot_password),
+    path('registration/basic_signup', basic.signup),
+    path('registration/basic_signup_change_password', basic.signup_change_password),
+    path('registration/basic_signup_change_username', basic.signup_change_username),
+
+    #test views
+    path('registration/signup', test.signup), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+    path('registration/login', test.login), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+    path('forgot_reset', basic.forgot_password_send_email),
+    path('forgot_password_send_email', basic.forgot_password_send_email),
 
     # common views
-    re_path('delete_user', common.delete_user),
-    re_path('logout', common.logout),
-    re_path('change_password', common.change_password),
-    re_path('verify_token', common.verify_token),
-    re_path('refresh_token', common.refresh_token),
+    path('registration/change_password', common.change_password),
+    path('registration/change_username', common.change_username),
+    path('registration/delete_user', common.delete_user),
+    path('registration/logout', common.logout),
+    path('registration/refresh_token', common.refresh_token),
+    path('registration/verify_token', common.verify_token),
     
     # oauth2 views
-    re_path('oauth2_callback', oauth2.callback),
-    re_path('oauth2_set', oauth2.set),
-    re_path('oauth2_unset', oauth2.unset),
-    re_path('oauth2_signup', oauth2.signup),
-    re_path('oauth2_login', oauth2.login),
+    path('registration/oauth2_callback/', oauth2.callback),
+    path('registration/oauth2_set/', oauth2.set),
+    path('registration/oauth2_unset/', oauth2.unset),
+    path('registration/oauth2_signup/', oauth2.signup),
+    path('registration/oauth2_login/', oauth2.login),
 
     # twofa views
-    re_path('otp_send_email', otp.send_email),
-    re_path('otp_confirm_twofa', otp.confirm_twofa),
-    re_path('otp_confirm_login', otp.confirm_login),
+    path('registration/otp_send_email', otp.send_email),
+    path('registration/otp_confirm_twofa', otp.confirm_twofa),
+    path('registration/otp_confirm_login', otp.confirm_login),
 
 
 ]

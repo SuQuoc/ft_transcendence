@@ -1,7 +1,7 @@
 @base_url = https://localhost:8000
 
 # @name post_signup
-POST {{base_url}}/registration/signup/
+POST {{base_url}}/registration/signup
 Content-Type: application/json
 
 {"username": "email@domain.at", "password": "Pass1234!"}
@@ -9,7 +9,7 @@ Content-Type: application/json
 ###
 
 # @name post_login
-POST {{base_url}}/registration/login/
+POST {{base_url}}/registration/login
 Content-Type: application/json
 
 {"username": "email@domain.at", "password": "Pass1234!"}

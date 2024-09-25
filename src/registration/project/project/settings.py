@@ -126,6 +126,6 @@ PASSWORD_RESET_TIMEOUT = 600
 CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
 ]
-
+APPEND_SLASH=False # [aguilmea] changed temporarly
 
 # [aguilmea] end of added manually
