@@ -11,6 +11,8 @@ export class PongCanvasElement extends HTMLElement {
 		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
 		this.handlePlayerMoveKey_var = this.handlePlayerMoveKey.bind(this);
 		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
+
+		this.handlePlayerMoveMouse_var = this.handlePlayerMoveMouse.bind(this);
 	}
 
 	connectedCallback() {
@@ -36,6 +38,8 @@ export class PongCanvasElement extends HTMLElement {
 		window.addEventListener('keydown', this.handlePlayerMoveKey_var);
 		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
 		this.addEventListener('touchstart', this.handlePlayerMoveTouch_var);
+
+		this.canvas.addEventListener('mousemove', this.handlePlayerMoveMouse_var);
 	}
 
 	disconnectedCallback() {
@@ -45,6 +49,8 @@ export class PongCanvasElement extends HTMLElement {
 		window.removeEventListener('keydown', this.handlePlayerMoveKey_var);
 		this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
 		this.removeEventListener('touchstart', this.handlePlayerMoveTouch_var);
+
+		this.canvas.removeEventListener('mousemove', this.handlePlayerMoveMouse_var);
 	}
 
 
@@ -140,7 +146,8 @@ export class PongCanvasElement extends HTMLElement {
 	}
 	handlePlayerMoveTouch(event) {
 		let touch_y = event.touches[0].clientY;
-		let player_middle = this.player_right.height * this.scale / 2;
+		this.movePlayer(touch_y);
+		/* let player_middle = this.player_right.height * this.scale / 2;
 		let y_min = this.canvas.offsetTop + player_middle;
 		let y_max = this.canvas.offsetTop + this.canvas.height - player_middle;
 
@@ -151,7 +158,25 @@ export class PongCanvasElement extends HTMLElement {
 		else if (touch_y > y_max)
 			this.player_right.draw(this.ctx, this.height_unscaled - this.player_right.height);
 		else 
-			this.player_right.draw(this.ctx, (touch_y - y_min) / this.scale);
+			this.player_right.draw(this.ctx, (touch_y - y_min) / this.scale); */
+	}
+	handlePlayerMoveMouse(event) {
+		this.movePlayer(event.clientY);
+	}
+
+	movePlayer(input_y) {
+		let player_middle = this.player_right.height * this.scale / 2;
+		let y_min = this.canvas.offsetTop + player_middle;
+		let y_max = this.canvas.offsetTop + this.canvas.height - player_middle;
+
+		
+		this.player_right.clear(this.ctx);
+		if (input_y < y_min)
+			this.player_right.draw(this.ctx, 0);
+		else if (input_y > y_max)
+			this.player_right.draw(this.ctx, this.height_unscaled - this.player_right.height);
+		else 
+			this.player_right.draw(this.ctx, (input_y - y_min) / this.scale);
 	}
 
 
