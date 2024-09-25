@@ -1,0 +1,57 @@
+
+POST {{base_url}}/registration/yo_login/
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+###
+
+POST {{base_url}}/registration/login_random/
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+###
+
+POST {{base_url}}/registration/random/
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+
+POST {{base_url}}/registration/yo_login
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+###
+
+POST {{base_url}}/registration/login_random
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+###
+
+POST {{base_url}}/registration/random
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}

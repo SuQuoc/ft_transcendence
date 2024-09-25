@@ -6,9 +6,9 @@ from django.utils import timezone
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ..authenticate import AccessTokenAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
+from ..authenticate import AccessTokenAuthentication, OneTimePasswordAuthentication
 from ..models import OneTimePassword
-from .utils_otp import send_twofa_email, create_one_time_password
+from .utils_otp import send_otp_email, create_one_time_password
 from .utils import generate_response_with_valid_JWT
 
 
@@ -18,12 +18,12 @@ from .utils import generate_response_with_valid_JWT
 def send_email(request):
     try:
         action = request.data.get('action')
-        if not action or action not in ['twofa_enable', 'twofa_disable', 'twofa_login']:
+        if not action or action not in ['signup', 'login']:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         request.user.otp.all().delete()
 #            otp.delete()
         password = create_one_time_password(request.user.id, action)
-        send_twofa_email(request.user.username, action, password) # I need to pass the password to the function because in the future i want to hash it
+        send_otp_email(request.user.username, action, password) # I need to pass the password to the function because in the future i want to hash it
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'twofa_send_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

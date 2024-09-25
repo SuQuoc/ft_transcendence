@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -13,16 +14,23 @@ from .utils import generate_response_with_valid_JWT, send_200_with_expired_cooki
 def delete_user(request):
     try:
         current_password = request.data.get('password')
+        otp = request.data.get('otp')
+        user = request.user
         if not current_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(current_password):
+            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if otp is None:
+            otp = create_one_time_password(user.id, 'delete_user')
+            send_otp_email(user.username, 'delete_user', otp)
+            return Response({3}, status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'delete_user', otp):
+            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
         #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
-            # return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         response = send_delete_request_to_um(request)
         if response.status_code != 200:
-            return response
-        user = request.user
-        if not user.check_password(current_password):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({5}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         user.delete()
         return send_200_with_expired_cookies()
     except Exception as e:
@@ -39,23 +47,54 @@ def logout(request):
 
 
 @api_view(['POST'])
-@authentication_classes([RefreshTokenAuthentication])
+@authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def change_password(request):
     try:
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
-        refresh = request.COOKIES.get('refresh', None)
-        if not refresh or not current_password or not new_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not current_password or not new_password:
+            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
         user = request.user
         if not user or not user.check_password(current_password):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+        otp = request.data.get('otp')
+        if not otp:
+            otp = create_one_time_password(user.id, 'change_password')
+            send_otp_email(user.username, 'change_password', otp)
+            return Response({3}, status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'change_password', otp):
+            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
         user.set_password(new_password)
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
         return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def change_username(request):
+    try:
+        new_username = request.data.get('new_username')
+        if not new_username:
+            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        if not user:
+            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+        otp = request.data.get('otp')
+        if not otp:
+            otp = create_one_time_password(user.id, 'change_username')
+            send_otp_email(new_username, 'change_username', otp)
+            return Response({3}, status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'change_username', otp):
+            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
+        user.username = new_username
+        user.save()
+        return send_200_with_expired_cookies()
+    except Exception as e:
+        return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
