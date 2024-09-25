@@ -70,7 +70,7 @@ def send_reset_email(recipient, token):
 
 
 def send_delete_request_to_um(request):
-    request_uri = 'http://usermanagement:8000/um/profile/'
+    request_uri = 'http://usermanagement:8000/um/profile'
     headers = {
         'Content-Type': 'application/json',
         'Cookie': 'access=' + request.COOKIES.get('access')
