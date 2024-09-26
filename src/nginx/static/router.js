@@ -81,7 +81,7 @@ const Router = {
 		// !!! if not, the event listeners might not be added
 
 		// check if the user is logged in
-		if (location.pathname !== "/login" && location.pathname !== "/signup") {
+		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				Router.go("/login", false);
@@ -129,7 +129,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname") {
+		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
@@ -146,7 +146,7 @@ const Router = {
 		let pageElement = null; // the new page element
 
 		//comment out to add token check
-		if (route !== "/login" && route !== "/signup") {
+		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
@@ -191,6 +191,9 @@ const Router = {
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
+				break;
+			case "/forgot-password":
+				pageElement = document.createElement("forgot-password");
 				break;
 			case "/displayname":
 				pageElement = document.createElement("select-displayname-page");

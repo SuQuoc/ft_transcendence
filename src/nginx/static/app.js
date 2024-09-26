@@ -33,6 +33,7 @@ import { FriendList } from './js/FriendList.js';
 import { FriendSearch } from './js/FriendSearch.js';
 import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
 import { TournamentWaitingRoomPage } from './js/TournamentWaitingRoomPage.js';
+import { ForgotPassword} from './js/ForgotPassword.js'
 
 
 console.log("app.js loaded");
