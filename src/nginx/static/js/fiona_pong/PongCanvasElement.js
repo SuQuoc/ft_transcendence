@@ -9,10 +9,11 @@ export class PongCanvasElement extends HTMLElement {
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleCanvasResize_var = this.handleCanvasResize.bind(this);
 		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
-		this.handlePlayerMoveKey_var = this.handlePlayerMoveKey.bind(this);
-		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
 
-		this.handlePlayerMoveMouse_var = this.handlePlayerMoveMouse.bind(this);
+		this.handlePlayerMoveKeyDown_var = this.handlePlayerMoveKeyDown.bind(this);
+		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
+		this.handlePlayerMoveTouchStart_var = this.handlePlayerMoveTouchStart.bind(this);
+		this.handlePlayerMoveEnd_var = this.handlePlayerMoveEnd.bind(this);
 	}
 
 	connectedCallback() {
@@ -27,30 +28,29 @@ export class PongCanvasElement extends HTMLElement {
 			this.handleCanvasResize();
 			this.handleBackgroundCanvasResize();
 		});
-		
-		console.log('canvas.width: ', this.canvas.width);
-		console.log('canvas.height: ', this.canvas.height);
 
 		// add event listeners
 		// maybe should be this or this.canvas not window !!??
 		window.addEventListener('resize', this.handleCanvasResize_var);
 		window.addEventListener('resize', this.handleBackgroundCanvasResize_var);
-		window.addEventListener('keydown', this.handlePlayerMoveKey_var);
-		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
-		this.addEventListener('touchstart', this.handlePlayerMoveTouch_var);
 
-		this.canvas.addEventListener('mousemove', this.handlePlayerMoveMouse_var);
+		window.addEventListener('keydown', this.handlePlayerMoveKeyDown_var);
+		window.addEventListener('keyup', this.handlePlayerMoveEnd_var);
+		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.addEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
+		this.addEventListener('touchend', this.handlePlayerMoveEnd_var);
 	}
 
 	disconnectedCallback() {
 		// remove event listeners
 		window.removeEventListener('resize', this.handleCanvasResize_var);
 		window.removeEventListener('resize', this.handleBackgroundCanvasResize_var);
-		window.removeEventListener('keydown', this.handlePlayerMoveKey_var);
-		this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
-		this.removeEventListener('touchstart', this.handlePlayerMoveTouch_var);
 
-		this.canvas.removeEventListener('mousemove', this.handlePlayerMoveMouse_var);
+		window.removeEventListener('keydown', this.handlePlayerMoveKeyDown_var);
+		window.removeEventListener('keyup', this.handlePlayerMoveEnd_var);
+		this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.removeEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
+		this.removeEventListener('touchend', this.handlePlayerMoveEnd_var);
 	}
 
 
@@ -75,6 +75,9 @@ export class PongCanvasElement extends HTMLElement {
 		this.width_unscaled =	1000;
 		this.height_unscaled =	this.width_unscaled * this.ratio;
 
+		this.intervall_id =		null; // used to move the player
+		this.move_to_y = 		0; // used to move the player
+
 		this.player_left =	new Player(player_x, player_y, player_width, player_height, player_speed, player_color);
 		this.player_right =	new Player(this.width_unscaled - player_x - player_width,
 										player_y, player_width, player_height, player_speed, player_color);
@@ -82,16 +85,32 @@ export class PongCanvasElement extends HTMLElement {
 		this.background = 	new Background(this.width_unscaled, this.height_unscaled, 50, 'grey', '50px Arial');
 	}
 
+	/** Scales the canvas depending on the screensize and sets this.scale to the new scale. */
 	scaleCanvas(ctx, canvas_width, canvas_width_unscaled) {
-		const scale = canvas_width / canvas_width_unscaled;
-		this.scale = scale;
+		this.scale = canvas_width / canvas_width_unscaled;
 	
-		ctx.scale(scale, scale);
+		ctx.scale(this.scale, this.scale);
 	}
 	
+	/** Moves the right player up or down depending on this.move_to_y. */
+	movePlayer() {
+		//this.move_to_y -= this.canvas.offsetTop;
+		console.log('move_to_y: ', this.move_to_y);
+		let player_middle = this.player_right.height * this.scale / 2;
+		let current_y = (this.player_right.y * this.scale) + player_middle;
+
+		if (current_y >= this.move_to_y -5 && current_y <= this.move_to_y + 5)
+			return;
+		if (current_y <= this.move_to_y)
+			this.player_right.moveDown(this.ctx, this.height_unscaled);
+		else if (current_y >= this.move_to_y)
+			this.player_right.moveUp(this.ctx);
+	}
+
 
 	/// ----- Event Handlers ----- ///
 
+	/** Resizes the (foreground) Canvas depending on the screensize. */
 	handleCanvasResize() {
 		const container_width = this.container.clientWidth;
 		const container_height = this.container.clientHeight;
@@ -109,6 +128,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.ball.draw(this.ctx, 'white');
 	}
 	
+	/** Resizes the background Canvas depending on the screensize. */
 	handleBackgroundCanvasResize() {
 		const container_width = this.container.clientWidth;
 		const container_height = this.container.clientHeight;
@@ -124,59 +144,51 @@ export class PongCanvasElement extends HTMLElement {
 		this.background.drawBackground(this.bg_ctx, '0', '0');
 	}
 	
-	handlePlayerMoveKey(event) {
-		const keys = new Set(['ArrowUp', 'ArrowDown', 'w', 's']);
-	
-		if (keys.has(event.key)) {
-			switch (event.key) {
-				case 'ArrowUp':
-					this.player_right.moveUp(this.ctx);
-					break;
-				case 'ArrowDown':
-					this.player_right.moveDown(this.ctx, this.height_unscaled);
-					break;
-				case 'w':
-					this.player_left.moveUp(this.ctx);
-					break;
-				case 's':
-					this.player_left.moveDown(this.ctx, this.height_unscaled);
-					break
-			}
+	/** Starts an interval that calls movePlayer and sets this.intervall_id depending on the key pressed. */
+	handlePlayerMoveKeyDown(event) {
+		if (this.intervall_id) {
+			//clearInterval(this.intervall_id);
+			return;
 		}
+
+		if (event.key === 'ArrowUp') {
+			this.move_to_y = 0;
+		} else if (event.key === 'ArrowDown') {
+			this.move_to_y = this.canvas.offsetTop + this.canvas.height;
+		}
+
+		this.intervall_id = setInterval(() => { // the => is needed to keep the context of this
+			this.movePlayer();
+		}, 20);
 	}
+
+	/** Sets a new goal for the player to move to (this.move_to_y) */
 	handlePlayerMoveTouch(event) {
-		let touch_y = event.touches[0].clientY;
-		this.movePlayer(touch_y);
-		/* let player_middle = this.player_right.height * this.scale / 2;
-		let y_min = this.canvas.offsetTop + player_middle;
-		let y_max = this.canvas.offsetTop + this.canvas.height - player_middle;
-
-		
-		this.player_right.clear(this.ctx);
-		if (touch_y < y_min)
-			this.player_right.draw(this.ctx, 0);
-		else if (touch_y > y_max)
-			this.player_right.draw(this.ctx, this.height_unscaled - this.player_right.height);
-		else 
-			this.player_right.draw(this.ctx, (touch_y - y_min) / this.scale); */
-	}
-	handlePlayerMoveMouse(event) {
-		this.movePlayer(event.clientY);
+		console.log('touchmove');
+		this.move_to_y = event.touches[0].clientY - this.canvas.offsetTop;
 	}
 
-	movePlayer(input_y) {
-		let player_middle = this.player_right.height * this.scale / 2;
-		let y_min = this.canvas.offsetTop + player_middle;
-		let y_max = this.canvas.offsetTop + this.canvas.height - player_middle;
+	/** Starts an interval that calls movePlayer */
+	handlePlayerMoveTouchStart(event) {
+		console.log('touchstart');
 
-		
-		this.player_right.clear(this.ctx);
-		if (input_y < y_min)
-			this.player_right.draw(this.ctx, 0);
-		else if (input_y > y_max)
-			this.player_right.draw(this.ctx, this.height_unscaled - this.player_right.height);
-		else 
-			this.player_right.draw(this.ctx, (input_y - y_min) / this.scale);
+		if (this.intervall_id) {
+			clearInterval(this.intervall_id);
+			this.intervall_id = null;
+		}
+
+		this.move_to_y = event.touches[0].clientY - this.canvas.offsetTop;
+		this.intervall_id = setInterval(() => { // the => is needed to keep the context of this
+			this.movePlayer();
+		}, 20);
+	}
+
+	/** Ends movement of Player.
+	 * 
+	 * Clears the interval (clearIneterval) and assigns null to this.interval */
+	handlePlayerMoveEnd(event) {
+		clearInterval(this.intervall_id);
+		this.intervall_id = null;
 	}
 
 
