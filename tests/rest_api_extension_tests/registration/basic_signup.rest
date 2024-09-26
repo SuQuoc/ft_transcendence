@@ -1,0 +1,18 @@
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username1}}",
+    "password": "{{current_password1}}",
+    "otp": "HY4WP5MD3V5DUYFB"
+}

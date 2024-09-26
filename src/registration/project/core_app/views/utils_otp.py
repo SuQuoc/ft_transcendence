@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from ..serializers import OneTimePasswordSerializer
+from..models import OneTimePassword
 
 import random
 import string
@@ -11,7 +12,7 @@ import os
 # [aguilmea] i do not pass the token as a parameter so it is more secure but it is not the easiest way for the user
 # I am not sure if i should send the link or if the user should stay on the page
 # FE should handle the get request and send me a post request (more secured) so that i can answer with a response
-def send_twofa_email(username, action, password):
+def send_otp_email(username, action, password):
     try:
         subject = ' Confirm your action for your Transcendence account'
         link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'
@@ -39,10 +40,12 @@ def send_twofa_email(username, action, password):
             html_message=None, # [aguilmea] will only be sent as plain text and not html
         )
     except Exception as e:
-        raise Exception(f"send_twofa_email: {str(e)}")
+        raise Exception(f"send_otp_email: {str(e)}")
 
 def create_one_time_password(related_user, action):
     try:
+        for otp in OneTimePassword.objects.filter(related_user=related_user):
+            otp.delete()
         password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
         otp_data = {
             'related_user': related_user,
@@ -57,3 +60,18 @@ def create_one_time_password(related_user, action):
         return password
     except Exception as e:
         raise Exception({'create_one_time_password error': str(e)})
+
+def check_one_time_password(related_user, action, password):
+    try:
+        otp = OneTimePassword.objects.get(related_user=related_user)
+        if otp.expire < timezone.now():
+            otp.delete()
+            raise Exception ('otp expired')
+        if otp.action != action:
+            raise Exception ('wrong action')
+        if otp.password != password:
+            raise Exception ('wrong password')
+        otp.delete()
+        return True
+    except Exception as e:
+       return False
