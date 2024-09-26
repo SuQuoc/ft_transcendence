@@ -43,9 +43,9 @@ class OneTimePasswordSerializer(serializers.ModelSerializer):
 class OauthTwoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OauthTwo
-        fields = ['id', 'state_end', 'next_step', 'related_user']
+        fields = ['id', 'state', 'next_step', 'related_user']
         extra_kwargs = {
             'id': {'read_only': True},
-            'state_end': {'read_only': True},
+            'state': {'read_only': True},
             'next_step': {'read_only': True},
         }
