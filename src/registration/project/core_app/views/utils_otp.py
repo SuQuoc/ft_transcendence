@@ -9,9 +9,6 @@ import random
 import string
 import os
 
-# [aguilmea] i do not pass the token as a parameter so it is more secure but it is not the easiest way for the user
-# I am not sure if i should send the link or if the user should stay on the page
-# FE should handle the get request and send me a post request (more secured) so that i can answer with a response
 def send_otp_email(username, action, password):
     try:
         subject = ' Confirm your action for your Transcendence account'
@@ -34,10 +31,10 @@ def send_otp_email(username, action, password):
             "Your Transcendence team",
             [username],
             fail_silently=False,
-            auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
-            auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
-            connection=None, # [aguilmea] optional email backend
-            html_message=None, # [aguilmea] will only be sent as plain text and not html
+            auth_user=None, # will use EMAIL_HOST_USER
+            auth_password=None, # will use EMAIL_HOST_PASSWORD
+            connection=None, #  optional email backend
+            html_message=None, # will only be sent as plain text and not html
         )
     except Exception as e:
         raise Exception(f"send_otp_email: {str(e)}")

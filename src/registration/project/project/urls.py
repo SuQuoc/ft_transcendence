@@ -29,6 +29,7 @@ urlpatterns = [
    
     # oauth2 views
     path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
+    path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
     path('registration/oauthtwo_signup', oauthtwo.signup),
     path('registration/oauthtwo_login', oauthtwo.login),
     #path('registration/oauthtwo_callback', oauthtwo.callback),

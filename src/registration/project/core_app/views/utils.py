@@ -60,10 +60,10 @@ def send_reset_email(recipient, token):
             "Your Transcendence team",
             [recipient],
             fail_silently=False,
-            auth_user=None, # [aguilmea] will use EMAIL_HOST_USER
-            auth_password=None, # [aguilmea] will use EMAIL_HOST_PASSWORD
-            connection=None, # [aguilmea] optional email backend
-            html_message=None, # [aguilmea] will only be sent as plain text and not html
+            auth_user=None, # will use EMAIL_HOST_USER
+            auth_password=None, # will use EMAIL_HOST_PASSWORD
+            connection=None, # optional email backend
+            html_message=None, # will only be sent as plain text and not html
         )
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

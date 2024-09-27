@@ -1,5 +1,5 @@
-from datetime import timedelta  # [aguilmea] added manually
-import os  # [aguilmea] added manually
+from datetime import timedelta
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,13 +14,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # [aguilmea] added manually
-    'corsheaders',  # [aguilmea] added manually
+    'rest_framework',
+    'corsheaders',
     'core_app',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # [aguilmea] added manually
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,7 +85,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# [aguilmea] added manually:
+# added manually
 
 with open('/run/secrets/private_key.pem', 'r') as f:
     PRIVATE_KEY = f.read()
@@ -128,4 +128,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 APPEND_SLASH=False # [aguilmea] changed temporarly
 
-# [aguilmea] end of added manually
+#  end of added manually
