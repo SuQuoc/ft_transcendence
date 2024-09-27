@@ -161,7 +161,7 @@ export class LoginPage extends ComponentBaseClass {
 			window.app.userData.email = email;
 
 			// Check if the user already has a displayname
-			const displaynameResponse = await fetch ('/um/profile/', {
+			const displaynameResponse = await fetch ('/um/profile', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json'

@@ -35,8 +35,6 @@ class CustomUserCreate(generics.CreateAPIView):
         serializer.save()
 
 
-# is_self, friend, stranger logic potentially ONLY for the SEARCH ENDPOINT
-# because u may ONLY be able to view OWN PROFILE
 class CustomUserProfile(generics.GenericAPIView):
     parser_classes = [MultiPartParser, FormParser] # only used for patch, since GET and DELETE typically dont have a body
     queryset = CustomUser.objects.all()
@@ -46,18 +44,16 @@ class CustomUserProfile(generics.GenericAPIView):
         serializer = CustomUserProfileSerializer(user)
         return Response(serializer.data)
 
-    # @parser_classes([MultiPartParser, FormParser])
     def patch(self, request):
         user = get_user_from_jwt(request)
         serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
         try:
-            serializer.is_valid(raise_exception=True)
-            #return Response({'error': "test"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True) # will call the validate method in the serializer IF DEFINED
         except ImageTooLargeError as e:
             return Response({'error': str(e)}, status=e.status_code)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
