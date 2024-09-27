@@ -79,9 +79,16 @@ export class ForgotPassword extends ComponentBaseClass {
         resetSpinner.style.display = 'inline-block';
 
         try {
-            /*
-            this.apiFetch('/registration/send-otp', {method: 'POST', body: JSON.stringify({ "username": email })});
-            */
+            const response = await fetch('/registration/basic_forgot_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ "username": email }),
+            });
+            if (!response.ok) {
+                throw new Error('Could not send OTP');
+            }
             this.startTimer(60, resetButton);
             this.handleEmailInput();
         } catch (error) {
@@ -117,9 +124,16 @@ export class ForgotPassword extends ComponentBaseClass {
         }
 
         try {
-            /*
-            this.apiFetch('/registration/reset-password', {method: 'POST', body: JSON.stringify({ "email": email, "otp": otp, "password": password1 })});
-            */
+            const response = await fetch('/registration/basic_forgot_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ "username": email, otp, "new_password": password1 }),
+            });
+            if (!response.ok) {
+                throw new Error('Could not change password');
+            }
             app.router.go('/login', false);
         } catch (error) {
             console.error('Error during password reset:', error);
