@@ -66,7 +66,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		}
 
 		try {
-			const response = await fetch('/um/user-creation/', {
+			const response = await fetch('/um/user-creation', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',

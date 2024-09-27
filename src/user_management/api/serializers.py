@@ -10,14 +10,14 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["displayname"]
 
-# for deserilazing
+# ONLY FOR /profile GET --> fields online and relationship not needed
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
     relationship = serializers.SerializerMethodField(required=False)
     
     class Meta:
         model = CustomUser
-        fields = ["displayname", "online", "image", "relationship"]
+        fields = ["displayname", "image", "online", "relationship"]
     
     def get_relationship(self, obj):
         return self.context.get('relationship', None)
@@ -29,22 +29,6 @@ class CustomUserProfileSerializer(serializers.ModelSerializer):
             representation.pop('relationship')
 
         return representation
-
-
-class ImageTooLargeError(APIException):
-    status_code = 413
-    default_detail = 'A custom validation error occurred.'
-    default_code = 'custom_validation_error'
-
-def profile_image_validator(image):
-    filesize = image.size
-
-    # width, height = get_image_dimensions(image)
-    # if width != REQUIRED_WIDTH or height != REQUIRED_HEIGHT:
-    #     raise ValidationError(f"You need to upload an image with {REQUIRED_WIDTH}x{REQUIRED_HEIGHT} dimensions")
-
-    if filesize > MEGABYTE_LIMIT * 1024 * 1024:
-        raise ImageTooLargeError(f"Max file size is {MEGABYTE_LIMIT}MB")
 
 
 
@@ -77,7 +61,24 @@ class UserRelationSerializer(serializers.ModelSerializer):
         if representation.get('online') is None:
             representation.pop('online')
         return representation
-    
+
+
+class ImageTooLargeError(APIException):
+    status_code = 413
+    default_detail = 'A custom validation error occurred.'
+    default_code = 'custom_validation_error'
+
+def profile_image_validator(image):
+    filesize = image.size
+
+    # width, height = get_image_dimensions(image)
+    # if width != REQUIRED_WIDTH or height != REQUIRED_HEIGHT:
+    #     raise ValidationError(f"You need to upload an image with {REQUIRED_WIDTH}x{REQUIRED_HEIGHT} dimensions")
+
+    if filesize > MEGABYTE_LIMIT * 1024 * 1024:
+        raise ImageTooLargeError(f"Max file size is {MEGABYTE_LIMIT}MB")
+
+
 class CustomUserEditSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(validators=[profile_image_validator])
 
@@ -85,6 +86,10 @@ class CustomUserEditSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["displayname", "image"]
 
+    def validate(self, data):
+        if data.get('displayname') is None and data.get('image') is None:
+            raise serializers.ValidationError("No valid field provided.")
+        return data
 
 
 
