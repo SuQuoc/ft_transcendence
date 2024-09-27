@@ -15,15 +15,6 @@ export class ForgotPassword extends ComponentBaseClass {
         this.shadowRoot.getElementById('newPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
         this.shadowRoot.getElementById('newPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
         this.shadowRoot.getElementById('forgotPasswordForm').addEventListener('keydown', this.handleKeyDown.bind(this));
-        /*
-        this.shadowRoot.getElementById('resetSubmitButton').addEventListener('submit', this.resetPassword.bind(this));
-        this.shadowRoot.getElementById('resetSubmitButton').addEventListener('click', this.resetPassword.bind(this));
-        this.shadowRoot.getElementById('requestOTP').addEventListener('submit', this.requestOTP.bind(this));
-        this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
-        this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOtpInput.bind(this));
-        this.shadowRoot.getElementById('newPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
-        this.shadowRoot.getElementById('newPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
-         */
     }
 
     handleKeyDown(event) {
@@ -33,10 +24,8 @@ export class ForgotPassword extends ComponentBaseClass {
             const passwordSectionVisible = this.shadowRoot.getElementById('passwordSection').style.display !== 'none';
 
             if (!otpSectionVisible) {
-                console.log("requesting OTP");
                 this.requestOTP(event);
             } else if (otpSectionVisible && passwordSectionVisible) {
-                console.log("resetting password");
                 this.resetPassword(event);
             }
         }
@@ -106,7 +95,7 @@ export class ForgotPassword extends ComponentBaseClass {
 
     async resetPassword(event) {
         event.preventDefault();
-        const resetButton = this.shadowRoot.querySelector('button[type="submit"]');
+        const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
         const resetSpinner = this.shadowRoot.getElementById('resetSpinner');
         const resetError = this.shadowRoot.getElementById('errorMessage');
         if (resetButton.disabled) return;
