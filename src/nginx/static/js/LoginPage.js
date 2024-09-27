@@ -8,11 +8,15 @@ export class LoginPage extends ComponentBaseClass {
 
 	connectedCallback() {
 		super.connectedCallback();
-		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
-		this.shadowRoot.getElementById('loginEmail').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('loginPassword').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('loginSubmitButton').addEventListener('click', this.login.bind(this));
 		this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
-		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
+		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
+		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
+		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
+
+		//this.shadowRoot.getElementById('loginEmail').addEventListener('input', this.validateForm.bind(this));
+		//this.shadowRoot.getElementById('loginPassword').addEventListener('input', this.validateForm.bind(this));
+		//this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
 	getElementHTML() {
@@ -47,6 +51,20 @@ export class LoginPage extends ComponentBaseClass {
 		return template;
 	}
 
+	handleEmailEnter(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+
+			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
+			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
+			if (!otpSectionVisible) {
+				this.requestOTP(event);
+			} else if (otpSectionVisible && loginButton.disabled === false) {
+				this.login(event);
+			}
+		}
+	}
+
 	validateEmail() {
 		const email = this.shadowRoot.getElementById('loginEmail').value;
 		const emailWarning = this.shadowRoot.getElementById('errorMessage');
@@ -64,10 +82,9 @@ export class LoginPage extends ComponentBaseClass {
 	}
 
 	validateForm() {
-		const email = this.shadowRoot.getElementById('loginEmail').value;
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
-		const loginButton = this.shadowRoot.querySelector('loginSubmitButton');
+		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 		const otpPattern = /^[A-Z0-9]{16}$/;
 		const emailValid = this.validateEmail();
 
@@ -88,7 +105,8 @@ export class LoginPage extends ComponentBaseClass {
 		requestOTPButton.disabled = true;
 
 		try {
-			await this.apiFetch('/registration/send-otp', { method: 'POST', body: JSON.stringify({ "username": email }) });
+			//TODO: integrate send OTP endpoint when it is finished
+			//await this.apiFetch('/registration/send-otp', { method: 'POST', body: JSON.stringify({ "username": email }) });
 			this.startTimer(60, requestOTPButton);
 			this.shadowRoot.getElementById('otpSection').style.display = 'block';
 		} catch (error) {
@@ -134,7 +152,7 @@ export class LoginPage extends ComponentBaseClass {
 
 	async login(event) {
 		event.preventDefault();
-		const loginButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 		const loginSpinner = this.shadowRoot.getElementById('loginSpinner');
 		const loginError = this.shadowRoot.getElementById('errorMessage');
 		loginButton.style.display = 'none';
@@ -146,12 +164,12 @@ export class LoginPage extends ComponentBaseClass {
 
 		try {
 			//TODO: use the new basic_login endpoint in combination with OTP
-			const loginResponse = await fetch('/registration/basic_login', {
+			const loginResponse = await fetch('/registration/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ "username": email, password, otp })
+				body: JSON.stringify({ "username": email, password })
 			});
 
 			if (!loginResponse.ok) {
