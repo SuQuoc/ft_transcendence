@@ -1,8 +1,6 @@
-# [aguilmea] file was created manually
 from rest_framework import serializers
-
 from .models import RegistrationUser, OneTimePassword, OauthTwo
-
+import random, string
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = RegistrationUser(**validated_data)
         user.set_password(password)
-        user.save()  
+        user.save()
         return user 
 
     def update(self, instance, validated_data):
@@ -43,9 +41,13 @@ class OneTimePasswordSerializer(serializers.ModelSerializer):
 class OauthTwoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OauthTwo
-        fields = ['id', 'state', 'next_step', 'related_user']
+        fields = ['id', 'related_user', 'next_step', ]
         extra_kwargs = {
             'id': {'read_only': True},
-            'state': {'read_only': True},
-            'next_step': {'read_only': True},
         }
+
+    def create(self, validated_data):
+        validated_data['state'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        oauthtwo = OauthTwo(**validated_data)
+        oauthtwo.save()
+        return oauthtwo
