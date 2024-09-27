@@ -12,7 +12,7 @@ from .utils import generate_response_with_valid_JWT, send_reset_email
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
 @api_view(['POST'])
-@authentication_classes([CredentialsAuthentication])
+@authentication_classes([CredentialsAuthentication]) # [aguilmea] change to Base Authentication? and delete the CredentialsAuthentication class
 @permission_classes([IsAuthenticated])
 def login(request):
     try:

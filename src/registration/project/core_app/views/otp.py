@@ -13,9 +13,8 @@ from .utils import generate_response_with_valid_JWT
 
 
 @api_view(['POST'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
-def send_email(request):
+@permission_classes([AllowAny])
+def send_otp(request):
     try:
         action = request.data.get('action')
         if not action or action not in ['signup', 'login']:

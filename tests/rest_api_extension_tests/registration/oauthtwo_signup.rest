@@ -1,0 +1,29 @@
+
+POST {{base_url}}/registration/oauthtwo_send_authorization_request
+Content-Type: application/json
+
+{
+    "next_step" : "signup"
+}
+
+###
+# after authorization with own user gets redirected to
+# https://localhost:8000/callback
+# with for example following parameters 
+# code=55fa7c56644d8329d5bb4a5ab6035224d6ac6955653d6cecb4c7215e92dda270
+# state=4EX3QD6D5944J8SVZITZJY87RJ8THS05YQEX0TYKR7VFQX3ZAKRDG57KU9KUGSTCA8R02VINOKRMHI17DOZET05GIW9P68B43Q1KMXBV2FUKPHYLVLQQT6GDEFQTQBKX
+
+# copy them in the next request
+
+###
+
+POST {{base_url}}/registration/oauthtwo_exchange_code_against_access_token
+Content-Type: application/json
+
+{
+    "code": "8a29890491408de003cd8fb2579d109a28dd50740467f8897f1da6ed95d98a0e",
+    "state": "2YOIB7S0SRAUF9941T4EUIZGVUBSW2N357NHQQAYPKXCDVKHCFKUHFIENPJFF6VTPZGT4PFJZWPAPZFH394YZLFDNDLUVS3RRXSDWYGS07A6DLRXZ7P0JUDKURDNO89U"
+}
+
+
+
