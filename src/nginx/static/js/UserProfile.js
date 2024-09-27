@@ -52,7 +52,7 @@ export class UserProfile extends ComponentBaseClass {
     </style>
     <div class="form-container bg-dark text-white">
     <div id="userManagement">
-        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
+        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "https://i.pravatar.cc/150?img=52"'>
         <div id="imageWarning" class="mt-2"></div>
         <input type="file" id="imageUpload" style="display: none;">
         <form id="profileForm">
@@ -217,18 +217,13 @@ export class UserProfile extends ComponentBaseClass {
             const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
             if ('displayname' in response) {
                 window.app.userData.username = response.displayname;
+                this.shadowRoot.getElementById('displayName').value = window.app.userData.username;
             }
-            if ('email' in response) {
-                window.app.userData.email = response.email;
+            if ('image' in response) {
+                window.app.userData.profileImage = response.image;
+                this.shadowRoot.getElementById('profileImage').src = window.app.userData.profileImage;
             }
-            this.shadowRoot.getElementById('displayName').value = window.app.userData.username;
             this.shadowRoot.getElementById('email').value = window.app.userData.email;
-
-            const profileImage = this.shadowRoot.getElementById('profileImage');
-            profileImage.src = response.image;
-            profileImage.onerror = () => {
-                profileImage.src = 'https://i.pravatar.cc/150?img=3';
-            };
         } catch (error) {
             console.error('Error loading user data:', error);
         }
