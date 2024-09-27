@@ -56,6 +56,7 @@ export class ForgotPassword extends ComponentBaseClass {
                         <input name="password2" id="newPassword2" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
                         <span id="passwordErrorMessage" class="text-danger"></span>
                     </div>
+                    <p class="text-white-50 small m-0">Back to <a href="/login" class="text-decoration-none text-white">Login</a> or <a href="/signup" class="text-decoration-none text-white">Sign-up</a></p>
                     <button type="submit" class="btn btn-custom w-100" form="forgotPasswordForm" id="resetSubmitButton" disabled>Reset Password</button>
                     <div class="spinner-border text-light" role="status" id="resetSpinner" style="display: none;">
                         <span class="visually-hidden">Loading...</span>

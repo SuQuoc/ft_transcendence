@@ -29,7 +29,7 @@ export class LoginPage extends ComponentBaseClass {
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
                     <div class="input-group mb-3">
                     	<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
-                    	<button class="btn btn-custom" type="button" id="requestOTP" style="min-width: 100px;">Send OTP</button>
+                    	<button class="btn btn-custom" type="button" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
                     </div>
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
@@ -87,6 +87,11 @@ export class LoginPage extends ComponentBaseClass {
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 		const otpPattern = /^[A-Z0-9]{16}$/;
 		const emailValid = this.validateEmail();
+		const otpButton = this.shadowRoot.getElementById('requestOTP');
+
+		if (otpButton.disabled && emailValid && password.length > 0) {
+			otpButton.disabled = false;
+		}
 
 		if (emailValid && password.length > 0 && otpPattern.test(otp)) {
 			loginButton.disabled = false;
@@ -97,16 +102,28 @@ export class LoginPage extends ComponentBaseClass {
 
 	async requestOTP(event) {
 		event.preventDefault();
-		const email = this.shadowRoot.getElementById('loginEmail').value;
 		const requestOTPButton = this.shadowRoot.getElementById('requestOTP');
-		const errorMessage = this.shadowRoot.getElementById('errorMessage');
 		if (requestOTPButton.disabled) return;
+
+		const email = this.shadowRoot.getElementById('loginEmail').value;
+		const errorMessage = this.shadowRoot.getElementById('errorMessage');
+		const password = this.shadowRoot.getElementById('loginPassword').value;
 
 		requestOTPButton.disabled = true;
 
 		try {
 			//TODO: integrate send OTP endpoint when it is finished
-			//await this.apiFetch('/registration/send-otp', { method: 'POST', body: JSON.stringify({ "username": email }) });
+			const loginResponse = await fetch('/registration/basic_login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ "username": email, password })
+			});
+
+			if (!loginResponse.ok) {
+				throw new Error('Requesting OTP failed');
+			}
 			this.startTimer(60, requestOTPButton);
 			this.shadowRoot.getElementById('otpSection').style.display = 'block';
 		} catch (error) {
@@ -164,12 +181,12 @@ export class LoginPage extends ComponentBaseClass {
 
 		try {
 			//TODO: use the new basic_login endpoint in combination with OTP
-			const loginResponse = await fetch('/registration/login', {
+			const loginResponse = await fetch('/registration/basic_login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ "username": email, password })
+				body: JSON.stringify({ "username": email, password, otp })
 			});
 
 			if (!loginResponse.ok) {
