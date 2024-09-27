@@ -24,14 +24,37 @@ Content-Type: application/json
 ###
 
 
-GET {{base_url}}/registration/oauthtwo_send_authorization_request
+POST {{base_url}}/registration/oauthtwo_send_authorization_request
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
-{}
+{
+    "next_step" : "set_oauth2"
+}
+
+###
+# after authorization with own user gets redirected to
+# https://localhost:8000/callback
+# with for example following parameters 
+# code=55fa7c56644d8329d5bb4a5ab6035224d6ac6955653d6cecb4c7215e92dda270
+# state=4EX3QD6D5944J8SVZITZJY87RJ8THS05YQEX0TYKR7VFQX3ZAKRDG57KU9KUGSTCA8R02VINOKRMHI17DOZET05GIW9P68B43Q1KMXBV2FUKPHYLVLQQT6GDEFQTQBKX
+
+# copy them in the next request
 
 ###
 
+
+POST {{base_url}}/registration/oauthtwo_exchange_code_against_access_token
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+    "code": "9aef3cd0965ce5146d44b3f4d9fdb25b4c941d3d3963e33b30fd2d595e9cc0b7",
+    "state": "ILGVLJGYPWVCT9FSFJXQODGSOUI1WF07I5ZZU9VSAOMXFW8SWQJ73EVJ7WEYKPOAZRJMR62M1498GW7KKDIQP4EDXLY3QMG3CDZG9A1FNYT7ET3G0355ADQ80I16GKRW"
+}
+
+
+###
 
 POST {{base_url}}/registration/oauthtwo_set
 Content-Type: application/json
