@@ -28,6 +28,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(LOOBIES, self.channel_name)
         await self.accept()
 
+
+        #print(self.scope["user"])
+        print("-----------------")
+
     async def disconnect(self):
         current_room = cache.get(f'user_{self.channel_name}_room')
         if current_room:
@@ -42,8 +46,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         type = dict_data['type']
         
         # handle websocket message from client
-        if type == 'create_room':
-            room_name = dict_data.get('room_name')
+        if type == 'createTournament': # Frontend
+            room_name = dict_data.get('tournament_name') # Frontend
             await self.create_room(room_name)
 
         elif type == 'join_room':
