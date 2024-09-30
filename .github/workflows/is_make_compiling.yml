@@ -31,8 +31,6 @@ jobs:
         make &
         while ! nc -z localhost 8000; do
           echo "Waiting for server ..."
-          echo "2: $EMAIL_HOST_PASSWORD"
-          echo "3: $EMAIL_HOST_USER"
           sleep 2
         done
 
