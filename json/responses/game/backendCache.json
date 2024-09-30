@@ -1,0 +1,13 @@
+lobbies =
+{
+    "room_name1": {
+        "creator_name": "creator_name",
+        "players": ["name1", "name2", "name3"],
+    },
+
+    "room_name2": {
+        "creator_name": "creator_name",
+        "players": ["name1", "name2", "name3"],
+    }
+
+}
