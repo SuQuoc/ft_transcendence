@@ -30,8 +30,8 @@ urlpatterns = [
     # path("um/profile/", views.profile, name="profile"), # delete later, just for testing if server is still rendering changes
     #path("um/friends", include("friends.urls")),
     #path("um/friends/", include("friends.urls")),
-    re_path(r'um/friends$|um/friends/', include("friends.urls")),
     path("um/", include("api.urls")),
+    path('um/friends/', include("friends.urls")),
 ]
 
 if settings.DEBUG:

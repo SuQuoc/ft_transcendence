@@ -43,7 +43,8 @@ def create_one_time_password(related_user, action):
     try:
         for otp in OneTimePassword.objects.filter(related_user=related_user):
             otp.delete()
-        password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
+        #password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
+        password = '0000000000000000' # [aguilmea] for testing purposes, should be deleted in production
         otp_data = {
             'related_user': related_user,
             'action': action,

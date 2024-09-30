@@ -115,7 +115,7 @@ export class FriendList extends ComponentBaseClass {
 
 	async fetchFriendList() {
 		try {
-			this.result = await this.apiFetch('/um/friends', { method: 'GET', cache: 'no-store' });
+			this.result = await this.apiFetch('/um/friends/', { method: 'GET', cache: 'no-store' });
 			//this.processFriendData(response);
 			this.updateList();
 		} catch (e) {

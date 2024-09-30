@@ -1,20 +1,48 @@
 
 @baseUrl = https://localhost:8000
 
-# @name postSignup
-POST {{baseUrl}}/registration/signup/
+POST {{baseUrl}}/registration/basic_signup
 Content-Type: application/json
 
-{"username": "email@domain.at", "password": "Pass1234!"}
+{
+    "username": "email@domain.at",
+    "password": "Pass1234!"
+}
 
+###
+
+# @name postSignup
+POST {{baseUrl}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "email@domain.at",
+    "password": "Pass1234!",
+    "otp": "0000000000000000"
+}
+
+###
+
+
+POST {{baseUrl}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "email@domain.at",
+    "password": "Pass1234!"
+}
 
 ###
 
 # @name postLogin
-POST {{baseUrl}}/registration/login
+POST {{baseUrl}}/registration/basic_login
 Content-Type: application/json
 
-{"username": "email@domain.at", "password": "Pass1234!"}
+{
+    "username": "email@domain.at",
+    "password": "Pass1234!",
+    "otp": "0000000000000000"
+}
 
 ###
 
@@ -23,7 +51,7 @@ Content-Type: application/json
 ###
 
 @displayname = ProCoder
-POST {{baseUrl}}/um/user-creation/
+POST {{baseUrl}}/um/user-creation
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -59,5 +87,5 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "receiver": "fdsdsfsdfsdfsd"
+    "receiver": "MeMario"
 }
