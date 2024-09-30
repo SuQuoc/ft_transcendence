@@ -97,6 +97,7 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupPassword1").fill(password1)
     page.locator("#signupPassword2").fill(password2)
     page.locator("#requestOTP").click()
+    expect(page.locator("#otpCode")).to_be_visible()
     page.locator("#otpCode").fill(OTP)
     page.locator("#signupSubmitButton").click()
 
