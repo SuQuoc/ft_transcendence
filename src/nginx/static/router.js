@@ -114,7 +114,7 @@ const Router = {
 		};
 
 		window.app.socket.onopen = () => {
-			window.app.socket.send(JSON.stringify({"type": type, "user_id": window.app.userData.username}));
+			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
 		};
 	},
 
@@ -231,7 +231,6 @@ const Router = {
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
-		console.log("history: ", history);
 	},
 
 

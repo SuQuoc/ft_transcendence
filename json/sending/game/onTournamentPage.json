@@ -1,4 +1,4 @@
 {
-	"type": "anTournamentPage",
-	"user_id": "123456"
+	"type": "onTournamentPage",
+	"displayname": "name"
 }

@@ -82,7 +82,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	handleRecievedMessage(event) {
 		const data = JSON.parse(event.data);
 		
-		console.log("data: ", data);
+		console.log("handleRecievedMessage: data: ", data);
 		
 		this.root.getElementById("joinTournamentElements").innerHTML = "";
 		if (data.type === "updateTournamentList") {
@@ -94,6 +94,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 												tournament.current_player_num,
 												tournament.max_player_num);
 			}
+		}
+		if (data.type === "new_room") {
+			this.createJoinTournamentElement(data.room_name, //tournament_name
+											data.creator_name,
+											0/* tournament.points_to_win */,
+											data.size, //current_player_num
+											1/* tournament.max_player_num */);
 		}
 	}
 
@@ -110,18 +117,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 											"tournament_name": tournament_name,
 											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
-											"current_player_num": "1", // the creator is the first player
 											"max_player_num": number_of_players}));
 		
+		console.log("tournament created");
 		// goes to the tournament lobby
 		window.app.router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 		// TODO: should go to the tournament waiting room first !!
 	};
 
 
-
+	// does this even get callled???!!!
 	handleJoinTournament(event) {
-		console.log("join tournament button clicked");
+		console.log("join tournament button clicked in joinTournamentPage");
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
 		window.app.socket.send(JSON.stringify({"type": "joinTournament",

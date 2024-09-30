@@ -51,4 +51,4 @@ class CustomAuthMiddleware:
         return self.inner(scope)
 
 def CustomAuthMiddlewareStack(inner):
-    return CustomAuthMiddleware(AuthMiddlewareStack(inner)
+    return CustomAuthMiddleware(AuthMiddlewareStack(inner))
