@@ -16,6 +16,7 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
+	// !!!! id of button requestOTP should be signupRequestOTP
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `

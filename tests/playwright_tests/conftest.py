@@ -13,6 +13,7 @@ AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 USERMAIL = "test1@test.at"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
+OTP = "0000000000000000"
 
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
@@ -95,6 +96,8 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupEmail").fill(email)
     page.locator("#signupPassword1").fill(password1)
     page.locator("#signupPassword2").fill(password2)
+    page.locator("#requestOTP").click()
+    page.locator("#otpCode").fill(OTP)
     page.locator("#signupSubmitButton").click()
 
 
@@ -102,6 +105,8 @@ def login(page: Page, email: str, password: str):
     page.goto(BASE_URL)
     page.locator("#loginEmail").fill(email)
     page.locator("#loginPassword").fill(password)
+    page.locator("#requestOTP").click()
+    page.locator("#otpCode").fill(OTP)
     page.locator("#loginSubmitButton").click()
 
 
