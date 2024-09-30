@@ -41,6 +41,7 @@ urlpatterns = [
     path('registration/logout', common.logout),
     path('registration/refresh_token', common.refresh_token),
     path('registration/verify_token', common.verify_token),
+    path('registration/get_email', common.get_email),
 
     #test views # [aguilmea] to be deleted as soon as frontend changed the endpoint
     path('registration/signup', test.signup), # [aguilmea] to be deleted as soon as frontend changed the endpoint
