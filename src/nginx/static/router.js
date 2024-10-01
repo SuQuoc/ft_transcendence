@@ -54,7 +54,6 @@ const getDisplayname = async () => {
 		// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 		if (!response.ok) {
 			window.app.router.go('/displayname', false);
-			console.log('displayname not ok:', response);
 		} else {
 			const responseData = await response.json();
 			window.app.userData.username = responseData.displayname;
@@ -63,6 +62,33 @@ const getDisplayname = async () => {
 		}
 	} catch (error) {
 		console.error('Error getting displayname (router):', error);
+	}
+}
+
+/** Checks if the displayname is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
+const getEmail = async () => {
+	if (window.app.userData.email) // if the displayname is already set we don't need to fetch it
+		return;
+
+	try {
+		// Check if the user already has a displayname
+		const response = await fetch ('/registration/get_email', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		// Redirects to the home page if the user already has an email or to the select login page if they don't
+		if (!response.ok) {
+			window.app.router.go('/login', false);
+		} else {
+			const responseData = await response.json();
+			window.app.userData.username = responseData.email;
+			app.router.go('/', false); // maybe this should be set to false?
+		}
+	} catch (error) {
+		console.error('Error getting email (router):', error);
 	}
 }
 
@@ -89,7 +115,8 @@ const Router = {
 			}
 		}
 		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
-		// TODO: we need to get email and profile image as well
+		getEmail();
+		// TODO: we need to get profile image as well
 		
 		// check initial URL
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
