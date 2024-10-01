@@ -38,7 +38,7 @@ class LobbyRoom:
     def from_json(json_str):
         data = json.loads(json_str)
         return LobbyRoom(data['room_name'], data["creator_name"], data['players'])
-    
+#######
 
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
@@ -64,26 +64,21 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(LOBBIES, self.channel_name)
         await super().disconnect(close_code)  # Ensure proper cleanup by calling the parent class's disconnect method
 
-
+     ### WEBSOCKET MESSAGE HANDLER ###
     async def receive(self, text_data):
         dict_data = json.loads(text_data)
         type = dict_data.get('type')
+        print(json.dumps(dict_data))
         
         # handle websocket message from client
         if type == 'on_tournament_page':
             self.displayname = dict_data.get('displayname')
-            print(json.dumps(dict_data))
-            print(self.displayname)
 
-        if type == 'create_tournament': # Frontend
-            room_name = dict_data.get('tournament_name') # Frontend
-            
-            print(json.dumps(dict_data))
-            await self.create_room(room_name)
+        elif type == 'create_tournament':
+            await self.create_room(dict_data)
             
         elif type == 'join_tournament':
-            room_name = dict_data.get('room_name')
-            await self.join_room(room_name)
+            await self.join_room(dict_data)
 
         elif type == 'leave_tournament':
             #room_name = dict_data.get('room_name')
@@ -92,10 +87,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         elif type == 'get_tournament_list':
             await self.get_tournament_list()
 
-
-
-    async def create_room(self, room_name):
+    ### WEBSOCKET MESSAGES ###
+    async def create_room(self, dict_data):
         print("create_room")
+        room_name = dict_data.get('tournament_name') # Frontend
+        points_to_win = dict_data.get('points_to_win') # Frontend
+        max_player_num = dict_data.get('max_player_num') # Frontend
+
         if not room_name:
             raise ValueError("Room name is required for creating a lobby")
 
@@ -105,34 +103,34 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             if room_name in lobbies:
                 await self.send_error(f"Lobby '{room_name}' already exists.")
                 return
-                raise ValueError(f"Lobby '{room_name}' already exists.")
 
             # Add the new lobby to the list of known lobbies
             lobbies[room_name] = dict()
+            lobbies[room_name]["players"] = []
             
             lobbies[room_name]["creator_name"] = self.displayname
-            lobbies[room_name]["players"] = []
             lobbies[room_name]["players"].append(self.displayname)
             lobbies[room_name]["size"] = 1
+            lobbies[room_name]["max_player_num"] = max_player_num
+            lobbies[room_name]["points_to_win"] = points_to_win
 
 
             cache.set('lobbies', lobbies)
+
             cache.set(f'current_room_{self.displayname}', room_name)
 
-
-
-        
         # Notify others about the new lobby
-        await self.updateLobbies("new_room", room_name)
+        await self.updateLobbies("new_room", room_name, 1)
 
         # add user to the channel group
         await self.channel_layer.group_add(f'lobby_{room_name}', self.channel_name)
-        
         return
 
-    async def join_room(self, room_name):
-        # Check if the lobby exists
+    async def join_room(self, dict_data):
+        room_name = dict_data.get('room_name')
+
         async with self.update_lock:
+            # Check if the room exists
             lobbies = cache.get('lobbies', {})
             if room_name not in lobbies:
                 await self.send_error(f"Lobby room '{room_name}' does not exist.")
@@ -151,7 +149,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # Check room size !!!
 
             # CACHE: Add the user to the new lobby room 
-            lobbies[room_name]["players"].add(self.displayname)
+            lobbies[room_name]["players"].append(self.displayname)
             lobbies[room_name]["size"] += 1
             room_size = lobbies[room_name]["size"]
 
@@ -161,14 +159,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # Notify ALL in the LOBBIES group, including users who already are in a lobby-room
         # SIMPLE, adding and removing the users of the LOBBIES group frequently has also drawbacks
         
-        
-        self.updateLobbies(room_name, room_size)
+         # Send all in the lobbies page who joined !!!
+        self.updateLobbies("room_size_update", room_name, room_size)
         
         # CHANNELS: Add user to the lobby room group
         await self.channel_layer.group_add(f'lobby_{room_name}', self.channel_name)
 
         # Send all in the lobby room who joined !!!
-        self.updateRoom(room_name)
+        self.updateLobbyRoom("playerJoinedLobby", room_name)
         
 
         # Send message to WebSocket Frontend
@@ -177,8 +175,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "joined": "true",
         }))
 
-
-        
 
     async def leave_tournament(self):
         """Helper method to remove a user from a lobby."""
@@ -189,6 +185,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             lobbies = cache.get('lobbies', {})
             
             if current_room not in lobbies:
+                print(f"Lobby room '{current_room}' does not exist.")
                 await self.send_error(f"Lobby room '{current_room}' does not exist.")
                 return 
 
@@ -201,7 +198,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             lobbies[current_room]["players"].remove(self.displayname)
             cache.delete(f'current_room_{self.displayname}')
             
-            lobbies[current_room]["size"] =- 1
+            lobbies[current_room]["size"] -= 1
             room_size = lobbies[current_room]["size"]
 
             if room_size <= 0:
@@ -210,16 +207,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
 
         if room_size <= 0:
-            # Notify others about the deleted room
-            await self.channel_layer.group_send(
-                LOBBIES, 
-                {
-                    'type': 'delete_room',
-                    'room_name': current_room,
-                }
-            )
+            self.updateLobbies("delete_room", current_room)
         else:
-            # Notify others about the updated room size
+            self.updateLobbies("room_size_update", current_room, room_size)
             await self.channel_layer.group_send(
                 LOBBIES, 
                 {
@@ -229,7 +219,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 }
             )
         
-
         # CHANNELS: Remove user from the lobby room group
         await self.channel_layer.group_discard(
             f'lobby_{current_room}',
@@ -237,126 +226,20 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         )
 
 
-    async def leave_room(self, room_name):
-        """Helper method to remove a user from a lobby."""
-
-        async with self.update_lock:
-            lobbies = cache.get('lobbies', {})
-            if room_name not in lobbies:
-                await self.send_error(f"Lobby room '{room_name}' does not exist.")
-                return 
-
-            current_room = cache.get(f'current_room_{self.displayname}')
-            if current_room != room_name:
-                await self.send_error(f"You are not in lobby room '{room_name}'.")
-                return 
-                
-
-            # CHACHE: Remove the user from the lobby room
-            lobbies[room_name]["players"].remove(self.displayname)
-            cache.delete(f'current_room_{self.displayname}')
-            
-            lobbies[room_name]["size"] =- 1
-            room_size = lobbies[room_name]["size"]
-
-            if room_size <= 0:
-                del lobbies[room_name]
-            cache.set('lobbies', lobbies)
-        
-
-        if room_size <= 0:
-            # Notify others about the deleted room
-            await self.channel_layer.group_send(
-                LOBBIES, 
-                {
-                    'type': 'delete_room',
-                    'room_name': room_name,
-                }
-            )
-        else:
-            # Notify others about the updated room size
-            await self.channel_layer.group_send(
-                LOBBIES, 
-                {
-                    'type': 'room_size_update',
-                    'room_name': room_name,
-                    'size': room_size
-                }
-            )
-        
-
-        # CHANNELS: Remove user from the lobby room group
-        await self.channel_layer.group_discard(
-            f'lobby_{room_name}',
-            self.channel_name
-        )
-
-
-
-
-
-
     async def get_tournament_list(self):
         lobbies = cache.get('lobbies', {})
-
-
         text_data=json.dumps({
             'type': 'get_tournament_list',
             "lobbies": lobbies
         })
-
         print(f"get_tournament_list: {text_data}")
         await self.send(text_data=text_data)
 
 
-        return lobbies
-
-
-    # Helper
-    async def updateLobbies(self, type, room_name, room_size=1):
-            if type == "new_room":
-                print(f"new_room: {room_name}")
-                await self.channel_layer.group_send(
-                    LOBBIES,
-                    {
-                        'type': type,
-                        'creator_name': self.displayname,
-                        'room_name': room_name,
-                        'size': room_size
-                    })
-
-            elif type == 'room_size_update':
-                await self.channel_layer.group_send(
-                    LOBBIES,
-                    {
-                        'type': type,
-                        'room_name': room_name,
-                        'size': room_size
-                    }
-                )
-
-
     
-
-    async def updateRoom(self, room_name):
-            await self.channel_layer.group_send(
-                f'lobby_{room_name}',
-                {
-                    'type': 'playerJoinedLobby',
-                    "displayname": self.displayname
-                    # image
-                    # size and room_name? then frontend doesnt need to count up themselves
-                }
-            )
-
-    async def send_error(self, message):
-        await self.send(text_data=json.dumps({
-            'error': message
-        }))
     
-    # Events
+    ### EVENTS ###
     async def new_room(self, event):
-        print("event_new_room")
         room_name = event['room_name']
         size = event['size']
         creator_name = event['creator_name']
@@ -371,16 +254,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def delete_room(self, event):
         room_name = event['room_name']
-        print(f"event_delete_room: {room_name}")
-        
-        # Send message to WebSocket Frontend
         await self.send(text_data=json.dumps({
             'type': 'delete_room',
             'room_name': room_name
         }))
 
     async def room_size_update(self, event):
-        print("event_room_size_update")
         room_name = event['room_name']
         size = event['size']
         await self.send(text_data=json.dumps({
@@ -389,23 +268,72 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             'size': size
         }))
 
-
-    
-
     async def playerJoinedLobby(self, event):
         displayname = event['displayname']
         await self.send(text_data=json.dumps({
             'type': 'playerJoinedLobby',
             'displayname': displayname
         }))
+    
+    ### Helper ###
+    async def updateLobbies(self, type, room_name, room_size):
+            """
+            Handles all changes to the list of lobbies
+
+            - new_room: A new lobby has been created
+            - delete_room: A lobby has been deleted
+            - room_size_update: The size of a lobby has changed
+            """
+
+            print(f"TRIGGER event: {type}")
+            if type == "new_room":
+                print(f"new_room: {room_name}")
+                await self.channel_layer.group_send(
+                    LOBBIES, {
+                        'type': type,
+                        'creator_name': self.displayname,
+                        'room_name': room_name,
+                        'size': room_size
+                    })
+                
+            elif type == "delete_room":
+                await self.channel_layer.group_send(
+                    LOBBIES, {
+                        'type': 'delete_room',
+                        'room_name': room_name,
+                    })
+                
+            elif type == 'room_size_update':
+                print(f"room_size_update: {room_name}, size: {room_size}")
+                await self.channel_layer.group_send(
+                    LOBBIES, {
+                        'type': type,
+                        'room_name': room_name,
+                        'size': room_size
+                    })
+                
+    async def updateLobbyRoom(self, type, room_name):
+        if type == 'playerJoinedLobby':
+            await self.channel_layer.group_send(
+                f'lobby_{room_name}',
+                {
+                    'type': 'playerJoinedLobby',
+                    "displayname": self.displayname
+                    # image
+                    # size and room_name? then frontend doesnt need to count up themselves
+                }
+            )
+        # elif type == 'join_tournament':
+        #     await self.channel_layer.group_send(
+        #         f'lobby_{room_name}',
+        #         {
+        #             'type': 'playerLeftLobby',
+        #             "displayname": self.displayname
+        #         }
+        #     )
 
 
-    async def deleteRoom(self, event):
-        room_name = event['room_name']
+    async def send_error(self, message):
         await self.send(text_data=json.dumps({
-            'type': 'deleteRoom',
-            'room_name': room_name
+            'error': message
         }))
-
-
-        
