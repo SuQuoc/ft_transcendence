@@ -6,7 +6,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		super();
 		
 		// Binds the method to this class instance so it can be used in the event listener
-		this.handleRecievedMessageVar = this.handleRecievedMessage.bind(this);
+		this.handleReceivedMessageVar = this.handleReceivedMessage.bind(this);
 		this.handleRangeDisplayVar = this.handleRangeDisplay.bind(this);
 		this.handleTournamentCreationVar = this.handleTournamentCreation.bind(this);
 	};
@@ -15,6 +15,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		super.connectedCallback();
 
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+		this.join_tournament_elements = this.root.getElementById("joinTournamentElements");
 		this.create_tournament_form = this.root.getElementById("createTournamentForm");
 		this.range_display = this.root.getElementById("createPointsToWinDisplay");
 		this.display_lane = this.root.getElementById("createDisplayLane");
@@ -27,12 +28,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// adding event listeners
 		if (window.app.socket)
-			window.app.socket.addEventListener("message", this.handleRecievedMessageVar);
+			window.app.socket.addEventListener("message", this.handleReceivedMessageVar);
 		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreationVar);
 		this.input_range.addEventListener("input", this.handleRangeDisplayVar);
 		
 		// calling the method to set the initial position of the display
 		this.handleRangeDisplay({target: this.input_range});
+
+		// getting the list of tournaments
+		/* if (!window.app.socket)
+			console.error("socket is not open");
+		window.app.socket.send(JSON.stringify({"type": "get_tournament_list"})); */
+		this.getTournamentList();
 	};
 
 	disconnectedCallback() {
@@ -40,7 +47,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		
 		// removing event listeners
 		if (window.app.socket)
-			window.app.socket.removeEventListener("message", this.handleRecievedMessageVar);
+			window.app.socket.removeEventListener("message", this.handleReceivedMessageVar);
 		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreationVar);
 		this.input_range.removeEventListener("input", this.handleRangeDisplayVar);
 	};
@@ -51,14 +58,25 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
 	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
 		let element = new JoinTournamentElement();
-		this.root.getElementById("joinTournamentElements").appendChild(element);
 
-		element.querySelectorAll("[name='join_name']")[0].innerHTML = tournament_name;
-		element.querySelectorAll("[name='join_creator']")[0].innerHTML = creator_name;
-		element.querySelectorAll("[name='join_points_to_win']")[0].innerHTML = points_to_win;
-		element.querySelectorAll("[name='join_current_player_num']")[0].innerHTML = current_player_num;
-		element.querySelectorAll("[name='join_max_player_num']")[0].innerHTML = max_player_num;
+		element.setAttribute('name', tournament_name);
+		this.join_tournament_elements.appendChild(element);
 
+		element.querySelector("[name='join_name']").innerHTML = tournament_name;
+		element.querySelector("[name='join_creator']").innerHTML = creator_name;
+		element.querySelector("[name='join_points_to_win']").innerHTML = points_to_win;
+		element.querySelector("[name='join_current_player_num']").innerHTML = current_player_num;
+		element.querySelector("[name='join_max_player_num']").innerHTML = max_player_num;
+		
+		//this.noTournamentsToJoin();
+	};
+
+	/** deletes a joinTournamentElement */
+	deleteJoinTournamentElement(tournament_name) {
+		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
+		console.log('delete join tournament element: ', element);
+		
+		this.join_tournament_elements.removeChild(element);
 		//this.noTournamentsToJoin();
 	};
 	
@@ -75,32 +93,62 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 	};
 	
+	getTournamentList() {
+		if (!window.app.socket) {
+			console.error("socket is not open");
+			window.app.router.go("/"); // goes to the home page
+		}
+
+		if (window.app.socket.readyState === WebSocket.OPEN) {
+			window.app.socket.send(JSON.stringify({"type": "get_tournament_list"}));
+			console.log('websocket is open');
+		} else {
+			window.app.socket.addEventListener('open', () => {
+				window.app.socket.send(JSON.stringify({"type": "get_tournament_list"}));
+			}, { once: true });
+			console.log('websocket adding event listener on open')
+		}
+	}
 	
+
 	/// ----- Event Handlers ----- ///
 
 	/** gets called when the websocket receives a message */
-	handleRecievedMessage(event) {
+	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
 		
-		console.log("handleRecievedMessage: data: ", data);
+		console.log("handleReceivedMessage: data: ", data);
 		
-		this.root.getElementById("joinTournamentElements").innerHTML = "";
-		if (data.type === "updateTournamentList") {
-			for (let key in data.tournaments) {
-				const tournament = data.tournaments[key];
-				this.createJoinTournamentElement(tournament.tournament_name,
+		if (data.type === "get_tournament_list") {
+			console.log("get_tournament_list");
+			for (let tournament_name in data.lobbies) {
+				const tournament = data.lobbies[tournament_name];
+				this.createJoinTournamentElement(tournament_name,
 												tournament.creator_name,
-												tournament.points_to_win,
-												tournament.current_player_num,
-												tournament.max_player_num);
+												0/* tournament.points_to_win */,
+												tournament.size, // current_player_num
+												1/* tournament.max_player_num */);
 			}
 		}
 		if (data.type === "new_room") {
-			this.createJoinTournamentElement(data.room_name, //tournament_name
+			console.log("new_room: ", data.room_name);
+			console.log('new room: join tournament elements: ', this.join_tournament_elements.children);
+			this.createJoinTournamentElement(data.room_name, // tournament_name
 											data.creator_name,
-											0/* tournament.points_to_win */,
-											data.size, //current_player_num
-											1/* tournament.max_player_num */);
+											0/* data.points_to_win */,
+											data.size, // current_player_num
+											1/* data.max_player_num */);
+		}
+
+
+		if (data.type === "room_size_update") {
+			console.log("room_size_update");
+		}
+
+
+		if (data.type === "delete_room") {
+			console.log("delete_room: ", data.room_name);
+			this.deleteJoinTournamentElement(data.room_name);
 		}
 	}
 
@@ -113,7 +161,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		const	points_to_win = event.target.points_to_win.value;
 
 		// sends the tournament details to the game server
-		window.app.socket.send(JSON.stringify({"type": "createTournament",
+		window.app.socket.send(JSON.stringify({"type": "create_tournament",
 											"tournament_name": tournament_name,
 											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
@@ -126,12 +174,12 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 
-	// does this even get callled???!!!
+	// does this even get called???!!!
 	handleJoinTournament(event) {
 		console.log("join tournament button clicked in joinTournamentPage");
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
-		window.app.socket.send(JSON.stringify({"type": "joinTournament",
+		window.app.socket.send(JSON.stringify({"type": "join_tournament",
 										"tournament_name": tournament_name}));
 		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}
@@ -168,7 +216,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					id="joinTournamentElements"
 				>
 					<!-- No tournaments to join (should only appear when there are no tournaments available -->
-					<div id="noTournamentsToJoin" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div>
+					<!-- <div id="noTournamentsToJoin" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div> -->
 					
 					<!-- Join Tournament elements will be added here -->
 				</div>

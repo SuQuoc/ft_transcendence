@@ -33,7 +33,7 @@ export class JoinTournamentElement extends HTMLElement {
 		
 		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
 
-		window.app.socket.send(JSON.stringify({"type": "joinTournament",
+		window.app.socket.send(JSON.stringify({"type": "join_tournament",
 										"tournament_name": tournament_name}));
 		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
 	}

@@ -6,7 +6,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	constructor() {
 		super();
 		// Binds the method to this class instance so it can be used in the event listener
-		this.handleRecievedMessage_var = this.handleRecievedMessage.bind(this);
+		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 		this.handlePongFullScreen_var = this.handlePongFullScreen.bind(this);
 	}
 	connectedCallback() {
@@ -23,7 +23,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// adding event listeners
 		this.canvas.addEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
-		window.app.socket.addEventListener("message", this.handleRecievedMessage_var);
+		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 
 		// gets the player list when the page is loaded
 		window.app.socket.send(JSON.stringify({type: "getUpdateLobbyPlayerList"}));
@@ -35,7 +35,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// removing event listeners
 		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
-		window.app.socket.removeEventListener("message", this.handleRecievedMessage_var);
+		window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
 	}
 
 
@@ -54,12 +54,12 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	/// ----- Event Handlers ----- ///
 
 	handleLeaveLobby(event) {
-		window.app.socket.send(JSON.stringify({type: "leaveTournament"}));
+		window.app.socket.send(JSON.stringify({type: "leave_tournament"}));
 		window.app.router.go("/tournament", false); // isn't added to the history
 	}
 
 	/** gets called when the websocket receives a message */
-	handleRecievedMessage(event) {
+	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
 		
 		console.log("received message in tournament-lobby-page: ", data);

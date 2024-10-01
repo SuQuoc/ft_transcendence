@@ -103,7 +103,7 @@ const Router = {
 			channel_name = "match";
 
 		if (!window.app.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldnt it always be wss with ws only i get a 400 bad request
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws only i get a 400 bad request
 			// comment old version let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
 			window.app.socket = new WebSocket(ws_path);
@@ -115,7 +115,6 @@ const Router = {
 
 		window.app.socket.onopen = () => {
 			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
-			window.app.socket.send(JSON.stringify({"type": "getTournamentList"}));
 		};
 	},
 
@@ -166,8 +165,10 @@ const Router = {
 				pageElement = document.createElement("play-menu-home-page");
 				break;
 			case "/tournament":
-				Router.closeWebSocket(); //only closes the socket if it is open
-				Router.makeWebSocket("onTournamentPage");
+				if (addToHistory === true) {
+					Router.closeWebSocket(); //only closes the socket if it is open
+					Router.makeWebSocket("on_tournament_page");
+				}
 				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/tournament-lobby":
@@ -181,7 +182,7 @@ const Router = {
 			case "/match":
 				console.log("match page created");
 				Router.closeWebSocket(); //only closes the socket if it is open
-				Router.makeWebSocket("onFindOpponentPage");
+				Router.makeWebSocket("on_find_opponent_page");
 				pageElement = document.createElement("find-opponent-page");
 				break;
 			case "/pong":
@@ -245,7 +246,7 @@ const Router = {
 		const data = JSON.parse(event.data);
 
 		switch (data.type) {
-			case "joinTournament":
+			case "join_tournament":
 				if (data.joined === "true")
 					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
 				else
