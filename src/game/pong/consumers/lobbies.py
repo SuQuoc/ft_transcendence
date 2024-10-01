@@ -108,8 +108,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # Add the new lobby to the list of known lobbies
             lobbies[room_name] = dict()
             
-            lobbies[room_name]["creator_name"] = (self.displayname)
-            lobbies[room_name]["players"] = {self.displayname}
+            lobbies[room_name]["creator_name"] = self.displayname
+            lobbies[room_name]["players"] = (self.displayname)
 
             cache.set('lobbies', lobbies)
             cache.set(f'current_room_{self.displayname}', room_name)
@@ -228,7 +228,17 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def get_tournament_list(self):
         lobbies = cache.get('lobbies', {})
-        print(lobbies)
+
+
+        text_data=json.dumps({
+            'type': 'getTournamentList',
+            "lobbies": lobbies
+        })
+
+        print(f"TEST: {text_data}")
+        await self.send(text_data=text_data)
+
+
         return lobbies
 
 

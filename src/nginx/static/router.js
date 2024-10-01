@@ -115,6 +115,7 @@ const Router = {
 
 		window.app.socket.onopen = () => {
 			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+			window.app.socket.send(JSON.stringify({"type": "getTournamentList"}));
 		};
 	},
 
