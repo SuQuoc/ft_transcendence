@@ -10,7 +10,7 @@ import pytest
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
-USERMAIL = "test1@test.at"
+USERMAIL = "transcendence42vienna+test1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
