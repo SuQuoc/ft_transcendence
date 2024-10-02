@@ -58,6 +58,10 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
 	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
 		let element = new JoinTournamentElement();
+		if (!element) {
+			console.error("Error: createJoinTournamentElement: element could not be created");
+			return;
+		}
 
 		element.setAttribute('name', tournament_name);
 		this.join_tournament_elements.appendChild(element);
@@ -74,11 +78,24 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** deletes a joinTournamentElement */
 	deleteJoinTournamentElement(tournament_name) {
 		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
-		console.log('delete join tournament element: ', element);
-		
+		if (!element) {
+			console.error("Error: deleteJoinTournamentElement: element to delete not found");
+			return;
+		}
+
 		this.join_tournament_elements.removeChild(element);
 		//this.noTournamentsToJoin();
 	};
+
+	updateCurrentPlayerNum(tournament_name, current_player_num) {
+		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
+		if (!element) {
+			console.error("Error: updateCurrentPlayerNum: element to update not found");
+			return;
+		}
+
+		element.querySelector("[name='join_current_player_num']").innerHTML = current_player_num;
+	}
 	
 	/** hides or shows a text that says "no tournaments to join" */
 	noTournamentsToJoin() { // not working!!!!! TODO: fix this
@@ -125,30 +142,36 @@ export class JoinTournamentPage extends ComponentBaseClass {
 				const tournament = data.lobbies[tournament_name];
 				this.createJoinTournamentElement(tournament_name,
 												tournament.creator_name,
-												0/* tournament.points_to_win */,
+												tournament.points_to_win,
 												tournament.size, // current_player_num
-												1/* tournament.max_player_num */);
+												tournament.max_player_num);
 			}
 		}
-		if (data.type === "new_room") {
+		else if (data.type === "new_room") {
 			console.log("new_room: ", data.room_name);
 			console.log('new room: join tournament elements: ', this.join_tournament_elements.children);
 			this.createJoinTournamentElement(data.room_name, // tournament_name
 											data.creator_name,
-											0/* data.points_to_win */,
+											data.points_to_win,
 											data.size, // current_player_num
-											1/* data.max_player_num */);
+											data.max_player_num);
 		}
-
-
-		if (data.type === "room_size_update") {
+		else if (data.type === "room_size_update") {
 			console.log("room_size_update");
+			this.updateCurrentPlayerNum(data.room_name, data.size);
 		}
-
-
-		if (data.type === "delete_room") {
+		else if (data.type === "delete_room") {
 			console.log("delete_room: ", data.room_name);
 			this.deleteJoinTournamentElement(data.room_name);
+		}
+		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
+			// ignoring these types for now !!!
+		}
+		else if (data.type === "error") {
+			console.error("Error: handleReceivedMessage: ", data.message);
+		}
+		else {
+			console.error("Error: handleReceivedMessage: unknown data type: ", data.type);
 		}
 	}
 
