@@ -147,7 +147,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 												tournament.max_player_num);
 			}
 		}
-		if (data.type === "new_room") {
+		else if (data.type === "new_room") {
 			console.log("new_room: ", data.room_name);
 			console.log('new room: join tournament elements: ', this.join_tournament_elements.children);
 			this.createJoinTournamentElement(data.room_name, // tournament_name
@@ -156,17 +156,22 @@ export class JoinTournamentPage extends ComponentBaseClass {
 											data.size, // current_player_num
 											data.max_player_num);
 		}
-
-
-		if (data.type === "room_size_update") {
+		else if (data.type === "room_size_update") {
 			console.log("room_size_update");
 			this.updateCurrentPlayerNum(data.room_name, data.size);
 		}
-
-
-		if (data.type === "delete_room") {
+		else if (data.type === "delete_room") {
 			console.log("delete_room: ", data.room_name);
 			this.deleteJoinTournamentElement(data.room_name);
+		}
+		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
+			// ignoring these types for now !!!
+		}
+		else if (data.type === "error") {
+			console.error("Error: handleReceivedMessage: ", data.message);
+		}
+		else {
+			console.error("Error: handleReceivedMessage: unknown data type: ", data.type);
 		}
 	}
 
