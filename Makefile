@@ -25,10 +25,14 @@ build_only:
 rm_vol:
 	docker volume prune -af
 
+rm_keys:
+	rm -rf ./src/common_files/jwt__keys
+	rm -rf ./src/common_files/ssl_certs
+
 clean: down
 	docker system prune -f
 
-fclean: down rm_vol
+fclean: down rm_vol rm_keys
 	docker system prune -af
 
 re: down rm_vol cache_clean build_up
@@ -37,6 +41,7 @@ new: fclean build_up
 
 keys:
 	bash ./src/common_files/jwt_create_keys.sh
+	bash ./src/common_files/ssl_create_keys.sh
 
 cache_clean:	game_cache_clean reg_cache_clean um_cache_clean
 
