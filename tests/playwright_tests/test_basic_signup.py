@@ -4,7 +4,7 @@ from conftest import delete_user, set_display_name
 BASE_URL = "https://localhost:8000"
 USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
 USERPW = "password"
-USERDISPLAYNAME = "test1"
+USERDISPLAYNAME = "basic_signup_1"
 OTP = "0000000000000000"
 
 class TestBasicSignup:
@@ -13,7 +13,7 @@ class TestBasicSignup:
        
         with sync_playwright() as playwright:
             
-            browser = playwright.chromium.launch(headless=False)
+            browser = playwright.chromium.launch()
             context = browser.new_context(ignore_https_errors=True)
             page = context.new_page()
         
@@ -84,7 +84,7 @@ class TestBasicSignup:
        
         with sync_playwright() as playwright:
             
-            browser = playwright.chromium.launch(headless=False)
+            browser = playwright.chromium.launch()
             context = browser.new_context(ignore_https_errors=True)
             page = context.new_page()
         
@@ -117,5 +117,28 @@ class TestBasicSignup:
     # def test_signup_wrong_password(playwright: Playwright) -> None:
     # [aguilmea] to be written when the password rules are implemented
 
+    def test_signup_password_mismatch(playwright: Playwright) -> None:
+       
+        with sync_playwright() as playwright:
+            
+            browser = playwright.chromium.launch()
+            context = browser.new_context(ignore_https_errors=True)
+            page = context.new_page()
+        
+            try:
+                page.goto(BASE_URL)
+                page.click("#loginGoToSignup")
+                page.locator("#signupEmail").fill(USERMAIL)
+                page.locator("#signupPassword1").fill(USERPW)
+                page.locator("#signupPassword2").fill(USERPW + "1")
+                expect(page.locator("#errorMessagePassword")).to_be_visible()
+                expect(page.locator("#errorMessagePassword")).to_have_text("Passwords don't match")
+            
+            except:
+                expect(page.locator("#FAIL")).to_be_visible()
+        
+            finally:        
+                context.close()
+                browser.close()
 
 
