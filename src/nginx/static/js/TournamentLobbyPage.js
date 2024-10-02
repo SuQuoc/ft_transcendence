@@ -19,6 +19,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.canvas = this.root.querySelector("pong-canvas-element");
 		this.player_list = this.root.getElementById("lobbyPlayerList");
 		this.leave_button = this.root.getElementById("lobbyLeaveButton");
+		this.current_player_num = this.root.getElementById("lobbyCurrentPlayerNum");
 
 		// adding event listeners
 		this.canvas.addEventListener("dblclick", this.handlePongFullScreen_var);
@@ -41,13 +42,33 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	/// ----- Methods ----- ///
 
-	addPlayerElement(player_name) {
+	addPlayerElement(player_name) { // needs the avatar too !!!
 		let element = new TournamentLobbyPlayerElement();
 
+		element.setAttribute('name', player_name);
 		this.player_list.appendChild(element);
 		element.querySelector("[name='lobby_player_name']").innerText = player_name;
 
 		//TODO: change avatar
+	}
+
+	deletePlayerElement(player_name) {
+		let element = this.player_list.querySelector(`tournament-lobby-player-element[name="${player_name}"]`);
+		if (!element) {
+			console.error("Error: deletePlayerElement: element to delete not found");
+			return;
+		}
+
+		this.join_tournament_elements.removeChild(element);
+		//this.noTournamentsToJoin();
+	}
+
+	updateCurrentPlayerNum(new_player_num) {
+		this.current_player_num.innerText = new_player_num;
+	}
+
+	getPlayerList() {
+		// maybe i need to send a message to the server to get the player list
 	}
 
 
@@ -62,10 +83,18 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
 		
-		console.log("received message in tournament-lobby-page: ", data);
+		console.log("received message on tournament-lobby-page: ", data);
 		
-		this.root.getElementById("lobbyPlayerList").innerHTML = "";
-		if (data.type === "updateLobbyPlayerList") {
+		if (data.type === "new_player") {
+			this.addPlayerElement(data.displayname); // needs the avatar too !!!
+		}
+		else if (data.type === "player_left") {
+			this.deletePlayerElement(data.displayname);
+		}
+		else if (data.type === "update_current_player_num") {
+			this.current_player_num.innerText = data.current_player_num;
+		}
+		else if (data.type === "updateLobbyPlayerList") {
 			for (let key in data) {
 				if (data[key].player_name)
 					this.addPlayerElement(data[key].player_name);

@@ -54,12 +54,8 @@ body {
 	height: 30px;
 }
 
-@media (min-width: 992px) {
-	.lobby-player-sidebar-lg {
-		width: 200px;
-	}
-}
-.lobby-player-sidebar-lg {
+.lobby-player-sidebar {
+	width: 200px;
 	border-top: var(--custom-bg-color) 2px solid;
 	border-bottom: var(--custom-bg-color) 2px solid;
 }

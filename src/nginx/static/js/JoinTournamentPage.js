@@ -36,9 +36,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.handleRangeDisplay({target: this.input_range});
 
 		// getting the list of tournaments
-		/* if (!window.app.socket)
-			console.error("socket is not open");
-		window.app.socket.send(JSON.stringify({"type": "get_tournament_list"})); */
 		this.getTournamentList();
 	};
 
@@ -87,6 +84,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		//this.noTournamentsToJoin();
 	};
 
+	/** updates the 'current_player_num' of the 'join-tournament-element' with the tournament_name passed */
 	updateCurrentPlayerNum(tournament_name, current_player_num) {
 		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
 		if (!element) {
@@ -110,6 +108,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 	};
 	
+	/** sends a message to the server to get the list of tournaments */
 	getTournamentList() {
 		if (!window.app.socket) {
 			console.error("socket is not open");
