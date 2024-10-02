@@ -123,6 +123,7 @@ def delete_user(page: Page, password: str):
     page.locator("#deleteUserButton").click()
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#confirmDeleteUserButton").click()
+    # [aguilmea] delete user has no otp in the front end but in the backend it has - so it is not working rigth now
 ############################################
 
 

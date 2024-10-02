@@ -2,7 +2,7 @@ from playwright.sync_api import Playwright, sync_playwright, expect
 from conftest import delete_user, set_display_name
 
 BASE_URL = "https://localhost:8000"
-USERMAIL = "transcendence42vienna+test1@gmail.com"
+USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
@@ -69,7 +69,7 @@ class TestBasicSignup:
                 
             # finishing the signup and deleting the user
                 set_display_name(page, USERDISPLAYNAME)
-                delete_user(page, USERPW)
+                delete_user(page, USERPW) # [aguilmea] delete does not working right now because not implemented in the frontend
             
             except:
                 expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
@@ -77,9 +77,45 @@ class TestBasicSignup:
             finally:
                 context.close()
                 browser.close()
-    
 
-    # ---------------------
+
+
+    def test_signup_wrong_username(playwright: Playwright) -> None:
+       
+        with sync_playwright() as playwright:
+            
+            browser = playwright.chromium.launch(headless=False)
+            context = browser.new_context(ignore_https_errors=True)
+            page = context.new_page()
+        
+            try:
+                page.goto(BASE_URL)
+                page.click("#loginGoToSignup")
+                page.locator("#signupPassword1").fill(USERPW)
+                page.locator("#signupPassword2").fill(USERPW)
+            
+                page.locator("#signupEmail").fill("wrongemail")
+                expect(page.locator("#errorMessageEmail")).to_be_visible()
+                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+                
+                page.locator("#signupEmail").fill("wrong@email")
+                expect(page.locator("#errorMessageEmail")).to_be_visible()
+                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+                
+                page.locator("#signupEmail").fill("wrongemail.at")
+                expect(page.locator("#errorMessageEmail")).to_be_visible()
+                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+            
+            except:
+                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+            
+            finally:
+                context.close()
+                browser.close()
+
+    
+    # def test_signup_wrong_password(playwright: Playwright) -> None:
+    # [aguilmea] to be written when the password rules are implemented
 
 
 
