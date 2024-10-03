@@ -18,6 +18,10 @@ from django.core.cache import cache  # Import Django"s cache
 
 LOBBIES = "lobbies"
 
+# TYPES of messages
+T_PLAYER_JOINED_ROOM = "player_joined_room"
+T_PLAYER_LEFT_ROOM = "player_left_room"
+
 import json
 
 
@@ -160,7 +164,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         # CHANNELS: Add user to the lobby room group
         await self.group_add(room_name)
-        await self.updateLobbyRoom("player_joined_room", room_name) # chnage this !!!
+        await self.updateLobbyRoom(T_PLAYER_JOINED_ROOM, room_name) # change this !!!
         
         # Send message to WebSocket Frontend
         await self.send(text_data=json.dumps({
@@ -197,40 +201,42 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
         print("leave_room")
         async with self.update_lock:
-            current_room = cache.get(f"current_room_{self.displayname}")
+            current_room_name = cache.get(f"current_room_{self.displayname}")
             lobbies = cache.get("lobbies", {})
 
-            if current_room is None:
+            if current_room_name is None:
                 await self.send_error(f"You are not in any lobby room.")
                 return 
             
-            if current_room not in lobbies:
-                raise ValueError(f"Lobby room '{current_room}' does not exist in the cache - SHOULD NEVER HAPPEN.")
+            if current_room_name not in lobbies:
+                raise ValueError(f"Lobby room '{current_room_name}' does not exist in the cache - SHOULD NEVER HAPPEN.")
 
             # CACHE: Remove the user from the lobby room
-            lobbies[current_room]["players"].remove(self.displayname)
+            current_room = lobbies[current_room_name]
+            current_room["players"].remove(self.displayname)
             cache.delete(f"current_room_{self.displayname}")
             
-            lobbies[current_room]["size"] -= 1
-            room_size = lobbies[current_room]["size"]
+            current_room["size"] -= 1
+            
 
-            if room_size == 0:
+            if current_room["size"] == 0:
                 del lobbies[current_room]
-            if room_size < 0:
+            if current_room["size"] < 0:
                 raise ValueError(f"Lobby room '{current_room}' has negative size - SHOULD NEVER HAPPEN.")
             cache.set("lobbies", lobbies)
 
+        # CHANNELS: Remove user from the lobby room group
+        await self.updateLobbyRoom(T_PLAYER_LEFT_ROOM, current_room)
+        await self.group_remove(current_room)
 
-        if room_size <= 0:
+        if current_room["size"] == 0:
             await self.group_send_delete_room(current_room)
             #await self.updateLobbies("delete_room", current_room)
         else:
-            await self.group_send_room_size_update(current_room, room_size)
+            await self.group_send_room_size_update(current_room["name"], current_room["size"])
             #await self.updateLobbies("room_size_update", current_room, room_size)
             
-        # CHANNELS: Remove user from the lobby room group
-        await self.group_remove(current_room)
-
+        
     
 
     # should only return lobbies that are not full !!!
@@ -336,14 +342,27 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             except Exception as e:
                 print(f"Error: {e}") """
         
-    async def updateLobbyRoom(self, type, room_name):
-        if type == "player_joined_room":
+    async def updateLobbyRoom(self, type, room):
+        if type == T_PLAYER_JOINED_ROOM:
             await self.channel_layer.group_send(
-                f"lobby_{room_name}",
+                f"lobby_{room["name"]}",
                 {
                     "type": "player_joined_room",
-                    "displayname": self.displayname
+                    "displayname": self.displayname,
                     # image
+                    "room": room
+                    # size and room_name? then frontend doesnt need to count up themselves
+                }
+            )
+
+        if type == T_PLAYER_LEFT_ROOM:
+            await self.channel_layer.group_send(
+                f"lobby_{room["name"]}",
+                {
+                    "type": "player_left_room",
+                    "displayname": self.displayname,
+                    # image
+                    "room": room
                     # size and room_name? then frontend doesnt need to count up themselves
                 }
             )
@@ -370,8 +389,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "name": room_name,
             "creator_name": creator_name,
             "players": [creator_name],
-            "points_to_win": points_to_win,
-            "max_player_num": max_player_num,
+            "points_to_win": int(points_to_win),
+            "max_player_num": int(max_player_num),
             "size": 1
         }
         return new_room
