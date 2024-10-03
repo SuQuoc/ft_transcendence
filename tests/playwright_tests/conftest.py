@@ -10,7 +10,7 @@ import pytest
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
-USERMAIL = "test1@test.at"
+USERMAIL = "transcendence42vienna+test1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
@@ -116,6 +116,14 @@ def set_display_name(page: Page, display_name: str):
     page.locator("#displayNameInput").fill(display_name)
     page.locator("#displayNameSubmitButton").click()
     page.wait_for_selector("#navbar", timeout=5000)
+
+
+def delete_user(page: Page, password: str):
+    page.locator("#userDropdown").click()
+    page.locator("#deleteUserButton").click()
+    page.locator("#deleteUserPassword").fill(password)
+    page.locator("#confirmDeleteUserButton").click()
+    # [aguilmea] delete user has no otp in the front end but in the backend it has - so it is not working rigth now
 ############################################
 
 
