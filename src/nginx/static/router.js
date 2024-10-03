@@ -65,7 +65,7 @@ const getDisplayname = async () => {
 	}
 }
 
-/** Checks if the email is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
+/** Checks if the email is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /login */
 const getEmail = async () => {
 	if (window.app.userData.email) // if the email is already set we don't need to fetch it
 		return;
