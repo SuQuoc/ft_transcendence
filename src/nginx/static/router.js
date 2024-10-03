@@ -1,3 +1,5 @@
+import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
+
 const validateToken = async () => {
 	try {
 		// check if the token is valid
@@ -142,7 +144,7 @@ const Router = {
 
 
 	// changes the page main content and update the URL
-	go: async (route, addToHistory = true) => {
+	go: async (route, addToHistory = true, tournamentName = "") => { // the tournamentName is only needed for the tournamentLobbyPage
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
@@ -173,7 +175,7 @@ const Router = {
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
-				pageElement = document.createElement("tournament-lobby-page");
+				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
 			case "/tournament-waiting-room":
 				//protection (what if the socket is not open??!!!!)
@@ -242,7 +244,7 @@ const Router = {
 	 * 
 	 *  Add this as a "message" event listener to window.app.socket.
 	 *  It changes the route (page) depending on the message received from the server */
-	handleSocketMessageChangeRoute(event) {
+	/* handleSocketMessageChangeRoute(event) {
 		const data = JSON.parse(event.data);
 
 		switch (data.type) {
@@ -256,7 +258,7 @@ const Router = {
 				console.log("unknown message type: ", data.type);
 				break;
 		}
-	},
+	}, */
 
 	handleNavLinks(event) {
 		event.preventDefault();
