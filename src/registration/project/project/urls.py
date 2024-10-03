@@ -15,11 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import common, oauthtwo, basic
+from core_app.views import common, oauthtwo, basic, backup
 from django.urls import path
 
 urlpatterns = [
     
+    # backup_views
+    path('registration/backup_login', backup.login),
+
     # basic views
     path('registration/basic_login', basic.login),
     path('registration/basic_forgot_password', basic.forgot_password),

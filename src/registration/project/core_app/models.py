@@ -35,6 +35,11 @@ class RegistrationUser(AbstractUser):
         self.save()
         return str(self.backup_code)
 
+    def check_backup_code(self, backup_code): # [aguilmea] has to be checked against hashed value
+        if self.backup_code == backup_code:
+            return True
+        return False
+
 class OneTimePassword(models.Model):
 
     ACTION_CHOICES = [
