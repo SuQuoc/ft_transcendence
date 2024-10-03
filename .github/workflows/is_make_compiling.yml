@@ -11,6 +11,12 @@ on:
 jobs:
   build_start_test:
     runs-on: ubuntu-latest
+
+    env: # Or as an environment variable
+      EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+      EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD}}
+      
+        
     steps:
     - uses: actions/checkout@v4
 

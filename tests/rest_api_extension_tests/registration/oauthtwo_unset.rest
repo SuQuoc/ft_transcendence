@@ -1,0 +1,45 @@
+
+POST {{base_url}}/registration/send_otp
+Content-Type: application/json
+
+{
+    "username": {{}}
+
+}
+
+###
+
+# @name post_signup
+POST {{base_url}}/registration/oauthtwo_signup
+Content-Type: application/json
+
+{}
+
+###
+
+POST {{base_url}}/registration/login
+Content-Type: application/json
+
+{"username": "email@domain.at", "password": "Pass1234!"}
+
+###
+
+@SET_COOKIE = {{post_signup.response.headers.Set-Cookie}}
+
+###
+
+GET {{base_url}}/registration/oauthtwo_unset/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###
+
+GET {{base_url}}/registration/change_username/
+Content-Type: application/json
+Cookie: access=a,b,c refresh=x,y,z
+
+{}
+
+###

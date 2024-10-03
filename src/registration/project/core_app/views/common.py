@@ -117,3 +117,13 @@ def refresh_token(request):
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_email(request):
+    try:
+        user = request.user
+        return Response({'email': user.username}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'get_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

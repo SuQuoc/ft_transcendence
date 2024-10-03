@@ -59,7 +59,7 @@ export class UserProfile extends ComponentBaseClass {
           <div class="mb-3">
             <label for="displayName" class="form-label">Display Name</label>
             <input type="text" class="form-control" id="displayName">
-            <div class="warning-message" id="displayNameWarning">Error changing display name</div>
+            <div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
           </div>
           <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
@@ -271,10 +271,10 @@ export class UserProfile extends ComponentBaseClass {
     async saveProfile() {
         const saveButton = this.shadowRoot.getElementById('saveProfile');
         const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');
-        const displayNameWarning = this.shadowRoot.getElementById('displayNameWarning');
+        const profileDisplayNameWarning = this.shadowRoot.getElementById('profileDisplayNameWarning');
         saveButton.disabled = true;
         saveSpinner.style.display = 'inline-block';
-        displayNameWarning.style.display = 'none';
+        profileDisplayNameWarning.style.display = 'none';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
         const imageUpload = this.shadowRoot.getElementById('imageUpload');
@@ -293,7 +293,7 @@ export class UserProfile extends ComponentBaseClass {
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);
-            displayNameWarning.style.display = 'block';
+            profileDisplayNameWarning.style.display = 'block';
         }
 
         saveButton.disabled = false;
