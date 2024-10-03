@@ -37,7 +37,7 @@ fclean: down rm_vol rm_keys
 
 re: down rm_vol cache_clean build_up
 
-new: fclean build_up
+new: fclean keys build_up
 
 keys:
 	bash ./src/common_files/jwt_create_keys.sh
