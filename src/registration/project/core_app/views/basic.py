@@ -135,37 +135,3 @@ def signup_change_username(request):
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-#############################
-
-@api_view(['POST'])
-@authentication_classes([OneTimePasswordAuthentication])
-@permission_classes([IsAuthenticated])
-def forgot_password_reset(request):
-    try:
-        token = request.data.get('token')
-        new_password = request.data.get('new_password')
-        if not token or not new_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        token_generator = PasswordResetTokenGenerator()
-        if not token_generator.check_token(request.user, token):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        user.set_password(new_password)
-        user.save()
-        return Response(status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['POST'])
-@authentication_classes([UsernameAuthentication])
-@permission_classes([IsAuthenticated])
-def forgot_password_send_email(request):
-    try:
-        user = request.user
-        token_generator = PasswordResetTokenGenerator()
-        token = token_generator.make_token(user)
-        send_reset_email(user.username, token)
-        return Response(status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'forgot_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-

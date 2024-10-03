@@ -8,43 +8,6 @@ from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
-@api_view(['POST'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
-def delete_user(request):
-    try:
-        current_password = request.data.get('password')
-        otp = request.data.get('otp')
-        user = request.user
-        if not current_password:
-            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
-        if not user.check_password(current_password):
-            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if otp is None:
-            otp = create_one_time_password(user.id, 'delete_user')
-            send_otp_email(user.username, 'delete_user', otp)
-            return Response({3}, status=status.HTTP_202_ACCEPTED)
-        if not check_one_time_password(user, 'delete_user', otp):
-            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
-        #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
-        response = send_delete_request_to_um(request)
-        if response.status_code != 200:
-            return Response({5}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        user.delete()
-        return send_200_with_expired_cookies()
-    except Exception as e:
-        return Response({'delete_user error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['GET'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
-def logout(request):
-    try:
-        return send_200_with_expired_cookies()
-    except Exception as e:
-        return Response({'logout error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -95,6 +58,52 @@ def change_username(request):
     except Exception as e:
         return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_user(request):
+    try:
+        current_password = request.data.get('password')
+        otp = request.data.get('otp')
+        user = request.user
+        if not current_password:
+            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(current_password):
+            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if otp is None:
+            otp = create_one_time_password(user.id, 'delete_user')
+            send_otp_email(user.username, 'delete_user', otp)
+            return Response({3}, status=status.HTTP_202_ACCEPTED)
+        if not check_one_time_password(user, 'delete_user', otp):
+            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
+        #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
+        response = send_delete_request_to_um(request)
+        if response.status_code != 200:
+            return Response({5}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user.delete()
+        return send_200_with_expired_cookies()
+    except Exception as e:
+        return Response({'delete_user error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_email(request):
+    try:
+        user = request.user
+        return Response({'email': user.username}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'get_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@authentication_classes([AccessTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    try:
+        return send_200_with_expired_cookies()
+    except Exception as e:
+        return Response({'logout error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -117,13 +126,3 @@ def refresh_token(request):
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['POST'])
-@authentication_classes([AccessTokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_email(request):
-    try:
-        user = request.user
-        return Response({'email': user.username}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'get_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

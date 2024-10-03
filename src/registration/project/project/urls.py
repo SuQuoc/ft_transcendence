@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import common, oauthtwo, basic, otp, test
+from core_app.views import common, oauthtwo, basic, otp
 from django.urls import path
 
 urlpatterns = [
@@ -27,23 +27,21 @@ urlpatterns = [
     path('registration/basic_signup_change_password', basic.signup_change_password),
     path('registration/basic_signup_change_username', basic.signup_change_username),
    
-    # oauth2 views
-    path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
-    path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
-
-    # twofa views
-    path('registration/otp_send_otp', otp.send_otp),
-
     # common views
     path('registration/change_password', common.change_password),
     path('registration/change_username', common.change_username),
     path('registration/delete_user', common.delete_user),
+    path('registration/get_email', common.get_email),
     path('registration/logout', common.logout),
     path('registration/refresh_token', common.refresh_token),
     path('registration/verify_token', common.verify_token),
-    path('registration/get_email', common.get_email),
 
-    #test views # [aguilmea] to be deleted as soon as frontend changed the endpoint
-    path('registration/signup', test.signup), # [aguilmea] to be deleted as soon as frontend changed the endpoint
-    path('registration/login', test.login), # [aguilmea] to be deleted as soon as frontend changed the endpoint
+
+    # oauth2 views
+    path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
+    path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
+
+    # otp views
+    path('registration/otp_send_otp', otp.send_otp),
+
 ]
