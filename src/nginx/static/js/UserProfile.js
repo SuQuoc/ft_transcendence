@@ -289,7 +289,7 @@ export class UserProfile extends ComponentBaseClass {
         try {
             const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
             window.app.userData.username = response.displayname;
-            //window.app.userData.profileImage = response.image;
+            window.app.userData.profileImage = response.image;
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);

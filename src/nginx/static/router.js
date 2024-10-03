@@ -57,8 +57,8 @@ const getDisplayname = async () => {
 		} else {
 			const responseData = await response.json();
 			window.app.userData.username = responseData.displayname;
-			//window.app.userData.<image?> = responseData.image;
-			app.router.go('/', false); // maybe this should be set to false?
+			window.app.userData.profileImage = responseData.image;
+			app.router.go('/', false);
 		}
 	} catch (error) {
 		console.error('Error getting displayname (router):', error);
@@ -156,6 +156,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
+		document.getElementById('userDropdown').src = window.app.userData.profileImage;
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
