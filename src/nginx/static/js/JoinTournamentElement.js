@@ -31,11 +31,11 @@ export class JoinTournamentElement extends HTMLElement {
 		console.log('join tournament handler in JoinTournamentElement');
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
-		window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
+		//window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
 
-		window.app.socket.send(JSON.stringify({"type": "join_tournament",
-										"room_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
+		/* window.app.socket.send(JSON.stringify({"type": "join_tournament",
+										"room_name": tournament_name})); */
+		window.app.router.go("/tournament-lobby", false, tournament_name); // false means it doesn't get added to the history
 	}
 
 	// the element with the info of the tournament and a button to join it

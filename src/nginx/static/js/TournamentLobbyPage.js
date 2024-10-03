@@ -3,8 +3,11 @@ import { TournamentLobbyPlayerElement } from "./TournamentLobbyPlayerElement.js"
 import { PongCanvasElement } from "./fiona_pong/PongCanvasElement.js";
 
 export class TournamentLobbyPage extends ComponentBaseClass {
-	constructor() {
+	constructor(tournament_name) {
 		super();
+
+		this.tournament_name = tournament_name;
+
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 		this.handlePongFullScreen_var = this.handlePongFullScreen.bind(this);
@@ -26,8 +29,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
 		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 
-		// gets the player list when the page is loaded
-		window.app.socket.send(JSON.stringify({type: "getUpdateLobbyPlayerList"}));
+		// sending a request to the server to join the tournament
+		window.app.socket.send(JSON.stringify({type: "join_tournament", room_name: this.tournament_name}));
 	}
 
 	disconnectedCallback() {
@@ -41,6 +44,13 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 
 	/// ----- Methods ----- ///
+
+	initLobby(points_to_win, max_player_num) {
+		this.root.getElementById("lobbyTournamentName").innerText = this.tournament_name;
+		this.root.getElementById("lobbyPointsToWin").innerText = points_to_win;
+		this.root.getElementById("lobbyMaxPlayerNum").innerText = max_player_num;
+
+	}
 
 	addPlayerElement(player_name) { // needs the avatar too !!!
 		let element = new TournamentLobbyPlayerElement();
@@ -67,17 +77,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.current_player_num.innerText = new_player_num;
 	}
 
-	getPlayerList() {
-		// maybe i need to send a message to the server to get the player list
-	}
-
 
 	/// ----- Event Handlers ----- ///
-
-	handleLeaveLobby(event) {
-		window.app.socket.send(JSON.stringify({type: "leave_tournament"}));
-		window.app.router.go("/tournament", false); // isn't added to the history
-	}
 
 	/** gets called when the websocket receives a message */
 	handleReceivedMessage(event) {
@@ -100,6 +101,11 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 					this.addPlayerElement(data[key].player_name);
 			}
 		}
+	}
+
+	handleLeaveLobby(event) {
+		window.app.socket.send(JSON.stringify({type: "leave_tournament"}));
+		window.app.router.go("/tournament", false); // isn't added to the history
 	}
 
 	handlePongFullScreen() {
@@ -132,6 +138,18 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 						h-lg-100 p-2 gap-lg-0 gap-5"
 				id="lobbyPlayerSidebar"
 			>
+				<!-- tournament name -->
+				<p id="lobbyTournamentName" class="text-break text-wrap mb-1">TournabmentNamjkkkkkkkkkkkke</p>
+				<hr class="mt-0 mb-3"></hr>
+
+				<!-- points to win -->
+				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
+					<span class="d-lg-block d-none fs-4">PTW:</span>
+					<div class="d-flex ms-lg-auto">
+						<span id="lobbyPointsToWin" class="fs-4">0</span>
+					</div>
+				</div>
+
 				<!-- leave button -->
 				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
 				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
