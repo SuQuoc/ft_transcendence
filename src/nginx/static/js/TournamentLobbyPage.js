@@ -45,11 +45,14 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	/// ----- Methods ----- ///
 
-	initLobby(points_to_win, max_player_num) {
+	initLobby(data) {
 		this.root.getElementById("lobbyTournamentName").innerText = this.tournament_name;
-		this.root.getElementById("lobbyPointsToWin").innerText = points_to_win;
-		this.root.getElementById("lobbyMaxPlayerNum").innerText = max_player_num;
+		this.root.getElementById("lobbyPointsToWin").innerText = data.points_to_win;
+		this.root.getElementById("lobbyMaxPlayerNum").innerText = data.max_player_num;
 
+		for (let i in data.players) {
+			this.addPlayerElement(data.players[i]);
+		}
 	}
 
 	addPlayerElement(player_name) { // needs the avatar too !!!
@@ -68,9 +71,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			console.error("Error: deletePlayerElement: element to delete not found");
 			return;
 		}
-
-		this.join_tournament_elements.removeChild(element);
-		//this.noTournamentsToJoin();
+		
+		this.player_list.removeChild(element);
 	}
 
 	updateCurrentPlayerNum(new_player_num) {
@@ -86,20 +88,19 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		
 		console.log("received message on tournament-lobby-page: ", data);
 		
-		if (data.type === "new_player") {
+		if (data.type === "player_joined_room") {
 			this.addPlayerElement(data.displayname); // needs the avatar too !!!
 		}
-		else if (data.type === "player_left") {
+		else if (data.type === "player_left_room") {
 			this.deletePlayerElement(data.displayname);
 		}
 		else if (data.type === "update_current_player_num") {
 			this.current_player_num.innerText = data.current_player_num;
 		}
-		else if (data.type === "updateLobbyPlayerList") {
-			for (let key in data) {
-				if (data[key].player_name)
-					this.addPlayerElement(data[key].player_name);
-			}
+		else if (data.type === "join_tournament") {
+			if (data.joined === "false")
+				window.app.router.go("/tournament", false); // if for some reason you can't join you get sent back to the joinTournament page
+			this.initLobby(data.room);
 		}
 	}
 
@@ -139,7 +140,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 				id="lobbyPlayerSidebar"
 			>
 				<!-- tournament name -->
-				<p id="lobbyTournamentName" class="text-break text-wrap mb-1">TournabmentNamjkkkkkkkkkkkke</p>
+				<p id="lobbyTournamentName" class="text-break text-wrap mb-1">tournament name</p>
 				<hr class="mt-0 mb-3"></hr>
 
 				<!-- points to win -->

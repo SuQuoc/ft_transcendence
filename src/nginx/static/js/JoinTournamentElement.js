@@ -29,7 +29,7 @@ export class JoinTournamentElement extends HTMLElement {
 	// and changes the route to the tournament waiting room where the client waits for the message from the server
 	handleJoinTournament(event) {
 		console.log('join tournament handler in JoinTournamentElement');
-		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
+		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML; // can be simplified because i am saving the tournament name in the parent div as well as a name
 		
 		//window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
 
