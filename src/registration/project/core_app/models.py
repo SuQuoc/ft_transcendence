@@ -1,4 +1,4 @@
-import uuid
+import uuid, random, string
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -10,7 +10,7 @@ class RegistrationUser(AbstractUser):
     
     username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128, blank=True)
-    
+    backup_code = models.CharField(max_length=128, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
     
@@ -29,6 +29,11 @@ class RegistrationUser(AbstractUser):
     
     def is_verified(self):
         return self.email_verified
+    
+    def generate_backup_code(self): # [aguilmea] has to be hashed before saving
+        self.backup_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        self.save()
+        return str(self.backup_code)
 
 class OneTimePassword(models.Model):
 

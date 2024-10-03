@@ -9,6 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
             'password': {'write_only': True},
+            'backup_code': {'read_only': True},
         }
 
     def create(self, validated_data):
