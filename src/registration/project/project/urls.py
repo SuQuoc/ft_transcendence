@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from core_app.views import common, oauthtwo, basic, otp
+from core_app.views import common, oauthtwo, basic
 from django.urls import path
 
 urlpatterns = [
@@ -36,12 +36,8 @@ urlpatterns = [
     path('registration/refresh_token', common.refresh_token),
     path('registration/verify_token', common.verify_token),
 
-
     # oauth2 views
     path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
     path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
-
-    # otp views
-    path('registration/otp_send_otp', otp.send_otp),
 
 ]
