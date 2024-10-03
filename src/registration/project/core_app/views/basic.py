@@ -66,7 +66,9 @@ def signup(request):
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
-        if not user or user is None:
+        if not user:
+            if otp:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
