@@ -156,6 +156,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
+		console.log("setting userDropdown: ", window.app.userData.profileImage);
 		document.getElementById('userDropdown').src = window.app.userData.profileImage;
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
 			document.getElementById("navbar").style.display = "none";
@@ -173,13 +174,15 @@ const Router = {
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
-		//comment out to add token check
 		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
 				addToHistory = false;
 			}
+		} else {
+			app.userData = {};
+			localStorage.removeItem("userData");
 		}
 
 		Router.hideOrShowNavbarAndFooter(route);

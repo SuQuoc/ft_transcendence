@@ -19,7 +19,7 @@ export class LoginPage extends ComponentBaseClass {
 		//this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
-	getElementHTML() {
+	getElementHTML(){
 		const template = document.createElement('template');
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
@@ -51,16 +51,16 @@ export class LoginPage extends ComponentBaseClass {
 		return template;
 	}
 
-	handleEmailEnter(event) {
+	async handleEmailEnter(event) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 
 			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
 			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 			if (!otpSectionVisible) {
-				this.requestOTP(event);
+				await this.requestOTP(event);
 			} else if (otpSectionVisible && loginButton.disabled === false) {
-				this.login(event);
+				await this.login(event);
 			}
 		}
 	}
@@ -93,11 +93,7 @@ export class LoginPage extends ComponentBaseClass {
 			otpButton.disabled = false;
 		}
 
-		if (emailValid && password.length > 0 && otpPattern.test(otp)) {
-			loginButton.disabled = false;
-		} else {
-			loginButton.disabled = true;
-		}
+		loginButton.disabled = !(emailValid && password.length > 0 && otpPattern.test(otp));
 	}
 
 	async requestOTP(event) {
@@ -134,20 +130,6 @@ export class LoginPage extends ComponentBaseClass {
 		}
 	}
 
-	handleOTPInput() {
-		const otp = this.shadowRoot.getElementById('otpCode').value;
-		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
-		const otpPattern = /^[A-Z0-9]{16}$/;
-
-		if (otpPattern.test(otp)) {
-			errorMessage.textContent = '';
-			this.shadowRoot.getElementById('otpCode').removeAttribute('aria-invalid');
-		} else {
-			errorMessage.textContent = 'Invalid OTP';
-			this.shadowRoot.getElementById('otpCode').setAttribute('aria-invalid', 'true');
-		}
-	}
-
 	startTimer(duration, button) {
 		let timer = duration, minutes, seconds;
 		this.timer = setInterval(() => {
@@ -180,7 +162,6 @@ export class LoginPage extends ComponentBaseClass {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 
 		try {
-			//TODO: use the new basic_login endpoint in combination with OTP
 			const loginResponse = await fetch('/registration/basic_login', {
 				method: 'POST',
 				headers: {
@@ -205,13 +186,15 @@ export class LoginPage extends ComponentBaseClass {
 
 			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 			if (!displaynameResponse.ok) {
-				window.app.router.go('/displayname', false);
+				await app.router.go('/displayname', false);
 				console.log('displayname not ok:', displaynameResponse);
 			} else {
 				const responseData = await displaynameResponse.json();
 				window.app.userData.username = responseData.displayname;
-				//window.app.userData.<image?> = responseData.image;
-				app.router.go("/", false);
+				if (responseData.image) {
+					window.app.userData.profileImage = responseData.image;
+				}
+				await app.router.go("/", false);
 			}
 		} catch (error) {
 			console.error('Error during login:', error);
