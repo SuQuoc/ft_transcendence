@@ -74,7 +74,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 	/** deletes a joinTournamentElement */
 	deleteJoinTournamentElement(tournament_name) {
-		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
+		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name='${tournament_name}']`);
 		if (!element) {
 			console.error("Error: deleteJoinTournamentElement: element to delete not found");
 			return;
@@ -86,7 +86,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 	/** updates the 'current_player_num' of the 'join-tournament-element' with the tournament_name passed */
 	updateCurrentPlayerNum(tournament_name, current_player_num) {
-		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name="${tournament_name}"]`);
+		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name='${tournament_name}']`);
 		if (!element) {
 			console.error("Error: updateCurrentPlayerNum: element to update not found");
 			return;

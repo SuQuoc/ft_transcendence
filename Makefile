@@ -131,5 +131,16 @@ test: down
 	pytest ./tests/playwright_tests
 	@make down
 
+test_tournament: down
+	@make re > /dev/null 2>&1 &
+	@PID=$$!
+	@wait $$PID
+	@while ! nc -z localhost 8000; do \
+		echo "* Waiting for the server to start..."; \
+		sleep 2; \
+	done
+	pytest ./tests/playwright_tests/test_displayname.py
+	@make down
+
 test_running:
 	pytest ./tests/playwright_tests
