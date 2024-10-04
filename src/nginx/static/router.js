@@ -38,8 +38,8 @@ const validateToken = async () => {
 }
 
 /** Checks if the displayname is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
-const getDisplayname = async () => {
-	if (window.app.userData.username) // if the displayname is already set we don't need to fetch it
+const getUserData = async () => {
+	if (window.app.userData.username && window.app.userData.profileImage) // if the displayname is already set we don't need to fetch it
 		return;
 
 	try {
@@ -61,34 +61,7 @@ const getDisplayname = async () => {
 			app.router.go('/', false);
 		}
 	} catch (error) {
-		console.error('Error getting displayname (router):', error);
-	}
-}
-
-/** Checks if the email is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /login */
-const getEmail = async () => {
-	if (window.app.userData.email) // if the email is already set we don't need to fetch it
-		return;
-
-	try {
-		// Check if the user already has an email
-		const response = await fetch ('/registration/get_email', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-
-		// Redirects to the home page if the user already has an email or to the select login page if they don't
-		if (!response.ok) {
-			window.app.router.go('/login', false);
-		} else {
-			const responseData = await response.json();
-			window.app.userData.username = responseData.email;
-			app.router.go('/', false); // maybe this should be set to false?
-		}
-	} catch (error) {
-		console.error('Error getting email (router):', error);
+		console.error('Error getting userdata (router):', error);
 	}
 }
 
@@ -114,8 +87,7 @@ const Router = {
 				return;
 			}
 		}
-		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
-		getEmail();
+		getUserData(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
 		// TODO: we need to get profile image as well
 		
 		// check initial URL
@@ -156,8 +128,6 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		console.log("setting userDropdown: ", window.app.userData.profileImage);
-		document.getElementById('userDropdown').src = window.app.userData.profileImage;
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
@@ -165,6 +135,17 @@ const Router = {
 		else {
 			document.getElementById("navbar").style.display = "";
 			document.getElementById("footer").style.display = "";
+			if (window.app.userData.profileImage) {
+				document.getElementById('userDropdown').src = window.app.userData.profileImage;
+			} else {
+				const response = fetch('/um/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+				response.then(data => data.json()).then(data => {
+					if (data.image) {
+						window.app.userData.profileImage = data.image;
+						document.getElementById('userDropdown').src = data.image;
+					}
+				});
+			}
 		}
 	},
 

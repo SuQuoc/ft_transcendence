@@ -13,10 +13,6 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
-
-		//this.shadowRoot.getElementById('loginEmail').addEventListener('input', this.validateForm.bind(this));
-		//this.shadowRoot.getElementById('loginPassword').addEventListener('input', this.validateForm.bind(this));
-		//this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
 	getElementHTML(){
@@ -184,15 +180,15 @@ export class LoginPage extends ComponentBaseClass {
 				}
 			});
 
+			const displaynameData = await displaynameResponse.json();
 			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
-			if (!displaynameResponse.ok) {
+			if (!displaynameResponse.ok || displaynameData.displayname === "") {
 				await app.router.go('/displayname', false);
 				console.log('displayname not ok:', displaynameResponse);
 			} else {
-				const responseData = await displaynameResponse.json();
-				window.app.userData.username = responseData.displayname;
-				if (responseData.image) {
-					window.app.userData.profileImage = responseData.image;
+				window.app.userData.username = displaynameData.displayname;
+				if (displaynameData.image) {
+					window.app.userData.profileImage = displaynameData.image;
 				}
 				await app.router.go("/", false);
 			}
