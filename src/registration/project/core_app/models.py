@@ -1,6 +1,7 @@
 import uuid, random, string
 
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -30,15 +31,15 @@ class RegistrationUser(AbstractUser):
     def is_verified(self):
         return self.email_verified
     
-    def generate_backup_code(self): # [aguilmea] has to be hashed before saving
-        self.backup_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+    def generate_backup_code(self): 
+        backup_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        self.backup_code = make_password(backup_code)
         self.save()
-        return str(self.backup_code)
+        return backup_code
 
-    def check_backup_code(self, backup_code): # [aguilmea] has to be checked against hashed value
-        if self.backup_code == backup_code:
-            return True
-        return False
+    def check_backup_code(self, backup_code):
+        return check_password(backup_code, self.backup_code)
+
 
 class OneTimePassword(models.Model):
 
