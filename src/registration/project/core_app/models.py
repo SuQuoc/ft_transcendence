@@ -55,7 +55,7 @@ class OneTimePassword(models.Model):
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
-    password = models.CharField(max_length=16)  
+    password = models.CharField(max_length=128)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
     def delete(self):
@@ -66,8 +66,12 @@ class OneTimePassword(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk: # if it is a new object, I want to delete all the old ones
             OneTimePassword.objects.filter(related_user=self.related_user, action=self.action).delete()
+        self.password = make_password(self.password)
         super().save(*args, **kwargs) # calls the parent method
-
+  
+    def check_password(self, password):    
+        return check_password(password, self.password)
+    
     def __str__(self):
         return f"{self.related_user.username} {self.action}"
 
@@ -91,7 +95,7 @@ class OauthTwo(models.Model):
         return self
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.related_user is not None:
+        if not self.pk and self.related_user is not None: # [aguilmea] when do i delete the oauth2 without related_user?
             OauthTwo.objects.filter(related_user=self.related_user).delete()
         super().save(*args, **kwargs)
 
