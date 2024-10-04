@@ -47,12 +47,13 @@ class OneTimePassword(models.Model):
         ('signup', 'signup'),
         ('reset_password', 'reset_password'),
         ('change_password', 'change_password'),
-        ('change_username', 'change_username'),
+        ('change_username_old', 'change_username_old'),
+        ('change_username_new', 'change_username_new'),
         ('delete_user', 'delete_user'),
     ]
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
-    action = models.CharField(max_length=16, choices=ACTION_CHOICES)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     password = models.CharField(max_length=16)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
@@ -63,7 +64,7 @@ class OneTimePassword(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk: # if it is a new object, I want to delete all the old ones
-            OneTimePassword.objects.filter(related_user=self.related_user).delete()
+            OneTimePassword.objects.filter(related_user=self.related_user, action=self.action).delete()
         super().save(*args, **kwargs) # calls the parent method
 
     def __str__(self):

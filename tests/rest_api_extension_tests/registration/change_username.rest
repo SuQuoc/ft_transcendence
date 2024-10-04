@@ -1,5 +1,12 @@
-# @name signup
-POST {{base_url}}/registration/signup
+@otp_signup = 0000000000000000
+@otp_login = 0000000000000000
+@otp_old_email = 0000000000000000 
+@otp_new_email = 0000000000000000 
+
+#######################################
+# change_username without backup_code #
+#######################################
+POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
 
 {
@@ -9,28 +16,27 @@ Content-Type: application/json
 
 ###
 
-@ACCESS_COOKIE = {{signup.response.headers.Set-Cookie}};
-
-###
-
-# @name login
-POST {{base_url}}/registration/login
+# @name signup_1
+POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
 
 {
     "username": "{{username2-1}}",
-    "password": "{{current_password2}}"
+    "password": "{{current_password2}}",
+    "otp": "{{otp_signup}}"
 }
 
 ###
+@ACCESS_COOKIE_1 = {{signup_1.response.headers.Set-Cookie}}
 
-@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+###
+@CODE = {{signup_1.response.body.backup_code}}
 
 ###
 
 POST {{base_url}}/registration/change_username
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+Cookie: {{ACCESS_COOKIE_1}}
 
 {
     "new_username": "{{username2-2}}"
@@ -38,8 +44,7 @@ Cookie: {{ACCESS_COOKIE}}
 
 ###
 
-
-POST {{base_url}}/registration/login
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -49,8 +54,7 @@ Content-Type: application/json
 
 ###
 
-# @name login
-POST {{base_url}}/registration/login
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -60,22 +64,35 @@ Content-Type: application/json
 
 ###
 
-@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+# @name login_2
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-1}}",
+    "password": "{{current_password2}}",
+    "otp": "{{otp_login}}"
+}
+
+###
+@ACCESS_COOKIE_2 = {{login_2.response.headers.Set-Cookie}}
 
 ###
 
 POST {{base_url}}/registration/change_username
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+Cookie: {{ACCESS_COOKIE_2}}
 
 {
     "new_username": "{{username2-2}}",
-    "otp": "FPWKO45I70QN1KER"
+    "password": "{{current_password2}}",
+    "otp_old_email": "{{otp_old_email}}",
+    "otp_new_email": "{{otp_new_email}}"
 }
 
 ###
 
-POST {{base_url}}/registration/login
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -85,7 +102,8 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/registration/login
+
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
@@ -93,4 +111,132 @@ Content-Type: application/json
     "password": "{{current_password2}}"
 }
 
-##################################################
+####
+
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}",
+    "otp": "{{otp_login}}"
+}
+
+
+####################################
+# change_username with backup_code #
+####################################
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}"
+}
+
+###
+
+# @name login_3
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}",
+    "otp": "{{otp_signup}}"
+}
+
+###
+@ACCESS_COOKIE_3 = {{login_3.response.headers.Set-Cookie}}
+
+###
+
+POST {{base_url}}/registration/change_username
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE_3}}
+
+{
+    "new_username": "{{username2-1}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-1}}",
+    "password": "{{current_password2}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}"
+}
+
+###
+
+# @name login_4
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}",
+    "otp": "{{otp_login}}"
+}
+
+###
+@ACCESS_COOKIE_4 = {{login_4.response.headers.Set-Cookie}}
+
+###
+
+POST {{base_url}}/registration/change_username
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE_4}}
+
+{
+    "new_username": "{{username2-1}}",
+    "password": "{{current_password2}}",
+    "backup_code": "{{CODE}}",
+    "otp_new_email": "{{otp_new_email}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}"
+}
+
+###
+
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-1}}",
+    "password": "{{current_password2}}"
+}
+###
+
+
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username2-1}}",
+    "password": "{{current_password2}}",
+    "otp": "{{otp_login}}"
+}

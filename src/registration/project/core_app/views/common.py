@@ -41,22 +41,35 @@ def change_username(request):
     try:
         new_username = request.data.get('new_username')
         if not new_username:
-            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user = request.user
-        if not user:
-            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
-        otp = request.data.get('otp')
-        if not otp:
-            otp = create_one_time_password(user.id, 'change_username')
-            send_otp_email(new_username, 'change_username', otp)
-            return Response({3}, status=status.HTTP_202_ACCEPTED)
-        if not check_one_time_password(user, 'change_username', otp):
-            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
+        otp_old = request.data.get('otp_old_email')
+        otp_new = request.data.get('otp_new_email')
+        backup_code = request.data.get('backup_code')
+        if not otp_new:
+            if otp_old is not None or backup_code is not None:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            otp_new = create_one_time_password(user.id, 'change_username_new')
+            send_otp_email(new_username, 'change_username_new', otp_new)
+            otp_old = create_one_time_password(user.id, 'change_username_old')
+            send_otp_email(user.username, 'change_username_old', otp_old)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        if otp_old is not None and backup_code is not None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not check_one_time_password(user, 'change_username_new', otp_new):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if otp_old:
+            if not check_one_time_password(user, 'change_username_old', otp_old):
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+        elif not backup_code:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        elif not user.check_backup_code(backup_code):
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.username = new_username
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'change_username error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -67,20 +80,20 @@ def delete_user(request):
         otp = request.data.get('otp')
         user = request.user
         if not current_password:
-            return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(current_password):
-            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         if otp is None:
             otp = create_one_time_password(user.id, 'delete_user')
             send_otp_email(user.username, 'delete_user', otp)
-            return Response({3}, status=status.HTTP_202_ACCEPTED)
+            return Response(status=status.HTTP_202_ACCEPTED)
         if not check_one_time_password(user, 'delete_user', otp):
-            return Response({4}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         #send_delete_request_to_game # [aguilmea] here because if we delete the statistics but not the user it is better
         response = send_delete_request_to_um(request)
         if response.status_code != 200:
-            return Response({5}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         user.delete()
         return send_200_with_expired_cookies()
     except Exception as e:

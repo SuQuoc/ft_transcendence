@@ -44,7 +44,7 @@ def exchange_code_against_access_token(request):
     #        return Response(status=status.HTTP_401_UNAUTHORIZED)  # [aguilmea] state noch hashen beim verschicken und prüfen
         oauthtwo = OauthTwo.objects.get(state=returned_state)
         if oauthtwo == None:
-            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         ft_access_token = request_ft_token(returned_authorization_code)
         username = get_ft_email(ft_access_token)
         user = RegistrationUser.objects.filter(username=username).first()

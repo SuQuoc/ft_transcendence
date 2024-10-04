@@ -39,16 +39,16 @@ def forgot_password(request):
         otp = request.data.get('otp')
         new_password = request.data.get('new_password')
         if not username:
-            return Response({1},status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
         if not user or user.is_verified() is False:
-            return Response({2},status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
             created_otp = create_one_time_password(user.id, 'reset_password')
             send_otp_email(username, 'reset_password', created_otp)
             return Response(status=status.HTTP_202_ACCEPTED)
         if not new_password or not check_one_time_password(user, 'reset_password', otp):
-           return Response({3},status=status.HTTP_400_BAD_REQUEST)
+           return Response(status=status.HTTP_400_BAD_REQUEST)
         user.set_password(new_password)
         user.save()
         return Response(status=status.HTTP_200_OK)
