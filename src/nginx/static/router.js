@@ -46,7 +46,7 @@ const getDisplayname = async () => {
 
 	try {
 		// Check if the user already has a displayname
-		const response = await fetch ('/um/profile/', {
+		const response = await fetch ('/um/profile', {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
@@ -56,7 +56,6 @@ const getDisplayname = async () => {
 		// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 		if (!response.ok) {
 			window.app.router.go('/displayname', false);
-			console.log('displayname not ok:', response);
 		} else {
 			const responseData = await response.json();
 			window.app.userData.username = responseData.displayname;
@@ -65,6 +64,33 @@ const getDisplayname = async () => {
 		}
 	} catch (error) {
 		console.error('Error getting displayname (router):', error);
+	}
+}
+
+/** Checks if the email is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /login */
+const getEmail = async () => {
+	if (window.app.userData.email) // if the email is already set we don't need to fetch it
+		return;
+
+	try {
+		// Check if the user already has an email
+		const response = await fetch ('/registration/get_email', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		// Redirects to the home page if the user already has an email or to the select login page if they don't
+		if (!response.ok) {
+			window.app.router.go('/login', false);
+		} else {
+			const responseData = await response.json();
+			window.app.userData.username = responseData.email;
+			app.router.go('/', false); // maybe this should be set to false?
+		}
+	} catch (error) {
+		console.error('Error getting email (router):', error);
 	}
 }
 
@@ -83,7 +109,7 @@ const Router = {
 		// !!! if not, the event listeners might not be added
 
 		// check if the user is logged in
-		if (location.pathname !== "/login" && location.pathname !== "/signup") {
+		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				Router.go("/login", false);
@@ -91,7 +117,8 @@ const Router = {
 			}
 		}
 		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
-		// TODO: we need to get email and profile image as well
+		getEmail();
+		// TODO: we need to get profile image as well
 		
 		// check initial URL
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
@@ -132,7 +159,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname") {
+		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
@@ -149,7 +176,7 @@ const Router = {
 		let pageElement = null; // the new page element
 
 		//comment out to add token check
-		if (route !== "/login" && route !== "/signup") {
+		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
@@ -196,6 +223,9 @@ const Router = {
 				break;
 			case "/signup":
 				pageElement = document.createElement("signup-page");
+				break;
+			case "/forgot-password":
+				pageElement = document.createElement("forgot-password");
 				break;
 			case "/displayname":
 				pageElement = document.createElement("select-displayname-page");

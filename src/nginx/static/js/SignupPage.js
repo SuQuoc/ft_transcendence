@@ -12,8 +12,11 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('signupPassword1').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
+		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
+	// !!!! id of button requestOTP should be signupRequestOTP
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
@@ -23,16 +26,24 @@ export class SignupPage extends ComponentBaseClass {
                     <h3 class="text-center text-white">Signup</h3>
                     <!-- Email -->
                     <label for="signupEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email"
-                        id="signupEmail"
-                        type="email"
-                        class="form-control"
-                        placeholder="name@example.com"
-                        aria-required="true"
-                        aria-describedby="errorMessageEmail"
-                    />
+                    <div class="input-group mb-3">
+						<input name="email"
+							id="signupEmail"
+							type="email"
+							class="form-control"
+							placeholder="name@example.com"
+							aria-required="true"
+							aria-describedby="errorMessageEmail"
+						/>
+						<button class="btn btn-custom" type="button" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
+					</div>
                     <span id="errorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
                     <!-- first Password -->
+                    <div id="otpSection" style="display: none;">
+                    	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16">
+                    	<span id="otpErrorMessage" class="text-danger"></span>
+                    </div>
                     <label for="signupPassword1" class="form-label text-white-50">Password</label>
                     <input name="password"
                         id="signupPassword1"
@@ -58,7 +69,8 @@ export class SignupPage extends ComponentBaseClass {
                         </a>
                         here!
                     </p>
-                    <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton">Sign up</button>
+                    <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
+                    <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
                     <div id="passwordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
                     <div id="emailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
                     <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
@@ -75,15 +87,17 @@ export class SignupPage extends ComponentBaseClass {
 		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
 		const emailWarning = this.shadowRoot.getElementById('errorMessageEmail');
 		const passwordWarning = this.shadowRoot.getElementById('errorMessagePassword');
+		const otpButton = this.shadowRoot.getElementById('requestOTP');
 
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 		const passwordsMatch = password1 === password2;
 
 		if (emailValid && passwordsMatch) {
-			signupButton.disabled = false;
+			otpButton.disabled = false;
 			emailWarning.textContent = '';
 			passwordWarning.textContent = '';
 		} else {
+			otpButton.disabled = true;
 			signupButton.disabled = true;
 			if (!emailValid) {
 				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
@@ -104,6 +118,68 @@ export class SignupPage extends ComponentBaseClass {
 		}
 	}
 
+	async requestOTP(event) {
+		event.preventDefault();
+		const requestOTPButton = this.shadowRoot.getElementById('requestOTP');
+		if (requestOTPButton.disabled) return;
+
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const errorMessage = this.shadowRoot.getElementById('errorMessageEmail');
+		const password = this.shadowRoot.getElementById('signupPassword1').value;
+
+		requestOTPButton.disabled = true;
+
+		try {
+			const response = await fetch('/registration/basic_signup', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ "username": email, password })
+			});
+
+			if (!response.ok) {
+				throw new Error('Requesting OTP failed');
+			}
+			this.shadowRoot.getElementById('otpSection').style.display = 'block';
+		} catch (error) {
+			console.error('Error during OTP request:', error);
+			errorMessage.textContent = 'Could not send OTP';
+			this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
+			requestOTPButton.disabled = false;
+		}
+	}
+
+	handleOTPInput() {
+		const otp = this.shadowRoot.getElementById('otpCode').value;
+		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
+		const otpPattern = /^[A-Z0-9]{16}$/;
+
+		if (otpPattern.test(otp)) {
+			errorMessage.textContent = '';
+			this.shadowRoot.getElementById('otpCode').removeAttribute('aria-invalid');
+		} else {
+			errorMessage.textContent = 'Invalid OTP';
+			this.shadowRoot.getElementById('otpCode').setAttribute('aria-invalid', 'true');
+		}
+		this.updateSignupButtonState();
+	}
+
+	updateSignupButtonState() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
+		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
+		const otp = this.shadowRoot.getElementById('otpCode').value;
+		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const otpPattern = /^[A-Z0-9]{16}$/;
+
+		if (email && password1 && password2 && otpPattern.test(otp)) {
+			signupButton.disabled = false;
+		} else {
+			signupButton.disabled = true;
+		}
+	}
+
 	async signup(event) {
 		event.preventDefault();
 		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
@@ -113,27 +189,15 @@ export class SignupPage extends ComponentBaseClass {
 
 		const email = this.shadowRoot.getElementById('signupEmail').value;
 		const password = this.shadowRoot.getElementById('signupPassword1').value;
-		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
-
-		if (password !== password2) {
-			console.error('Passwords do not match');
-			signupButton.disabled = false;
-			return;
-		}
-
-		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			console.error('Invalid email address');
-			signupButton.disabled = false;
-			return;
-		}
+		const otp = this.shadowRoot.getElementById('otpCode').value;
 
 		try {
-			const response = await fetch('/registration/signup', {
+			const response = await fetch('/registration/basic_signup', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ username: email, password })
+				body: JSON.stringify({ username: email, password, otp })
 			});
 
 			if (!response.ok) {

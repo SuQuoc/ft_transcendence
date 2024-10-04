@@ -52,13 +52,14 @@ export class UserProfile extends ComponentBaseClass {
     </style>
     <div class="form-container bg-dark text-white">
     <div id="userManagement">
-        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image">
+        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "https://i.pravatar.cc/150?img=52"'>
         <div id="imageWarning" class="mt-2"></div>
         <input type="file" id="imageUpload" style="display: none;">
         <form id="profileForm">
           <div class="mb-3">
             <label for="displayName" class="form-label">Display Name</label>
             <input type="text" class="form-control" id="displayName">
+            <div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
           </div>
           <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
@@ -92,6 +93,7 @@ export class UserProfile extends ComponentBaseClass {
               <span class="input-group-text" id="confirmPasswordToggle">Show</span>
             </div>
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
+            <div class="warning-message" id="changePasswordWarning">Error changing password</div>
           </div>
           <button type="button" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
           <div class="spinner-border text-light" role="status" id="changePasswordSpinner">
@@ -165,20 +167,9 @@ export class UserProfile extends ComponentBaseClass {
             }
 
             try {
-                const response = await fetch('/um/profile', { method: 'DELETE' });
-                if (!response.ok) {
-                    throw new Error('Error deleting user from user management');
-                }
-                const response_reg = await fetch('/registration/delete_user', {
-                    method: 'POST',
-                    cache: 'no-store',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current_password: password })
-                });
-                if (!response_reg.ok) {
-                    throw new Error('Error deleting user from registration');
-                }
+                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password }) });
                 console.log('User deleted');
+                window.app.router.go('/login', true);
             } catch (error) {
                 console.error('Error deleting user:', error);
             }
@@ -224,21 +215,15 @@ export class UserProfile extends ComponentBaseClass {
         try {
             // Fetch user data from global app object or API
             const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
-            this.shadowRoot.getElementById('displayName').value = response.displayname;
-            if (!('email' in response)) {
-                this.shadowRoot.getElementById('email').value = window.app.userData.email;
+            if ('displayname' in response) {
+                window.app.userData.username = response.displayname;
+                this.shadowRoot.getElementById('displayName').value = window.app.userData.username;
             }
-
-            // Check if the image URL is reachable
-            const imageUrl = response.image;
-            const image = new Image();
-            image.onload = () => {
-                this.shadowRoot.getElementById('profileImage').src = imageUrl;
-            };
-            image.onerror = () => {
-                this.shadowRoot.getElementById('profileImage').src = 'https://i.pravatar.cc/300';
-            };
-            image.src = imageUrl;
+            if ('image' in response) {
+                window.app.userData.profileImage = response.image;
+                this.shadowRoot.getElementById('profileImage').src = window.app.userData.profileImage;
+            }
+            this.shadowRoot.getElementById('email').value = window.app.userData.email;
         } catch (error) {
             console.error('Error loading user data:', error);
         }
@@ -248,7 +233,6 @@ export class UserProfile extends ComponentBaseClass {
         const file = event.target.files[0];
         const allowedTypes = ['image/jpeg', 'image/png'];
         const maxSize = 1024 * 1024; // 1MB
-        console.log('Image selected:', file);
 
         const warningMessage = this.shadowRoot.getElementById('imageWarning');
         warningMessage.textContent = '';
@@ -272,34 +256,44 @@ export class UserProfile extends ComponentBaseClass {
                 this.shadowRoot.getElementById('profileImage').src = e.target.result;
                 window.app.userData.profileImage = e.target.result;
             };
-            //TODO: Add API call to upload image, use base64 string to transmit
-            reader.readAsDataURL(file);
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                this.apiFetch('/um/profile', { method: 'PATCH', body: formData }, 'multipart/form-data');
+                reader.readAsDataURL(file);
+            } catch {
+                warningMessage.textContent = 'Error uploading image.';
+                warningMessage.classList.add('alert', 'alert-danger');
+            }
         }
     }
 
     async saveProfile() {
         const saveButton = this.shadowRoot.getElementById('saveProfile');
         const saveSpinner = this.shadowRoot.getElementById('saveProfileSpinner');
+        const profileDisplayNameWarning = this.shadowRoot.getElementById('profileDisplayNameWarning');
         saveButton.disabled = true;
         saveSpinner.style.display = 'inline-block';
+        profileDisplayNameWarning.style.display = 'none';
 
         const displayName = this.shadowRoot.getElementById('displayName').value;
-        //const profileImage = this.selectedImage;
-        const profileImage = window.app.userData.profileImage;
-
+        const imageUpload = this.shadowRoot.getElementById('imageUpload');
         const formData = new FormData();
-        formData.append('displayName', displayName);
-        if (profileImage) {
-            formData.append('profileImage', profileImage);
+        formData.append('displayname', displayName);
+
+        if (imageUpload.files.length > 0) {
+            const imageFile = imageUpload.files[0];
+            formData.append('image', imageFile);
         }
 
         try {
             const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
             window.app.userData.username = response.displayname;
-            window.app.userData.profileImage = response.image;
+            //window.app.userData.profileImage = response.image;
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);
+            profileDisplayNameWarning.style.display = 'block';
         }
 
         saveButton.disabled = false;
@@ -329,8 +323,10 @@ export class UserProfile extends ComponentBaseClass {
     async changePassword() {
         const changeButton = this.shadowRoot.getElementById('changePassword');
         const changeSpinner = this.shadowRoot.getElementById('changePasswordSpinner');
+        const changePasswordWarning = this.shadowRoot.getElementById('changePasswordWarning');
         changeButton.disabled = true;
         changeSpinner.style.display = 'inline-block';
+        changePasswordWarning.style.display = 'none';
 
         const oldPassword = this.shadowRoot.getElementById('oldPassword').value;
         const newPassword = this.shadowRoot.getElementById('newPassword').value;
@@ -339,13 +335,15 @@ export class UserProfile extends ComponentBaseClass {
             return;
         }
 
-        // Simulate API call, can be removed later
-        //await new Promise(resolve => setTimeout(resolve, 500));
         try {
             await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({"current_password": oldPassword, "new_password": newPassword})});
+            this.shadowRoot.getElementById('oldPassword').value = '';
+            this.shadowRoot.getElementById('newPassword').value = '';
+            this.shadowRoot.getElementById('confirmPassword').value = '';
             console.log('Changed password');
         } catch (error) {
             console.error('Error changing password: ', error);
+            changePasswordWarning.style.display = 'block';
         }
 
         changeButton.disabled = false;

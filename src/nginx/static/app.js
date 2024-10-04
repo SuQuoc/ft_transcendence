@@ -1,16 +1,23 @@
 import Router from './router.js';
 
 // global
+const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
+	username: null, // maybe this should be changed to displayname
+	email: null,
+	profileImage: null,
+	id: null, // temporary!! (i think)
+};
+
 window.app = {
 	router: Router,
 	socket: null,
-	userData: {
-		username: null, // maybe this should be changed to displayname
-		email: null,
-		profileImage: null,
-		id: null, // temporary!! (i think)
-	}
+	userData: storedUserData,
 };
+
+// Save userData to localStorage whenever it changes
+window.addEventListener('beforeunload', () => {
+	localStorage.setItem('userData', JSON.stringify(window.app.userData));
+});
 
 // link custom web components
 import { FindOpponentPage } from './js/FindOpponentPage.js';
@@ -26,6 +33,7 @@ import { FriendList } from './js/FriendList.js';
 import { FriendSearch } from './js/FriendSearch.js';
 import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
 import { TournamentWaitingRoomPage } from './js/TournamentWaitingRoomPage.js';
+import { ForgotPassword} from './js/ForgotPassword.js'
 
 
 console.log("app.js loaded");

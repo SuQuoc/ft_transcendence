@@ -23,12 +23,15 @@ from django.urls import include
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.urls import re_path
 
 urlpatterns = [
     path("um/admin/", admin.site.urls),
     # path("um/profile/", views.profile, name="profile"), # delete later, just for testing if server is still rendering changes
-    path("um/friends/", include("friends.urls")),
+    #path("um/friends", include("friends.urls")),
+    #path("um/friends/", include("friends.urls")),
     path("um/", include("api.urls")),
+    path('um/friends/', include("friends.urls")),
 ]
 
 if settings.DEBUG:

@@ -23,6 +23,9 @@ services:
       - network_user_management
       - network_registration
       - network_django
+    secrets:
+      - localhost.crt
+      - localhost.key
     profiles:
       - all
     restart: on-failure
@@ -44,6 +47,10 @@ networks:
 
 secrets:
   public_key.pem:
-    file: ../src/common_files/public_key.pem
+    file: ../src/common_files/jwt_keys/public_key.pem
   private_key.pem:
-    file: ../src/common_files/private_key.pem
+    file: ../src/common_files/jwt_keys/private_key.pem
+  localhost.crt:
+    file: ../src/common_files/ssl_certs/localhost.crt
+  localhost.key:
+    file: ../src/common_files/ssl_certs/localhost.key

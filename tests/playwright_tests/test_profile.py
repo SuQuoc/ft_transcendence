@@ -5,7 +5,7 @@ from conftest import login, USERMAIL, USERPW, USERDISPLAYNAME
 
 
 USER_NEWNAME = "newName"
-USER_NEWMAIL = "newmail@test.com"
+USER_NEWMAIL = "transcendence42vienna+newmail@gmail.com"
 USER_NEWPW = "newpassword"
 
 class TestProfile:

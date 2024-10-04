@@ -28,10 +28,6 @@ class CredentialsAuthentication(BaseAuthentication):
             return None
         return user, None
     
-class NoExistingUserAuthentication(BaseAuthentication):
-    def authenticate(self, request, username=None, password=None):
-        return None
-
 class OneTimePasswordAuthentication(BaseAuthentication):
     def authenticate(self, request, password=None):
         otp = request.data.get('otp')
