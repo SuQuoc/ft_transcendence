@@ -21,7 +21,11 @@ USERMAIL = "transcendence42vienna+test1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
+
+# DEFINES for tournament tests
 N_USERS = 5 # min 5
+T_DISPLAYNAME = "tuser"
+T_NAME = "tname"
 
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
@@ -48,7 +52,7 @@ def authenticate():
             browser.close()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def pages():
     with sync_playwright() as p:
         browser: Browser = p.chromium.launch()
@@ -62,9 +66,13 @@ def pages():
             pages.append(page)
             try:
                 signup(page, f"transcendence42vienna+tuser{i}@gmail.com", USERPW, USERPW)
-                set_display_name(page, f"tuser{i}")
+                set_display_name(page, f"{T_DISPLAYNAME}{i}")
             except Exception as e:
-                print(f"failed to create user tuser{i}: {e}")
+                try:
+                    login(page, f"transcendence42vienna+tuser{i}@gmail.com", USERPW)
+                    page.wait_for_selector("#navbar", timeout=5000)
+                except Exception as e:
+                    print(f"failed to create user tuser{i}: {e}")
         
         yield pages
 
@@ -126,7 +134,6 @@ def login_page():
 
 ### utils ##############################
 def signup(page: Page, email: str, password1: str, password2: str):
-    print(f"Using BASE_URL --------------------------------------------: {BASE_URL}")
     page.goto(BASE_URL)
     page.click("#loginGoToSignup")
     expect(page.locator("#signupForm")).to_be_visible()

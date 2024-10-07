@@ -139,7 +139,7 @@ test_tournament: down
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done
-	pytest ./tests/playwright_tests/test_displayname.py
+	pytest ./tests/playwright_tests/test_tournament_multiple.py
 	@make down
 
 test_running:
