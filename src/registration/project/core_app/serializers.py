@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = RegistrationUser(**validated_data)
         user.set_password(password)
         user.save()
+        # passepassword_changed(password, user=user, password_validators=None)
         return user 
 
     def update(self, instance, validated_data):
@@ -28,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             # validate password(password, user=instance) # [aguilmea] not setup yet to make testing easier
             instance.set_password(password) 
+            # password_changed(password, user=instance, password_validators=None) #[aguilmea] password_changed is basically a way for Django to say to all password validators: "Hey, take note, the user's password has been changed to this value, so if you need to keep track of for some reason, do it now, because after this, I'll destroy the unhashed version of this password"
         instance.save()
         return instance
 
