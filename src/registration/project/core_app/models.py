@@ -23,6 +23,10 @@ class RegistrationUser(AbstractUser):
     def __str__(self):
         return self.username
     
+    def save(self, *args, **kwargs):
+        self.username = self.username.lower()  # Ensure username is stored in lowercase
+        super(RegistrationUser, self).save(*args, **kwargs)
+
     def set_verified(self):
         self.email_verified = True
         self.save()
