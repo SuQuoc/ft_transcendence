@@ -34,6 +34,7 @@ export class JoinTournamentElement extends HTMLElement {
 		window.app.router.go("/tournament-lobby", false, tournament_name); // false means it doesn't get added to the history
 	}
 
+	
 	// the element with the info of the tournament and a button to join it
 	getElementHTML() {
 		const template = document.createElement('template');
