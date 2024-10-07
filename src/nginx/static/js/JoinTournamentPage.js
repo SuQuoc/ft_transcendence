@@ -192,21 +192,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		console.log("tournament created");
 		// goes to the tournament lobby
 		window.app.router.go("/tournament-lobby", false, tournament_name); // false means it doesn't get added to the history
-		// TODO: should go to the tournament waiting room first !!
 	};
-
-
-	// does this even get called???!!!
-	/* handleJoinTournament(event) {
-		console.log("join tournament button clicked in joinTournamentPage");
-		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
-		
-		window.app.socket.send(JSON.stringify({"type": "join_tournament",
-										"tournament_name": tournament_name}));
-		window.app.router.go("/tournament-waiting-room", false); // false means it doesn't get added to the history
-	} */
-
-
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
 	handleRangeDisplay(event) {

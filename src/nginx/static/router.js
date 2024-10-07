@@ -204,10 +204,6 @@ const Router = {
 				//protection (what if the socket is not open??!!!!)
 				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
-			case "/tournament-waiting-room":
-				//protection (what if the socket is not open??!!!!)
-				pageElement = document.createElement("tournament-waiting-room-page");
-				break;
 			case "/match":
 				console.log("match page created");
 				Router.closeWebSocket(); //only closes the socket if it is open
@@ -269,26 +265,6 @@ const Router = {
 
 
 	/// ----- Event Handlers ----- ///
-
-	/** !!! Use this only with the "once" option when adding the Event Listener !!!
-	 * 
-	 *  Add this as a "message" event listener to window.app.socket.
-	 *  It changes the route (page) depending on the message received from the server */
-	/* handleSocketMessageChangeRoute(event) {
-		const data = JSON.parse(event.data);
-
-		switch (data.type) {
-			case "join_tournament":
-				if (data.joined === "true")
-					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
-				else
-					Router.go("/tournament", false); // should probably be false ??
-				break;
-			default:
-				console.log("unknown message type: ", data.type);
-				break;
-		}
-	}, */
 
 	handleNavLinks(event) {
 		event.preventDefault();
