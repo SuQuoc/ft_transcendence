@@ -31,6 +31,9 @@ class LobbyRoom:
         self.room_name = room_name
         self.players = players
         self.creator_name = None
+        self.points_to_win = 0
+        self.cur_player_num = 0
+        self.max_player_num = 0
 
     def to_json(self):
         return json.dumps({
@@ -42,6 +45,27 @@ class LobbyRoom:
     def from_json(json_str):
         data = json.loads(json_str)
         return LobbyRoom(data["room_name"], data["creator_name"], data["players"])
+    
+    def add_player(self, player):
+        if self.cur_player_num == self.max_player_num:
+            return
+        
+        self.players.append(player)
+        self.cur_player_num += 1
+
+    def rem_player(self, player):
+        """
+        Removes a player from the room.
+        """
+        if player not in self.players:
+            raise ValueError(f"Player '{player}' is not in the room.")
+            return
+        
+        self.players.remove(player)
+        self.cur_player_num -= 1
+
+    def is_full(self):
+        return self.cur_player_num == self.max_player_num
 #######
 
 
