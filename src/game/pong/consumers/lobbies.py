@@ -58,12 +58,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.accept()
         #print(self.scope["user"])
 
-    async def disconnect(self, close_code): # take a look at close_code !!!
-        print("disconnect")
+    async def disconnect(self, close_code): 
+        print(f"disconnect - close_code: {close_code}")
         
         await self.leave_room()
         await self.channel_layer.group_discard(LOBBIES, self.channel_name)
-        await super().disconnect(close_code)  # Ensure proper cleanup by calling the parent class"s disconnect method
+        await super().disconnect(close_code)
 
      ### WEBSOCKET MESSAGE HANDLER ###
     async def receive(self, text_data):
@@ -76,7 +76,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             if type == "on_tournament_page":
                 self.displayname = dict_data.get("displayname")
 
-            elif type == "create_tournament":
+            elif type == "create_room":
                 await self.create_room(dict_data)
 
             elif type == "join_tournament":
@@ -110,7 +110,11 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             current_room = cache.get(f"current_room_{self.displayname}")
 
             if room_name in lobbies:
-                await self.send_error(f"Lobby '{room_name}' already exists.")
+                await self.send(text_data=json.dumps({
+                    "type": "join_tournament",
+                    "joined": "false",
+                }))
+                # await self.send_error(f"Lobby '{room_name}' already exists.")
                 return
             if current_room is not None:
                 await self.send_error(f"You are already in a lobby: '{current_room}'. Leave that lobby before creating a new one.")
@@ -395,8 +399,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
 
     async def send_error(self, message):
+        print(f"ERROR: {message}=========================")
         await self.send(text_data=json.dumps({
-            "type": "error",
+            "type": "join_tournament",
+            "joined": "false",
             "message": message
         }))
 

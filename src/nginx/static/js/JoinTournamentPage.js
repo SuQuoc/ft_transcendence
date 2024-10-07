@@ -183,7 +183,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		const	points_to_win = event.target.points_to_win.value;
 
 		// sends the tournament details to the game server
-		window.app.socket.send(JSON.stringify({"type": "create_tournament",
+		window.app.socket.send(JSON.stringify({"type": "create_room",
 											"tournament_name": tournament_name,
 											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
