@@ -1,6 +1,6 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 import { TournamentLobbyPlayerElement } from "./TournamentLobbyPlayerElement.js";
-import { PongCanvasElement } from "./fiona_pong/PongCanvasElement.js";
+import { PongCanvasElement } from "./pong/PongCanvasElement.js";
 
 export class TournamentLobbyPage extends ComponentBaseClass {
 	constructor(tournament_name) {
