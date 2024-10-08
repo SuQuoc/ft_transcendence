@@ -1,43 +1,43 @@
 export class JoinTournamentElement extends HTMLElement {
-	constructor() {
+	// should not be needed!!!
+	/* constructor() {
 		super();
 
 		this.handleJoinTournamentVar = this.handleJoinTournament.bind(this);
-	}
+	} */
 	// when the component is attached to the DOM
 	connectedCallback() {
 		const template = this.getElementHTML();
 		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
 		this.appendChild(content);
 
-		this.join_tournament_button = this.querySelector("[name='join_tournament_button']");
+		// should not be needed!!!
+	/* 	this.join_tournament_button = this.querySelector("[name='join_tournament_button']");
 
 		// add event listeners
-		this.join_tournament_button.addEventListener("click", this.handleJoinTournamentVar);
+		this.join_tournament_button.addEventListener("click", this.handleJoinTournamentVar); */
 	}
 
-	disconnectedCallback() {
+	// should not be needed!!!
+	/* disconnectedCallback() {
 		// remove event listeners
 		this.join_tournament_button.removeEventListener("click", this.handleJoinTournamentVar);
-	}
+	} */
 
 
 	/// ----- Event Handlers ----- ///
 
-	// makes an event listener that listens for a message from the server to change the route (wether or not the client can join the tournament)
-	// then it sends a message to the server that the client wants to join the tournament
-	// and changes the route to the tournament waiting room where the client waits for the message from the server
-	handleJoinTournament(event) {
+	// should not be needed!!!
+	/** Reroutes to the tournament lobby page */
+/* 	handleJoinTournament(event) {
 		console.log('join tournament handler in JoinTournamentElement');
 		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML; // can be simplified because i am saving the tournament name in the parent div as well as a name
 		
-		//window.app.socket.addEventListener("message", window.app.router.handleSocketMessageChangeRoute, {once: true});
-
-		/* window.app.socket.send(JSON.stringify({"type": "join_tournament",
-										"room_name": tournament_name})); */
+		//window.app.socket.send(JSON.stringify({"type": "join_tournament", "room_name": tournament_name}));
 		window.app.router.go("/tournament-lobby", false, tournament_name); // false means it doesn't get added to the history
-	}
+	} */
 
+	
 	// the element with the info of the tournament and a button to join it
 	getElementHTML() {
 		const template = document.createElement('template');

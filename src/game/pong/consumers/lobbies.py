@@ -155,6 +155,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         # add user to the channel group
         await self.group_add(room_name)
+        await self.send_success(room_name)
         return
     
 

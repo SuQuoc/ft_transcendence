@@ -29,8 +29,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
 		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 
-		// sending a request to the server to join the tournament
-		window.app.socket.send(JSON.stringify({type: "join_tournament", room_name: this.tournament_name}));
+		// sending a request to the server to get the room info
+		window.app.socket.send(JSON.stringify({type: "get_room_info", room_name: this.tournament_name}));
 	}
 
 	disconnectedCallback() {
@@ -49,6 +49,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.root.getElementById("lobbyTournamentName").innerText = this.tournament_name;
 		this.root.getElementById("lobbyPointsToWin").innerText = data.points_to_win;
 		this.root.getElementById("lobbyMaxPlayerNum").innerText = data.max_player_num;
+		this.current_player_num.innerText = data.cur_player_num;
 
 		for (let i in data.players) {
 			this.addPlayerElement(data.players[i]);
@@ -82,30 +83,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	/// ----- Event Handlers ----- ///
 
-	/** gets called when the websocket receives a message */
-	handleReceivedMessage(event) {
-		const data = JSON.parse(event.data);
-		
-		console.log("received message on tournament-lobby-page: ", data);
-		
-		if (data.type === "player_joined_room") {
-			this.addPlayerElement(data.displayname); // needs the avatar too !!!
-		}
-		else if (data.type === "player_left_room") {
-			this.deletePlayerElement(data.displayname);
-		}
-		else if (data.type === "update_current_player_num") {
-			this.current_player_num.innerText = data.current_player_num;
-		}
-		else if (data.type === "join_tournament") {
-			if (data.joined === "false")
-				window.app.router.go("/tournament", false); // if for some reason you can't join you get sent back to the joinTournament page
-			this.initLobby(data.room);
-		}
-	}
-
 	handleLeaveLobby(event) {
-		window.app.socket.send(JSON.stringify({type: "leave_tournament"}));
+		window.app.socket.send(JSON.stringify({type: "leave_room"}));
 		window.app.router.go("/tournament", false); // isn't added to the history
 	}
 
@@ -122,6 +101,31 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		this.canvas.handleCanvasResize();
 		this.canvas.handleBackgroundCanvasResize();
+	}
+
+	/** gets called when the websocket receives a message */
+	handleReceivedMessage(event) {
+		const data = JSON.parse(event.data);
+		
+		console.log("received message on tournament-lobby-page: ", data);
+		
+		if (data.type === "player_joined_room") {
+			this.addPlayerElement(data.displayname); // needs the avatar too !!!
+			this.current_player_num.innerText = data.current_player_num;
+		}
+		else if (data.type === "player_left_room") {
+			this.deletePlayerElement(data.displayname);
+			this.current_player_num.innerText = data.current_player_num;
+		}
+		else if (data.type === "room_info") {
+			this.initLobby(data.room);
+		}
+		else if (data.type === "error") {
+			console.error("Error: handleReceivedMessage: ", data.error);
+		}
+		else {
+			console.error("Error: handleReceivedMessage: unknown type: ", data.type);
+		}
 	}
 
 
