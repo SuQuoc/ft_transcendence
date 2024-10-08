@@ -31,6 +31,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// adding event listeners
 		if (window.app.socket)
 			window.app.socket.addEventListener("message", this.handleReceivedMessageVar);
+		this.join_tournament_elements.addEventListener("click", this.handleJoinTournament);
 		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreationVar);
 		this.input_range.addEventListener("input", this.handleRangeDisplayVar);
 		
@@ -146,57 +147,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 	/// ----- Event Handlers ----- ///
 
-	/** gets called when the websocket receives a message */
-	handleReceivedMessage(event) {
-		const data = JSON.parse(event.data);
-		
-		console.log("handleReceivedMessage: data: ", data);
-		
-		if (data.type === "tournament_list") {
-			console.log("tournament_list");
-			for (let tournament_name in data.lobbies) {
-				const tournament = data.lobbies[tournament_name];
-				this.createJoinTournamentElement(tournament_name,
-												tournament.creator_name,
-												tournament.points_to_win,
-												tournament.cur_player_num, // current_player_num
-												tournament.max_player_num);
-			}
-		}
-		else if (data.type === "new_room") {
-			console.log("new_room: ", data.room.room_name);
-			this.createJoinTournamentElement(data.room.room_name, // tournament_name
-											data.room.creator_name,
-											data.room.points_to_win,
-											data.room.cur_player_num, // current_player_num
-											data.room.max_player_num);
-		}
-		else if (data.type === "room_size_update") {
-			console.log("room_size_update");
-			this.updateCurrentPlayerNum(data.room_name, data.cur_player_num);
-		}
-		else if (data.type === "delete_room") {
-			console.log("delete_room: ", data.room_name);
-			this.deleteJoinTournamentElement(data.room_name);
-		}
-		else if (data.type === "success") {
-			// going to the tournament lobby
-			window.app.router.go("/tournament-lobby", false, data.room_name); // maybe i need to save the room name locally
-		}
-
-		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
-			// ignoring these types for now !!!
-		}
-		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.message);
-			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
-			// TODO: make error messages appear on the page !!!
-		}
-		else {
-			console.error("Error: handleReceivedMessage: unknown data type: ", data.type);
-		}
-	}
-
 	/** get's called when someone creates a tournament */
 	handleTournamentCreation(event) {
 		event.preventDefault();
@@ -207,13 +157,23 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "create_room",
-											"tournament_name": tournament_name,
+											"room_name": tournament_name,
 											"creator_name": window.app.userData.username,
 											"points_to_win": points_to_win,
 											"max_player_num": number_of_players}));
 		
 		console.log("tournament created");
 		this.waitingForPermission(); // waiting for permission to go to the tournament lobby
+	};
+
+	handleJoinTournament(event) {
+		console.log('join tournament handler in JoinTournamentElement');
+		if (event.target.tagName !== "BUTTON")
+			return;
+
+		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML; // can be simplified because i am saving the tournament name in the parent div as well as a name
+		
+		window.app.socket.send(JSON.stringify({"type": "join_room", "room_name": tournament_name}));
 	};
 
 	/** moves the "display" of the range input to the correct position (above the thumb) and changes the value displayed */
@@ -228,6 +188,56 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.range_display.innerHTML = event.target.value;
 	};
 	
+	/** gets called when the websocket receives a message */
+	handleReceivedMessage(event) {
+		const data = JSON.parse(event.data);
+		
+		console.log("handleReceivedMessage: data: ", data);
+		
+		if (data.type === "room_size_update") {
+			console.log("room_size_update");
+			this.updateCurrentPlayerNum(data.room_name, data.cur_player_num);
+		}
+		else if (data.type === "new_room") {
+			console.log("new_room: ", data.room.room_name);
+			this.createJoinTournamentElement(data.room.room_name, // tournament_name
+											data.room.creator_name,
+											data.room.points_to_win,
+											data.room.cur_player_num, // current_player_num
+											data.room.max_player_num);
+		}
+		else if (data.type === "delete_room") {
+			console.log("delete_room: ", data.room_name);
+			this.deleteJoinTournamentElement(data.room_name);
+		}
+		else if (data.type === "success") {
+			// going to the tournament lobby
+			window.app.router.go("/tournament-lobby", false, data.room_name); // maybe i need to save the room name locally
+		}
+		else if (data.type === "tournament_list") {
+			console.log("tournament_list");
+			for (let tournament_name in data.lobbies) {
+				const tournament = data.lobbies[tournament_name];
+				this.createJoinTournamentElement(tournament_name,
+												tournament.creator_name,
+												tournament.points_to_win,
+												tournament.cur_player_num, // current_player_num
+												tournament.max_player_num);
+			}
+		}
+
+		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
+			// ignoring these types for now !!!
+		}
+		else if (data.type === "error") {
+			console.error("Error: handleReceivedMessage: ", data.message);
+			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
+			// TODO: make error messages appear on the page !!!
+		}
+		else {
+			console.error("Error: handleReceivedMessage: unknown data type: ", data.type);
+		}
+	};
 
 	getElementHTML() {
 		const template = document.createElement('template');

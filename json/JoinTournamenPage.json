@@ -3,11 +3,11 @@
 // Request
 {
 	"type": "create_room",
-	"tournament_name": "tournament_name",
+	"room_name": "tournament_name",
 	"creator_name": "display_name",
 	"points_to_win": "points_to_win",
 	"max_player_num": "max_player_num"
-}//
+}
 
 {
 	"type": "join_room",
@@ -17,15 +17,15 @@
 
 {
     "type": "get_tournament_list",
-}//
+}
 
 
 // ON SUCCESS ------------------------------------------------
 // Response to the client who wants to create the room
 {
     "type": "success",
-    // "room_name": "room_name"
-}//
+    // "room_name": "room_name" ??
+}
 
 { 
     "type": "tournament_list",
@@ -49,7 +49,7 @@
             "max_player_num": "max_player_num"
         }
     }
-}//
+}
 
 // Response to all other clients chilling on JoinTournamentPage 
 {
@@ -62,18 +62,18 @@
         "cur_player_num": "cur_player_num",
         "max_player_num": "max_player_num"
     }
-}//
+}
 
 {
     "type": "room_size_update",
     "room_name": "room_name",
     "cur_player_num": "cur_player_num"
-}//
+}
 
 {
     "type": "delete_room",
     "room_name": "room_name",
-}//
+}
 
 
 // ON FAILURE ------------------------------------------------
@@ -83,6 +83,6 @@
                 room_full, 
                 room_does_not_exist, 
                 (room_name_invalid)"
-}//
+}
 
 
