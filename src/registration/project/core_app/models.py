@@ -1,4 +1,4 @@
-import uuid
+import uuid, random, string
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -10,7 +10,7 @@ class RegistrationUser(AbstractUser):
     
     username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128, blank=True)
-    
+    backup_code = models.CharField(max_length=128, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
     
@@ -29,6 +29,16 @@ class RegistrationUser(AbstractUser):
     
     def is_verified(self):
         return self.email_verified
+    
+    def generate_backup_code(self): # [aguilmea] has to be hashed before saving
+        self.backup_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        self.save()
+        return str(self.backup_code)
+
+    def check_backup_code(self, backup_code): # [aguilmea] has to be checked against hashed value
+        if self.backup_code == backup_code:
+            return True
+        return False
 
 class OneTimePassword(models.Model):
 
@@ -37,12 +47,13 @@ class OneTimePassword(models.Model):
         ('signup', 'signup'),
         ('reset_password', 'reset_password'),
         ('change_password', 'change_password'),
-        ('change_username', 'change_username'),
+        ('change_username_old', 'change_username_old'),
+        ('change_username_new', 'change_username_new'),
         ('delete_user', 'delete_user'),
     ]
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
-    action = models.CharField(max_length=16, choices=ACTION_CHOICES)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     password = models.CharField(max_length=16)  
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
@@ -53,7 +64,7 @@ class OneTimePassword(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk: # if it is a new object, I want to delete all the old ones
-            OneTimePassword.objects.filter(related_user=self.related_user).delete()
+            OneTimePassword.objects.filter(related_user=self.related_user, action=self.action).delete()
         super().save(*args, **kwargs) # calls the parent method
 
     def __str__(self):
