@@ -23,7 +23,7 @@ USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
 
 # DEFINES for tournament tests
-N_USERS = 5 # min 5
+N_USERS = 6 # min 6
 T_DISPLAYNAME = "tuser"
 T_NAME = "tname"
 
@@ -52,16 +52,17 @@ def authenticate():
             browser.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def pages():
     with sync_playwright() as p:
         browser: Browser = p.chromium.launch()
         pages = []
         contexts = []
         for i in range(N_USERS):
-            
             context: BrowserContext = browser.new_context(ignore_https_errors=True)
+            context.set_default_timeout(3000)
             contexts.append(context)
+            
             page: Page = context.new_page()
             pages.append(page)
             try:

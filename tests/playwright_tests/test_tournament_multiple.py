@@ -5,12 +5,17 @@ from playwright.sync_api import expect
 from playwright.sync_api import Page
 from playwright.sync_api import sync_playwright
 import pytest
-from conftest import signup, login, set_display_name, N_USERS, USERPW, T_DISPLAYNAME, T_NAME
+from conftest import signup, login, set_display_name, N_USERS, USERPW, T_DISPLAYNAME, T_NAME, BASE_URL
+
+
+
 
 
 
 class TestTournamentMultiple:
        # test creating tournament with same name
+
+            
     def test_create_tournament(self, pages):
         # going to tournament page
         for page in pages[:N_USERS - 1]:
@@ -30,7 +35,8 @@ class TestTournamentMultiple:
         for i in range(3):
             expect(pages[-1].locator(f"join-tournament-element[name='{T_NAME}{i}']")).to_be_visible()
 
-
+        self.go_to_home(pages)
+    
 
     def test_join_tournament(self, pages):
         tname=f"{T_NAME}0"
@@ -56,10 +62,11 @@ class TestTournamentMultiple:
             expect(page.locator("#lobbyMaxPlayerNum")).to_have_text("8")
             expect(page.locator("#lobbyCurrentPlayerNum")).to_have_text("2")
 
-        expect(page.locator(f"tournament-lobby-player-element[name='{T_DISPLAYNAME}0']")).to_be_visible()
- 
+        expect(page.locator(f"tournament-lobby-player-element[name='{T_DISPLAYNAME}0']")).to_be_visible() 
+        
+        self.go_to_home(pages)
     
-    def test_leave_tournament(self, pages):
+    """  def test_leave_tournament(self, pages):
         tname=f"{T_NAME}0"
         
         # going to tournament page
@@ -81,6 +88,53 @@ class TestTournamentMultiple:
         leave_tournament(pages[1])
         expect(pages[1].locator("#joinTournamentElements")).to_be_empty()
 
+        # checking if the tournament name is available again after
+        create_tournament(pages[0], tournament_name=tname, n_players=8, points_to_win=1)
+
+        self.go_to_home(pages)
+        """
+   
+    def test_tournament_name_taken(self, pages):
+        tname=f"{T_NAME}0"
+
+        for page in pages:
+            page.locator("#playMenuGoToTournament").click()
+
+        create_tournament(pages[0], tournament_name=tname, n_players=8, points_to_win=1)
+        create_tournament(pages[1], tournament_name=tname, n_players=4, points_to_win=12)
+        
+        expect(pages[0].locator("#createTournamentForm")).to_be_visible() # expect an error message !!
+
+        self.go_to_home(pages)
+
+
+    def test_tournament_full(self, pages):
+        tname=f"{T_NAME}0"
+
+        for page in pages[:-1]:
+            page.locator("#playMenuGoToTournament").click()
+
+        create_tournament(pages[0], tournament_name=tname, n_players=4, points_to_win=1)
+        for page in pages[1:4]:
+            join_tournament(page, tournament_name=tname)
+        
+        # check if element is hidden for users already ON the on_tournament page
+        expect(pages[5].locator(f"join-tournament-element[name='{tname}']")).to_be_hidden()
+
+        # check if element is hidden for users ENTERING the on_tournament page
+        page.locator("#playMenuGoToTournament").click()
+        expect(pages[6].locator(f"join-tournament-element[name='{tname}']")).to_be_hidden()
+
+        # check if element is visible for users ON and ENTERING the on_tournament page
+        leave_tournament(pages[0])
+        expect(pages[5].locator(f"join-tournament-element[name='{tname}']")).to_be_visible()
+        expect(pages[0].locator(f"join-tournament-element[name='{tname}']")).to_be_visible()
+
+        self.go_to_home(pages)
+    
+    def go_to_home(self, pages):
+        for page in pages:
+            page.goto(BASE_URL)
 
 def change_slider_value(page, slider_selector, value):
     # Set the value of the slider
