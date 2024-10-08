@@ -199,8 +199,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			this.updateCurrentPlayerNum(data.room_name, data.cur_player_num);
 		}
 		else if (data.type === "new_room") {
-			console.log("new_room: ", data.room.room_name);
-			this.createJoinTournamentElement(data.room.room_name, // tournament_name
+			console.log("new_room: ", data.room.name);
+			this.createJoinTournamentElement(data.room.name, // tournament_name
 											data.room.creator_name,
 											data.room.points_to_win,
 											data.room.cur_player_num, // current_player_num

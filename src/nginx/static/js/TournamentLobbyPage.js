@@ -111,11 +111,11 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		
 		if (data.type === "player_joined_room") {
 			this.addPlayerElement(data.displayname); // needs the avatar too !!!
-			this.current_player_num.innerText = data.current_player_num;
+			this.current_player_num.innerText = data.cur_player_num;
 		}
 		else if (data.type === "player_left_room") {
 			this.deletePlayerElement(data.displayname);
-			this.current_player_num.innerText = data.current_player_num;
+			this.current_player_num.innerText = data.cur_player_num;
 		}
 		else if (data.type === "room_info") {
 			this.initLobby(data.room);

@@ -24,9 +24,11 @@ T_CREATE_ROOM = "create_room"
 T_NEW_ROOM = "new_room"
 
 T_JOIN_ROOM = "join_room"
-T_LEAVE_ROOM = "leave_room"
 T_PLAYER_JOINED_ROOM = "player_joined_room"
+
+T_LEAVE_ROOM = "leave_room"
 T_PLAYER_LEFT_ROOM = "player_left_room"
+T_DELETE_ROOM = "delete_room"
 
 T_GET_TOURNAMENT_LIST = "get_tournament_list"
 T_TOURNAMENT_LIST = "tournament_list"
@@ -114,13 +116,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             print(f"Exception: {e}")
-            # await self.send_error(f"Error: {e}")
 
 
     ### WEBSOCKET MESSAGES ###
     async def create_room(self, dict_data):
         print("create_room")
-        room_name = dict_data.get("tournament_name")
+        room_name = dict_data.get("room_name")
         points_to_win = dict_data.get("points_to_win")
         max_player_num = dict_data.get("max_player_num")
 
@@ -134,10 +135,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
             if room_name in lobbies:
                 await self.send_error(Errors.ROOM_NAME_TAKEN)
-                """ await self.send(text_data=json.dumps({
-                    "type": "join_tournament",
-                    "joined": "false",
-                })) """
                 return
             
             if current_room is not None:
@@ -163,26 +160,17 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         room_name = dict_data.get("room_name")
 
         async with self.update_lock:
-            # Check if the room exists
             lobbies = cache.get("lobbies", {})
             current_room_name = cache.get(f"current_room_{self.displayname}")
 
+            # Check if the room exists
             if room_name not in lobbies: # SHOULD NEVER HAPPEN
                 await self.send_error(Errors.ROOM_DOES_NOT_EXIST)
                 return
             
             room = lobbies[room_name]
-            """ if room["creator_name"] == self.displayname: # u are the creator so only then if call is triggered
-                await self.send_client_join_tournament("join_tournament", room)
-                return """
-
             if current_room_name is not None: # SHOULD NEVER HAPPEN
                 await self.send_error(Errors.ALREADY_IN_ROOM)
-                """ await self.send(text_data=json.dumps({
-                    "type": "join_tournament",
-                    "joined": "false",
-                    # "message": f"You are already in a lobby: "{current_room}". Leave that lobby before joining a new one."
-                })) """
                 return
 
             room = await self.add_player_to_room(room_name, lobbies)
@@ -191,8 +179,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.updateLobbyRoom(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
         await self.group_add(room_name)
         
-        # Send message to WebSocket Frontend
-        # await self.send_client_join_tournament("join_tournament", room)
+    
 
     
     async def leave_room(self):
@@ -253,11 +240,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_TOURNAMENT_LIST,
             "lobbies": lobbies
         })
-
-        print(f"tournament_list: {json.dumps({
-            "type": T_TOURNAMENT_LIST,
-            "lobbies": lobbies
-        }, indent=4)}")
         await self.send(text_data=text_data)
 
 
@@ -273,7 +255,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         print(f"trigger delete_room: {room_name}")
         await self.channel_layer.group_send(
                     LOBBIES, {
-                        "type": "delete_room",
+                        "type": T_DELETE_ROOM,
                         "room_name": room_name,
                     })
         
@@ -293,8 +275,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "player_joined_room",
                     "displayname": self.displayname,
-                    # image
                     "cur_player_num": room["cur_player_num"],
+                    # image
                 }
             )
 
@@ -304,9 +286,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "player_left_room",
                     "displayname": self.displayname,
+                    "cur_player_num": room["cur_player_num"],
                     # image
-                    "room": room
-                    # size and room_name? then frontend doesnt need to count up themselves
                 }
             )
 
@@ -357,15 +338,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         }))
 
 
-    """ async def send_client_join_tournament(self, type, room):
-        if type == "join_tournament":
-            await self.send(text_data=json.dumps({
-                        "type": "join_tournament",
-                        "joined": "true",
-                        "room": room
-                })) """
-
-
     ### Helper ###
     async def add_player_to_room(self, room_name, lobbies):
         room = lobbies[room_name]            
@@ -402,6 +374,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # CACHE: Set the current room of the user 
         cache.set(f"current_room_{self.displayname}", room_name)
         return room
+
 
     async def group_remove(self, group_name: str):
         """

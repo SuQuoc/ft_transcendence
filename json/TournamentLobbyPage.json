@@ -2,7 +2,7 @@
 // Request -------------------------------------------------
 {
 	"type": "get_room_info",
-	"room_name": "room_name",
+	"room_name": "room_name"
 }
 
 {
@@ -15,7 +15,7 @@
     "type": "room_info",
     "room":
     {
-        "room_name": "room_name",
+        "name": "room_name",
         "creator_name": "display_name",
         "points_to_win": "points_to_win",
         "cur_player_num": "cur_player_num",
