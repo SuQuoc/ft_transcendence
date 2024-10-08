@@ -3,7 +3,7 @@
 // Request
 {
 	"type": "create_room",
-	"tournament_name": "tournament_name",
+	"room_name": "tournament_name",
 	"creator_name": "display_name",
 	"points_to_win": "points_to_win",
 	"max_player_num": "max_player_num"
@@ -24,6 +24,7 @@
 // Response to the client who wants to create the room
 {
     "type": "success",
+    "room_name": "room_name"
 }
 
 { 
@@ -32,7 +33,7 @@
     {
         "room_name":
         {
-            "room_name": "room_name",
+            "name": "room_name",
             "creator_name": "display_name",
             "points_to_win": "points_to_win",
             "cur_player_num": "cur_player_num",
@@ -41,7 +42,7 @@
 
         "room_name":
         {
-            "room_name": "room_name",
+            "name": "room_name",
             "creator_name": "display_name",
             "points_to_win": "points_to_win",
             "cur_player_num": "cur_player_num",
@@ -80,7 +81,8 @@
     "type": "error",
     "error": "room_name_taken, 
                 room_full, 
-                room_does_not_exist, 
+                room_does_not_exist,
+                already_in_room, 
                 (room_name_invalid)"
 }
 
