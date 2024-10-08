@@ -4,16 +4,15 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.authentication import BaseAuthentication
 
-from ..authenticate import UsernameAuthentication, OneTimePasswordAuthentication
+from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
 @api_view(['POST'])
-@authentication_classes([BaseAuthentication])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
 def login(request):
     try:

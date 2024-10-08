@@ -3,12 +3,12 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.authentication import BaseAuthentication
 
+from ..authenticate import CredentialsAuthentication
 from .utils import generate_response_with_valid_JWT
 
 @api_view(['POST'])
-@authentication_classes([BaseAuthentication])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
 def login(request):
     try:

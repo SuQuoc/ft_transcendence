@@ -20,7 +20,7 @@ class RefreshTokenAuthentication(JWTAuthentication):
         return self.get_user(validated_token), validated_token
           
 class OneTimePasswordAuthentication(BaseAuthentication):
-    def authenticate(self, request, password=None):
+    def authenticate(self, request):
         otp = request.data.get('otp')
         username = request.data.get('username')
         if not otp or not username:
@@ -34,7 +34,17 @@ class OneTimePasswordAuthentication(BaseAuthentication):
         if stored_otp.password != otp:
             return None
         return user, None
-
+    
+class CredentialsAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return None
+        user = RegistrationUser.objects.filter(username=username).first()
+        if not user or not user.check_password(password):
+            return None
+        return user, None
 
 class UsernameAuthentication(BaseAuthentication):
     def authenticate(self, request, password=None):
