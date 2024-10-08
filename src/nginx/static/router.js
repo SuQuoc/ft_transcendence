@@ -1,3 +1,5 @@
+import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
+
 const validateToken = async () => {
 	try {
 		// check if the token is valid
@@ -130,8 +132,8 @@ const Router = {
 			channel_name = "match";
 
 		if (!window.app.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
 			window.app.socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -140,7 +142,7 @@ const Router = {
 		};
 
 		window.app.socket.onopen = () => {
-			window.app.socket.send(JSON.stringify({"type": type, "user_id": window.app.userData.username}));
+			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
 		};
 	},
 
@@ -156,7 +158,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
+		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
@@ -168,7 +170,7 @@ const Router = {
 
 
 	// changes the page main content and update the URL
-	go: async (route, addToHistory = true) => {
+	go: async (route, addToHistory = true, tournamentName = "") => { // the tournamentName is only needed for the tournamentLobbyPage
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
@@ -191,22 +193,20 @@ const Router = {
 				pageElement = document.createElement("play-menu-home-page");
 				break;
 			case "/tournament":
-				Router.closeWebSocket(); //only closes the socket if it is open
-				Router.makeWebSocket("onTournamentPage");
+				if (addToHistory === true) {
+					Router.closeWebSocket(); //only closes the socket if it is open
+					Router.makeWebSocket("on_tournament_page");
+				}
 				pageElement = document.createElement("join-tournament-page");
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
-				pageElement = document.createElement("tournament-lobby-page");
-				break;
-			case "/tournament-waiting-room":
-				//protection (what if the socket is not open??!!!!)
-				pageElement = document.createElement("tournament-waiting-room-page");
+				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
 			case "/match":
 				console.log("match page created");
 				Router.closeWebSocket(); //only closes the socket if it is open
-				Router.makeWebSocket("onFindOpponentPage");
+				Router.makeWebSocket("on_find_opponent_page");
 				pageElement = document.createElement("find-opponent-page");
 				break;
 			case "/pong":
@@ -260,31 +260,10 @@ const Router = {
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
 			history.pushState({route}, "", route);
-		console.log("history: ", history);
 	},
 
 
 	/// ----- Event Handlers ----- ///
-
-	/** !!! Use this only with the "once" option when adding the Event Listener !!!
-	 * 
-	 *  Add this as a "message" event listener to window.app.socket.
-	 *  It changes the route (page) depending on the message received from the server */
-	handleSocketMessageChangeRoute(event) {
-		const data = JSON.parse(event.data);
-
-		switch (data.type) {
-			case "joinTournament":
-				if (data.joined === "true")
-					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
-				else
-					Router.go("/tournament", false); // should probably be false ??
-				break;
-			default:
-				console.log("unknown message type: ", data.type);
-				break;
-		}
-	},
 
 	handleNavLinks(event) {
 		event.preventDefault();

@@ -1,10 +1,11 @@
 # chat/routing.py
 from django.urls import re_path, path
 
-from . import consumers
+from .consumers.lobbies import LobbiesConsumer
 
 websocket_urlpatterns = [
-    re_path(r"daphne/pong/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
+    # re_path(r"daphne/pong/(?P<room_name>\w+)/$", ChatConsumer.as_asgi()),
+    path('daphne/lobbies', LobbiesConsumer.as_asgi(), name='lobbies-page'),
 ]
 
 """ websocket_urlpatterns = [

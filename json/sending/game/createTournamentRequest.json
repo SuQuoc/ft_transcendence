@@ -1,8 +1,0 @@
-{
-	"type": "createTournamentRequest",
-	"tournament_name": "tournament_name",
-	"creator_name": "display_name",
-	"points_to_win": "points_to_win",
-	"current_player_num": "current_player_num",
-	"max_player_num": "max_player_num"
-}

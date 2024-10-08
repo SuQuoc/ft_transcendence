@@ -1,4 +1,3 @@
-from conftest import BASE_URL
 from playwright.sync_api import expect
 from playwright.sync_api import Page
 

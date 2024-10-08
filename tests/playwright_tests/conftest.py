@@ -4,16 +4,28 @@ from playwright.sync_api import BrowserContext
 from playwright.sync_api import expect
 from playwright.sync_api import Page
 from playwright.sync_api import sync_playwright
+from dotenv import load_dotenv
 import pytest
+
+# KEYNOTE: If the test is started from another folder other than the ROOT PROJECT FOLDER,
+# the .env file will not be found (e.g. you are in the tests folder and run pytest from there)
+ 
+load_dotenv("./docker_compose_files/.env")
+BASE_URL = os.getenv("SERVER_URL", "https://localhost:8000") # Using the defined SERVER_URL from the env, if not defined, use localhost
+print(f"Using BASE_URL !!!!!!!!!!!!: {BASE_URL}")
 
 # Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
-BASE_URL = "https://localhost:8000"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 USERMAIL = "transcendence42vienna+test1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
 OTP = "0000000000000000"
+
+# DEFINES for tournament tests
+N_USERS = 5 # min 5
+T_DISPLAYNAME = "tuser"
+T_NAME = "tname"
 
 # Fixtures to test anything after successful signup/login, the fixtures avoid re-login all the time
 @pytest.fixture(scope="session")
@@ -38,6 +50,38 @@ def authenticate():
             context.storage_state(path=AUTH_STATE_PATH)
             context.close()
             browser.close()
+
+
+@pytest.fixture(scope="function")
+def pages():
+    with sync_playwright() as p:
+        browser: Browser = p.chromium.launch()
+        pages = []
+        contexts = []
+        for i in range(N_USERS):
+            
+            context: BrowserContext = browser.new_context(ignore_https_errors=True)
+            contexts.append(context)
+            page: Page = context.new_page()
+            pages.append(page)
+            try:
+                signup(page, f"transcendence42vienna+tuser{i}@gmail.com", USERPW, USERPW)
+                set_display_name(page, f"{T_DISPLAYNAME}{i}")
+            except Exception as e:
+                try:
+                    login(page, f"transcendence42vienna+tuser{i}@gmail.com", USERPW)
+                    page.wait_for_selector("#navbar", timeout=5000)
+                except Exception as e:
+                    print(f"failed to create user tuser{i}: {e}")
+        
+        yield pages
+
+        for page, context in zip(pages, contexts):
+            page.close()
+            context.close()
+
+        browser.close()
+        
 
 @pytest.fixture(scope="function", params=["chromium"])
 def browser_type(request):

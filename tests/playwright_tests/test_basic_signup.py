@@ -1,16 +1,17 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
-from conftest import delete_user, set_display_name
+from conftest import delete_user, set_display_name, BASE_URL, OTP
 
-BASE_URL = "https://localhost:8000"
+
 USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "basic_signup_1"
-OTP = "0000000000000000"
+
+
+
 
 class TestBasicSignup:
 
     def test_signup_check_empty_fields(playwright: Playwright) -> None:
-       
         with sync_playwright() as playwright:
             
             browser = playwright.chromium.launch()

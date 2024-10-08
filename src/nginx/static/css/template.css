@@ -14,7 +14,6 @@
 	--custom-btn-base-color: #252670;
 	--custom-btn-hover-color: #121472;
 	--custom-btn-click-color: #0c0d52;
-
 }
 
 html {
@@ -25,6 +24,9 @@ body {
 	background: var(--custom-bg-color);
 }
 
+.bg-custom {
+	background: var(--custom-bg-color);
+}
 
 .dark-footer-border-bottom {
 	border-bottom: 1px solid var(--custom-bg-color);
@@ -40,17 +42,20 @@ body {
 	max-width: 1000px;
 }
 
+.canvas-container {
+	width: 100%;
+	height: 100%;
+	max-width: 100vw;
+	max-height: 100vh;
+}
+
 .lobby-player-avatar {
 	width: 30px;
 	height: 30px;
 }
 
-@media (min-width: 992px) {
-	.lobby-player-sidebar-lg {
-		width: 200px;
-	}
-}
-.lobby-player-sidebar-lg {
+.lobby-player-sidebar {
+	width: 200px;
 	border-top: var(--custom-bg-color) 2px solid;
 	border-bottom: var(--custom-bg-color) 2px solid;
 }

@@ -1,4 +1,3 @@
-# chat/consumers.py
 import asyncio
 import json
 import time
@@ -59,7 +58,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         self.player = PongPlayer(self.player_id, self.map_size, channel_name=self.channel_name)
-    
+
         if self.room_name == "match":
             return
 
@@ -83,7 +82,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Now using a lobby class in a dict for better control
             self.lobby = Lobby(lobby_name=self.room_name, max_len=2)
             self.match: Match = self.lobby.addPlayer(self.player)
-            
+
             await self.channel_layer.group_add(
                 self.match.name,  # Replace with the actual group name
                 self.channel_name
@@ -94,7 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         async with self.update_lock:
-            
+
             self.lobby = self.joinTournamentPage[self.room_name]
             self.match: Match = self.lobby.addPlayer(self.player)
 
@@ -211,7 +210,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             case "leaveTournament":
                 await self.leaveTournament(msg)
-            
+
             case "getUpdateLobbyPlayerList":
                 print("getUpdateLobbyPlayerList")
                 await self.sendtoClient.sendLobbyPlayerList(self.lobby)
@@ -246,7 +245,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("player id", self.room_name)
         e["type"] = "playerId"
         await self.send(text_data=json.dumps(e))
-    
+
     async def start_Pong(self, e):
         print("start pong", self.room_name)
         e["type"] = "startPong"
@@ -269,7 +268,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             status = "true"
         await self.sendJoinTournament(status)
 
-        # remove player to the tournaments joinTournamentPage group and send a update the lobby list 
+        # remove player to the tournaments joinTournamentPage group and send a update the lobby list
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         await self.channel_layer.group_add(self.lobby.lobby_name, self.channel_name)
         await self.sendtoClient.sendLobbyStatus(self.joinTournamentPage)
@@ -335,7 +334,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "joinTournament",
                 "joined": e}
             ))
-        
+
     async def update_LobbyPlayerList(self, e) -> None:
         print("hi dude")
         e["type"] = "updateLobbyPlayerList"
