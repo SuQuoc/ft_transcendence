@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import RegistrationUser, OneTimePassword, OauthTwo
-from common_utils import generate_random_string
+from django.contrib.auth.hashers import make_password
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = RegistrationUser(**validated_data)
         user.set_password(password)
         user.save()
-        # passepassword_changed(password, user=user, password_validators=None)
+        # password_changed(password, user=user, password_validators=None)
         return user 
 
     def update(self, instance, validated_data):
@@ -44,13 +44,15 @@ class OneTimePasswordSerializer(serializers.ModelSerializer):
 class OauthTwoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OauthTwo
-        fields = ['id', 'related_user', 'next_step', ]
+        fields = ['id', 'related_user', 'state', 'next_step', ]
         extra_kwargs = {
             'id': {'read_only': True},
+            'state': {'write_only': True},
         }
 
     def create(self, validated_data):
-        validated_data['state'] = generate_random_string(128)
+        state = validated_data.pop('state')
         oauthtwo = OauthTwo(**validated_data)
+        oauthtwo.state = make_password(state)
         oauthtwo.save()
         return oauthtwo

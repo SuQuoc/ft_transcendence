@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
-from common_utils import generate_random_string
+from .common_utils import generate_random_string
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

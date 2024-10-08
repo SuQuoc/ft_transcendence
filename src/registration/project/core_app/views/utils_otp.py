@@ -3,8 +3,8 @@ from datetime import timedelta
 from django.utils import timezone
 
 from ..serializers import OneTimePasswordSerializer
-from..models import OneTimePassword
-from .utils import generate_random_string
+from ..models import OneTimePassword
+from ..common_utils import generate_random_string
 
 import os
 

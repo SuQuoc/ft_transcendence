@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from ..serializers import UserSerializer, OauthTwoSerializer
 from ..models import RegistrationUser
 from .utils import generate_response_with_valid_JWT
+from ..common_utils import generate_random_string
 
 def generate_authorization_request_data(request):
     try:
@@ -13,15 +14,17 @@ def generate_authorization_request_data(request):
         id = None
         if request.user:
             id = request.user.id
+        state = generate_random_string(128)
         data = {
             'next_step' : next_step,
-            'related_user': id
+            'related_user': id,
+            'state': state
         }
         oauth_token_s = OauthTwoSerializer(data=data)
         if not oauth_token_s.is_valid():
             raise Exception({'generate_code_verifier serialiazer' : oauth_token_s.errors})
-        oauth = oauth_token_s.save()
-        return oauth.state
+        oauth_token_s.save()
+        return state
     except Exception as e:
         raise Exception({'generate_authorization_request_data': str(e)})
 
