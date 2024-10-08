@@ -159,7 +159,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
+		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
