@@ -1,0 +1,42 @@
+
+// Request -------------------------------------------------
+{
+	"type": "get_room_info",
+	"room_name": "room_name"
+}
+
+{
+    "type": "leave_room"
+}
+
+
+// Response ------------------------------------------------
+{
+    "type": "room_info",
+    "room":
+    {
+        "name": "room_name",
+        "creator_name": "display_name",
+        "points_to_win": "points_to_win",
+        "cur_player_num": "cur_player_num",
+        "max_player_num": "max_player_num"
+    }
+}
+
+{
+    "type": "player_joined_room",
+    "displayname": "displayname",
+    "cur_player_num": "cur_player_num"
+    // "avatar": "avatar"
+}
+
+{
+    "type": "player_left_room",
+    "displayname": "displayname",
+    "cur_player_num": "cur_player_num"
+}
+
+{
+    "type": "error",
+    "error": "not_in_room, room_does_not_exist"
+}

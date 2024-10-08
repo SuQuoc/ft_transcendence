@@ -36,8 +36,8 @@ application = ProtocolTypeRouter(
 
 # INSTEAD OF AuthMiddlewareStack, we can use our own custom middleware - COPILOT !!!
 
-# custom_auth_middleware.py
-from urllib.parse import parse_qs
+# custom_auth_middleware.py which we might need later for JWT auth ??
+""" from urllib.parse import parse_qs
 
 class CustomAuthMiddleware:
     def __init__(self, inner):
@@ -51,4 +51,4 @@ class CustomAuthMiddleware:
         return self.inner(scope)
 
 def CustomAuthMiddlewareStack(inner):
-    return CustomAuthMiddleware(AuthMiddlewareStack(inner))
+    return CustomAuthMiddleware(AuthMiddlewareStack(inner)) """

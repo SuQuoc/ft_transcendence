@@ -132,8 +132,7 @@ const Router = {
 			channel_name = "match";
 
 		if (!window.app.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws only i get a 400 bad request
-			// comment old version let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
 			window.app.socket = new WebSocket(ws_path);
 
@@ -159,7 +158,7 @@ const Router = {
 
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password") {
+		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
 		}
@@ -203,10 +202,6 @@ const Router = {
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
 				pageElement = new TournamentLobbyPage(tournamentName);
-				break;
-			case "/tournament-waiting-room":
-				//protection (what if the socket is not open??!!!!)
-				pageElement = document.createElement("tournament-waiting-room-page");
 				break;
 			case "/match":
 				console.log("match page created");
@@ -269,26 +264,6 @@ const Router = {
 
 
 	/// ----- Event Handlers ----- ///
-
-	/** !!! Use this only with the "once" option when adding the Event Listener !!!
-	 * 
-	 *  Add this as a "message" event listener to window.app.socket.
-	 *  It changes the route (page) depending on the message received from the server */
-	/* handleSocketMessageChangeRoute(event) {
-		const data = JSON.parse(event.data);
-
-		switch (data.type) {
-			case "join_tournament":
-				if (data.joined === "true")
-					Router.go("/tournament-lobby", false); // false means it doesn't get added to the history
-				else
-					Router.go("/tournament", false); // should probably be false ??
-				break;
-			default:
-				console.log("unknown message type: ", data.type);
-				break;
-		}
-	}, */
 
 	handleNavLinks(event) {
 		event.preventDefault();
