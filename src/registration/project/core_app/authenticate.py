@@ -18,23 +18,7 @@ class RefreshTokenAuthentication(JWTAuthentication):
             return None
         validated_token = self.get_validated_token(raw_token)
         return self.get_user(validated_token), validated_token
-          
-class OneTimePasswordAuthentication(BaseAuthentication):
-    def authenticate(self, request):
-        otp = request.data.get('otp')
-        username = request.data.get('username')
-        if not otp or not username:
-            return None
-        user = RegistrationUser.objects.filter(username=username).first()
-        stored_otp = OneTimePassword.objects.filter(related_user=user.id).first()
-        if not stored_otp:
-            return None
-        if stored_otp.expire < timezone.now():
-            return None
-        if stored_otp.password != otp:
-            return None
-        return user, None
-    
+            
 class CredentialsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         username = request.data.get('username')
