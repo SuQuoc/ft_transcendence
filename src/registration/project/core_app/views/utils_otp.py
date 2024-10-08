@@ -4,9 +4,8 @@ from django.utils import timezone
 
 from ..serializers import OneTimePasswordSerializer
 from..models import OneTimePassword
+from .utils import generate_random_string
 
-import random
-import string
 import os
 
 def send_otp_email(username, action, password):
@@ -41,7 +40,7 @@ def send_otp_email(username, action, password):
 
 def create_one_time_password(related_user, action):
     try:
-        #password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
+        #password = generate_random_string(16)
         password = '0000000000000000' # [aguilmea] for testing purposes, should be deleted in production
         otp_data = {
             'related_user': related_user,

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import RegistrationUser, OneTimePassword, OauthTwo
-import random, string
+from common_utils import generate_random_string
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,7 +50,7 @@ class OauthTwoSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        validated_data['state'] = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        validated_data['state'] = generate_random_string(128)
         oauthtwo = OauthTwo(**validated_data)
         oauthtwo.save()
         return oauthtwo

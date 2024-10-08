@@ -5,8 +5,7 @@ from django.conf import settings
 
 from django.core.mail import send_mail
 
-import requests
-import os
+import os, requests
 
 def send_200_with_expired_cookies():
     response = Response(status=status.HTTP_200_OK)

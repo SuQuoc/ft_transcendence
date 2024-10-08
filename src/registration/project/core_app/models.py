@@ -1,10 +1,12 @@
-import uuid, random, string
+import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+
+from common_utils import generate_random_string
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -36,7 +38,7 @@ class RegistrationUser(AbstractUser):
         return self.email_verified
     
     def generate_backup_code(self): 
-        backup_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=128))
+        backup_code = generate_random_string(128)
         self.backup_code = make_password(backup_code)
         self.save()
         return backup_code
