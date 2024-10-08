@@ -163,6 +163,8 @@ cython_debug/
 
 .vscode
 **/migrations/
+
+**ssl_certs/
 *.pem
 *.cnf
 *.crt
