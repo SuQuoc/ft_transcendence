@@ -44,15 +44,8 @@ class OneTimePasswordSerializer(serializers.ModelSerializer):
 class OauthTwoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OauthTwo
-        fields = ['id', 'related_user', 'state', 'next_step', ]
+        fields = ['id', 'related_user', 'state', 'next_step']
         extra_kwargs = {
             'id': {'read_only': True},
             'state': {'write_only': True},
         }
-
-    def create(self, validated_data):
-        state = validated_data.pop('state')
-        oauthtwo = OauthTwo(**validated_data)
-        oauthtwo.state = make_password(state)
-        oauthtwo.save()
-        return oauthtwo

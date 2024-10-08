@@ -1,6 +1,5 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import RegistrationUser, OneTimePassword
-from django.utils import timezone
+from .models import RegistrationUser
 from rest_framework.authentication import BaseAuthentication
 
 class AccessTokenAuthentication(JWTAuthentication):

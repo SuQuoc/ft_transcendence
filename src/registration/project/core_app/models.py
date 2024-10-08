@@ -93,7 +93,6 @@ class OauthTwo(models.Model):
     state = models.CharField(max_length=128)
     next_step = models.CharField(max_length=16, choices=NEXT_STEP_CHOICES)
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, null=True, related_name='OauthTwo_related_user')
-    expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
     def delete(self):
         self.expire = timezone.now()
@@ -103,7 +102,11 @@ class OauthTwo(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk and self.related_user is not None: # [aguilmea] when do i delete the oauth2 without related_user?
             OauthTwo.objects.filter(related_user=self.related_user).delete()
+        self.state = make_password(self.state)
         super().save(*args, **kwargs)
+
+    def check_state(self, state):    
+        return check_password(state, self.state)
 
     def __str__(self):
         return f"{self.state} {self.next_step}"

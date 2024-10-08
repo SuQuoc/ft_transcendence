@@ -6,15 +6,13 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from ..serializers import UserSerializer, OauthTwoSerializer
 from ..models import RegistrationUser
 from .utils import generate_response_with_valid_JWT
-from ..common_utils import generate_random_string
 
-def generate_authorization_request_data(request):
+def generate_authorization_request_data(request, state):
     try:
         next_step = request.data.get('next_step')
         id = None
         if request.user:
             id = request.user.id
-        state = generate_random_string(128)
         data = {
             'next_step' : next_step,
             'related_user': id,
