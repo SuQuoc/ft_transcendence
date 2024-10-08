@@ -132,8 +132,7 @@ const Router = {
 			channel_name = "match";
 
 		if (!window.app.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws only i get a 400 bad request
-			// comment old version let ws_path = ws_scheme + '://' + window.location.host + "/daphne/pong/" + channel_name + "/";
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
 			window.app.socket = new WebSocket(ws_path);
 
