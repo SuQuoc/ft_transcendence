@@ -16,7 +16,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super.connectedCallback();
 
 		// adding classes
-		this.classList.add("d-flex", "flex-lg-row", "flex-column-reverse", "w-100", "h-100");
+		this.classList.add("d-flex", "flex-row", "w-100", "h-100");
 
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
 		this.canvas = this.root.querySelector("pong-canvas-element");
@@ -133,53 +133,53 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
-			
-			<!-- lobby player sidebar -->
-			<div class="d-flex flex-lg-column flex-row
+
+			<!-- lobby -->
+			<div class="d-flex flex-column
 						justify-content-between
-						lobby-player-sidebar-lg
-						overflow-auto
+						lobby-player-sidebar
 						bg-dark shadow text-white
-						h-lg-100 p-2 gap-lg-0 gap-5"
+						h-100 p-2 gap-0"
 				id="lobbyPlayerSidebar"
 			>
 				<!-- tournament name -->
 				<p id="lobbyTournamentName" class="text-break text-wrap mb-1">tournament name</p>
-				<hr class="mt-0 mb-3"></hr>
+				<hr class="mt-0 mb-0"></hr>
 
 				<!-- points to win -->
-				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
-					<span class="d-lg-block d-none fs-4">PTW:</span>
-					<div class="d-flex ms-lg-auto">
-						<span id="lobbyPointsToWin" class="fs-4">0</span>
+				<div class="d-flex flex-row align-items-center w-100 mb-2">
+					<span class="fs-5">Points to win:</span>
+					<div class="d-flex ms-auto">
+						<span id="lobbyPointsToWin" class="fs-5">0</span>
 					</div>
 				</div>
 
-				<!-- leave button -->
-				<hr class="d-lg-block d-none mt-auto mb-2 order-lg-3"></hr>
-				<button id="lobbyLeaveButton" class="btn btn-custom px-4 order-lg-3"><Label>leave</Label></button>
-
 				<!-- number of players -->
-				<div class="d-flex flex-row align-items-center w-lg-100 order-lg-1">
-					<span class="d-lg-block d-none fs-4">Players:</span>
-					<div class="d-flex ms-lg-auto">
-						<span id="lobbyCurrentPlayerNum" class="fs-4">1</span>
-						<span class="fs-4">/</span>
-						<span id="lobbyMaxPlayerNum" class="fs-4">4</span>
+				<div class="d-flex flex-row align-items-center w-100">
+					<span class="fs-5">Players:</span>
+					<div class="d-flex ms-auto">
+						<span id="lobbyCurrentPlayerNum" class="fs-5">1</span>
+						<span class="fs-5">/</span>
+						<span id="lobbyMaxPlayerNum" class="fs-5">4</span>
 					</div>
 				</div>
 
 				<!-- player list -->
-				<hr class="d-lg-block d-none mt-2 mb-3 order-lg-2"></hr>
+				<hr class="mt-1 mb-3"></hr>
 				<div id="lobbyPlayerList"
-					class="d-flex flex-lg-column flex-row
-							align-self-lg-start align-self-center
+					class="d-flex flex-column
+							align-self-start
+							overflow-auto
 							gap-3 row-gap-2
-							order-lg-2"
+						"
 				>
 					<!-- tournament-lobby-player-elements: -->
 					
 				</div>
+
+				<!-- leave button -->
+				<hr class="mt-auto mb-2"></hr>
+				<button id="lobbyLeaveButton" class="btn btn-custom px-4"><Label>leave</Label></button>
 
 			</div>
 			<!-- game -->

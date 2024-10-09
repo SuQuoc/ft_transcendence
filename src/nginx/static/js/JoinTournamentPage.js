@@ -230,7 +230,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			// ignoring these types for now !!!
 		}
 		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.message);
+			console.error("Error: handleReceivedMessage: ", data.error);
 			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			// TODO: make error messages appear on the page !!!
 		}
