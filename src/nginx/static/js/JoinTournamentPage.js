@@ -216,8 +216,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 		else if (data.type === "tournament_list") {
 			console.log("tournament_list");
-			for (let tournament_name in data.lobbies) {
-				const tournament = data.lobbies[tournament_name];
+			for (let tournament_name in data.tournaments) {
+				const tournament = data.tournaments[tournament_name];
 				this.createJoinTournamentElement(tournament_name,
 												tournament.creator_name,
 												tournament.points_to_win,
