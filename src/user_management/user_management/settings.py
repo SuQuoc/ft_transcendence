@@ -162,7 +162,6 @@ REST_FRAMEWORK = {
     # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'user_management.authenticate.CookieJWTAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
