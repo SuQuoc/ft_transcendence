@@ -10,13 +10,13 @@ from .common_utils import generate_random_string
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128, blank=True)
     backup_code = models.CharField(max_length=128, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
-    
+
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
     REQUIRED_FIELDS = []
@@ -24,7 +24,7 @@ class RegistrationUser(AbstractUser):
 
     def __str__(self):
         return self.username
-    
+
     def save(self, *args, **kwargs):
         self.username = self.username.lower()  # Ensure username is stored in lowercase
         super(RegistrationUser, self).save(*args, **kwargs)
@@ -33,11 +33,11 @@ class RegistrationUser(AbstractUser):
         self.email_verified = True
         self.save()
         return self
-    
+
     def is_verified(self):
         return self.email_verified
-    
-    def generate_backup_code(self): 
+
+    def generate_backup_code(self):
         backup_code = generate_random_string(128)
         self.backup_code = make_password(backup_code)
         self.save()
@@ -61,7 +61,7 @@ class OneTimePassword(models.Model):
 
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
-    password = models.CharField(max_length=128)  
+    password = models.CharField(max_length=128)
     expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 
     def delete(self):
@@ -74,10 +74,10 @@ class OneTimePassword(models.Model):
             OneTimePassword.objects.filter(related_user=self.related_user, action=self.action).delete()
         self.password = make_password(self.password)
         super().save(*args, **kwargs) # calls the parent method
-  
-    def check_password(self, password):    
+
+    def check_password(self, password):
         return check_password(password, self.password)
-    
+
     def __str__(self):
         return f"{self.related_user.username} {self.action}"
 
@@ -105,9 +105,11 @@ class OauthTwo(models.Model):
         self.state = make_password(self.state)
         super().save(*args, **kwargs)
 
-    def check_state(self, state):    
+    def check_state(self, state):
         return check_password(state, self.state)
+
+    def get_hashed_state(self):
+        return self.state
 
     def __str__(self):
         return f"{self.state} {self.next_step}"
-    

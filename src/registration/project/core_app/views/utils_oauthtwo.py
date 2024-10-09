@@ -21,15 +21,14 @@ def generate_authorization_request_data(request, state):
         oauth_token_s = OauthTwoSerializer(data=data)
         if not oauth_token_s.is_valid():
             raise Exception({'generate_code_verifier serialiazer' : oauth_token_s.errors})
-        oauth_token_s.save()
-        return state
+        oauth = oauth_token_s.save()
+        return oauth.get_hashed_state()
     except Exception as e:
         raise Exception({'generate_authorization_request_data': str(e)})
 
 def request_ft_token(returned_authorization_code):
-    
     try:
-        redirect_uri = os.environ.get('SERVER_URL') + '/callback'       
+        redirect_uri = os.environ.get('SERVER_URL') + '/callback'
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
             'client_id': os.environ.get('FT_CLIENT_ID'),

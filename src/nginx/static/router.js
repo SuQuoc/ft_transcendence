@@ -67,6 +67,35 @@ const getUserData = async () => {
 	}
 }
 
+const checkQueryParams = async () => {
+	try {
+		const code = localStorage.getItem("oauthCode");
+		const state = localStorage.getItem("oauthState");
+		if (code && state) {
+			const response = await fetch("/registration/oauthtwo_exchange_code_against_access_token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ code: code, state: state })
+			});
+
+			if (response.status === 200) {
+				localStorage.removeItem("oauthCode");
+				localStorage.removeItem("oauthState");
+				return true;
+			} else {
+				throw new Error("Error exchanging code against access token");
+			}
+		} else {
+			return false;
+		}
+	} catch (error) {
+		console.error("Error checking query params: ", error.message);
+		return false;
+	}
+}
+
 const Router = {
 	init: async () => {
 		// adding event listeners
@@ -84,7 +113,9 @@ const Router = {
 		// check if the user is logged in
 		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
 			const tokenValid = await validateToken();
-			if (!tokenValid) {
+			const queryParamsValid = await checkQueryParams();
+			console.log("tokenValid: ", tokenValid, " | queryParamsValid: ", queryParamsValid);
+			if (!tokenValid && !queryParamsValid) {
 				Router.go("/login", false);
 				return;
 			}

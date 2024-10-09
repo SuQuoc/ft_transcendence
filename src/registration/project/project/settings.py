@@ -118,6 +118,7 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -136,6 +137,8 @@ PASSWORD_RESET_TIMEOUT = 600
 
 CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
+    "https://localhost:8000",
+    "https://127.0.0.1:8000"
 ]
 APPEND_SLASH=False # [aguilmea] changed temporarly
 
