@@ -1,17 +1,17 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.decorators import authentication_classes , permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.shortcuts import redirect
+
 
 from ..authenticate import AccessTokenAuthentication
 from .utils_oauthtwo import generate_authorization_request_data, get_ft_email, request_ft_token, request_ft_user, login, signup
+from .utils import generate_redirect_with_state_cookie
 from ..models import OauthTwo, RegistrationUser
+from ..common_utils import generate_random_string
 
-import requests
-import os
-
+import os, requests
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -19,8 +19,8 @@ import os
 def send_authorization_request(request):
     try:
         redirect_uri = os.environ.get('SERVER_URL') + '/callback'
-        state = generate_authorization_request_data(request)
-
+        state = generate_random_string(128)
+        hashed_state = generate_authorization_request_data(request, state)
         authorize_url = requests.Request('GET', 'https://api.intra.42.fr/oauth/authorize', params={
             'client_id': os.environ.get('FT_CLIENT_ID'),
             'redirect_uri': redirect_uri,
@@ -28,8 +28,7 @@ def send_authorization_request(request):
             'state': state,
             'response_type': 'code'
         }).prepare().url
-        redirect(authorize_url) # Redirect the user to the authorization URL
-        return Response({authorize_url}, status=status.HTTP_200_OK)
+        return generate_redirect_with_state_cookie(hashed_state, authorize_url)
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -39,11 +38,11 @@ def exchange_code_against_access_token(request):
     try:
         returned_authorization_code = request.data.get("code")
         returned_state = request.data.get("state")
-    #    set_state = request.COOKIES.get("state")
-    #    if set_state != returned_state
-    #        return Response(status=status.HTTP_401_UNAUTHORIZED)  # [aguilmea] state noch hashen beim verschicken und prüfen
-        oauthtwo = OauthTwo.objects.get(state=returned_state)
+        hashed_state = request.COOKIES.get("state")
+        oauthtwo = OauthTwo.objects.get(state=hashed_state)
         if oauthtwo == None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if oauthtwo.check_state(returned_state) == False:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         ft_access_token = request_ft_token(returned_authorization_code)
         username = get_ft_email(ft_access_token)

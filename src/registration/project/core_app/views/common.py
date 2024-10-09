@@ -66,6 +66,7 @@ def change_username(request):
         elif not user.check_backup_code(backup_code):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.username = new_username
+        user.ft_userid = None
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
