@@ -41,7 +41,7 @@ def send_otp_email(username, action, password):
 
 def create_one_time_password(related_user, action):
     try:
-        for otp in OneTimePassword.objects.filter(related_user=related_user):
+        for otp in OneTimePassword.objects.filter(related_user=related_user, action=action):
             otp.delete()
         #password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
         password = '0000000000000000' # [aguilmea] for testing purposes, should be deleted in production
@@ -60,16 +60,16 @@ def create_one_time_password(related_user, action):
         raise Exception({'create_one_time_password error': str(e)})
 
 def check_one_time_password(related_user, action, password):
-    try:
-        otp = OneTimePassword.objects.get(related_user=related_user)
+#    try:
+        otp = OneTimePassword.objects.get(related_user=related_user, action=action)
         if otp.expire < timezone.now():
             otp.delete()
-            raise Exception ('otp expired')
+            raise Exception (action + ": " + 'otp expired')
         if otp.action != action:
-            raise Exception ('wrong action')
+            raise Exception (action + ": " + 'wrong action')
         if otp.password != password:
-            raise Exception ('wrong password')
+            raise Exception (action + ': ' + 'wrong password')
         otp.delete()
         return True
-    except Exception as e:
-       return False
+#    except Exception as e:
+#       return False

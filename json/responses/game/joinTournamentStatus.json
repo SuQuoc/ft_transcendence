@@ -1,4 +1,0 @@
-{
-	"type": "joinTournamentStatus",
-	"status": "accepted" //(or "declined")
-}

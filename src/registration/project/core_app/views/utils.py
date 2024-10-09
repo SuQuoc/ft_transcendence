@@ -14,10 +14,12 @@ def send_200_with_expired_cookies():
     response.delete_cookie('refresh')
     return response
 
-def generate_response_with_valid_JWT(status_code, token_s):
-    response = Response(status=status_code)
+def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    response = Response(status=status_code)
+    if backup_code:
+        response.data = {'backup_code': backup_code}
     access_token = token_s.validated_data['access']
     access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
     response.set_cookie(

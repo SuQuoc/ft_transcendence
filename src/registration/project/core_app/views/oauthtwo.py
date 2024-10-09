@@ -44,7 +44,7 @@ def exchange_code_against_access_token(request):
     #        return Response(status=status.HTTP_401_UNAUTHORIZED)  # [aguilmea] state noch hashen beim verschicken und prüfen
         oauthtwo = OauthTwo.objects.get(state=returned_state)
         if oauthtwo == None:
-            return Response({2}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         ft_access_token = request_ft_token(returned_authorization_code)
         username = get_ft_email(ft_access_token)
         user = RegistrationUser.objects.filter(username=username).first()
@@ -55,30 +55,3 @@ def exchange_code_against_access_token(request):
         raise Exception({'exchange_code_against_access_token: next_step not recognized' : oauthtwo.next_step})
     except Exception as e:
         return Response({'exchange_code_against_access_token': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-#@api_view(['POST'])
-#@authentication_classes([AccessTokenAuthentication])
-#@permission_classes([IsAuthenticated])
-#def set(request):
-#    try:
-#        ft_access_token = request.session.get('ft_access_token')
-#        headers = {'Authorization': f'Bearer {ft_access_token}'}
-#        user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-#        if (user_response.status_code != 200):
-#            return Response({str(user_response)}, status=status.HTTP_401_UNAUTHORIZED)
-#        id = user_response.data.get('id')
-#        setattr(request.user, 'ft_userid', id)
-#        return Response(status=status.HTTP_200_OK)
-#    except Exception as e:
-#        return Response({'oauthwo_set error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#@api_view(['POST'])
-#@authentication_classes([AccessTokenAuthentication])
-#@permission_classes([IsAuthenticated])
-#def unset(request):
-#    try:
-#        setattr(request.user, 'ft_userid', None)
-#        return Response(status=status.HTTP_200_OK)
-#    except Exception as e:
-#        return Response({'oauthtwo_unset error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

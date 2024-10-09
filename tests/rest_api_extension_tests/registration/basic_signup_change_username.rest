@@ -1,5 +1,6 @@
-@first_otp = 61IWWWMPTYKB2FKI
-@second_otp = 2MAF8LBMYD3PYQAQ 
+# [aguilmea] should be checked again when otp is setup to real values
+@first_otp = 0000000000000000 
+@second_otp = 0000000000000000
 
 POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
@@ -27,7 +28,39 @@ Content-Type: application/json
 {
     "username": "{{username2-1}}",
     "password": "{{current_password2}}",
+    "otp": "{{second_otp}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}",
     "otp": "{{first_otp}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username2-2}}",
+    "password": "{{current_password2}}",
+    "otp": "{{second_otp}}"
+}
+
+###
+
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username2-1}}",
+    "password": "{{current_password2}}"
 }
 
 ###
@@ -38,27 +71,5 @@ Content-Type: application/json
 {
     "username": "{{username2-1}}",
     "password": "{{current_password2}}",
-    "otp": "{{second_otp}}"
-}
-
-###
-
-POST {{base_url}}/registration/basic_signup
-Content-Type: application/json
-
-{
-    "username": "{{username2-2}}",
-    "password": "{{current_password2}}",
     "otp": "{{first_otp}}"
-}
-
-###
-
-POST {{base_url}}/registration/basic_signup
-Content-Type: application/json
-
-{
-    "username": "{{username2-2}}",
-    "password": "{{current_password2}}",
-    "otp": "{{second_otp}}"
 }

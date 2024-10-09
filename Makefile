@@ -3,7 +3,7 @@ DOCKER_COMPOSE = docker compose -f ./docker_compose_files/docker-compose.yml
 
 
 ###################### General #####################
-.PHONY: all up build_up build_no_cache down build_only rm_vol clean fclean re new keys cache_clean
+.PHONY: all up build_up build_no_cache down build_only rm_vol rm_keys clean fclean re new keys cache_clean
 
 all: up
 
@@ -25,18 +25,23 @@ build_only:
 rm_vol:
 	docker volume prune -af
 
+rm_keys:
+	rm -rf ./src/common_files/jwt__keys
+	rm -rf ./src/common_files/ssl_certs
+
 clean: down
 	docker system prune -f
 
-fclean: down rm_vol
+fclean: down rm_vol rm_keys
 	docker system prune -af
 
 re: down rm_vol cache_clean build_up
 
-new: fclean build_up
+new: fclean keys build_up
 
 keys:
 	bash ./src/common_files/jwt_create_keys.sh
+	bash ./src/common_files/ssl_create_keys.sh
 
 cache_clean:	game_cache_clean reg_cache_clean um_cache_clean
 
@@ -124,6 +129,17 @@ test: down
 		sleep 2; \
 	done
 	pytest ./tests/playwright_tests
+	@make down
+
+test_tournament: down
+	@make re > /dev/null 2>&1 &
+	@PID=$$!
+	@wait $$PID
+	@while ! nc -z localhost 8000; do \
+		echo "* Waiting for the server to start..."; \
+		sleep 2; \
+	done
+	pytest ./tests/playwright_tests/test_tournament_multiple.py
 	@make down
 
 test_running:

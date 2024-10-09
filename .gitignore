@@ -164,6 +164,11 @@ cython_debug/
 .vscode
 **/migrations/
 *.pem
+*.cnf
+*.crt
+*.csr
+*.key
+*.srl
 
 tests/playwright_tests/auth_state.json
 
