@@ -62,18 +62,29 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+  {
+    # Checks the similarity between the password and a set of attributes of the user.
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    'OPTIONS': {
+      'user_attributes': ('username', 'ft_userid', 'backup_code'),
+      'max_similarity': 0.5,
+    }
+  },
+  {
+    # Checks whether the password meets a minimum length.
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    'OPTIONS': {
+      'min_length': 8,
+    }
+  },
+  {
+    # Checks whether the password occurs in a list of common passwords
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+  },
+  {
+    # Checks whether the password isn’t entirely numeric
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+  }
 ]
 
 AUTH_USER_MODEL = "core_app.RegistrationUser"

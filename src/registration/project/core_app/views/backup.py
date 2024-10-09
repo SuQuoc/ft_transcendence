@@ -8,7 +8,7 @@ from ..authenticate import CredentialsAuthentication
 from .utils import generate_response_with_valid_JWT
 
 @api_view(['POST'])
-@authentication_classes([CredentialsAuthentication]) # [aguilmea] change to Base Authentication? and delete the CredentialsAuthentication class
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
 def login(request):
     try:

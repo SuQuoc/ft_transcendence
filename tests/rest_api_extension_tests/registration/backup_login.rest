@@ -41,6 +41,16 @@ Content-Type: application/json
 
 {
     "username": "{{username3}}",
+    "password": "{{current_password3}}"
+}
+
+###
+
+POST {{base_url}}/registration/backup_login
+Content-Type: application/json
+
+{
+    "username": "{{username3}}",
     "backup_code": "{{CODE}}"
 }
 ###

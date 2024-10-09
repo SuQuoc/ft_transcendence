@@ -1,6 +1,5 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import RegistrationUser, OneTimePassword
-from django.utils import timezone
+from .models import RegistrationUser
 from rest_framework.authentication import BaseAuthentication
 
 class AccessTokenAuthentication(JWTAuthentication):
@@ -18,32 +17,17 @@ class RefreshTokenAuthentication(JWTAuthentication):
             return None
         validated_token = self.get_validated_token(raw_token)
         return self.get_user(validated_token), validated_token
-        
+            
 class CredentialsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        user = RegistrationUser.objects.filter(username=username).first()
-        if user is None or not user.check_password(password):
-            return None
-        return user, None
-    
-class OneTimePasswordAuthentication(BaseAuthentication):
-    def authenticate(self, request, password=None):
-        otp = request.data.get('otp')
-        username = request.data.get('username')
-        if not otp or not username:
+        if not username or not password:
             return None
         user = RegistrationUser.objects.filter(username=username).first()
-        stored_otp = OneTimePassword.objects.filter(related_user=user.id).first()
-        if not stored_otp:
-            return None
-        if stored_otp.expire < timezone.now():
-            return None
-        if stored_otp.password != otp:
+        if not user or not user.check_password(password):
             return None
         return user, None
-
 
 class UsernameAuthentication(BaseAuthentication):
     def authenticate(self, request, password=None):
@@ -51,8 +35,5 @@ class UsernameAuthentication(BaseAuthentication):
         if not username:
             return None
         user = RegistrationUser.objects.filter(username=username).first()
-        return user, None
-        if user is None:
-            return None 
         return user, None
     
