@@ -13,6 +13,7 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
+		this.shadowRoot.getElementById('signupWith42').addEventListener('click', this.signupWith42.bind(this));
 	}
 
 	// !!!! id of button requestOTP should be signupRequestOTP
@@ -21,8 +22,11 @@ export class SignupPage extends ComponentBaseClass {
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
             <div class="p-3 rounded-3 bg-dark">
+            	<h3 class="text-center text-white">Signup</h3>
+            	<label for="signupWith42" class="form-label text-white-50">Only for 42 students</label>
+            	<button id="signupWith42" class="btn btn-custom w-100 mb-3">Signup with 42</button>
+            	<hr class="text-white-50">
                 <form id="signupForm">
-                    <h3 class="text-center text-white">Signup</h3>
                     <div id="emailSection">
                     	<label for="signupEmail" class="form-label text-white-50">Email address</label>
 						<input name="email"
@@ -238,6 +242,29 @@ export class SignupPage extends ComponentBaseClass {
 			} finally {
 				signupButton.disabled = false;
 			}
+		}
+	}
+
+	async signupWith42(event) {
+		event.preventDefault();
+		try {
+			const response = await fetch('/registration/signup', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Signup with 42 failed');
+			}
+
+			const data = await response.json();
+			// Handle successful login with 42, e.g., redirect to home page
+			await app.router.go("/", false);
+		} catch (error) {
+			console.error('Error during signup with 42:', error);
+			this.shadowRoot.getElementById('errorMessage').textContent = 'Could not sign up with 42';
 		}
 	}
 }

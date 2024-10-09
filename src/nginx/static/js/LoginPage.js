@@ -13,6 +13,7 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('loginWith42').addEventListener('click', this.loginWith42.bind(this));
 	}
 
 	getElementHTML(){
@@ -20,8 +21,11 @@ export class LoginPage extends ComponentBaseClass {
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
             <div class="p-3 rounded-3 bg-dark">
+				<h3 class="text-center text-white">Login</h3>
+				<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
+            	<button id="loginWith42" class="btn btn-custom w-100 mb-3">Login with 42</button>
+            	<hr class="text-white-50">
                 <form id="loginForm">
-                    <h3 class="text-center text-white">Login</h3>
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
                     <div class="input-group mb-3">
                     	<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
@@ -200,6 +204,29 @@ export class LoginPage extends ComponentBaseClass {
 			loginButton.style.display = 'block';
 		} finally {
 			loginSpinner.style.display = 'none';
+		}
+	}
+
+	async loginWith42(event) {
+		event.preventDefault();
+		try {
+			const response = await fetch('/registration/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Login with 42 failed');
+			}
+
+			const data = await response.json();
+			// Handle successful login with 42, e.g., redirect to home page
+			await app.router.go("/", false);
+		} catch (error) {
+			console.error('Error during login with 42:', error);
+			this.shadowRoot.getElementById('errorMessage').textContent = 'Could not log in with 42';
 		}
 	}
 }
