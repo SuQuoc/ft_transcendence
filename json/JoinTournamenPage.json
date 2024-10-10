@@ -29,7 +29,7 @@
 
 { 
     "type": "tournament_list",
-    "lobbies":
+    "tournaments":
     {
         "room_name":
         {
