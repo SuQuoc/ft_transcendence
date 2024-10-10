@@ -5,12 +5,14 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from rest_framework_simplejwt.authentication import JWTStatelessUserAuthentication
+
+
 
 ACCESS = "access"
 
 # raw_token = access token
-class CookieJWTAuthentication(JWTTokenUserAuthentication):
+class CookieJWTAuthentication(JWTStatelessUserAuthentication):
     def authenticate(self, request):
         raw_token = request.COOKIES.get(ACCESS)
         if not raw_token:

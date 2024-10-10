@@ -5,14 +5,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ..authenticate import CredentialsAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
+from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 
 @api_view(['POST'])
-@authentication_classes([CredentialsAuthentication]) # [aguilmea] change to Base Authentication? and delete the CredentialsAuthentication class
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
 def login(request):
     try:

@@ -134,7 +134,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
 
-			<!-- lobby -->
+			<!-- lobby player sidebar -->
 			<div class="d-flex flex-column
 						justify-content-between
 						lobby-player-sidebar

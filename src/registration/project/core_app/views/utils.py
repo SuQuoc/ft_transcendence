@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
+from django.http import HttpResponseRedirect
 
 from django.core.mail import send_mail
 
-import requests
-import os
+import os, requests
 
 def send_200_with_expired_cookies():
     response = Response(status=status.HTTP_200_OK)
@@ -36,6 +36,19 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
         key='refresh',
         value=refresh_token,
         expires=refresh_token_expiration,
+        domain=os.environ.get('DOMAIN'),
+        httponly=True,
+        secure=True,
+        samesite = 'Strict')
+    return response
+
+def generate_redirect_with_state_cookie(hashed_state, authorize_url):
+    response = HttpResponseRedirect(authorize_url)
+    access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+    response.set_cookie(
+        key = 'state',
+        value = hashed_state,
+        expires=access_token_expiration,
         domain=os.environ.get('DOMAIN'),
         httponly=True,
         secure=True,
