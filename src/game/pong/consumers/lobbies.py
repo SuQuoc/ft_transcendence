@@ -16,7 +16,6 @@ from django.core.cache import cache  # Import Django"s cache
 # from .game_code.createMsg import SendToClient
 
 
-AVA_ROOMS = "available_rooms"
 
 # TYPES of messages
 T_ON_TOURNAMENT_PAGE = "on_tournament_page"
@@ -42,7 +41,7 @@ T_ERROR = "error"
 
 # Cache keys
 FULL_ROOMS = "full_rooms"
-AVAILABLE_ROOMS = "available_rooms"
+AVA_ROOMS = "available_rooms"
 
 class Errors:
     NOT_IN_ROOM = "not_in_room"
@@ -335,7 +334,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
 
     async def send_error(self, error: str):
-        print(f"ERROR: {error}=========================")
+        # print(f"ERROR: {error}=========================")
         await self.send(text_data=json.dumps({
             "type": T_ERROR,
             "error": error,
@@ -360,8 +359,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         room["cur_player_num"] += 1
 
         if room["cur_player_num"] == room["max_player_num"]:
-            print("DEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG")
-            print(room)
             del available_rooms[room_name]
             cache.set(AVA_ROOMS, available_rooms)
             
