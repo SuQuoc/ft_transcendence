@@ -74,9 +74,10 @@ class LobbyRoom:
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
-    displayname = None
     
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.displayname = None
     async def connect(self):
         #self.lobby_name = self.scope["url_route"]["kwargs"]["lobby_name"]
         #self.group_name = "group_%s" % self.room_name # django groups, a group of related channels
@@ -181,6 +182,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             room = await self.add_player_to_room(room_name, available_rooms)
 
         # CHANNELS: Add user to the room group
+        print(f"join_room: {room}")
         await self.updateLobbyRoom(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
         await self.group_add(room_name)
         
@@ -190,7 +192,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def leave_room(self):
         """Helper method to remove a user from a lobby."""
         
-        print(T_LEAVE_ROOM)
+        #print(T_LEAVE_ROOM)
         async with self.update_lock:
             room_name = cache.get(f"current_room_{self.displayname}")
             available_rooms = cache.get(AVA_ROOMS, {})
@@ -200,7 +202,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.send_error(Errors.NOT_IN_ROOM)
                 return
             
-            current_room = get_room(room_name, available_rooms, full_rooms)
+            current_room = get_room_from_cache(room_name, available_rooms, full_rooms)
             if current_room is None:
                 raise ValueError(Errors.ROOM_DOES_NOT_EXIST) # SHOULD NEVER HAPPEN
             if self.displayname not in current_room["players"]:
@@ -216,12 +218,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # CHANNELS: Remove user from the lobby room group
             await self.group_remove(room_name)
 
-            if current_room["status"] == "full": # just indicates that it was full at some point
-                if current_room["cur_player_num"] == 0:
-                    del full_rooms[current_room["name"]]
-                    cache.set(FULL_ROOMS, available_rooms)
+            await self.updateLobbyRoom(T_PLAYER_LEFT_ROOM, current_room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
 
-            elif current_room["status"] == "available":
+            if current_room["status"] == "available":
                 if current_room["cur_player_num"] == 0:
                     del available_rooms[current_room["name"]]
                     cache.set(AVA_ROOMS, available_rooms)
@@ -230,23 +229,11 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     available_rooms[room_name] = current_room
                     cache.set(AVA_ROOMS, available_rooms)
                     await self.group_send_room_size_update(current_room["name"], current_room["cur_player_num"])                
-            await self.updateLobbyRoom(T_PLAYER_LEFT_ROOM, current_room)
             
-
-
-    async def get_room_info(self, dict_data):
-        room_name = dict_data.get("room_name")
-        available_rooms = cache.get(AVA_ROOMS, {})
-        room = available_rooms.get(room_name)
-
-        if room is None:
-            await self.send_error(f"Room '{room_name}' does not exist.")
-            return
-
-        await self.send(text_data=json.dumps({
-            "type": T_ROOM_INFO,
-            "room": room
-        }))
+            elif current_room["status"] == "full": # just indicates that it was full at some point
+                if current_room["cur_player_num"] == 0:
+                    del full_rooms[current_room["name"]]
+                cache.set(FULL_ROOMS, full_rooms)
         
 
     # should only return available_rooms that are not full !!!
@@ -328,7 +315,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def send_room_info(self, dict_data):
         room_name = dict_data.get("room_name")
         available_rooms = cache.get(AVA_ROOMS, {})
-        room = available_rooms.get(room_name)
+        full_rooms = cache.get(FULL_ROOMS, {})
+        room = get_room_from_cache(room_name, available_rooms, full_rooms)
 
         if room is None:
             await self.send_error(Errors.ROOM_DOES_NOT_EXIST)
@@ -372,9 +360,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         room["cur_player_num"] += 1
 
         if room["cur_player_num"] == room["max_player_num"]:
+            print("DEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG")
+            print(room)
             del available_rooms[room_name]
-            room["status"] = "full"
             cache.set(AVA_ROOMS, available_rooms)
+            
+            room["status"] = "full"
 
             # 1 function !!
             full_rooms = cache.get(FULL_ROOMS, {})
@@ -422,7 +413,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         return new_room
     
 
-def get_room(room_name, available_rooms: dict, all_rooms: dict) -> dict:
+def get_room_from_cache(room_name, available_rooms: dict, all_rooms: dict) -> dict:
     return available_rooms.get(room_name) or all_rooms.get(room_name)
 
     

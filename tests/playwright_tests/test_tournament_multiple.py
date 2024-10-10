@@ -18,7 +18,7 @@ class TestTournamentMultiple:
             
     def test_create_tournament(self, pages):
         # going to tournament page
-        for page in pages[:N_USERS - 1]:
+        for page in pages[:-1]:
             page.locator("#playMenuGoToTournament").click()
         #expect(pages[0].locator("#joinNoTournamentsAvailable")).to_be_visible()
         expect(pages[0].locator("#createTournamentForm")).to_be_visible()
@@ -121,17 +121,22 @@ class TestTournamentMultiple:
         for page in pages[1:4]:
             join_tournament(page, tournament_name=tname)
         
-        # check if element is hidden for users already ON the on_tournament page
+        # check if element is GONE for users already ON the on_tournament page
         expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
 
-        # check if element is hidden for users ENTERING the on_tournament page
+        # check if element is GONE for users ENTERING the on_tournament page
         pages[-1].locator("#playMenuGoToTournament").click()
         expect(pages[-1].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
 
-        # check if element is visible for users ON and ENTERING the on_tournament page
+        # check if element is GONE for users ON and ENTERING the on_tournament page
         leave_tournament(pages[0])
         expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
         expect(pages[0].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
+
+        # make all clients leave the tournament
+        for page in pages[1:4]:
+            leave_tournament(page)        
+        create_tournament(pages[0], tournament_name=tname, n_players=4, points_to_win=1) # check if name is available again
 
         self.go_to_home(pages)
     
