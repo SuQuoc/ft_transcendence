@@ -86,7 +86,8 @@ class TestTournamentMultiple:
         
         # checking if the join tournament element is removed from the lobby page when all players leave
         leave_tournament(pages[1])
-        expect(pages[1].locator("#joinTournamentElements")).to_be_empty()
+        expect(pages[1].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
+        expect(pages[1].locator("#joinNoTournaments")).to_be_visible()
 
         # checking if the tournament name is available again after
         create_tournament(pages[0], tournament_name=tname, n_players=8, points_to_win=1)
@@ -122,16 +123,20 @@ class TestTournamentMultiple:
             join_tournament(page, tournament_name=tname)
         
         # check if element is hidden for users already ON the on_tournament page
-        expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
+        expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
+        expect(pages[4].locator("#joinNoTournaments")).to_be_visible()
 
         # check if element is hidden for users ENTERING the on_tournament page
         pages[-1].locator("#playMenuGoToTournament").click()
-        expect(pages[-1].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
+        expect(pages[-1].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
+        expect(pages[-1].locator("#joinNoTournaments")).to_be_visible()
 
         # check if element is visible for users ON and ENTERING the on_tournament page
         leave_tournament(pages[0])
-        expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
-        expect(pages[0].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0) # not sure if this works, I want to check that the element doesn't exist
+        expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
+        expect(pages[4].locator("#joinNoTournaments")).to_be_visible()
+        expect(pages[0].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
+        expect(pages[0].locator("#joinNoTournaments")).to_be_visible()
 
         self.go_to_home(pages)
     
