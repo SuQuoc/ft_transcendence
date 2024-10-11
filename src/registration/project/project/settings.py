@@ -137,9 +137,32 @@ PASSWORD_RESET_TIMEOUT = 600
 
 CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
-    "https://localhost:8000",
-    "https://127.0.0.1:8000"
 ]
 APPEND_SLASH=False # [aguilmea] changed temporarly
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Set the logging level for Django-specific messages
+            'propagate': True,
+        },
+    },
+}
 
 #  end of added manually

@@ -86,7 +86,7 @@ export class SignupPage extends ComponentBaseClass {
 		const email = this.shadowRoot.getElementById('signupEmail').value;
 		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
-		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
 		const emailWarning = this.shadowRoot.getElementById('errorMessageEmail');
 		const passwordWarning = this.shadowRoot.getElementById('errorMessagePassword');
 
@@ -98,13 +98,13 @@ export class SignupPage extends ComponentBaseClass {
 			if (otpSection.style.display === 'block') {
 				this.handleOTPInput();
 			} else {
-				signupButton.disabled = false;
+				signupButton.removeAttribute("disabled");
 				emailWarning.textContent = '';
 				passwordWarning.textContent = '';
 			}
 		} else {
 			otpSection.style.display = 'none';
-			signupButton.disabled = true;
+			signupButton.setAttribute("disabled", "");
 			if (!emailValid) {
 				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
 				emailWarning.textContent = 'Invalid email address';
@@ -176,21 +176,21 @@ export class SignupPage extends ComponentBaseClass {
 		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
-		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
 		const otpPattern = /^[A-Z0-9]{16}$/;
 
 		if (email && password1 && password2 && otpPattern.test(otp)) {
-			signupButton.disabled = false;
+			signupButton.removeAttribute('disabled');
 		} else {
-			signupButton.disabled = true;
+			signupButton.setAttribute('disabled', "");
 		}
 	}
 
 	async signup(event) {
 		event.preventDefault();
-		const signupButton = this.shadowRoot.querySelector('button[type="submit"]');
+		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
 		const signupError = this.shadowRoot.getElementById('signupError');
-		signupButton.disabled = true;
+		signupButton.setAttribute('disabled', "");
 		signupError.style.display = 'none';
 
 		const email = this.shadowRoot.getElementById('signupEmail').value;
@@ -212,9 +212,9 @@ export class SignupPage extends ComponentBaseClass {
 					throw new Error('Requesting OTP failed');
 				}
 				otpSection.style.display = 'block';
-				this.shadowRoot.getElementById('signupEmail').disabled = true;
-				this.shadowRoot.getElementById('signupPassword1').disabled = true;
-				this.shadowRoot.getElementById('signupPassword2').disabled = true;
+				this.shadowRoot.getElementById('signupEmail').setAttribute('disabled', '');
+				this.shadowRoot.getElementById('signupPassword1').setAttribute('disabled', '');
+				this.shadowRoot.getElementById('signupPassword2').setAttribute('disabled', '');
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
@@ -242,7 +242,7 @@ export class SignupPage extends ComponentBaseClass {
 				console.error('Error during signup:', error);
 				signupError.style.display = 'block';
 			} finally {
-				signupButton.disabled = false;
+				signupButton.removeAttribute('disabled');
 			}
 		}
 	}

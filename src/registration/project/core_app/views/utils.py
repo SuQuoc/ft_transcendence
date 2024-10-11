@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 
 from django.core.mail import send_mail
 
-import os, requests
+import os, requests, logging
 
 def send_200_with_expired_cookies():
     response = Response(status=status.HTTP_200_OK)
@@ -15,8 +15,10 @@ def send_200_with_expired_cookies():
     return response
 
 def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
+    logging.warning(f"START")
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    logging.warning(f"'token_s': {token_s}")
     response = Response(status=status_code)
     if backup_code:
         response.data = {'backup_code': backup_code}
@@ -30,6 +32,7 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
         httponly=True,
         secure=True,
         samesite = 'Strict')
+    logging.warning(f"POINT 2")
     refresh_token = token_s.validated_data['refresh']
     refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
     response.set_cookie(
@@ -40,6 +43,7 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
         httponly=True,
         secure=True,
         samesite = 'Strict')
+    logging.warning(f"END")
     return response
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):

@@ -1,4 +1,5 @@
 import uuid
+from encodings.base64_codec import base64_decode, base64_encode
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
@@ -7,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .common_utils import generate_random_string
+import base64
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -102,11 +104,14 @@ class OauthTwo(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk and self.related_user is not None: # [aguilmea] when do i delete the oauth2 without related_user?
             OauthTwo.objects.filter(related_user=self.related_user).delete()
-        self.state = make_password(self.state)
+        self.state = base64.b64encode(self.state.encode('utf-8')).decode('utf-8')
+        #self.state = make_password(self.state)
         super().save(*args, **kwargs)
 
     def check_state(self, state):
-        return check_password(state, self.state)
+        #return check_password(state, self.state)
+        decoded_state = base64.b64decode(self.state.encode('utf-8')).decode('utf-8')
+        return decoded_state == state
 
     def get_hashed_state(self):
         return self.state
