@@ -17,7 +17,7 @@ const validateToken = async () => {
 
 		return true;
 	} catch (error) {
-		console.error("Error validating token: ", error.message);
+		console.log("Error validating token, trying to refresh: ", error.message);
 
 		try {
 			const refreshResponse = await fetch("/registration/refresh_token", {
@@ -114,7 +114,6 @@ const Router = {
 		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			const queryParamsValid = await checkQueryParams();
-			console.log("tokenValid: ", tokenValid, " | queryParamsValid: ", queryParamsValid);
 			if (!tokenValid && !queryParamsValid) {
 				Router.go("/login", false);
 				return;

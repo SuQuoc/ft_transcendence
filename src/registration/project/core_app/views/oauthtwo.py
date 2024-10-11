@@ -12,7 +12,9 @@ from ..models import OauthTwo, RegistrationUser
 from ..common_utils import generate_random_string
 
 import os, requests, time, logging
+from silk.profiling.profiler import silk_profile
 
+@silk_profile(name='send_authorization_request')
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([AllowAny])
@@ -32,34 +34,25 @@ def send_authorization_request(request):
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@silk_profile(name='exchange_code_against_access_token')
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):
     try:
-        overall_time = time.time()
         returned_authorization_code = request.data.get("code")
         returned_state = request.data.get("state")
         hashed_state = request.COOKIES.get("state")
         oauthtwo = OauthTwo.objects.get(state=hashed_state)
         if oauthtwo == None:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        start_time = time.time()
         if oauthtwo.check_state(returned_state) == False:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        logging.warning(f"time for checking state: {time.time() - start_time}")
-        start_time = time.time()
         ft_access_token = request_ft_token(returned_authorization_code)
-        logging.warning(f"time for requesting token: {time.time() - start_time}")
-        start_time = time.time()
         username = get_ft_email(ft_access_token)
-        logging.warning(f"time for requesting email: {time.time() - start_time}")
         user = RegistrationUser.objects.filter(username=username).first()
-        logging.warning(f"overall time: {time.time() - overall_time}")
         if oauthtwo.next_step == 'login' or (oauthtwo.next_step == 'signup' and user is not None):
-            logging.warning(f"user reached login: {username}")
             return login(username)
         if oauthtwo.next_step == 'signup':
-            logging.warning(f"user reached signup: {username}")
             return signup(username)
         raise Exception({'exchange_code_against_access_token: next_step not recognized' : oauthtwo.next_step})
     except Exception as e:

@@ -128,10 +128,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "um/static/"  # had to add um/ before [probably of nginx config] to have the browsable api from DRF to render the page correctly
-STATIC_ROOT = BASE_DIR / "/static/"
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_URL = "um/img/"  # had to add um/ before [probably of nginx config] to have the browsable api from DRF to render the page correctly
+STATIC_ROOT = os.path.join(BASE_DIR, 'uploads/')
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
+#TODO: check how we use MEDIA_URL and if it works without debug flag
 MEDIA_URL = "um/media/"  # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
 MEDIA_ROOT = BASE_DIR / "uploads"
 
@@ -181,7 +182,7 @@ SIMPLE_JWT = {
     'ALGORITHM': 'RS256', # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
     'VERIFYING_KEY': PUBLIC_KEY, # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
     'SIGNING_KEY': PRIVATE_KEY, # todo !!! delete this line
-    
+
     # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }

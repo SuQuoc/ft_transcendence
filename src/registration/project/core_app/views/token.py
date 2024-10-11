@@ -16,16 +16,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         self.fields.pop('password', None)
 
     def validate(self, attrs):
-        # Get the user using the username
-        #TODO: check why we get UsernameAuthentication.authenticate() got an unexpected keyword argument 'username'
         username = attrs.get('username')
-        user = RegistrationUser.objects.filter(username=username).first()
+        user_exists = RegistrationUser.objects.filter(username=username).exists()
 
-        if user is None:
-            logging.warning('No active account found with the given credentials')
+        if not user_exists:
             raise serializers.ValidationError('No active account found with the given credentials')
 
-        # Create the token pair
+        user = RegistrationUser.objects.get(username=username)
         refresh = RefreshToken.for_user(user)
 
         return {

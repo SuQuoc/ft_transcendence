@@ -30,6 +30,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEBUG:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
+    SILKY_PYTHON_PROFILER = True
+    SILKY_PYTHON_PROFILER_BINARY = True
+    INSTALLED_APPS.append('silk')
+    MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
+
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -93,7 +104,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # added manually

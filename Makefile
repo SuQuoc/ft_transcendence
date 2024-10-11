@@ -55,7 +55,7 @@ reg_cache_clean:
 	find ./src/registration/project/core_app/migrations/ -type f ! -name '__init__.py' -delete
 	rm -rf ./src/registration/project/core_app/views/__pycache__/
 	rm -rf ./src/registration/project/project/__pycache__/
-
+	rm -rf ./src/registration/*.prof
 
 ###################### Game #####################
 .PHONY: game_cache_clean

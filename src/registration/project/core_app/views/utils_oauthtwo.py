@@ -79,7 +79,8 @@ def login(email):
         }
         #token_s = TokenObtainPairSerializer(data=data)
         token_s = CustomTokenObtainPairSerializer(data=data)
-        logging.warning(f"login: {token_s}")
+        if user.check_password(''):
+            return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -99,7 +100,7 @@ def signup(email):
     try:
         data = {
             'username': email,
-            'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
+            'password': '' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
         user_s = UserSerializer(data=data)
         logging.warning(f"signup: {data}")

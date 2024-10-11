@@ -14,12 +14,13 @@ def send_200_with_expired_cookies():
     response.delete_cookie('refresh')
     return response
 
-def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
-    logging.warning(f"START")
+def generate_response_with_valid_JWT(status_code, token_s, backup_code=None, response_body=None):
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    logging.warning(f"'token_s': {token_s}")
     response = Response(status=status_code)
+    if response_body:
+        response.data = response_body
+    #TODO: [aguilmea] check if backup_code is needed
     if backup_code:
         response.data = {'backup_code': backup_code}
     access_token = token_s.validated_data['access']
@@ -32,7 +33,6 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
         httponly=True,
         secure=True,
         samesite = 'Strict')
-    logging.warning(f"POINT 2")
     refresh_token = token_s.validated_data['refresh']
     refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
     response.set_cookie(
@@ -43,7 +43,6 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None):
         httponly=True,
         secure=True,
         samesite = 'Strict')
-    logging.warning(f"END")
     return response
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):
