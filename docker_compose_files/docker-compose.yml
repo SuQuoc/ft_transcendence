@@ -13,7 +13,7 @@ services:
     volumes:
       - ../src/nginx/static:/www/data
     ports:
-      - 8000:443
+      - 4443:443
     depends_on:
       - registration
       - usermanagement
