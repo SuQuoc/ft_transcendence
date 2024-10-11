@@ -46,49 +46,29 @@ class Errors:
     ROOM_NAME_INVALID = "room_name_invalid"
     ALREADY_IN_ROOM = "already_in_room"
 
-# MAY USE CLASSES FOR BETTER READABILITY
-class LobbyRoom:
-    def __init__(self, room_name, creator_name, players): # players is a list of players
-        self.room_name = room_name
-        self.players = players
-        self.creator_name = None
-
-    def to_json(self):
-        return json.dumps({
-            "name": self.name,
-            "players": self.players
-        })
-
-    @staticmethod
-    def from_json(json_str):
-        data = json.loads(json_str)
-        return LobbyRoom(data["room_name"], data["creator_name"], data["players"])
-#######
-
-
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.displayname = None
+
+
     async def connect(self):
         #self.lobby_name = self.scope["url_route"]["kwargs"]["lobby_name"]
         #self.group_name = "group_%s" % self.room_name # django groups, a group of related channels
-
         await self.channel_layer.group_add(AVA_ROOMS, self.channel_name)
         await self.accept()
         #print(self.scope["user"])
 
     async def disconnect(self, close_code): 
         print(f"disconnect - close_code: {close_code}")
-        
         await self.leave_room()
         await self.channel_layer.group_discard(AVA_ROOMS, self.channel_name)
         await super().disconnect(close_code)
 
-     ### WEBSOCKET MESSAGE HANDLER ###
     async def receive(self, text_data):
+        """WEBSOCKET MESSAGE HANDLER"""
         try:
             dict_data = json.loads(text_data) # convert message from client to dict
             type = dict_data.get("type")
@@ -153,7 +133,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.group_send_new_room(available_rooms[room_name])
 
 
-
     async def join_room(self, dict_data):
         room_name = dict_data.get("room_name")
 
@@ -178,9 +157,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.updateLobbyRoom(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
         await self.group_add(room_name)
         
-    
 
-    
     async def leave_room(self):
         """Helper method to remove a user from a lobby."""
         
@@ -207,9 +184,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             if current_room["cur_player_num"] < 0:
                 raise ValueError(f"Lobby room '{room_name}' has negative size - SHOULD NEVER HAPPEN.")
 
-            # CHANNELS: Remove user from the lobby room group
+            # CHANNELS: Remove user from the tournament room group
             await self.group_remove(room_name)
-
             await self.updateLobbyRoom(T_PLAYER_LEFT_ROOM, current_room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
 
             if current_room["status"] == "available":
@@ -227,7 +203,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     update_or_add_room_to_cache(current_room, FULL_ROOMS, full_rooms)
                 
     
-
     # GROUP SENDS-------------------------------------------------
     async def group_send_new_room(self, room: dict):
         print(f"trigger new_room: {room["name"]}")
@@ -344,9 +319,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def add_player_to_room(self, room_name, available_rooms):
         room = available_rooms[room_name]            
 
-        # if a room is full, it should not be returned by get_tournament_list !!! (therefore raising an error should not happen regularly)
+        # if a room is full, it should not be returned by get_tournament_list !!! (therefore raising an error SHOULD NEVER HAPPEN)
         if room["cur_player_num"] == room["max_player_num"]:
-            print(f"Lobby room '{room["name"]}' is full.")
             await self.send_error(f"join_room - Lobby room '{room["name"]}' is full.")
             raise ValueError(f"Lobby room '{room["name"]}' is full.")
 
