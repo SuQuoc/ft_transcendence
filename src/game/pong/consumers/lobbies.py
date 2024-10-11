@@ -1,8 +1,6 @@
-# chat/consumers.py
+
 import asyncio
 import json
-import time
-import uuid
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -14,8 +12,6 @@ from django.core.cache import cache  # Import Django"s cache
 # from .game_code.pongPlayer import PongPlayer
 # from .game_code.storageClasses import SlotXy
 # from .game_code.createMsg import SendToClient
-
-
 
 # TYPES of messages
 T_ON_TOURNAMENT_PAGE = "on_tournament_page"
@@ -37,7 +33,6 @@ T_ROOM_INFO = "room_info"
 
 T_SUCCESS = "success"
 T_ERROR = "error"
-
 
 # Cache keys
 FULL_ROOMS = "full_rooms"
@@ -110,7 +105,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.join_room(dict_data)
 
             elif type == T_LEAVE_ROOM:
-                #room_name = dict_data.get("room_name")
                 await self.leave_room()
 
             elif type == T_GET_ROOM_INFO:
@@ -148,18 +142,17 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
             # Add the new lobby to the list of known available_rooms
             available_rooms[room_name] = self.init_new_room(room_name, self.displayname, points_to_win, max_player_num)
-
             cache.set(AVA_ROOMS, available_rooms)
             cache.set(f"current_room_{self.displayname}", room_name)
-
-        # Notify others about the new lobby
-        await self.group_send_new_room(available_rooms[room_name])
 
         # add user to the channel group
         await self.group_add(room_name)
         await self.send_success(room_name)
-        return
-    
+
+        # Notify others about the new lobby
+        await self.group_send_new_room(available_rooms[room_name])
+
+
 
     async def join_room(self, dict_data):
         room_name = dict_data.get("room_name")
@@ -221,30 +214,21 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
             if current_room["status"] == "available":
                 if current_room["cur_player_num"] == 0:
-                    del available_rooms[current_room["name"]]
-                    cache.set(AVA_ROOMS, available_rooms)
+                    del_room_from_cache(current_room, AVA_ROOMS, available_rooms)
                     await self.group_send_delete_room(current_room["name"])
                 else:
-                    available_rooms[room_name] = current_room
-                    cache.set(AVA_ROOMS, available_rooms)
+                    update_or_add_room_to_cache(current_room, AVA_ROOMS, available_rooms)
                     await self.group_send_room_size_update(current_room["name"], current_room["cur_player_num"])                
             
             elif current_room["status"] == "full": # just indicates that it was full at some point
                 if current_room["cur_player_num"] == 0:
-                    del full_rooms[current_room["name"]]
-                cache.set(FULL_ROOMS, full_rooms)
-        
+                    del_room_from_cache(current_room, FULL_ROOMS, full_rooms)
+                else:
+                    update_or_add_room_to_cache(current_room, FULL_ROOMS, full_rooms)
+                
+    
 
-    # should only return available_rooms that are not full !!!
-    async def get_tournament_list(self):
-        available_rooms = cache.get(AVA_ROOMS, {})
-        text_data=json.dumps({
-            "type": T_TOURNAMENT_LIST,
-            "tournaments": available_rooms
-        })
-        await self.send(text_data=text_data)
-
-
+    # GROUP SENDS-------------------------------------------------
     async def group_send_new_room(self, room: dict):
         print(f"trigger new_room: {room["name"]}")
         await self.channel_layer.group_send(
@@ -311,7 +295,21 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
 
     ### Send to own websocket ###
+    async def get_tournament_list(self):
+        """Sends the list of available tournament rooms to the client."""
+
+        available_rooms = cache.get(AVA_ROOMS, {})
+        text_data=json.dumps({
+            "type": T_TOURNAMENT_LIST,
+            "tournaments": available_rooms
+        })
+        await self.send(text_data=text_data)
+    
+
     async def send_room_info(self, dict_data):
+        """
+        Sends the information of a room to the client who joined a room and requested info.
+        """
         room_name = dict_data.get("room_name")
         available_rooms = cache.get(AVA_ROOMS, {})
         full_rooms = cache.get(FULL_ROOMS, {})
@@ -325,6 +323,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_ROOM_INFO,
             "room": room
         }))
+
 
     async def send_success(self, room_name: str):
         await self.send(text_data=json.dumps({
@@ -341,7 +340,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         }))
 
 
-    ### Helper ###
+    # Helper----------------------------------------------------------------
     async def add_player_to_room(self, room_name, available_rooms):
         room = available_rooms[room_name]            
 
@@ -359,27 +358,18 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         room["cur_player_num"] += 1
 
         if room["cur_player_num"] == room["max_player_num"]:
-            del available_rooms[room_name]
-            cache.set(AVA_ROOMS, available_rooms)
-            
             room["status"] = "full"
-
-            # 1 function !!
-            full_rooms = cache.get(FULL_ROOMS, {})
-            full_rooms[room["name"]] = room
-            cache.set(FULL_ROOMS, full_rooms)
-
+            del_room_from_cache(room, AVA_ROOMS, available_rooms)
+            update_or_add_room_to_cache(room, FULL_ROOMS)
             await self.group_send_delete_room(room["name"])
         else:
-            available_rooms[room_name] = room
-            cache.set(AVA_ROOMS, available_rooms)        
             # Notify ALL in the AVA_ROOMS group, including users who already are in a lobby-room
             # SIMPLE, adding and removing the users of the AVA_ROOMS group frequently has also drawbacks
+            update_or_add_room_to_cache(room, AVA_ROOMS, available_rooms)
             await self.group_send_room_size_update(room_name, room["cur_player_num"])
         
-        await self.send_success(room_name)
-        # CACHE: Set the current room of the user 
         cache.set(f"current_room_{self.displayname}", room_name)
+        await self.send_success(room_name)
         return room
 
 
@@ -410,12 +400,40 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         return new_room
     
 
+def update_or_add_room_to_cache(room: dict, cache_name, cached_data: dict=None, ):
+    """
+    Updates or adds a room to the cache. 
+    If the cached_data is not provided, it gets the cached_data from the cache with the cache_name.
+    """
+    if not cache_name:
+        raise ValueError("cache_name must be provided.")
+    if not cached_data:
+        cached_data = cache.get(cache_name, {})
+
+    cached_data.update({room["name"]: room})
+    cache.set(cache_name, cached_data)
+
+
+def del_room_from_cache(room: dict, cache_name, cached_data: dict=None):
+    """
+    Deletes a room to the cache. 
+    If the cached_data is not provided, it gets the cached_data from the cache with the cache_name.
+    """
+    if not cache_name:
+        raise ValueError("cache_name must be provided.")
+    if not cached_data:
+        cached_data = cache.get(cache_name, {})
+
+    del cached_data[room["name"]]
+    cache.set(cache_name, cached_data)
+
+
 def get_room_from_cache(room_name, available_rooms: dict, all_rooms: dict) -> dict:
     return available_rooms.get(room_name) or all_rooms.get(room_name)
 
     
 
-### other version ### Evenn if i use kwargs everytime
+### other version ### Even if i use kwargs everytime, it wouldnt help me since i need to always pass the dict
     """ async def updateLobbies(self, type, room_name, room_size, ptw=0, max_player_num=0):
             
             Handles all changes to the list of available_rooms
