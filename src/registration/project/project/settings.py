@@ -33,9 +33,14 @@ MIDDLEWARE = [
 if DEBUG:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+    if not os.path.exists(STATIC_ROOT):
+        os.makedirs(STATIC_ROOT)
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static'),
     ]
+    for static_dir in STATICFILES_DIRS:
+        if not os.path.exists(static_dir):
+            os.makedirs(static_dir)  
     SILKY_PYTHON_PROFILER = True
     SILKY_PYTHON_PROFILER_BINARY = True
     INSTALLED_APPS.append('silk')
