@@ -1,4 +1,4 @@
-import os
+import os, re, time
 from playwright.sync_api import Browser
 from playwright.sync_api import BrowserContext
 from playwright.sync_api import expect
@@ -6,6 +6,7 @@ from playwright.sync_api import Page
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 import pytest
+from pathlib import Path
 
 # KEYNOTE: If the test is started from another folder other than the ROOT PROJECT FOLDER,
 # the .env file will not be found (e.g. you are in the tests folder and run pytest from there)
@@ -20,7 +21,6 @@ AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 USERMAIL = "transcendence42vienna+test1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "test1"
-OTP = "0000000000000000"
 
 # DEFINES for tournament tests
 N_USERS = 6 # min 6
@@ -142,7 +142,8 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupPassword1").fill(password1)
     page.locator("#signupPassword2").fill(password2)
     page.locator("#signupSubmitButton").click()
-    page.locator("#otpCode").fill(OTP)
+    otp = get_otp()
+    page.locator("#otpCode").fill(otp)
     page.locator("#signupSubmitButton").click()
 
 
@@ -151,7 +152,8 @@ def login(page: Page, email: str, password: str):
     page.locator("#loginEmail").fill(email)
     page.locator("#loginPassword").fill(password)
     page.locator("#requestOTP").click()
-    page.locator("#otpCode").fill(OTP)
+    otp = get_otp()
+    page.locator("#otpCode").fill(otp)
     page.locator("#loginSubmitButton").click()
 
 
@@ -168,6 +170,24 @@ def delete_user(page: Page, password: str):
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#requestDeleteUserButton").click()
     # [aguilmea] delete user has no otp in the front end but in the backend it has - so it is not working rigth now
+
+
+def get_otp():
+    base = Path(__file__).resolve().parent.parent.parent  # Correct usage of parent
+    directory = base / 'src/registration/project/emails/'
+    files = [f for f in directory.iterdir() if f.is_file()]
+    while not files:
+        time.sleep(1)  # Wait for 1 second
+        files = [f for f in directory.iterdir() if f.is_file()]
+    last_saved_file = max(files, key=os.path.getmtime)
+    with open(last_saved_file, 'r') as f:
+        content = f.read().strip()
+    match = re.search(r'The code is:\s*(\d{16})', content)
+    if match:
+        otp = match.group(1)  # Extract the matched OTP
+        return otp
+    else:
+        return None
 ############################################
 
 
