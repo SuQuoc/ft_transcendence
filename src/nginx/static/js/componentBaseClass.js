@@ -85,7 +85,7 @@ export class ComponentBaseClass extends HTMLElement {
 
 			return true;
 		} catch (error) {
-			console.error("Error validating token, trying to refresh: ", error.message);
+			console.log("Error validating token, trying to refresh: ", error.message);
 			try {
 				const refreshResponse = await fetch("/registration/refresh_token", {
 					method: "GET",

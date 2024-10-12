@@ -7,24 +7,25 @@ from ..models import OneTimePassword
 from ..common_utils import generate_random_string
 
 import os
+from asgiref.sync import sync_to_async
 
-def send_otp_email(username, action, password):
+async def send_otp_email(username, action, password):
     try:
         subject = ' Confirm your action for your Transcendence account'
         link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'
 
         message = f"""
         Hello,
-    
+
         Please go to the following link to confirm your action: {action}
         {link}
 
         The code is: {password} and is valid for 5 minutes.
-    
+
         Best regards,
         Your Transcendence team
         """
-        send_mail(
+        await send_mail(
             subject,
             message,
             "Your Transcendence team",

@@ -32,7 +32,7 @@ rm_keys:
 clean: down
 	docker system prune -f
 
-fclean: down rm_vol rm_keys
+fclean: down rm_vol rm_keys cache_clean
 	docker system prune -af
 
 re: down rm_vol cache_clean build_up
@@ -55,7 +55,8 @@ reg_cache_clean:
 	find ./src/registration/project/core_app/migrations/ -type f ! -name '__init__.py' -delete
 	rm -rf ./src/registration/project/core_app/views/__pycache__/
 	rm -rf ./src/registration/project/project/__pycache__/
-
+	rm -rf ./src/registration/*.prof
+	rm -rf ./src/registration/project/staticfiles
 
 ###################### Game #####################
 .PHONY: game_cache_clean

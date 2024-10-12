@@ -30,6 +30,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEBUG:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+    if not os.path.exists(STATIC_ROOT):
+        os.makedirs(STATIC_ROOT)
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
+    for static_dir in STATICFILES_DIRS:
+        if not os.path.exists(static_dir):
+            os.makedirs(static_dir)  
+    SILKY_PYTHON_PROFILER = True
+    SILKY_PYTHON_PROFILER_BINARY = True
+    INSTALLED_APPS.append('silk')
+    MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
+
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -93,7 +109,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # added manually
@@ -118,6 +133,7 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -138,5 +154,30 @@ CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
 ]
 APPEND_SLASH=False # [aguilmea] changed temporarly
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Set the logging level for Django-specific messages
+            'propagate': True,
+        },
+    },
+}
 
 #  end of added manually

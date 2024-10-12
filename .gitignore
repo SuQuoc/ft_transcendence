@@ -176,3 +176,5 @@ tests/playwright_tests/auth_state.json
 *.jpeg
 *.jpg
 !src/user_management/uploads/images/profile/default/*
+src/registration/project/staticfiles/
+src/registration/*.prof
