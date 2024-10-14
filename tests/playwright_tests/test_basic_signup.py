@@ -1,13 +1,10 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
-from conftest import delete_user, set_display_name, BASE_URL, OTP
+from conftest import delete_user, set_display_name, get_otp, BASE_URL
 
 
 USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "basic_signup_1"
-
-
-
 
 class TestBasicSignup:
 
@@ -51,12 +48,12 @@ class TestBasicSignup:
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
-
-            # sending the otp should disable otp and signup
                 page.locator("#signupSubmitButton").click()
 
-            # filling the otp should enable signup
-                page.locator("#otpCode").fill(OTP)
+            # filling the otp should enable signup 
+                otp = get_otp()
+                page.wait_for_selector("#otpCode", state="visible")
+                page.locator("#otpCode").fill(otp)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").click()
                 

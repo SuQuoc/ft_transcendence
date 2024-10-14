@@ -57,6 +57,7 @@ reg_cache_clean:
 	rm -rf ./src/registration/project/project/__pycache__/
 	rm -rf ./src/registration/*.prof
 	rm -rf ./src/registration/project/staticfiles
+	rm -rf ./src/registration/project/emails
 
 ###################### Game #####################
 .PHONY: game_cache_clean
