@@ -81,9 +81,9 @@ WSGI_APPLICATION = 'game.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'), # docker-compose environment POSTGRES_DB
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'NAME': os.environ.get('POSTGRES_DB'), # docker-compose environment POSTGRES_DB
+        'USER': os.environ.get('POSTGRES_ACCESS_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_ACCESS_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'), # docker-compose service name
         'PORT': os.environ.get('DB_PORT'),
     }
@@ -134,9 +134,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # setting to point to that routing object as your root application
 ASGI_APPLICATION = "game.asgi.application"
 
+
+# REDIS ---------------------------------------------------------
+REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_PASS = os.environ.get('REDIS_PASSWORD')
+print(f"REDIS_PORT: {REDIS_PORT}")
+print(f"REDIS_PASS: {REDIS_PASS}")
+
+
+# redis://:password@hostname:port/db_number
+# db_number
+# /0 - default for caching
+# /1 - for session data, in our case channels
+# /2 - for storing message queues
+
 # Example routing for channels
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use appropriate layer backend
+    #'default': {
+    #    'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use appropriate layer backend
+    #},
+
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(f"redis://:{REDIS_PASS}@redis:{REDIS_PORT}/1")], # should we get port from env !!
+        },
     },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://:{REDIS_PASS}@redis:6379/0", # should we get port from env !!
+    }
 }
