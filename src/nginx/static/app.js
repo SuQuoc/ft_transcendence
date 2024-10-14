@@ -36,6 +36,12 @@ import { ForgotPassword} from './js/ForgotPassword.js'
 console.log("app.js loaded");
 // it's better to wait for the DOM to load before running any JS
 window.addEventListener("DOMContentLoaded", async () => {
+	//required to parse the parameters received from OAuth callback
+	const queryParams = new URLSearchParams(window.location.search);
+	if (queryParams.has("code") && queryParams.has("state")) {
+		localStorage.setItem("oauthCode", queryParams.get("code"));
+		localStorage.setItem("oauthState", queryParams.get("state"));
+	}
 	// replaces the "null" state the browser pushes to the history when the page is loaded
 	if (!history.state)
 		history.replaceState({route: location.pathname}, "", location.pathname);
