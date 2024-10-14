@@ -78,46 +78,47 @@
 			<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
 				
 				<!-- Tournament name -->
-				<label for="createName" class="form-label text-white-50">Tournament Name:</label>
+				<label for="createNameInput" class="form-label text-white-50">Tournament Name:</label>
 				<input name="create_name"
-				id="createName"
-				type="text"
-				class="form-control mb-3"
-				placeholder="tournament name"
-				value="tournament"
+					id="createNameInput"
+					type="text"
+					class="form-control mb-2"
+					placeholder="tournament name"
+					value="tournament"
 				>
+				<div id="createTournamentNameError" class="text-danger" style="display: none">Tournament name already taken</div>
 				
 				<!-- Number of Players -->
-				<label for="createNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
+				<label for="createNumberOfPlayers" class="form-label text-white-50 mt-2">Number of Players:</label>
 				<div class="d-flex justify-content-around  mb-3" id="createNumberOfPlayers" role="group">
 					<input
-					type="radio"
-					value="4"
-					class="btn-check"
-					name="number_of_players"
-					id="create4PlayerInput"
-					autocomplete="off"
-					checked
+						type="radio"
+						value="4"
+						class="btn-check"
+						name="number_of_players"
+						id="create4PlayerInput"
+						autocomplete="off"
+						checked
 					>
 					<label class="btn btn-outline-custom w-25" for="create4PlayerInput">4</label>
 					
 					<input
-					type="radio"
-					value="8"
-					class="btn-check"
-					name="number_of_players"
-					id="create8PlayerInput"
-					autocomplete="off"
+						type="radio"
+						value="8"
+						class="btn-check"
+						name="number_of_players"
+						id="create8PlayerInput"
+						autocomplete="off"
 					>
 					<label class="btn btn-outline-custom w-25" for="create8PlayerInput">8</label>
 					
 					<input
-					type="radio"
-					value="16"
-					class="btn-check"
-					name="number_of_players"
-					id="create16PlayerInput"
-					autocomplete="off"
+						type="radio"
+						value="16"
+						class="btn-check"
+						name="number_of_players"
+						id="create16PlayerInput"
+						autocomplete="off"
 					>
 					<label class="btn btn-outline-custom w-25" for="create16PlayerInput">16</label>
 				</div>
@@ -129,13 +130,13 @@
 						<div id="createPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
 					</div>
 					<input type="range"
-					class="form-range range-input-slider"
-					id="createPointsToWin"
-					name="points_to_win"
-					min="1"
-					max="25"
-					step="1"
-					value="5"
+						class="form-range range-input-slider"
+						id="createPointsToWin"
+						name="points_to_win"
+						min="1"
+						max="25"
+						step="1"
+						value="5"
 					>
 				</div>
 				
