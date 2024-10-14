@@ -62,19 +62,12 @@ services:
       <<: *redis_env
       #REDIS_PASSWORD: "${REDIS_PASSWORD:-redispass}"
       PYTHONUNBUFFERED: 1
-      DJANGO_SECRET_KEY: 'django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn'
-      DJANGO_ALLOWED_HOSTS: "*" # change this line when deploying to production !!
-      ENGINE: django.db.backends.postgresql
-
+      DJANGO_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn}
       DB_HOST: "${DB_HOST_GAME:-db_game}"
       DB_PORT: ${DB_PORT_GAME:-5432}
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
-      POSTGRES_USER: "${GAME_POSTGRES_USER:-admin}"
-      POSTGRES_PASSWORD:  "${GAME_POSTGRES_USER:-adminpass}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
-      
-      JWT_SECRET: "${JWT_SECRET:-somesecret}"
     depends_on:
       db_game:
         condition: service_healthy
