@@ -17,7 +17,7 @@ services:
     # command: ["postgres", "-p", "5433"]
     # Now we need add -p "db_port"to the healthckeck
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${GAME_POSTGRES_USER_:-admin} -d ${GAME_POSTGRES_DB:-default_db}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${GAME_POSTGRES_ACCESS_USER:-game_accessy} -d ${GAME_POSTGRES_DB:-default_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
