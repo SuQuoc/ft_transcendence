@@ -31,12 +31,18 @@ services:
   redis:
     container_name: pong_game_redis
     image: redis:bookworm
+    # TODO: add a fix version for redis (not latest)
     environment: &redis_env
       REDIS_PASSWORD: "${REDIS_PASSWORD:-redispass}"
+      # TODO: make an access user that can be used by the django container and the healthcheck:
+      # to avoid attacks with malicious input on the redis server
       REDIS_PORT: "${REDIS_PORT:-6379}"
+      # TODO harmonise and hardcode the redis port - since it is harcoded in the django container and we generally did hardcode all the ports for now
     command: ["sh", "-c", "redis-server --requirepass $${REDIS_PASSWORD}"]
+    # TODO: do not use sh -c but the command directly like in the offical description of the image
     expose:
       - ${REDIS_PORT:-6379}
+      # TO DO: hardcode the redis port
     healthcheck:
       test: [ "CMD", "redis-cli", "ping"]
       interval: 10s
