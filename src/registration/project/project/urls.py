@@ -16,10 +16,10 @@ Including another URLconf
 """
 
 from core_app.views import common, oauthtwo, basic, backup
-from django.urls import path
+from django.urls import path, include
 
 urlpatterns = [
-    
+
     # backup_views
     path('registration/backup_login', backup.login),
 
@@ -29,7 +29,7 @@ urlpatterns = [
     path('registration/basic_signup', basic.signup),
     path('registration/basic_signup_change_password', basic.signup_change_password),
     path('registration/basic_signup_change_username', basic.signup_change_username),
-   
+
     # common views
     path('registration/change_password', common.change_password),
     path('registration/change_username', common.change_username),
@@ -42,5 +42,6 @@ urlpatterns = [
     # oauth2 views
     path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
     path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
-
 ]
+
+urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

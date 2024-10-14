@@ -11,15 +11,17 @@ from .utils import generate_redirect_with_state_cookie
 from ..models import OauthTwo, RegistrationUser
 from ..common_utils import generate_random_string
 
-import os, requests
+import os, requests, time, logging
+from silk.profiling.profiler import silk_profile
 
+@silk_profile(name='send_authorization_request')
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
     try:
         redirect_uri = os.environ.get('SERVER_URL') + '/callback'
-        state = generate_random_string(128)
+        state = generate_random_string(96)
         hashed_state = generate_authorization_request_data(request, state)
         authorize_url = requests.Request('GET', 'https://api.intra.42.fr/oauth/authorize', params={
             'client_id': os.environ.get('FT_CLIENT_ID'),
@@ -32,6 +34,7 @@ def send_authorization_request(request):
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@silk_profile(name='exchange_code_against_access_token')
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):
@@ -48,9 +51,9 @@ def exchange_code_against_access_token(request):
         username = get_ft_email(ft_access_token)
         user = RegistrationUser.objects.filter(username=username).first()
         if oauthtwo.next_step == 'login' or (oauthtwo.next_step == 'signup' and user is not None):
-            return login(ft_access_token)
+            return login(username)
         if oauthtwo.next_step == 'signup':
-            return signup(ft_access_token)
+            return signup(username)
         raise Exception({'exchange_code_against_access_token: next_step not recognized' : oauthtwo.next_step})
     except Exception as e:
         return Response({'exchange_code_against_access_token': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
