@@ -138,8 +138,6 @@ ASGI_APPLICATION = "game.asgi.application"
 # REDIS ---------------------------------------------------------
 REDIS_PORT = os.environ.get('REDIS_PORT')
 REDIS_PASS = os.environ.get('REDIS_PASSWORD')
-print(f"REDIS_PORT: {REDIS_PORT}")
-print(f"REDIS_PASS: {REDIS_PASS}")
 
 
 # redis://:password@hostname:port/db_number

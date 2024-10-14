@@ -7,11 +7,6 @@ from playwright.sync_api import sync_playwright
 import pytest
 from conftest import signup, login, set_display_name, N_USERS, USERPW, T_DISPLAYNAME, T_NAME, BASE_URL
 
-
-
-
-
-
 class TestTournamentMultiple:
 
     def test_create_tournament(self, pages):
