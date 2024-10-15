@@ -36,8 +36,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// making error toasts
 		this.room_full_toast = new ErrorToastElement("This room is already full, you were too slow...");
-		this.already_in_room_toast = new ErrorToastElement("You are already in this room, I don't know how you got here");
-		this.room_does_not_exist_toast = new ErrorToastElement("This room does not exist, if you see this message something went wrong in backend");
+		this.already_in_room_toast = new ErrorToastElement("You are already in this room");
+		this.room_does_not_exist_toast = new ErrorToastElement("This room does not exist, if you see this message something went wrong");
 		this.toast_container.append(this.room_full_toast, this.already_in_room_toast, this.room_does_not_exist_toast);
 
 		// adding event listeners
