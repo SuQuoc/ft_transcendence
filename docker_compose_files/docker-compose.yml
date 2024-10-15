@@ -38,6 +38,8 @@ volumes:
 networks:
   network_game:
     driver: bridge
+  network_redis_game:
+    driver: bridge
   network_registration:
     driver: bridge
   network_user_management:

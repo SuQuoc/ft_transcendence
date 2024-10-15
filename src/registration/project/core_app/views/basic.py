@@ -5,14 +5,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ..authenticate import CredentialsAuthentication, UsernameAuthentication, OneTimePasswordAuthentication
+from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+import time
+import logging
 
 @api_view(['POST'])
-@authentication_classes([CredentialsAuthentication]) # [aguilmea] change to Base Authentication? and delete the CredentialsAuthentication class
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
 def login(request):
     try:
@@ -21,13 +23,22 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
         if not otp:
+            start_time = time.time()
             created_otp = create_one_time_password(user.id, 'login')
+            logging.warning(f"time for creating OTP: {time.time() - start_time}")
+            start_time = time.time()
             send_otp_email(user.username, 'login', created_otp)
+            logging.warning(f"time for sending OTP: {time.time() - start_time}")
             return Response(status=status.HTTP_202_ACCEPTED)
+        start_time = time.time()
         if not check_one_time_password(user, 'login', otp):
-           return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        logging.warning(f"time for checking OTP: {time.time() - start_time}")
         token_s = TokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        start_time = time.time()
+        temp = generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        logging.warning(f"time for generating response: {time.time() - start_time}")
+        return temp
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -60,12 +71,16 @@ def forgot_password(request):
 @permission_classes([AllowAny])
 def signup(request):
     try:
+        start_time = time.time()
         username = request.data.get('username')
         password = request.data.get('password')
         otp = request.data.get('otp')
+        logging.warning(f"get data from request in: {time.time() - start_time}")
+        start_time = time.time()
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
+        logging.warning(f"get user from db in: {time.time() - start_time}")
         if not user:
             if otp:
                 return Response(status=status.HTTP_400_BAD_REQUEST)

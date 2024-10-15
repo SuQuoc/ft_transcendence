@@ -1,13 +1,10 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
-from conftest import delete_user, set_display_name, BASE_URL, OTP
+from conftest import delete_user, set_display_name, get_otp, BASE_URL
 
 
 USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
 USERPW = "password"
 USERDISPLAYNAME = "basic_signup_1"
-
-
-
 
 class TestBasicSignup:
 
@@ -26,45 +23,37 @@ class TestBasicSignup:
                 expect(page.locator("#signupEmail")).to_be_empty()
                 expect(page.locator("#signupPassword1")).to_be_empty()
                 expect(page.locator("#signupPassword2")).to_be_empty()
-                expect(page.locator("#requestOTP")).to_be_disabled()
                 expect(page.locator("#signupSubmitButton")).to_be_disabled()
 
             # if email and pw1 are filled, the submit buttons should be disabled
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill("")
-                expect(page.locator("#requestOTP")).to_be_disabled()
                 expect(page.locator("#signupSubmitButton")).to_be_disabled()
 
             # if email and pw2 are filled, the submit buttons should be disaabled
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill("")
                 page.locator("#signupPassword2").fill(USERPW)
-                expect(page.locator("#requestOTP")).to_be_disabled()
                 expect(page.locator("#signupSubmitButton")).to_be_disabled()
 
             # if pw1 and pw2 are filled, the submit buttons should be disaabled
                 page.locator("#signupEmail").fill("")
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW)
-                expect(page.locator("#requestOTP")).to_be_disabled()
                 expect(page.locator("#signupSubmitButton")).to_be_disabled()
 
             # if all fields are filled, signup should be disabled, otp should be enabled
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW)
-                expect(page.locator("#requestOTP")).to_be_enabled()
-                expect(page.locator("#signupSubmitButton")).to_be_disabled()
+                expect(page.locator("#signupSubmitButton")).to_be_enabled()
+                page.locator("#signupSubmitButton").click()
 
-            # sending the otp should disable otp and signup
-                page.locator("#requestOTP").click()
-                expect(page.locator("#requestOTP")).to_be_disabled()
-                expect(page.locator("#signupSubmitButton")).to_be_disabled()
-
-            # filling the otp should enable signup
-                page.locator("#otpCode").fill(OTP)
-                expect(page.locator("#requestOTP")).to_be_disabled()
+            # filling the otp should enable signup 
+                otp = get_otp()
+                page.wait_for_selector("#otpCode", state="visible")
+                page.locator("#otpCode").fill(otp)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").click()
                 

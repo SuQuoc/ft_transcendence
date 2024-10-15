@@ -1,13 +1,16 @@
 import os, requests
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from ..serializers import UserSerializer, OauthTwoSerializer
 from ..models import RegistrationUser
 from .utils import generate_response_with_valid_JWT
 
-def generate_authorization_request_data(request):
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .token import CustomTokenObtainPairSerializer
+import time, logging
+
+def generate_authorization_request_data(request, state):
     try:
         next_step = request.data.get('next_step')
         id = None
@@ -15,20 +18,20 @@ def generate_authorization_request_data(request):
             id = request.user.id
         data = {
             'next_step' : next_step,
-            'related_user': id
+            'related_user': id,
+            'state': state
         }
         oauth_token_s = OauthTwoSerializer(data=data)
         if not oauth_token_s.is_valid():
             raise Exception({'generate_code_verifier serialiazer' : oauth_token_s.errors})
         oauth = oauth_token_s.save()
-        return oauth.state
+        return oauth.get_hashed_state()
     except Exception as e:
         raise Exception({'generate_authorization_request_data': str(e)})
 
 def request_ft_token(returned_authorization_code):
-    
     try:
-        redirect_uri = os.environ.get('SERVER_URL') + '/callback'       
+        redirect_uri = os.environ.get('SERVER_URL') + '/callback'
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
             'client_id': os.environ.get('FT_CLIENT_ID'),
@@ -65,47 +68,48 @@ def request_ft_email(ft_access_token):
     except Exception as e:
         raise Exception({'request_ft_email': str(e)})
 
-def login(ft_access_token):
+def login(email):
     try:
-        email = get_ft_email(ft_access_token)
         user = RegistrationUser.objects.filter(username=email).first()
         if user is None:
             return Response({'login error': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
         data = {
             'username': email,
-            'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
+            #'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
-        token_s = TokenObtainPairSerializer(data=data)
+        #token_s = TokenObtainPairSerializer(data=data)
+        token_s = CustomTokenObtainPairSerializer(data=data)
+        if user.check_password(''):
+            return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def get_ft_email(ft_access_token):
-    try:
-        headers = {'Authorization': f'Bearer {ft_access_token}'}
-        response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-        if (response.status_code != 200):
-            return Response({str(response)}, status=status.HTTP_401_UNAUTHORIZED)
-        user_details = response.json()
-        email = user_details.get('email')
-        return email
-    except Exception as e:
-        raise Exception({'get_ft_email': str(e)})
+    headers = {'Authorization': f'Bearer {ft_access_token}'}
+    response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
+    if (response.status_code != 200):
+        return Response({str(response)}, status=status.HTTP_401_UNAUTHORIZED)
+    user_details = response.json()
+    email = user_details.get('email')
+    return email
 
 
-def signup(ft_access_token):
+def signup(email):
     try:
-        email = get_ft_email(ft_access_token)
         data = {
             'username': email,
-            'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
+            'password': '' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
         user_s = UserSerializer(data=data)
+        logging.warning(f"signup: {data}")
         if not user_s.is_valid():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            logging.warning(f"signup: {user_s.errors}")
+            return Response({'signup error': data}, status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
-        token_s = TokenObtainPairSerializer(data=data)
+        token_s = CustomTokenObtainPairSerializer(data=data)
+        #token_s = TokenObtainPairSerializer(data=data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

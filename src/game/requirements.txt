@@ -2,7 +2,8 @@ asgiref==3.8.1
 channels[daphne]==4.1.0
 django-sslserver
 # For daphne
-
+channels-redis==4.2.0
+redis==5.1.1
 Django==5.0.6
 psycopg==3.1.19
 sqlparse==0.5.0

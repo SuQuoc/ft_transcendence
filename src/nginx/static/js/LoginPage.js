@@ -13,19 +13,21 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
-
-		//this.shadowRoot.getElementById('loginEmail').addEventListener('input', this.validateForm.bind(this));
-		//this.shadowRoot.getElementById('loginPassword').addEventListener('input', this.validateForm.bind(this));
-		//this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 	}
 
-	getElementHTML() {
+	getElementHTML(){
 		const template = document.createElement('template');
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
             <div class="p-3 rounded-3 bg-dark">
+				<h3 class="text-center text-white">Login</h3>
+            	<form id="42LoginForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
+            		<input type="hidden" name="next_step" value="login">
+					<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
+					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Login with 42</button>
+				</form>
+            	<hr class="text-white-50">
                 <form id="loginForm">
-                    <h3 class="text-center text-white">Login</h3>
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
                     <div class="input-group mb-3">
                     	<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
@@ -51,16 +53,16 @@ export class LoginPage extends ComponentBaseClass {
 		return template;
 	}
 
-	handleEmailEnter(event) {
+	async handleEmailEnter(event) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 
 			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
 			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 			if (!otpSectionVisible) {
-				this.requestOTP(event);
+				await this.requestOTP(event);
 			} else if (otpSectionVisible && loginButton.disabled === false) {
-				this.login(event);
+				await this.login(event);
 			}
 		}
 	}
@@ -93,11 +95,7 @@ export class LoginPage extends ComponentBaseClass {
 			otpButton.disabled = false;
 		}
 
-		if (emailValid && password.length > 0 && otpPattern.test(otp)) {
-			loginButton.disabled = false;
-		} else {
-			loginButton.disabled = true;
-		}
+		loginButton.disabled = !(emailValid && password.length > 0 && otpPattern.test(otp));
 	}
 
 	async requestOTP(event) {
@@ -134,20 +132,6 @@ export class LoginPage extends ComponentBaseClass {
 		}
 	}
 
-	handleOTPInput() {
-		const otp = this.shadowRoot.getElementById('otpCode').value;
-		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
-		const otpPattern = /^[A-Z0-9]{16}$/;
-
-		if (otpPattern.test(otp)) {
-			errorMessage.textContent = '';
-			this.shadowRoot.getElementById('otpCode').removeAttribute('aria-invalid');
-		} else {
-			errorMessage.textContent = 'Invalid OTP';
-			this.shadowRoot.getElementById('otpCode').setAttribute('aria-invalid', 'true');
-		}
-	}
-
 	startTimer(duration, button) {
 		let timer = duration, minutes, seconds;
 		this.timer = setInterval(() => {
@@ -180,7 +164,6 @@ export class LoginPage extends ComponentBaseClass {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 
 		try {
-			//TODO: use the new basic_login endpoint in combination with OTP
 			const loginResponse = await fetch('/registration/basic_login', {
 				method: 'POST',
 				headers: {
@@ -203,15 +186,17 @@ export class LoginPage extends ComponentBaseClass {
 				}
 			});
 
+			const displaynameData = await displaynameResponse.json();
 			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
-			if (!displaynameResponse.ok) {
-				window.app.router.go('/displayname', false);
+			if (!displaynameResponse.ok || displaynameData.displayname === "") {
+				await app.router.go('/displayname', false);
 				console.log('displayname not ok:', displaynameResponse);
 			} else {
-				const responseData = await displaynameResponse.json();
-				window.app.userData.username = responseData.displayname;
-				//window.app.userData.<image?> = responseData.image;
-				app.router.go("/", false);
+				window.app.userData.username = displaynameData.displayname;
+				if (displaynameData.image) {
+					window.app.userData.profileImage = displaynameData.image;
+				}
+				await app.router.go("/", false);
 			}
 		} catch (error) {
 			console.error('Error during login:', error);

@@ -30,6 +30,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEBUG:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+    if not os.path.exists(STATIC_ROOT):
+        os.makedirs(STATIC_ROOT)
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
+    for static_dir in STATICFILES_DIRS:
+        if not os.path.exists(static_dir):
+            os.makedirs(static_dir)  
+    SILKY_PYTHON_PROFILER = True
+    SILKY_PYTHON_PROFILER_BINARY = True
+    INSTALLED_APPS.append('silk')
+    MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
+
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -62,18 +78,29 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+  {
+    # Checks the similarity between the password and a set of attributes of the user.
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    'OPTIONS': {
+      'user_attributes': ('username', 'ft_userid', 'backup_code'),
+      'max_similarity': 0.5,
+    }
+  },
+  {
+    # Checks whether the password meets a minimum length.
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    'OPTIONS': {
+      'min_length': 8,
+    }
+  },
+  {
+    # Checks whether the password occurs in a list of common passwords
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+  },
+  {
+    # Checks whether the password isn’t entirely numeric
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+  }
 ]
 
 AUTH_USER_MODEL = "core_app.RegistrationUser"
@@ -82,7 +109,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # added manually
@@ -107,6 +133,7 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -115,7 +142,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'emails/')
+    if not os.path.exists(EMAIL_FILE_PATH):
+        os.makedirs(EMAIL_FILE_PATH)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
@@ -127,5 +160,30 @@ CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
 ]
 APPEND_SLASH=False # [aguilmea] changed temporarly
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Set the logging level for Django-specific messages
+            'propagate': True,
+        },
+    },
+}
 
 #  end of added manually
