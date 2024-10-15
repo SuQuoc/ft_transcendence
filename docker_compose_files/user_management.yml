@@ -41,7 +41,7 @@ services:
       DB_HOST: "${DB_HOST_MANAGEMENT:-db_usermanagement}"
       DB_PORT: "${DB_PORT_MANAGEMENT:-5432}"
       DJ_SECRET_KEY: ${DJ_SECRET_KEY_MANAGEMENT:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      DEBUG: ${DEBUG:-False}
+      DEBUG: ${DEBUG:-True} # TODO !!
       DJ_ALLOWED_HOSTS: "${DJ_ALLOWED_HOSTS:-localhost}"
       DJ_SUDO_USERNAME_MANAGEMENT: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
       DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
