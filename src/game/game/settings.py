@@ -164,5 +164,6 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://:{REDIS_PASS}@redis:6379/0", # should we get port from env !!
+        "TIMEOUT": None,
     }
 }

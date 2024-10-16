@@ -17,6 +17,7 @@
     {
         "name": "room_name",
         "creator_name": "display_name",
+        "players": ["display_name1", "display_name2", "display_name3, display_name4"],
         "points_to_win": "points_to_win",
         "cur_player_num": "cur_player_num",
         "max_player_num": "max_player_num"
