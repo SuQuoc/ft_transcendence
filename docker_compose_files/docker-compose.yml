@@ -10,7 +10,7 @@ services:
   nginx:
     container_name: pong_nginx
     build: ../src/nginx
-    volumes:
+    volumes: # [aguilmea]  this has to be deleted once dev is ready
       - ../src/nginx/static:/www/data
     ports:
       - 8000:443
