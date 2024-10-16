@@ -13,6 +13,8 @@ from .utils_otp import create_one_time_password, send_otp_email, check_one_time_
 import time
 import logging
 
+import asyncio
+
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
