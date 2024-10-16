@@ -30,11 +30,13 @@ export class UserProfile extends ComponentBaseClass {
       .profile-image {
         width: 100%;
         max-width: 150px;
-        height: auto;
+        max-height: 150px;
         cursor: pointer;
         display: block;
         margin: 0 auto 1rem;
         border-radius: 50%;
+        object-fit: cover;
+        object-position: center;
       }
       .warning {
         border-color: red;
@@ -105,11 +107,16 @@ export class UserProfile extends ComponentBaseClass {
         </div>
         <button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
         <div id="deleteUserConfirmation" style="display: none;">
-            <div class="mb-3">
+            <div class="mb-3" id="passwordSection">
                 <label for="deleteUserPassword" class="form-label">Enter Current Password</label>
                 <input type="password" class="form-control" id="deleteUserPassword" placeholder="Current password" aria-placeholder="Current Password">
             </div>
-            <button type="button" class="btn btn-danger" id="confirmDeleteUserButton">Confirm Delete</button>
+            <button type="button" class="btn btn-primary" id="requestDeleteUserButton">Delete User</button>
+            <div class="mb-3" id="otpSection" style="display: none;">
+                <label for="deleteUserOTP" class="form-label">Enter OTP</label>
+                <input type="text" class="form-control" id="deleteUserOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16">
+            </div>
+            <button type="button" class="btn btn-danger" id="confirmDeleteUserButton" style="display: none;">Really? Action can't be undone</button>
         </div>
       </div>
     `;
@@ -144,32 +151,57 @@ export class UserProfile extends ComponentBaseClass {
         const userManagement = this.shadowRoot.getElementById('userManagement');
         const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
         const deleteUserButton = this.shadowRoot.getElementById('deleteUserButton');
+
+        const requestOTPButton = this.shadowRoot.getElementById('requestDeleteUserButton');
         const confirmDeleteUserButton = this.shadowRoot.getElementById('confirmDeleteUserButton');
+
         const deleteUserPassword = this.shadowRoot.getElementById('deleteUserPassword');
+        const otpSection = this.shadowRoot.getElementById('otpSection');
+        const passwordSection = this.shadowRoot.getElementById('passwordSection');
 
         if (deleteUserConfirmation.style.display === 'none') {
             deleteUserConfirmation.style.display = 'block';
             userManagement.style.display = 'none';
             deleteUserButton.textContent = 'Cancel';
+            otpSection.style.display = 'none';
+            passwordSection.style.display = 'block';
         } else {
             deleteUserConfirmation.style.display = 'none';
             userManagement.style.display = 'block';
             deleteUserButton.textContent = 'Delete User';
+            otpSection.style.display = 'none';
+            requestOTPButton.style.display = 'block';
+            confirmDeleteUserButton.style.display = 'none';
         }
 
-        confirmDeleteUserButton.addEventListener('click', async () => {
+        //TODO: take event handlers out of the function
+        requestOTPButton.addEventListener('click', async () => {
             const password = deleteUserPassword.value;
-            if (!password) {
-                deleteUserPassword.classList.add('warning');
-                return;
-            } else {
-                deleteUserPassword.classList.remove('warning');
-            }
+            password ? deleteUserPassword.classList.remove('warning') : deleteUserPassword.classList.add('warning');
 
             try {
                 await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password }) });
+                otpSection.style.display = 'block';
+                passwordSection.style.display = 'none';
+                requestOTPButton.style.display = 'none';
+                confirmDeleteUserButton.style.display = 'block';
+            } catch (error) {
+                console.error('Error requesting OTP:', error);
+            }
+        });
+
+        confirmDeleteUserButton.addEventListener('click', async () => {
+            const password = deleteUserPassword.value;
+            const otp = this.shadowRoot.getElementById('deleteUserOTP').value;
+
+            password ? deleteUserPassword.classList.remove('warning') : deleteUserPassword.classList.add('warning');
+            otp ? this.shadowRoot.getElementById('deleteUserOTP').classList.remove('warning') : this.shadowRoot.getElementById('deleteUserOTP').classList.add('warning');
+            if (!password || !otp) return;
+
+            try {
+                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password, otp: otp }) });
                 console.log('User deleted');
-                window.app.router.go('/login', true);
+                await window.app.router.go('/login', true);
             } catch (error) {
                 console.error('Error deleting user:', error);
             }
@@ -229,7 +261,7 @@ export class UserProfile extends ComponentBaseClass {
         }
     }
 
-    handleImageUpload(event) {
+    async handleImageUpload(event) {
         const file = event.target.files[0];
         const allowedTypes = ['image/jpeg', 'image/png'];
         const maxSize = 1024 * 1024; // 1MB
@@ -259,7 +291,7 @@ export class UserProfile extends ComponentBaseClass {
             const formData = new FormData();
             formData.append('image', file);
             try {
-                this.apiFetch('/um/profile', { method: 'PATCH', body: formData }, 'multipart/form-data');
+                await this.apiFetch('/um/profile', { method: 'PATCH', body: formData }, 'multipart/form-data');
                 reader.readAsDataURL(file);
             } catch {
                 warningMessage.textContent = 'Error uploading image.';
@@ -289,7 +321,7 @@ export class UserProfile extends ComponentBaseClass {
         try {
             const response = await this.apiFetch('/um/profile', {method: 'PATCH', body: formData}, 'multipart/form-data');
             window.app.userData.username = response.displayname;
-            //window.app.userData.profileImage = response.image;
+            window.app.userData.profileImage = response.image;
             console.log('Profile saved');
         } catch (error) {
             console.error('Error saving profile:', error);

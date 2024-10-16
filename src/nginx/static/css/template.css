@@ -55,7 +55,7 @@ body {
 }
 
 .lobby-player-sidebar {
-	width: 200px;
+	width: 225px;
 	border-top: var(--custom-bg-color) 2px solid;
 	border-bottom: var(--custom-bg-color) 2px solid;
 }

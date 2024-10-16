@@ -17,6 +17,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
 		this.join_tournament_elements = this.root.getElementById("joinTournamentElements");
 		this.waiting_for_permission = this.root.getElementById("joinWaitingForPermission");
+		this.no_tournaments_to_join = this.root.getElementById("joinNoTournaments");
 		this.join_tournament_page = this.root.getElementById("joinTournamentPage");
 		this.create_tournament_form = this.root.getElementById("createTournamentForm");
 		this.range_display = this.root.getElementById("createPointsToWinDisplay");
@@ -56,15 +57,16 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/// ----- Methods ----- ///
 	
 	/** hides or shows a text that says "no tournaments to join" */
-	noTournamentsToJoin() { // not working!!!!! TODO: fix this
-		const tournament_elements = this.root.querySelectorAll("join-tournament-element");
+	noTournamentsToJoin() {
+		const tournament_elements = this.join_tournament_elements.querySelectorAll("join-tournament-element");
 		console.log("tournament_elements: ", tournament_elements);
 
 		if (tournament_elements === null || tournament_elements.length === 0) {
-			this.root.getElementById("noTournamentsToJoin").style.display = "";
-		}
-		else {
-			this.root.getElementById("noTournamentsToJoin").style.display = "none";
+			this.no_tournaments_to_join.style.display = "";
+			this.join_tournament_elements.classList.add("align-self-center");
+		} else {
+			this.no_tournaments_to_join.style.display = "none";
+			this.join_tournament_elements.classList.remove("align-self-center");
 		}
 	};
 
@@ -100,7 +102,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		element.querySelector("[name='join_current_player_num']").innerHTML = current_player_num;
 		element.querySelector("[name='join_max_player_num']").innerHTML = max_player_num;
 		
-		//this.noTournamentsToJoin();
+		this.noTournamentsToJoin();
 	};
 
 	/** deletes a joinTournamentElement */
@@ -112,7 +114,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 
 		this.join_tournament_elements.removeChild(element);
-		//this.noTournamentsToJoin();
+		this.noTournamentsToJoin();
 	};
 
 	/** updates the 'current_player_num' of the 'join-tournament-element' with the tournament_name passed */
@@ -142,6 +144,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			}, { once: true });
 			console.log('websocket adding event listener on open')
 		}
+		this.noTournamentsToJoin();
 	}
 	
 
@@ -216,8 +219,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 		else if (data.type === "tournament_list") {
 			console.log("tournament_list");
-			for (let tournament_name in data.lobbies) {
-				const tournament = data.lobbies[tournament_name];
+			for (let tournament_name in data.tournaments) {
+				const tournament = data.tournaments[tournament_name];
 				this.createJoinTournamentElement(tournament_name,
 												tournament.creator_name,
 												tournament.points_to_win,
@@ -230,7 +233,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			// ignoring these types for now !!!
 		}
 		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.message);
+			console.error("Error: handleReceivedMessage: ", data.error);
 			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			// TODO: make error messages appear on the page !!!
 		}
@@ -257,59 +260,58 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					id="joinTournamentElements"
 				>
 					<!-- No tournaments to join (should only appear when there are no tournaments available -->
-					<!-- <div id="noTournamentsToJoin" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div> -->
+					<div id="joinNoTournaments" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div>
 					
 					<!-- Join Tournament elements will be added here -->
 				</div>
 					
 				<!-- Create Tournament Form -->
-				<div id="createTournamentFormBackground"
-						class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3"
-				>
+				<div class="flex-shrink-0 flex-grow-0 align-self-center align-self-md-start bg-dark rounded-3 p-3">
 					<form id="createTournamentForm">
 					<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
 						
 						<!-- Tournament name -->
 						<label for="createName" class="form-label text-white-50">Tournament Name:</label>
 						<input name="create_name"
-						id="createName"
-						type="text"
-						class="form-control mb-3"
-						placeholder="tournament name"
-						value="tournament"
+							id="createName"
+							type="text"
+							class="form-control mb-3"
+							placeholder="tournament name"
+							maxlength="30"
+							required
 						>
 						
 						<!-- Number of Players -->
 						<label for="createNumberOfPlayers" class="form-label text-white-50">Number of Players:</label>
 						<div class="d-flex justify-content-around  mb-3" id="createNumberOfPlayers" role="group">
 							<input
-							type="radio"
-							value="4"
-							class="btn-check"
-							name="number_of_players"
-							id="create4PlayerInput"
-							autocomplete="off"
-							checked
+								type="radio"
+								value="4"
+								class="btn-check"
+								name="number_of_players"
+								id="create4PlayerInput"
+								autocomplete="off"
+								checked
 							>
 							<label class="btn btn-outline-custom w-25" for="create4PlayerInput">4</label>
 							
 							<input
 							type="radio"
-							value="8"
-							class="btn-check"
-							name="number_of_players"
-							id="create8PlayerInput"
-							autocomplete="off"
+								value="8"
+								class="btn-check"
+								name="number_of_players"
+								id="create8PlayerInput"
+								autocomplete="off"
 							>
 							<label class="btn btn-outline-custom w-25" for="create8PlayerInput">8</label>
 							
 							<input
-							type="radio"
-							value="16"
-							class="btn-check"
-							name="number_of_players"
-							id="create16PlayerInput"
-							autocomplete="off"
+								type="radio"
+								value="16"
+								class="btn-check"
+								name="number_of_players"
+								id="create16PlayerInput"
+								autocomplete="off"
 							>
 							<label class="btn btn-outline-custom w-25" for="create16PlayerInput">16</label>
 						</div>
@@ -321,13 +323,13 @@ export class JoinTournamentPage extends ComponentBaseClass {
 								<div id="createPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
 							</div>
 							<input type="range"
-							class="form-range range-input-slider"
-							id="createPointsToWin"
-							name="points_to_win"
-							min="1"
-							max="25"
-							step="1"
-							value="5"
+								class="form-range range-input-slider"
+								id="createPointsToWin"
+								name="points_to_win"
+								min="1"
+								max="25"
+								step="1"
+								value="5"
 							>
 						</div>
 						

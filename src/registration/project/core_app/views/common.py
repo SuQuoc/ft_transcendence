@@ -100,7 +100,7 @@ def delete_user(request):
     except Exception as e:
         return Response({'delete_user error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+@api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_email(request):
@@ -136,7 +136,7 @@ def refresh_token(request):
         refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        token_s = TokenRefreshSerializer(data={'refresh': refresh_token})      
+        token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

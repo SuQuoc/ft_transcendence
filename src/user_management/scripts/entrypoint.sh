@@ -6,6 +6,9 @@ set -e
 python manage.py makemigrations
 python manage.py migrate
 
+#TODO: uncomment when checking for deployment
+#python manage.py collectstatic --noinput
+
 # Creating django admin user
 cat << EOF | python manage.py shell
 from django.contrib.auth import get_user_model

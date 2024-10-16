@@ -17,7 +17,7 @@ const validateToken = async () => {
 
 		return true;
 	} catch (error) {
-		console.error("Error validating token: ", error.message);
+		console.log("Error validating token, trying to refresh: ", error.message);
 
 		try {
 			const refreshResponse = await fetch("/registration/refresh_token", {
@@ -40,8 +40,8 @@ const validateToken = async () => {
 }
 
 /** Checks if the displayname is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
-const getDisplayname = async () => {
-	if (window.app.userData.username) // if the displayname is already set we don't need to fetch it
+const getUserData = async () => {
+	if (window.app.userData.username && window.app.userData.profileImage) // if the displayname is already set we don't need to fetch it
 		return;
 
 	try {
@@ -59,38 +59,40 @@ const getDisplayname = async () => {
 		} else {
 			const responseData = await response.json();
 			window.app.userData.username = responseData.displayname;
-			//window.app.userData.<image?> = responseData.image;
-			app.router.go('/', false); // maybe this should be set to false?
+			window.app.userData.profileImage = responseData.image;
+			app.router.go('/', false);
 		}
 	} catch (error) {
-		console.error('Error getting displayname (router):', error);
+		console.error('Error getting userdata (router):', error);
 	}
 }
 
-/** Checks if the email is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /login */
-const getEmail = async () => {
-	if (window.app.userData.email) // if the email is already set we don't need to fetch it
-		return;
-
+const checkQueryParams = async () => {
 	try {
-		// Check if the user already has an email
-		const response = await fetch ('/registration/get_email', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
+		const code = localStorage.getItem("oauthCode");
+		const state = localStorage.getItem("oauthState");
+		if (code && state) {
+			const response = await fetch("/registration/oauthtwo_exchange_code_against_access_token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ code: code, state: state })
+			});
 
-		// Redirects to the home page if the user already has an email or to the select login page if they don't
-		if (!response.ok) {
-			window.app.router.go('/login', false);
+			if (response.status === 200) {
+				localStorage.removeItem("oauthCode");
+				localStorage.removeItem("oauthState");
+				return true;
+			} else {
+				throw new Error("Error exchanging code against access token");
+			}
 		} else {
-			const responseData = await response.json();
-			window.app.userData.username = responseData.email;
-			app.router.go('/', false); // maybe this should be set to false?
+			return false;
 		}
 	} catch (error) {
-		console.error('Error getting email (router):', error);
+		console.error("Error checking query params: ", error.message);
+		return false;
 	}
 }
 
@@ -111,13 +113,13 @@ const Router = {
 		// check if the user is logged in
 		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
 			const tokenValid = await validateToken();
-			if (!tokenValid) {
+			const queryParamsValid = await checkQueryParams();
+			if (!tokenValid && !queryParamsValid) {
 				Router.go("/login", false);
 				return;
 			}
 		}
-		getDisplayname(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
-		getEmail();
+		getUserData(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
 		// TODO: we need to get profile image as well
 		
 		// check initial URL
@@ -165,6 +167,17 @@ const Router = {
 		else {
 			document.getElementById("navbar").style.display = "";
 			document.getElementById("footer").style.display = "";
+			if (window.app.userData.profileImage) {
+				document.getElementById('userDropdown').src = window.app.userData.profileImage;
+			} else {
+				const response = fetch('/um/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+				response.then(data => data.json()).then(data => {
+					if (data.image) {
+						window.app.userData.profileImage = data.image;
+						document.getElementById('userDropdown').src = data.image;
+					}
+				});
+			}
 		}
 	},
 
@@ -174,13 +187,15 @@ const Router = {
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
-		//comment out to add token check
 		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				route = "/login";
 				addToHistory = false;
 			}
+		} else {
+			app.userData = {};
+			localStorage.removeItem("userData");
 		}
 
 		Router.hideOrShowNavbarAndFooter(route);

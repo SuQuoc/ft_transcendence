@@ -2,29 +2,55 @@ services:
   db_game:
     container_name: pong_game_db
     image: postgres:16
-    environment:
-      PYTHONUNBUFFERED: 1
-      POSTGRES_DB: psqldb
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpass
-      POSTGRES_ACCESS_USER: accessuser
-      POSTGRES_ACCESS_PASSWORD: accessuserpw
+    environment: 
+      POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
+      POSTGRES_USER: "${GAME_POSTGRES_USER:-admin}"
+      POSTGRES_PASSWORD:  "${GAME_POSTGRES_USER:-adminpass}"
+      POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
+      POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
     expose:
       - "${DB_PORT_GAME:-5432}"
     volumes:
       - volume_game:/var/lib/postgresql/data
       - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
-    # RUN postgres on differnt port
+    # RUN postgres on different port
     # command: ["postgres", "-p", "5433"]
     # Now we need add -p "db_port"to the healthckeck
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER_GAME:-dbuser} -d ${POSTGRES_DB_GAME:-psqldb}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${GAME_POSTGRES_ACCESS_USER:-game_accessy} -d ${GAME_POSTGRES_DB:-default_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
     restart: on-failure
     networks:
       - network_game
+    profiles:
+      - all
+      - game
+
+  redis:
+    container_name: pong_game_redis
+    image: redis:bookworm
+    # TODO: add a fix version for redis (not latest)
+    environment: &redis_env
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-redispass}"
+      # TODO: make an access user that can be used by the django container and the healthcheck:
+      # to avoid attacks with malicious input on the redis server
+      REDIS_PORT: "${REDIS_PORT:-6379}"
+      # TODO harmonise and hardcode the redis port - since it is harcoded in the django container and we generally did hardcode all the ports for now
+    command: ["sh", "-c", "redis-server --requirepass $${REDIS_PASSWORD}"]
+    # TODO: do not use sh -c but the command directly like in the offical description of the image
+    expose:
+      - ${REDIS_PORT:-6379}
+      # TO DO: hardcode the redis port
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 4
+    # TODO: do we need a volume for redis ?!! 
+    networks:
+      - network_redis_game
     profiles:
       - all
       - game
@@ -39,26 +65,24 @@ services:
     expose:
       - "8000/tcp"
     environment:
+      <<: *redis_env
+      #REDIS_PASSWORD: "${REDIS_PASSWORD:-redispass}"
       PYTHONUNBUFFERED: 1
-      DJANGO_SECRET_KEY: 'django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn'
-      DJANGO_ALLOWED_HOSTS: "*" #change this line when deploying to production
-      ENGINE: django.db.backends.postgresql
-      POSTGRES_DB: psqldb
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpass
-      POSTGRES_ACCESS_USER: accessuser
-      POSTGRES_ACCESS_PASSWORD: accessuserpw
-      DB_NAME: psqldb
-      DB_USER: dbuser
-      DB_PASSWORD: dbpass
-      DB_HOST: db_game
-      DB_PORT: 5432
+      DJANGO_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn}
+      DB_HOST: "${DB_HOST_GAME:-db_game}"
+      DB_PORT: ${DB_PORT_GAME:-5432}
+      POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
+      POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
+      POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
     depends_on:
       db_game:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: on-failure
     networks:
       - network_game
+      - network_redis_game
       - network_django
     profiles:
       - all

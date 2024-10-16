@@ -15,12 +15,12 @@ def send_otp_email(username, action, password):
 
         message = f"""
         Hello,
-    
+
         Please go to the following link to confirm your action: {action}
         {link}
 
         The code is: {password} and is valid for 5 minutes.
-    
+
         Best regards,
         Your Transcendence team
         """
