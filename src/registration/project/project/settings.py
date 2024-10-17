@@ -187,6 +187,11 @@ LOGGING = {
             'level': 'WARNING',  # Set the logging level for Django-specific messages
             'propagate': True,
         },
+        'celery': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        }
     },
 }
 

@@ -9,8 +9,7 @@ from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
-from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
-from .utils_otp import send_otp_email_task
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
 
 
 @api_view(['POST'])
@@ -75,19 +74,15 @@ def signup(request):
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            user = user_s.create(request.data)
-            created_otp = create_one_time_password(user.id, 'signup')
-            send_otp_email_task.delay(username, 'signup', created_otp)
-            #send_otp_email(username, 'signup', created_otp)
+            user_data = user_s.validated_data
+            create_user_send_otp.delay(user_data, 'signup')
             return Response(status=status.HTTP_201_CREATED)
         if user.is_verified() is True:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
-            created_otp = create_one_time_password(user.id, 'signup')
-            send_otp_email_task.delay(username, 'signup', created_otp)
-            #send_otp_email(username, 'signup', created_otp)
+            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)

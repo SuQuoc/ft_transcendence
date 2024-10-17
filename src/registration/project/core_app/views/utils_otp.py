@@ -6,18 +6,27 @@ from datetime import timedelta
 from django.utils import timezone
 
 from ..serializers import OneTimePasswordSerializer
-from ..models import OneTimePassword
+from ..models import OneTimePassword, RegistrationUser
 from ..common_utils import generate_random_string
-
 import os
-
 from celery import shared_task
 
 @shared_task
-def send_otp_email_task(username, action, password):
-    logging.warning('send_otp_email_task')
-    send_otp_email(username, action, password)
+def create_user_send_otp(data, action):
+    try:
+        logging.info(f"create_user_send_otp: Received action = {action}")
+        if action == 'signup':
+            user_s = RegistrationUser.objects.create(**data)
+        elif action == 'otp':
+            user_s = RegistrationUser.objects.get(id=data['id'])
+        else:
+            raise Exception("create_user_send_otp: wrong type")
+        created_otp = create_one_time_password(user_s.id, 'signup')
+        send_otp_email.delay(user_s.username, 'signup', created_otp)
+    except Exception as e:
+        logging.warning(f"create_user_send_otp: {str(e)}")
 
+@shared_task
 def send_otp_email(username, action, password):
     try:
         subject = 'Confirm your action for your Transcendence account'
