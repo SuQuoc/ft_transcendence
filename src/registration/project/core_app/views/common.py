@@ -4,11 +4,10 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from ..serializers import UserSerializer
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
-
+import logging
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -17,20 +16,26 @@ def change_password(request):
     try:
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
+        logging.warning(f"1")
         if not current_password or not new_password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        logging.warning(f"2")
         user = request.user
         if not user or not user.check_password(current_password):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        logging.warning(f"3")
         otp = request.data.get('otp')
         if user.validate_password(new_password) is False:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        logging.warning(f"4")
         if not otp:
             otp = create_one_time_password(user.id, 'change_password')
             send_otp_email(user.username, 'change_password', otp)
             return Response(status=status.HTTP_202_ACCEPTED)
+        logging.warning(f"5")
         if not check_one_time_password(user, 'change_password', otp):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        logging.warning(f"6")
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
