@@ -54,8 +54,6 @@ services:
         condition: service_healthy
       redis_registration:
         condition: service_started
-      celery_registration:
-        condition: service_started
     restart: on-failure
     profiles:
       - registration
@@ -74,33 +72,3 @@ services:
         - "6379"
     networks:
       - network_registration
-
-  celery_registration:
-    container_name: pong_celery
-    build: ../src/registration
-    command: celery -A project worker -loglevel=info
-    volumes:
-      - ../src/registration:/app
-    environment:
-      POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
-      POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
-      POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_access_password}"
-      DB_HOST: "${DB_HOST_REG:-db_registration}"
-      DB_PORT: "${DB_PORT_REG:-5432}"
-      SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      DEBUG: ${DJANGO_DEBUG_REG:-True}
-      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
-      DOMAIN: ${DOMAIN:-localhost}
-      FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
-      FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
-      EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
-      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
-      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
-      SENDGRID_API_KEY: "${SENDGRID_API_KEY:-SG.}"
-    depends_on:
-      - redis_registration
-    networks:
-      - network_registration
-    secrets:
-      - public_key.pem
-      - private_key.pem

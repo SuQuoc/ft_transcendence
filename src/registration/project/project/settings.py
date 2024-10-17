@@ -31,8 +31,8 @@ MIDDLEWARE = [
 ]
 
 #values set for testing now
-CELERY_BROKER_URL = os.environ.get('redis://redis_registration:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('redis://redis_registration:6379/0')
+CELERY_BROKER_URL = 'redis://redis_registration:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis_registration:6379/0'
 
 if DEBUG:
     STATIC_URL = '/static/'
