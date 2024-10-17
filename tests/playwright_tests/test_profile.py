@@ -6,7 +6,7 @@ from conftest import login, USERMAIL, USERPW, USERDISPLAYNAME
 
 USER_NEWNAME = "newName"
 USER_NEWMAIL = "transcendence42vienna+newmail@gmail.com"
-USER_NEWPW = "newpassword"
+USER_NEWPW = "PEvv8uCbpA"
 
 class TestProfile:
     def test_user_profile_dropdown(self, page: Page):

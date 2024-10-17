@@ -3,6 +3,8 @@ from playwright.sync_api import expect
 from playwright.sync_api import Page, sync_playwright, Browser, BrowserContext
 from conftest import signup, login, set_display_name
 
+PASSWORD = "CVciCdUbOu"
+
 class TestInputtingDisplayName:
     # closing the window after signup, and logging in to check if you still need to enter a display name
     def test_close_window_after_signup(self):
@@ -12,7 +14,7 @@ class TestInputtingDisplayName:
             page: Page = context.new_page()
 
             try:
-                signup(page, "transcendence42vienna+displayname@gmail.com", "password", "password")
+                signup(page, "transcendence42vienna+displayname@gmail.com", PASSWORD, PASSWORD)
                 page.wait_for_selector("#displayNameForm", timeout=5000)
                 page.close()
                 context.close()
@@ -20,7 +22,7 @@ class TestInputtingDisplayName:
                 context = browser.new_context(ignore_https_errors=True)
                 page: Page = context.new_page()
 
-                login(page, "transcendence42vienna+displayname@gmail.com", "password")
+                login(page, "transcendence42vienna+displayname@gmail.com", PASSWORD)
                 page.wait_for_selector("#displayNameForm", timeout=5000)
                 set_display_name(page, "displayname")
                 expect(page.locator("#navbar")).to_be_visible()
@@ -36,7 +38,7 @@ class TestInputtingDisplayName:
     # taking the same displayname as the test above to test if i can take it as well (i shouldn't be able to)
     def test_displayname_warnings(self, login_page: Page):
         try:
-            signup(login_page, "transcendence42vienna+displayname2@gmail.com", "password", "password")
+            signup(login_page, "transcendence42vienna+displayname2@gmail.com", PASSWORD, PASSWORD)
             expect(login_page.locator("#displayNameForm")).to_be_visible()
 
             # checking the empty displayname warning (not really a warning, but the form shouldn't be submittable) (the warning is from html(?))
