@@ -3,8 +3,8 @@ from conftest import delete_user, set_display_name, get_otp, BASE_URL
 import re
 
 USERMAIL = "transcendence42vienna+accessibility2@gmail.com"
-USERPW = "password"
-NEWUSERPW = "newpassword"
+USERPW = "r8tA9JVquw"
+NEWUSERPW = "cmR8AqIw03"
 USERDISPLAYNAME = "accessibility2"
 
 class TestAccessibility:

@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.core.exceptions import ValidationError
 
 from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
@@ -60,6 +61,7 @@ def forgot_password(request):
             return Response(status=status.HTTP_202_ACCEPTED)
         if not new_password or not check_one_time_password(user, 'reset_password', otp):
            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user.validate_password(new_password)
         user.set_password(new_password)
         user.save()
         return Response(status=status.HTTP_200_OK)
@@ -101,10 +103,12 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        backup_code = user.generate_backup_code()
         user.set_verified( )
         token_s = TokenObtainPairSerializer(data=request.data)
-        backup_code = user.generate_backup_code()
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
+    except ValidationError as e:
+        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -121,13 +125,16 @@ def signup_change_password(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if user.is_verified():
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        created_otp = create_one_time_password(user.id, 'signup')
-        send_otp_email(username, 'signup', created_otp)
+        user.validate_password(password)
         user.set_password(password)
         user.save()
+        created_otp = create_one_time_password(user.id, 'signup')
+        send_otp_email(username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
+    except ValidationError as e:
+        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

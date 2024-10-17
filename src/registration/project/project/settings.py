@@ -1,6 +1,7 @@
 from datetime import timedelta
 import os
 from pathlib import Path
+from core_app.validators import MyMaximumLengthValidator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -79,26 +80,28 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
   {
-    # Checks the similarity between the password and a set of attributes of the user.
     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     'OPTIONS': {
       'user_attributes': ('username', 'ft_userid', 'backup_code'),
-      'max_similarity': 0.5,
+      'max_similarity': 0.9,
     }
   },
   {
-    # Checks whether the password meets a minimum length.
     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     'OPTIONS': {
       'min_length': 8,
     }
   },
   {
-    # Checks whether the password occurs in a list of common passwords
+    'NAME': 'core_app.validators.MyMaximumLengthValidator',
+    'OPTIONS': {
+      'max_length': 120,
+    }
+  },
+  {
     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
   },
   {
-    # Checks whether the password isn’t entirely numeric
     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
   }
 ]

@@ -19,7 +19,7 @@ print(f"Using BASE_URL !!!!!!!!!!!!: {BASE_URL}")
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 USERMAIL = "transcendence42vienna+test1@gmail.com"
-USERPW = "password"
+USERPW = "RShLrG2vV3"
 USERDISPLAYNAME = "test1"
 
 # DEFINES for tournament tests
