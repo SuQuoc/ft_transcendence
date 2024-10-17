@@ -95,7 +95,7 @@ AUTH_PASSWORD_VALIDATORS = [
   {
     'NAME': 'core_app.validators.MyMaximumLengthValidator',
     'OPTIONS': {
-      'max_length': 128,
+      'max_length': 120,
     }
   },
   {

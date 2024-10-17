@@ -9,7 +9,7 @@ class MyMaximumLengthValidator:
     Validate that the password is of a maximum length.
     """
 
-    def __init__(self, max_length=128):
+    def __init__(self, max_length=120):
         self.max_length = max_length
 
     def validate(self, password, user=None):
