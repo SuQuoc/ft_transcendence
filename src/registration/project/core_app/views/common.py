@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
+from ..serializers import UserSerializer
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
@@ -22,13 +23,14 @@ def change_password(request):
         if not user or not user.check_password(current_password):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         otp = request.data.get('otp')
+        if user.validate_password(new_password) is False:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
             otp = create_one_time_password(user.id, 'change_password')
             send_otp_email(user.username, 'change_password', otp)
             return Response(status=status.HTTP_202_ACCEPTED)
         if not check_one_time_password(user, 'change_password', otp):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        user.set_password(new_password)
         user.save()
         return send_200_with_expired_cookies()
     except Exception as e:
