@@ -1,3 +1,6 @@
+import logging
+
+from asgiref.sync import async_to_sync
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
@@ -5,18 +8,20 @@ from django.utils import timezone
 from ..serializers import OneTimePasswordSerializer
 from ..models import OneTimePassword
 from ..common_utils import generate_random_string
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Content, Mail, From, To
 
 import os
 
-async def send_otp_email(username, action, password):
+from celery import shared_task
+
+@shared_task
+def send_otp_email_task(username, action, password):
+    logging.warning('send_otp_email_task')
+    send_otp_email(username, action, password)
+
+def send_otp_email(username, action, password):
     try:
-        subject = ' Confirm your action for your Transcendence account'
+        subject = 'Confirm your action for your Transcendence account'
         link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'
-        from_email = From(os.environ.get('EMAIL_HOST_USER'))
-        to_email = To(username)
-        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
 
         message = f"""
         Hello,
@@ -29,11 +34,6 @@ async def send_otp_email(username, action, password):
         Best regards,
         Your Transcendence team
         """
-        plain_text = Content("text/plain", message)
-        response = sendgrid_client.send(Mail(from_email, to_email, subject, plain_text))
-        if response.status_code >= 300:
-            raise Exception(f"send_otp_email: {response.body}")
-        """
         send_mail(
             subject,
             message,
@@ -45,7 +45,6 @@ async def send_otp_email(username, action, password):
             connection=None, #  optional email backend
             html_message=None, # will only be sent as plain text and not html
         )
-        """
     except Exception as e:
         raise Exception(f"send_otp_email: {str(e)}")
 
