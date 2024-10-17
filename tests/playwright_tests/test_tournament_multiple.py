@@ -95,7 +95,7 @@ class TestTournamentMultiple:
         create_tournament(pages[0], tournament_name=tname, n_players=8, points_to_win=1)
 
         # trying to create a tournament with the same name
-        pages[1].locator("#createName").fill(tname)
+        pages[1].locator("#createNameInput").fill(tname)
         pages[1].locator("#createTournamentButton").click()
         
         expect(pages[1].locator("#createTournamentForm")).to_be_visible() # expect an error message !!
@@ -167,7 +167,7 @@ def create_tournament(page, tournament_name, n_players=4, points_to_win=5):
     """Creates a tournament with the given parameters and checks if the lobby page is visible.
 
     !!! page needs to be on the tournament page !!!"""
-    page.locator("#createName").fill(tournament_name)
+    page.locator("#createNameInput").fill(tournament_name)
     
     if n_players == 4:
         page.locator("label[for='create4PlayerInput']").click()
