@@ -1,0 +1,36 @@
+
+
+// Request
+{
+    "type": "up"
+}
+
+{
+    "type": "down",
+}
+
+{
+    "type": "stop",
+}
+
+
+
+
+// Response
+{
+    "type": "your_side",
+    "side": "left" | "right"
+}
+
+
+{
+    "type": "state_update",
+    "game_state": {
+        "player_l_y": 200,
+        "player_r_y": 100,
+        "ball_x": 40,
+        "ball_y": 140,
+        "score_l": 0,
+        "score_r": 1
+    }
+}
