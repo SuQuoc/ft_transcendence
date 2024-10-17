@@ -61,7 +61,9 @@ def forgot_password(request):
             return Response(status=status.HTTP_202_ACCEPTED)
         if not new_password or not check_one_time_password(user, 'reset_password', otp):
            return Response(status=status.HTTP_400_BAD_REQUEST)
-        user.save({"password": new_password})
+        user.validate_password(new_password)
+        user.set_password(new_password)
+        user.save()
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'forgot_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
