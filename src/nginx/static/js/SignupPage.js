@@ -66,7 +66,7 @@ export class SignupPage extends ComponentBaseClass {
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
-                        <a href="/login" class="text-decoration-none text-white">
+                        <a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
                             Log in
                         </a>
                         here!

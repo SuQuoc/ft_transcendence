@@ -3,7 +3,7 @@ from conftest import delete_user, set_display_name, get_otp, BASE_URL
 
 
 USERMAIL = "transcendence42vienna+basicsignup1@gmail.com"
-USERPW = "password"
+USERPW = "Xz8RD3nqw1"
 USERDISPLAYNAME = "basic_signup_1"
 
 class TestBasicSignup:
