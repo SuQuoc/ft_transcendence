@@ -66,6 +66,8 @@ server {
     listen [::]:443 ssl; #[aguilmea] we should check if ipv6 works
     http2 on;
 
+    server_name ${NGINX_HOST};
+
     ssl_certificate     /run/secrets/localhost.crt;
     ssl_certificate_key /run/secrets/localhost.key;
     ssl_session_timeout 1d;
