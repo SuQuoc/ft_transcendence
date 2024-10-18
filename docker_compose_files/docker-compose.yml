@@ -11,7 +11,9 @@ services:
     container_name: pong_nginx
     build: ../src/nginx
     volumes: # [aguilmea]  this has to be deleted once dev is ready
-      - ../src/nginx/static:/www/data
+      - ../src/nginx/static:/usr/share/nginx/html
+    environment:
+      - NGINX_HOST=${SERVER_URL:-https://localhost}
     ports:
       - 8000:443
     depends_on:
