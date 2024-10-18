@@ -128,11 +128,6 @@ const Router = {
 
 	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
-		let channel_name = "tournament"; // should be taken out ???!!!
-
-		if (type === "onFindOpponentPage") // should be taken out ???!!!
-			channel_name = "match"; // should be taken out ???!!!
-
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
@@ -161,24 +156,19 @@ const Router = {
 
 	//opens the window.app.pong_socket if it is closed
 	makePongWebSocket: (type) => {
-		let channel_name = "tournament"; // should be taken out ???!!!
-
-		if (type === "onFindOpponentPage") // should be taken out ???!!!
-			channel_name = "match"; // should be taken out ???!!!
-
-		if (!window.app.socket) {
+		if (!window.app.pong_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
-			window.app.socket = new WebSocket(ws_path);
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies/someNAME";
+			window.app.pong_socket = new WebSocket(ws_path);
 
 			// add event listeners
-			//window.app.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
+			//window.app.pong_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("pong socket created");
 		};
 
-		window.app.socket.onopen = () => {
+		window.app.pong_socket.onopen = () => {
 			console.log("pong socket opened");
-			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+			window.app.pong_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
 		};
 	},
 

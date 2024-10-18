@@ -31,7 +31,7 @@ export class PongCanvasElement extends HTMLElement {
 		});
 
 		// add event listeners
-		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
+		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
 		// maybe should be this or this.canvas not window !!??
 		window.addEventListener('resize', this.handleCanvasResize_var);
 		window.addEventListener('resize', this.handleBackgroundCanvasResize_var);
@@ -45,7 +45,7 @@ export class PongCanvasElement extends HTMLElement {
 
 	disconnectedCallback() {
 		// remove event listeners
-		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
+		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
 		window.removeEventListener('resize', this.handleCanvasResize_var);
 		window.removeEventListener('resize', this.handleBackgroundCanvasResize_var);
 
@@ -202,7 +202,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.player_left.draw(this.ctx, state.player_l_y);
 		this.player_right.clear(this.ctx);
 		this.player_right.draw(this.ctx, state.player_r_y);
-		this.bg_canvas.drawBackground(this.bg_ctx, state.left_score, state.right_score);
+		this.background.drawBackground(this.bg_ctx, state.score_l, state.score_r);
 	}
 
 	handlePlayerMoveKeyDown(event) {
@@ -227,6 +227,7 @@ export class PongCanvasElement extends HTMLElement {
 		const data = JSON.parse(event.data);
 
 		if (data.type === "your_side") {
+			console.log("Your side: ", data.side);
 			if (data.side === "left") {
 				this.me = this.player_left;
 				this.rival = this.player_right;
@@ -235,8 +236,13 @@ export class PongCanvasElement extends HTMLElement {
 				this.rival = this.player_right;
 			}
 		}
-		if (data.type === "game_state")
-			this.updateGame(data);
+		else if (data.type === "state_update") {
+			//console.log("Game state: ", data.game_state);
+			this.updateGame(data.game_state);
+		}
+		else {
+			console.error("Unknown message type: ", data.type);
+		}
 			
 	}
 

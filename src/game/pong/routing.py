@@ -3,7 +3,7 @@ from django.urls import re_path, path
 
 from .consumers.lobbies import LobbiesConsumer
 from .consumers.game_test import GameConsumer
-from .consumers.pong import PongGameConsumer
+from .consumers.pong_game_consumer import PongGameConsumer
 
 
 websocket_urlpatterns = [
