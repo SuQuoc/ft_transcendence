@@ -136,7 +136,7 @@ ASGI_APPLICATION = "game.asgi.application"
 
 
 # REDIS ---------------------------------------------------------
-REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_USER = os.environ.get('REDIS_USER')
 REDIS_PASS = os.environ.get('REDIS_PASSWORD')
 
 
@@ -146,7 +146,7 @@ REDIS_PASS = os.environ.get('REDIS_PASSWORD')
 # /1 - for session data, in our case channels
 # /2 - for storing message queues
 
-# Example routing for channels
+
 CHANNEL_LAYERS = {
     #'default': {
     #    'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use appropriate layer backend
@@ -155,7 +155,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(f"redis://:{REDIS_PASS}@redis:{REDIS_PORT}/1")], # should we get port from env !!
+            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/1")],
         },
     },
 }
@@ -163,6 +163,10 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://:{REDIS_PASS}@redis:6379/0", # should we get port from env !!
+        "LOCATION": f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/0",
     }
 }
+
+
+
+
