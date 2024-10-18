@@ -128,11 +128,6 @@ const Router = {
 
 	//opens the window.app.socket if it is closed
 	makeWebSocket: (type) => {
-		let channel_name = "tournament";
-
-		if (type === "onFindOpponentPage")
-			channel_name = "match";
-
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
 			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
@@ -144,6 +139,7 @@ const Router = {
 		};
 
 		window.app.socket.onopen = () => {
+			console.log("socket opened");
 			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
 		};
 	},
@@ -154,6 +150,34 @@ const Router = {
 			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
 			window.app.socket.close();
 			window.app.socket = null;
+			console.log("socket closed");
+		}
+	},
+
+	//opens the window.app.pong_socket if it is closed
+	makePongWebSocket: (type) => {
+		if (!window.app.pong_socket) {
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies/someNAME";
+			window.app.pong_socket = new WebSocket(ws_path);
+
+			// add event listeners
+			//window.app.pong_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
+			console.log("pong socket created");
+		};
+
+		window.app.pong_socket.onopen = () => {
+			console.log("pong socket opened");
+			window.app.pong_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+		};
+	},
+
+	/** closes the window.app.pong_socket if it is open */
+	closePongWebSocket: () => {
+		if (window.app.pong_socket) {
+			window.app.pong_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
+			window.app.pong_socket.close();
+			window.app.pong_socket = null;
 			console.log("socket closed");
 		}
 	},
@@ -216,15 +240,16 @@ const Router = {
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
+				Router.makePongWebSocket("tournament"); // type needed??!!!
 				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
 			case "/match":
 				console.log("match page created");
-				Router.closeWebSocket(); //only closes the socket if it is open
-				Router.makeWebSocket("on_find_opponent_page");
-				pageElement = document.createElement("find-opponent-page");
+				Router.closePongWebSocket(); //only closes the socket if it is open
+				Router.makePongWebSocket("match"); // maybe change to "on_match_page" ??!!
+				pageElement = document.createElement("match-page");
 				break;
-			case "/pong":
+			case "/pong": // needed??!!!
 				pageElement = document.createElement("pong-page");
 				pageElement.innerHTML = "Pong Game";
 				break;
@@ -268,8 +293,11 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) {
+		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) { // pong needed??!!!
 			Router.closeWebSocket(); // checks if the socket is open before closing
+		}
+		if (route !== "/tournament-lobby" && route !== "/match") {
+			Router.closePongWebSocket();
 		}
 
 		// adds the route to the history, so the back/forward buttons work

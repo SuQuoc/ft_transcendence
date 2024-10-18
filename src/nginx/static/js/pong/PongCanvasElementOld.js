@@ -7,13 +7,12 @@ export class PongCanvasElement extends HTMLElement {
 		super();
 
 		// Binds the method to this class instance so it can be used in the event listener
-		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 		this.handleCanvasResize_var = this.handleCanvasResize.bind(this);
 		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
 
 		this.handlePlayerMoveKeyDown_var = this.handlePlayerMoveKeyDown.bind(this);
-		//this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
-		//this.handlePlayerMoveTouchStart_var = this.handlePlayerMoveTouchStart.bind(this);
+		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
+		this.handlePlayerMoveTouchStart_var = this.handlePlayerMoveTouchStart.bind(this);
 		this.handlePlayerMoveEnd_var = this.handlePlayerMoveEnd.bind(this);
 	}
 
@@ -31,35 +30,34 @@ export class PongCanvasElement extends HTMLElement {
 		});
 
 		// add event listeners
-		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
 		// maybe should be this or this.canvas not window !!??
 		window.addEventListener('resize', this.handleCanvasResize_var);
 		window.addEventListener('resize', this.handleBackgroundCanvasResize_var);
 
 		window.addEventListener('keydown', this.handlePlayerMoveKeyDown_var);
 		window.addEventListener('keyup', this.handlePlayerMoveEnd_var);
-		//this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
-		//this.addEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
-		//this.addEventListener('touchend', this.handlePlayerMoveEnd_var);
+		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.addEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
+		this.addEventListener('touchend', this.handlePlayerMoveEnd_var);
 	}
 
 	disconnectedCallback() {
 		// remove event listeners
-		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
 		window.removeEventListener('resize', this.handleCanvasResize_var);
 		window.removeEventListener('resize', this.handleBackgroundCanvasResize_var);
 
 		window.removeEventListener('keydown', this.handlePlayerMoveKeyDown_var);
 		window.removeEventListener('keyup', this.handlePlayerMoveEnd_var);
-		//this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
-		//this.removeEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
-		//this.removeEventListener('touchend', this.handlePlayerMoveEnd_var);
+		this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
+		this.removeEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
+		this.removeEventListener('touchend', this.handlePlayerMoveEnd_var);
 	}
 
 
 	/// ----- Methods ----- ///
 	/** Initializes the canvases and other objects */
 	init() {
+		console.log('init---------------------');
 		let player_x = 10;
 		let player_y = 0;
 		let player_width = 10;
@@ -78,7 +76,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.width_unscaled =	1000;
 		this.height_unscaled =	this.width_unscaled * this.ratio;
 
-		this.interval_id =		null; // used to move the player
+		this.intervall_id =		null; // used to move the player
 		this.move_to_y = 		0; // used to move the player
 
 		this.player_left =	new Player(player_x, player_y, player_width, player_height, player_speed, player_color);
@@ -96,7 +94,7 @@ export class PongCanvasElement extends HTMLElement {
 	}
 	
 	/** Moves the right player up or down depending on this.move_to_y. */
-/* 	movePlayer() {
+	movePlayer() {
 		//this.move_to_y -= this.canvas.offsetTop;
 		console.log('move_to_y: ', this.move_to_y);
 		let player_middle = this.player_right.height * this.scale / 2;
@@ -108,7 +106,7 @@ export class PongCanvasElement extends HTMLElement {
 			this.player_right.moveDown(this.ctx, this.height_unscaled);
 		else if (current_y >= this.move_to_y)
 			this.player_right.moveUp(this.ctx);
-	} */
+	}
 
 
 	/// ----- Event Handlers ----- ///
@@ -144,13 +142,13 @@ export class PongCanvasElement extends HTMLElement {
 		}
 	
 		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
-		this.background.drawBackground(this.bg_ctx, '0', '0'); // need to save the score somewhere!!!
+		this.background.drawBackground(this.bg_ctx, '0', '0');
 	}
 	
-	/** Starts an interval that calls movePlayer and sets this.interval_id depending on the key pressed. */
-	/* handlePlayerMoveKeyDown(event) {
-		if (this.interval_id) {
-			//clearInterval(this.interval_id); // if you clear the player stops in the middle of the canvas !!
+	/** Starts an interval that calls movePlayer and sets this.intervall_id depending on the key pressed. */
+	handlePlayerMoveKeyDown(event) {
+		if (this.intervall_id) {
+			//clearInterval(this.intervall_id);
 			return;
 		}
 
@@ -160,94 +158,39 @@ export class PongCanvasElement extends HTMLElement {
 			this.move_to_y = this.canvas.offsetTop + this.canvas.height;
 		}
 
-		this.interval_id = setInterval(() => { // the => is needed to keep the context of this
+		this.intervall_id = setInterval(() => { // the => is needed to keep the context of this
 			this.movePlayer();
 		}, 20);
-	} */
+	}
 
 	/** Sets a new goal for the player to move to (this.move_to_y) */
-	/* handlePlayerMoveTouch(event) {
+	handlePlayerMoveTouch(event) {
 		console.log('touchmove');
 		this.move_to_y = event.touches[0].clientY - this.canvas.offsetTop;
-	} */
+	}
 
 	/** Starts an interval that calls movePlayer */
-	/* handlePlayerMoveTouchStart(event) {
+	handlePlayerMoveTouchStart(event) {
 		console.log('touchstart');
 
-		if (this.interval_id) {
-			clearInterval(this.interval_id);
-			this.interval_id = null;
+		if (this.intervall_id) {
+			clearInterval(this.intervall_id);
+			this.intervall_id = null;
 		}
 
 		this.move_to_y = event.touches[0].clientY - this.canvas.offsetTop;
-		this.interval_id = setInterval(() => { // the => is needed to keep the context of this
+		this.intervall_id = setInterval(() => { // the => is needed to keep the context of this
 			this.movePlayer();
 		}, 20);
-	} */
+	}
 
 	/** Ends movement of Player.
 	 * 
 	 * Clears the interval (clearIneterval) and assigns null to this.interval */
-	/* handlePlayerMoveEnd(event) {
-		clearInterval(this.interval_id);
-		this.interval_id = null;
-	} */
-
-
-	updateGame(state) {
-		this.ball.clear(this.ctx);
-		this.ball.draw(this.ctx, 'white', state.ball_x, state.ball_y);
-		this.player_left.clear(this.ctx);
-		this.player_left.draw(this.ctx, state.player_l_y);
-		this.player_right.clear(this.ctx);
-		this.player_right.draw(this.ctx, state.player_r_y);
-		this.background.drawBackground(this.bg_ctx, state.score_l, state.score_r);
-	}
-
-	handlePlayerMoveKeyDown(event) {
-		if (this.move_to_y !== "stop")
-			return;
-
-		if (event.key === 'ArrowUp') {
-			window.app.pong_socket.send(JSON.stringify({"type": "up"}));
-			this.move_to_y = "up";
-		} else if (event.key === 'ArrowDown') {
-			window.app.pong_socket.send(JSON.stringify({"type": "down"}));
-			this.move_to_y = "down";
-		}
-	}
-
 	handlePlayerMoveEnd(event) {
-		window.app.pong_socket.send(JSON.stringify({"type": "stop"}));
-		this.move_to_y = "stop";
+		clearInterval(this.intervall_id);
+		this.intervall_id = null;
 	}
-
-	handleReceivedMessage(event) {
-		const data = JSON.parse(event.data);
-
-		if (data.type === "your_side") {
-			console.log("Your side: ", data.side);
-			if (data.side === "left") {
-				this.me = this.player_left;
-				this.rival = this.player_right;
-			} else {
-				this.me = this.player_left;
-				this.rival = this.player_right;
-			}
-		}
-		else if (data.type === "state_update") {
-			//console.log("Game state: ", data.game_state);
-			this.updateGame(data.game_state);
-		}
-		else {
-			console.error("Unknown message type: ", data.type);
-		}
-			
-	}
-
-
-
 
 
 	getElementHTML() {

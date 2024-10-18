@@ -1,10 +1,11 @@
-
 import asyncio
 import json
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache  # Import Django"s cache
+from django.core.cache.backends.redis import RedisCache
+import time
 
 # from .game_code.ball import GameBall
 # from .game_code.lobby import Lobby
@@ -50,19 +51,26 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(args, kwargs)
         self.displayname = None
-
 
     async def connect(self):
         #self.lobby_name = self.scope["url_route"]["kwargs"]["lobby_name"]
         #self.group_name = "group_%s" % self.room_name # django groups, a group of related channels
         await self.channel_layer.group_add(AVA_ROOMS, self.channel_name)
         await self.accept()
+        print(f"Lobbies-Consumer - connect")
+
+        #time.sleep(100) # no can do anything with the consumer for the time 
+        #await asyncio.sleep(10) # others can still connect instantly, but the client connecting has to wait T time for messages following connect to be handled
+        #asyncio.sleep(10) # doesnt do anything 
+        
+        
+        
         #print(self.scope["user"])
 
     async def disconnect(self, close_code): 
-        print(f"disconnect - close_code: {close_code}")
+        print(f"Lobbies-Consumer disconnect - close_code: {close_code}")
         await self.leave_room()
         await self.channel_layer.group_discard(AVA_ROOMS, self.channel_name)
         await super().disconnect(close_code)
@@ -72,7 +80,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             dict_data = json.loads(text_data) # convert message from client to dict
             type = dict_data.get("type")
+            print(f"LOBBIES-Consumer - receive:")
             print(json.dumps(dict_data))
+            print("\n")
 
             # handle websocket message from client
             if type == T_ON_TOURNAMENT_PAGE:
@@ -93,16 +103,20 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             elif type == T_GET_TOURNAMENT_LIST:
                 await self.get_tournament_list()
 
+            else:
+                print(f"Unknown message type: {type}")
+                # send an error to client
         except Exception as e:
             print(f"Exception: {e}")
 
 
     ### WEBSOCKET MESSAGES ###
     async def create_room(self, dict_data):
-        print("create_room")
         room_name = dict_data.get("room_name")
         points_to_win = dict_data.get("points_to_win")
         max_player_num = dict_data.get("max_player_num")
+       
+
 
         if not room_name:
             raise ValueError("Room name is required for creating a lobby")
@@ -153,7 +167,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             room = await self.add_player_to_room(room_name, available_rooms)
 
         # CHANNELS: Add user to the room group
-        print(f"join_room: {room}")
         await self.updateLobbyRoom(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
         await self.group_add(room_name)
         
@@ -205,7 +218,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     
     # GROUP SENDS-------------------------------------------------
     async def group_send_new_room(self, room: dict):
-        print(f"trigger new_room: {room["name"]}")
+        #print(f"trigger new_room: {room["name"]}")
         await self.channel_layer.group_send(
                     AVA_ROOMS, {
                         "type": "new_room",
@@ -213,7 +226,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     })
         
     async def group_send_delete_room(self, room_name):
-        print(f"trigger delete_room: {room_name}")
+        #print(f"trigger delete_room: {room_name}")
         await self.channel_layer.group_send(
                     AVA_ROOMS, {
                         "type": T_DELETE_ROOM,
@@ -221,7 +234,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     })
         
     async def group_send_room_size_update(self, room_name, room_size):
-        print(f"trigger room_size_update: {room_name}")
+        #print(f"trigger room_size_update: {room_name}")
         await self.channel_layer.group_send(
             AVA_ROOMS, {
                 "type": "room_size_update",
