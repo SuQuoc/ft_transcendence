@@ -68,6 +68,8 @@ server {
 
     server_name ${NGINX_HOST};
 
+    server_tokens off; #[aguilmea] we can only hide the version and not nginx with the free version https://serverfault.com/questions/214242/can-i-hide-all-server-os-info
+    
     ssl_certificate     /run/secrets/localhost.crt;
     ssl_certificate_key /run/secrets/localhost.key;
     ssl_session_timeout 1d;
