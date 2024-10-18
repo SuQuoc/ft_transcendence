@@ -4,7 +4,8 @@ FROM nginx:1.27.0
 
 #to check:
 #RUN rm /etc/nginx/conf.d/default.conf
-COPY server.conf /etc/nginx/conf.d
+#COPY server.conf /etc/nginx/conf.d
+COPY templates /etc/nginx/templates
 COPY nginx.conf /etc/nginx/nginx.conf
 
 CMD ["nginx", "-g", "daemon off;"]
