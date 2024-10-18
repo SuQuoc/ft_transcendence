@@ -1,6 +1,7 @@
 import logging
 
 from asgiref.sync import async_to_sync
+from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
@@ -16,6 +17,7 @@ def create_user_send_otp(data, action):
     try:
         logging.info(f"create_user_send_otp: Received action = {action}")
         if action == 'signup':
+            data['password'] = make_password(data['password'])
             user_s = RegistrationUser.objects.create(**data)
         elif action == 'otp':
             user_s = RegistrationUser.objects.get(id=data['id'])
@@ -85,7 +87,8 @@ def check_one_time_password(related_user, action, password):
             raise Exception (action + ": " + 'wrong action')
         if not otp.check_password(password):
             raise Exception (action + ': ' + 'wrong password')
-        otp.delete()
+        from ..tasks import delete_otp_task
+        delete_otp_task.delay(otp.id)
         return True
 #    except Exception as e:
 #       return False

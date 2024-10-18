@@ -5,16 +5,21 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from .token import CustomTokenObtainPairSerializer
 from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
+from ..tasks import create_user_send_otp
 
+import logging
+from silk.profiling.profiler import silk_profile
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
+@silk_profile(name='login')
 def login(request):
     try:
         user = request.user
@@ -22,14 +27,14 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
         if not otp:
-            created_otp = create_one_time_password(user.id, 'login')
-            send_otp_email(user.username, 'login', created_otp)
+            #created_otp = create_one_time_password(user.id, 'login')
+            #send_otp_email.delay(user.username, 'login', created_otp)
+            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'login')
             return Response(status=status.HTTP_202_ACCEPTED)
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        token_s = TokenObtainPairSerializer(data=request.data)
-        temp = generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-        return temp
+        token_s = CustomTokenObtainPairSerializer(data=request.data)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -60,6 +65,7 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@silk_profile(name='signup')
 def signup(request):
     try:
         username = request.data.get('username')

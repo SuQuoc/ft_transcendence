@@ -232,7 +232,6 @@ export class SignupPage extends ComponentBaseClass {
 				});
 
 				if (!response.ok) {
-					console.log(response);
 					throw new Error('Signup failed');
 				}
 				window.app.userData.email = email;
