@@ -16,7 +16,6 @@ from silk.profiling.profiler import silk_profile
 
 @silk_profile(name='send_authorization_request')
 @api_view(['POST'])
-@authentication_classes([AccessTokenAuthentication])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
     try:
