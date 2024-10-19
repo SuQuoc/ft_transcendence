@@ -55,9 +55,9 @@ class RegistrationUser(AbstractUser):
         return self.email_verified
 
     def generate_backup_code(self):
-        backup_code = generate_random_string(128)
+        backup_code = generate_random_string(32)
         self.backup_code = make_password(backup_code)
-        self.save()
+        self.save(update_fields=['backup_code'])
         return backup_code
 
     def check_backup_code(self, backup_code):

@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 
 from core_app.views import common, oauthtwo, basic, backup
 from django.urls import path, include
@@ -44,4 +45,5 @@ urlpatterns = [
     path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
 ]
 
-urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
+if os.getenv('DEBUG', 'False') == 'True':
+    urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

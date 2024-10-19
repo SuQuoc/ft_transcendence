@@ -1,13 +1,21 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import RegistrationUser
 from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 class AccessTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):
         raw_token = request.COOKIES.get('access')
         if not raw_token:
-            return None
-        validated_token = self.get_validated_token(raw_token)
+            refresh_token = request.COOKIES.get('refresh')
+            if not refresh_token:
+                raise AuthenticationFailed('No access token provided')
+            else:
+                raise AuthenticationFailed('Invalid access token')
+        try:
+            validated_token = self.get_validated_token(raw_token)
+        except AuthenticationFailed:
+            raise AuthenticationFailed('Invalid access token')
         return self.get_user(validated_token), validated_token
 
 class RefreshTokenAuthentication(JWTAuthentication):
@@ -17,7 +25,7 @@ class RefreshTokenAuthentication(JWTAuthentication):
             return None
         validated_token = self.get_validated_token(raw_token)
         return self.get_user(validated_token), validated_token
-            
+
 class CredentialsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         username = request.data.get('username')
@@ -36,4 +44,4 @@ class UsernameAuthentication(BaseAuthentication):
             return None
         user = RegistrationUser.objects.filter(username=username).first()
         return user, None
-    
+

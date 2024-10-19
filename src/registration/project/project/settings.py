@@ -31,6 +31,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+#values set for testing now
+CELERY_BROKER_URL = 'redis://redis_registration:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis_registration:6379/0'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 if DEBUG:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
@@ -41,7 +46,7 @@ if DEBUG:
     ]
     for static_dir in STATICFILES_DIRS:
         if not os.path.exists(static_dir):
-            os.makedirs(static_dir)  
+            os.makedirs(static_dir)
     SILKY_PYTHON_PROFILER = True
     SILKY_PYTHON_PROFILER_BINARY = True
     INSTALLED_APPS.append('silk')
@@ -186,6 +191,11 @@ LOGGING = {
             'level': 'WARNING',  # Set the logging level for Django-specific messages
             'propagate': True,
         },
+        'celery': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        }
     },
 }
 
