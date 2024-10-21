@@ -13,7 +13,7 @@ cat <<EOF > /usr/local/etc/redis/redis.conf
 # Redis Configuration
 user default off
 user $REDIS_ADMIN_USER on >$REDIS_ADMIN_PASSWORD +@all
-user $REDIS_USER on >$REDIS_PASSWORD +@read ~* -@write
+user $REDIS_USER on >$REDIS_PASSWORD ~* +@read +@write +@connection +@pubsub +@scripting +@transaction
 EOF
 
 # Start Redis server
