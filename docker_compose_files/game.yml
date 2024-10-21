@@ -5,7 +5,7 @@ services:
     environment: 
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_USER: "${GAME_POSTGRES_USER:-admin}"
-      POSTGRES_PASSWORD:  "${GAME_POSTGRES_USER:-adminpass}"
+      POSTGRES_PASSWORD:  "${GAME_POSTGRES_PASSWORD:-adminpass}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
     expose:
@@ -33,10 +33,10 @@ services:
     image: redis:alpine3.20
     # TODO: add a fix version for redis (not latest)
     environment: &redis_env
-      REDIS_ADMIN_USER: ${G_REDIS_ADMIN_USER:-redisadmin}
-      REDIS_ADMIN_PASSWORD: ${G_REDIS_ADMIN_PASSWORD:-redisadminpass}
-      REDIS_USER: "${G_REDIS_USER:-redisuser}"
-      REDIS_PASSWORD: "${G_REDIS_PASSWORD:-redispass}"
+      REDIS_ADMIN_USER: ${GAME_REDIS_ADMIN_USER:-redisadmin}
+      REDIS_ADMIN_PASSWORD: ${GAME_REDIS_ADMIN_PASSWORD:-redisadminpass}
+      REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
 
 
       # TODO: make an access user that can be used by the django container and the healthcheck:
@@ -71,11 +71,10 @@ services:
       - "8000/tcp"
     environment:
       <<: *redis_env
-      #REDIS_PASSWORD: "${REDIS_PASSWORD:-redispass}"
       PYTHONUNBUFFERED: 1
-      DJANGO_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-!zvi(%&9vx@h-3l*at0)7)9!xf&q%w67r0a92d-bfn%m6&sntn}
-      DB_HOST: "${DB_HOST_GAME:-db_game}"
-      DB_PORT: ${DB_PORT_GAME:-5432}
+      DJ_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(} # NOTE: old value which was in settings
+      DB_HOST: "${GAME_DB_HOST:-db_game}"
+      DB_PORT: 5432
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
