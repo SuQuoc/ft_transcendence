@@ -178,7 +178,7 @@ const Router = {
 			window.app.pong_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
 			window.app.pong_socket.close();
 			window.app.pong_socket = null;
-			console.log("socket closed");
+			console.log("pong socket closed");
 		}
 	},
 
