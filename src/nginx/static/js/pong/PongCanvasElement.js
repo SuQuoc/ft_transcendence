@@ -81,11 +81,31 @@ export class PongCanvasElement extends HTMLElement {
 		this.interval_id =		null; // used to move the player
 		this.move_to_y = 		0; // used to move the player
 
-		this.player_left =	new Player(player_x, player_y, player_width, player_height, player_speed, player_color);
+		this.player_left =	new Player(player_x,
+										player_y,
+										player_width,
+										player_height,
+										player_speed,
+										player_color,
+										this.ctx);
 		this.player_right =	new Player(this.width_unscaled - player_x - player_width,
-										player_y, player_width, player_height, player_speed, player_color);
-		this.ball =			new Ball((this.width_unscaled / 2) - (ball_size / 2), (this.height_unscaled / 2) - (ball_size / 2), ball_size, ball_size);
-		this.background = 	new Background(this.width_unscaled, this.height_unscaled, 50, 'grey', '50px Arial');
+										player_y,
+										player_width,
+										player_height,
+										player_speed,
+										player_color,
+										this.ctx);
+		this.ball =			new Ball((this.width_unscaled / 2) - (ball_size / 2),
+									(this.height_unscaled / 2) - (ball_size / 2),
+									ball_size,
+									'white',
+									this.ctx);
+		this.background = 	new Background(this.width_unscaled,
+											this.height_unscaled,
+											50,
+											'grey',
+											'50px Arial',
+											this.bg_ctx);
 	}
 
 	/** Scales the canvas depending on the screensize and sets this.scale to the new scale. */
@@ -95,6 +115,47 @@ export class PongCanvasElement extends HTMLElement {
 		ctx.scale(this.scale, this.scale);
 	}
 	
+
+
+
+
+	/* game_loop() {
+		intervall_id = setInterval(() => {
+			this.ball.clear();
+			this.ball.draw(state.ball_x, state.ball_y);
+			this.player_left.clear();
+			this.player_left.draw(state.player_l_y);
+			this.player_right.clear();
+			this.player_right.draw(state.player_r_y);
+			this.background.drawBackground(this.bg_ctx, state.score_l, state.score_r);
+		}, 30);
+	} */
+
+	/* render_frame() {
+		this.ball.redraw(state.ball_x, state.ball_y);
+		this.player_left.redraw(state.player_l_y);
+		this.player_right.redraw(state.player_r_y);
+		this.background.drawBackground(state.score_l, state.score_r);
+	} */
+
+	updateGame(state) {
+		/* this.ball.pos.x = state.ball_x;
+		this.ball.pos.y = state.ball_y;
+		this.player_left.y = state.player_l_y;
+		this.player_right.y = state.player_r_y;
+		this.player_left.score = state.score_l;
+		this.player_right.score = state.score_r; */
+		this.ball.redraw(state.ball_x, state.ball_y);
+		this.player_left.redraw(state.player_l_y);
+		this.player_right.redraw(state.player_r_y);
+		this.background.drawBackground(state.score_l, state.score_r);
+	}
+
+
+
+
+
+
 	/** Moves the right player up or down depending on this.move_to_y. */
 /* 	movePlayer() {
 		//this.move_to_y -= this.canvas.offsetTop;
@@ -126,9 +187,9 @@ export class PongCanvasElement extends HTMLElement {
 		}
 	
 		this.scaleCanvas(this.ctx, this.canvas.width, this.width_unscaled);
-		this.player_left.draw(this.ctx);
-		this.player_right.draw(this.ctx);
-		this.ball.draw(this.ctx, 'white');
+		this.player_left.draw();
+		this.player_right.draw();
+		this.ball.draw();
 	}
 	
 	/** Resizes the background Canvas depending on the screensize. */
@@ -144,7 +205,7 @@ export class PongCanvasElement extends HTMLElement {
 		}
 	
 		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
-		this.background.drawBackground(this.bg_ctx, '0', '0'); // need to save the score somewhere!!!
+		this.background.drawBackground('0', '0'); // need to save the score somewhere!!!
 	}
 	
 	/** Starts an interval that calls movePlayer and sets this.interval_id depending on the key pressed. */
@@ -194,17 +255,6 @@ export class PongCanvasElement extends HTMLElement {
 		this.interval_id = null;
 	} */
 
-
-	updateGame(state) {
-		this.ball.clear(this.ctx);
-		this.ball.draw(this.ctx, 'white', state.ball_x, state.ball_y);
-		this.player_left.clear(this.ctx);
-		this.player_left.draw(this.ctx, state.player_l_y);
-		this.player_right.clear(this.ctx);
-		this.player_right.draw(this.ctx, state.player_r_y);
-		this.background.drawBackground(this.bg_ctx, state.score_l, state.score_r);
-	}
-
 	handlePlayerMoveKeyDown(event) {
 		if (this.move_to_y !== "stop")
 			return;
@@ -219,6 +269,8 @@ export class PongCanvasElement extends HTMLElement {
 	}
 
 	handlePlayerMoveEnd(event) {
+		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown' || this.move_to_y === "stop")
+			return;
 		window.app.pong_socket.send(JSON.stringify({"type": "stop"}));
 		this.move_to_y = "stop";
 	}
