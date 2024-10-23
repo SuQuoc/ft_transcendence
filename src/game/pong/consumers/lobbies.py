@@ -6,11 +6,9 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache  # Import Django"s cache
 from django.core.cache.backends.redis import RedisCache
 from .Room import TournamentRoom
-from enum import Enum
-
-import time
+from .utils import *
+# from .bracket_tournament_logic import start_tournament
 # from rest_framework_simplejwt.tokens import UntypedToken
-from .utils import get_user_id_from_jwt 
 
 # from .game_code.ball import GameBall
 # from .game_code.lobby import Lobby
@@ -19,42 +17,7 @@ from .utils import get_user_id_from_jwt
 # from .game_code.storageClasses import SlotXy
 # from .game_code.createMsg import SendToClient
 
-# TYPES of messages
-T_ON_TOURNAMENT_PAGE = "on_tournament_page"
-T_CREATE_ROOM = "create_room"
-T_NEW_ROOM = "new_room"
-T_ROOM_SIZE_UPDATE = "room_size_update"
 
-T_JOIN_ROOM = "join_room"
-T_PLAYER_JOINED_ROOM = "player_joined_room"
-
-T_LEAVE_ROOM = "leave_room"
-T_PLAYER_LEFT_ROOM = "player_left_room"
-T_DELETE_ROOM = "delete_room"
-
-T_GET_TOURNAMENT_LIST = "get_tournament_list"
-T_TOURNAMENT_LIST = "tournament_list"
-
-T_GET_ROOM_INFO = "get_room_info"
-T_ROOM_INFO = "room_info"
-
-T_START_TOURNAMENT = "start_tournament"
-
-T_SUCCESS = "success"
-T_ERROR = "error"
-
-# Cache keys
-FULL_ROOMS = "full_rooms"
-AVA_ROOMS = "available_rooms"
-
-class Errors(Enum):
-    NOT_IN_ROOM = "not_in_room"
-    NO_CURRENT_ROOM = "no_current_room"
-    ROOM_NAME_TAKEN = "room_name_taken"
-    ROOM_DOES_NOT_EXIST = "room_does_not_exist"
-    ROOM_FULL = "room_full"
-    ROOM_NAME_INVALID = "room_name_invalid"
-    ALREADY_IN_ROOM = "already_in_room"
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
@@ -160,7 +123,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             cache.set(f"current_room_{self.displayname}", room.name)
 
         # add user to the channel group
-        await self.group_add(room_name)
+        await self.group_add(get_room_group(room_name))
         await self.send_success(room_name)
 
         # Notify others about the new lobby
@@ -216,7 +179,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             cache.delete(f"current_room_{self.displayname}")
             
             # CHANNELS: Remove user from the tournament room group
-            await self.group_remove(room_name)
+            await self.group_remove(get_room_group(room_name))
             await self.group_send_Room(T_PLAYER_LEFT_ROOM, room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
 
             if room.status == TournamentRoom.AVAILABLE:
@@ -300,7 +263,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             raise ValueError("room must be a TournamentRoom object.")            
         if type == T_PLAYER_JOINED_ROOM:
             await self.channel_layer.group_send(
-                f"lobby_{room.name}",
+                get_room_group(room.name),
                 {
                     "type": type,
                     "displayname": self.displayname,
@@ -310,7 +273,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             )
         elif type == T_PLAYER_LEFT_ROOM:
             await self.channel_layer.group_send(
-                f"lobby_{room.name}",
+                get_room_group(room.name),
                 {
                     "type": type,
                     "displayname": self.displayname,
@@ -318,14 +281,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     # image
                 }
             )
-        elif type == T_START_TOURNAMENT:
+        """ elif type == T_START_TOURNAMENT:
             await self.channel_layer.group_send(
-                f"lobby_{room.name}",
+                get_room_group(room.name),
                 {
                     "type": type, # TODO: change to type
                     "test": "test"
                 }
-            )
+            ) """
 
     ### EVENTS - each Websocket in the group sends message to it's client ###
     async def new_room(self, event):
@@ -345,6 +308,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def start_tournament(self, event):
         await self.send(text_data=json.dumps(event))
+
+    
+    async def tournament_match(self, event):
+        """Sends the list of matches to the client."""
+        await self.send(text_data=json.dumps(event))
+
+    #async def start_tournament(self, event):
+    #    await self.send(text_data=json.dumps(event))
 
     ## Send to own websocket ##
     async def send_success(self, room_name: str):
@@ -378,14 +349,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
          # CHANNELS: Add user to the room group
         await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
-        await self.group_add(room.name)
+        await self.group_add(get_room_group(room.name))
         await self.send_success(room.name)
 
         if room.is_full():
             del_room_from_cache(room.name, AVA_ROOMS, available_rooms)
             update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS)
             await self.group_send_AvailableTournaments(T_DELETE_ROOM, room)
-            await self.group_send_Room(T_START_TOURNAMENT, room)
+            # await self.group_send_Room(T_START_TOURNAMENT, room)
             # asyncio.create_task(tournament_start(room))
         else:
             # Notify ALL in the AVA_ROOMS group, including users who already are in a lobby-room
@@ -400,88 +371,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         """
         Remove the channel from the specified channel group.
         """
-        await self.channel_layer.group_discard(f"lobby_{group_name}", self.channel_name)
+        await self.channel_layer.group_discard(group_name, self.channel_name)
 
-    async def group_add(self, group_name):
+    async def group_add(self, group_name: str):
         """
         Add the channel to the specified channel group.
         """
-        await self.channel_layer.group_add(f"lobby_{group_name}", self.channel_name)
-
-
-def update_or_add_room_to_cache(room: dict, cache_name, cached_data: dict=None, ):
-    """
-    Updates or adds a room to the cache. 
-    If the cached_data is not provided, it gets the cached_data from the cache with the cache_name.
-    """
-    if not isinstance(room, dict):
-        raise ValueError("room must be a dictionary.")
-    if not cache_name:
-        raise ValueError("cache_name must be provided.")
-    if not cached_data:
-        cached_data = cache.get(cache_name, {})
-
-    cached_data.update({room["name"]: room})
-    cache.set(cache_name, cached_data)
-
-
-def del_room_from_cache(room_name, cache_name, cached_data: dict=None):
-    """
-    Deletes a room to the cache. 
-    If the cached_data is not provided, it gets the cached_data from the cache with the cache_name.
-    """
-    
-    if not cache_name:
-        raise ValueError("cache_name must be provided.")
-    if not cached_data:
-        cached_data = cache.get(cache_name, {})
-
-    del cached_data[room_name]
-    cache.set(cache_name, cached_data)
-
-
-def get_room_dict(room_name, available_rooms: dict, all_rooms: dict) -> dict:
-    return available_rooms.get(room_name) or all_rooms.get(room_name)
-
-
-""" import random
-
-#asyncio.create_task()
-async def start_tournament(room: TournamentRoom):
-    # start the tournament
-
-    players = room.players
-    while len(players) > 3:
-        random.shuffle(players)
-        pairs = make_pairs(players)
-        
-        winners = []
-        for pair in pairs:
-            p1 = pair[0]
-            p2 = pair[1]
-            await send_match_id(p1, p1, p2)
-            await send_match_id(p2, p1, p2)
-
-            # result = wait for the GameConsumer to send the match result or a cancel message
-            
-            winners.append(result.winner)
-        players = winners
-
-
-async def send_match_id(self, channel_name):
-    await self.channel_layer.send(
-        channel_name,
-        {
-            'type': 'tournament_match',
-            'match_id': "uuid",
-            "player1": "player1",
-            "player2": "player2"
-        })
-    
-
-async def start_match(pair):
-    # start the match
-    pass
-
-def make_pairs(list) -> list:
-    return [list[i:i+2] for i in range(0, len(list), 2)] """
+        await self.channel_layer.group_add(group_name, self.channel_name)
