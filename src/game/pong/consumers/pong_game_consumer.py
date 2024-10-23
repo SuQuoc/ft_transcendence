@@ -4,32 +4,45 @@ import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
+from enum import Enum
+from .utils import get_user_id_from_jwt 
+
+
+class GameMode(Enum):
+    NORMAL = 'normal'
+    tournament = 'tournament'
 
 class PongGameConsumer(AsyncWebsocketConsumer):
     game_instance = None
     #game_loop_running = False
-    
     players = []
-    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.mode = None # resolve from scope
+
     async def connect(self):
         #print(f"GameConsumer - connect")
+        token = self.scope["cookies"]["access"]
+        self.client_group = f"client_{get_user_id_from_jwt(token)}"
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.game_group = f'game_{self.room_name}'
         
-        await self.accept()
+        await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(
                 self.game_group,
                 self.channel_name
-        )
+        ) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
+        await self.accept()
 
         self.players.append(self.channel_name)
         if len(self.players) == 2:
             PongGameConsumer.game_instance = Pong(self.players[0], self.players[1])
             await self.send_players_side()
-            self.players.remove(self.players[0])
-            self.players.remove(self.players[0])
-
+            #self.players.remove(self.players[0])
+            #self.players.remove(self.players[0])
+            
             #PongGameConsumer.game_loop_running = True
             asyncio.create_task(self.game_loop())
 
@@ -37,7 +50,14 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         #print(f"GameConsumer - disconnect")
+        
         self.players.remove(self.channel_name)
+
+        await self.channel_layer.group_discard(
+            self.client_group, 
+            self.channel_name
+        )
+        
         await self.channel_layer.group_discard(
             self.game_group,
             self.channel_name
@@ -48,8 +68,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
         
-        
-    
         #print(f"GameConsumer - receive:")
         #print(json.dumps(text_data))
         #print("\n")
@@ -91,7 +109,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 # send game end info to client
                 break
 
-            await asyncio.sleep(0.03)  # Update the game state every 50ms
+            await asyncio.sleep(0.03)  # Update the game state every 30ms
+
+        # TODO: 
+        # save the result of the game in the database - must be done in a task and not in consumer
+        # 1 match = 1 record in the database
+        # send message to tournament consumer if applicable
 
     async def state_update(self, event):
         game_state = event['game_state']

@@ -121,17 +121,19 @@ class TestTournamentMultiple:
         expect(pages[-1].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
         expect(pages[-1].locator("#joinNoTournaments")).to_be_visible()
 
-        # check if element is GONE for users ON and ENTERING the on_tournament page
+        # check if element is GONE AFTER ONLY 1 CLIENT LEAVES for users ON and ENTERING the on_tournament page
         leave_tournament(pages[0])
         expect(pages[4].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
         expect(pages[4].locator("#joinNoTournaments")).to_be_visible()
         expect(pages[0].locator(f"join-tournament-element[name='{tname}']")).to_have_count(0)
         expect(pages[0].locator("#joinNoTournaments")).to_be_visible()
 
-        # make all clients leave the tournament
+        # make ALL clients leave the tournament
         for page in pages[1:4]:
             leave_tournament(page)        
-        create_tournament(pages[0], tournament_name=tname, n_players=4, points_to_win=1) # check if name is available again
+        
+        # check if name is available again
+        create_tournament(pages[0], tournament_name=tname, n_players=4, points_to_win=1)
         go_to_home(pages)
     
 
