@@ -11,11 +11,12 @@ from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
-from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
-from ..tasks import create_user_send_otp
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from ..tasks import create_user_send_otp, generate_jwt_task
 
 import logging
 from silk.profiling.profiler import silk_profile
+from django.core.cache import cache
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -28,12 +29,15 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
         if not otp:
-            #created_otp = create_one_time_password(user.id, 'login')
-            #send_otp_email.delay(user.username, 'login', created_otp)
-            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'login')
+            create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': request.data.get('password')}, 'login')
             return Response(status=status.HTTP_202_ACCEPTED)
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        jwt_response = cache.get(f"jwt_{user.id}")
+        if jwt_response:
+            return jwt_response
+        logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
@@ -90,13 +94,17 @@ def signup(request):
         if not user.check_password(password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
-            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'otp')
+            create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': password}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         backup_code = user.generate_backup_code()
         user.set_verified( )
-        token_s = TokenObtainPairSerializer(data=request.data)
+        jwt_response = cache.get(f"jwt_{user.id}")
+        if jwt_response:
+            return jwt_response
+        logging.warning(f"no cached token for user {user.id}")
+        token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
     except ValidationError as e:
         return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)

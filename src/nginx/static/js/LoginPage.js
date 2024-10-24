@@ -110,7 +110,6 @@ export class LoginPage extends ComponentBaseClass {
 		requestOTPButton.disabled = true;
 
 		try {
-			//TODO: integrate send OTP endpoint when it is finished
 			const loginResponse = await fetch('/registration/basic_login', {
 				method: 'POST',
 				headers: {
@@ -126,7 +125,7 @@ export class LoginPage extends ComponentBaseClass {
 			this.shadowRoot.getElementById('otpSection').style.display = 'block';
 		} catch (error) {
 			console.error('Error during OTP request:', error);
-			errorMessage.textContent = 'Could not send OTP';
+			errorMessage.textContent = 'Could not send OTP, check your credentials';
 			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 			requestOTPButton.disabled = false;
 		}

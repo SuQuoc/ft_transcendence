@@ -19,3 +19,4 @@ argon2-cffi==23.1.0
 django-silk==5.2.0
 redis==5.1.1
 celery==5.4.0
+django-redis==5.4.0

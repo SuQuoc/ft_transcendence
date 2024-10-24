@@ -1,3 +1,4 @@
+import secrets
 import uuid
 
 from django.contrib.auth.models import AbstractUser
@@ -54,14 +55,18 @@ class RegistrationUser(AbstractUser):
     def is_verified(self):
         return self.email_verified
 
+    #TODO: check if we actually want to hash the backup code
     def generate_backup_code(self):
-        backup_code = generate_random_string(32)
-        self.backup_code = make_password(backup_code)
+        backup_code = secrets.token_hex(12)
+        self.backup_code = backup_code
+        #backup_code = generate_random_string(32)
+        #self.backup_code = make_password(backup_code)
         self.save(update_fields=['backup_code'])
         return backup_code
 
     def check_backup_code(self, backup_code):
-        return check_password(backup_code, self.backup_code)
+        #return check_password(backup_code, self.backup_code)
+        return backup_code == self.backup_code
 
 
 class OneTimePassword(models.Model):
