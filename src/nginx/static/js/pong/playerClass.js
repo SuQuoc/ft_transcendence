@@ -14,12 +14,14 @@ class Player {
 		this.width = width;
 		this.height = height;
 		this.speed = speed;
-		this.score = 0;
 		this.fill_style = fill_style;
 		this.ctx = ctx;
+		
+		this.score = 0;
+		//this.direction = "stop";
 	}
 
-	/** Draws the rectangle. Y is the height of the left upper corner of the rectangle.
+	/** Draws the rectangle and sets the new y$. Y is the height of the left upper corner of the rectangle.
 	 * @param {number} y - (optional: The y-coordinate of the left upper corner. Overwrites the current position)
 	*/
 	draw(y = this.y) {
@@ -29,9 +31,9 @@ class Player {
 		this.ctx.fillRect(this.x, y, this.width, this.height);
 	}
 
-	/** Clears the rectangle. The position is the last that was drawn.*/
+	/** Clears the rectangle on the last positon it was drawn.*/
 	clear() {
-		this.ctx.clearRect(this.x - 4, this.y - 4, this.width + 5, this.height + 5); // the -4 and +5 are because there was a border left (the smaller the canvas the higher these numbers have to be)
+		this.ctx.clearRect(this.x - 2, this.y - 2, this.width + 5, this.height + 5); // the -2 and +5 are because there was a border left (the smaller the canvas the higher these numbers have to be)
 	}
 
 	/** Clears and then draws the rectangle. Y is the height of the left upper corner of the rectangle.
@@ -74,6 +76,28 @@ class Player {
 		this.clear();
 		this.draw(this.y + this.speed, this.fill_style);
 	}
+
+	/** Moves the player up or down depending on their direction value
+	 * @param {number} canvas_height - The height of the **unscaled** canvas.
+	*/
+/* 	move(canvas_height) {
+		canvas_height -= this.height; // because the player is drawn from the top left corner
+		
+		if (this.direction === "up") {
+			if (this.y - this.speed < 0) { // maybe protect against negative values!!??
+				this.y = 0;
+				return;
+			}
+			this.y -= this.speed;
+		}
+		else if (this.direction === "down") {
+			if (this.y + this.speed > canvas_height) { // maybe protect against negative values!!??
+				this.y = canvas_height;
+				return;
+			}
+			this.y += this.speed;
+		}
+	} */
 }
 
 export { Player };

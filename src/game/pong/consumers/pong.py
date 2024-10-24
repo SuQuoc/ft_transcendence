@@ -65,7 +65,7 @@ class Ball:
     def reset(self):
         self.pos.x = self.base_pos.x
         self.pos.y = self.base_pos.y
-        self.vel = Vector(7, 7) # randomize direction ?!!!
+        self.vel = Vector(8, 8) # randomize direction ?!!!
 
 
 class Pong:
@@ -77,7 +77,7 @@ class Pong:
         self.player_width = 10
         self.player_height = 60
 
-        self.ball = Ball(self.canvas_width/2 - 5, self.canvas_height/2 - 5, 7, 7, 10)
+        self.ball = Ball(self.canvas_width/2 - 5, self.canvas_height/2 - 5, 8, 8, 10)
         self.player_l: Player = Player(id = player_l,
                                         pos_x = 10,
                                         pos_y = self.canvas_height/2 - self.player_height/2,
@@ -94,20 +94,21 @@ class Pong:
 
     def get_game_state(self):
         return {
+            'ball_pos_x': self.ball.pos.x,
+            'ball_pos_y': self.ball.pos.y,
             'player_l_y': self.player_l.pos.y,
             'player_r_y': self.player_r.pos.y,
-            'ball_x': self.ball.pos.x,
-            'ball_y': self.ball.pos.y,
             'score_l': self.player_l.score,
-            'score_r': self.player_r.score
+            'score_r': self.player_r.score,
         }
 
 
     def check_if_scored(self, ball: Ball, canvas_width):
+        """ checks if ball is out of bounds and updates score """
         if ball.pos.x < 0:
             self.player_r.score += 1
             ball.reset()
-        elif ball.pos.x > canvas_width:
+        if ball.pos.x > canvas_width:
             self.player_l.score += 1
             ball.reset()
 

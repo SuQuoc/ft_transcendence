@@ -54,6 +54,8 @@ export class PongCanvasElement extends HTMLElement {
 		//this.removeEventListener('touchmove', this.handlePlayerMoveTouch_var);
 		//this.removeEventListener('touchstart', this.handlePlayerMoveTouchStart_var);
 		//this.removeEventListener('touchend', this.handlePlayerMoveEnd_var);
+
+		clearInterval(this.interval_id);
 	}
 
 
@@ -64,9 +66,10 @@ export class PongCanvasElement extends HTMLElement {
 		let player_y = 0;
 		let player_width = 10;
 		let player_height = 60;
-		let player_speed = 10;
+		let player_speed = 10; // server is 10
 		let player_color = 'white';
 		let ball_size = 10;
+		let ball_speed = 8; // server is 8
 
 		this.container =		this.querySelector('#pongCanvasContainer');
 		this.bg_canvas = 		this.querySelector('#pongBackgroundCanvas');
@@ -78,7 +81,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.width_unscaled =	1000;
 		this.height_unscaled =	this.width_unscaled * this.ratio;
 
-		this.interval_id =		null; // used to move the player
+		this.interval_id =	null;
 		this.move_to_y = 		0; // used to move the player
 
 		this.player_left =	new Player(player_x,
@@ -98,6 +101,7 @@ export class PongCanvasElement extends HTMLElement {
 		this.ball =			new Ball((this.width_unscaled / 2) - (ball_size / 2),
 									(this.height_unscaled / 2) - (ball_size / 2),
 									ball_size,
+									ball_speed,
 									'white',
 									this.ctx);
 		this.background = 	new Background(this.width_unscaled,
@@ -106,6 +110,11 @@ export class PongCanvasElement extends HTMLElement {
 											'grey',
 											'50px Arial',
 											this.bg_ctx);
+
+		// states
+		this.curr_state = {} // current state
+		this.next_state = {}
+		this.sent_state = {}
 	}
 
 	/** Scales the canvas depending on the screensize and sets this.scale to the new scale. */
@@ -114,41 +123,36 @@ export class PongCanvasElement extends HTMLElement {
 	
 		ctx.scale(this.scale, this.scale);
 	}
-	
 
-
-
-
-	/* game_loop() {
-		intervall_id = setInterval(() => {
-			this.ball.clear();
-			this.ball.draw(state.ball_x, state.ball_y);
-			this.player_left.clear();
-			this.player_left.draw(state.player_l_y);
-			this.player_right.clear();
-			this.player_right.draw(state.player_r_y);
-			this.background.drawBackground(this.bg_ctx, state.score_l, state.score_r);
-		}, 30);
-	} */
-
-	/* render_frame() {
-		this.ball.redraw(state.ball_x, state.ball_y);
+	renderForeground(state) {
+		this.ball.redraw(state.ball_pos_x, state.ball_pos_y);
 		this.player_left.redraw(state.player_l_y);
 		this.player_right.redraw(state.player_r_y);
-		this.background.drawBackground(state.score_l, state.score_r);
-	} */
+	}
 
-	updateGame(state) {
-		/* this.ball.pos.x = state.ball_x;
-		this.ball.pos.y = state.ball_y;
-		this.player_left.y = state.player_l_y;
-		this.player_right.y = state.player_r_y;
-		this.player_left.score = state.score_l;
-		this.player_right.score = state.score_r; */
-		this.ball.redraw(state.ball_x, state.ball_y);
-		this.player_left.redraw(state.player_l_y);
-		this.player_right.redraw(state.player_r_y);
-		this.background.drawBackground(state.score_l, state.score_r);
+	async updateGame(state) {
+		this.sent_state = state;
+
+		// rendering
+		this.renderForeground(this.curr_state);
+		if (this.player_left.old_score !== state.score_l || this.player_right.old_score !== state.score_r) {
+			this.player_left.old_score = state.score_l;
+			this.player_right.old_score = state.score_r;
+			this.background.drawBackground(this.curr_state.score_l, this.curr_state.score_r);
+		}
+
+		// making a frame between the states sent by the server
+		setTimeout(() => {
+			let state = {
+				ball_pos_x : this.curr_state.ball_pos_x + (this.next_state.ball_pos_x - this.curr_state.ball_pos_x) / 2,
+				ball_pos_y : this.curr_state.ball_pos_y + (this.next_state.ball_pos_y - this.curr_state.ball_pos_y) / 2,
+				player_l_y : this.curr_state.player_l_y + (this.next_state.player_l_y - this.curr_state.player_l_y) / 2,
+				player_r_y : this.curr_state.player_r_y + (this.next_state.player_r_y - this.curr_state.player_r_y) / 2
+			}
+			this.renderForeground(state);
+			this.curr_state = this.next_state;
+			this.next_state = this.sent_state;
+		}, 15);
 	}
 
 
@@ -205,7 +209,7 @@ export class PongCanvasElement extends HTMLElement {
 		}
 	
 		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
-		this.background.drawBackground('0', '0'); // need to save the score somewhere!!!
+		this.background.drawBackground(this.player_left.score, this.player_right.score)
 	}
 	
 	/** Starts an interval that calls movePlayer and sets this.interval_id depending on the key pressed. */
@@ -275,10 +279,10 @@ export class PongCanvasElement extends HTMLElement {
 		this.move_to_y = "stop";
 	}
 
-	handleReceivedMessage(event) {
+	async handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
-
-		if (data.type === "your_side") {
+		//console.log("Received message: ", data);
+		/* if (data.type === "your_side") {
 			console.log("Your side: ", data.side);
 			if (data.side === "left") {
 				this.me = this.player_left;
@@ -287,19 +291,24 @@ export class PongCanvasElement extends HTMLElement {
 				this.me = this.player_left;
 				this.rival = this.player_right;
 			}
+			//this.game_loop();
+		} */
+		if (data.type === "state_update") {
+			await this.updateGame(data.game_state);
 		}
-		else if (data.type === "state_update") {
-			//console.log("Game state: ", data.game_state);
-			this.updateGame(data.game_state);
+		else if (data.type === "initial_state") {
+			this.curr_state = data.game_state;
+			this.next_state = data.game_state;
+		}
+		else if (data.type === "game_end") {
+			console.log("game_end");
+			clearInterval(this.interval_id);
 		}
 		else {
 			console.error("Unknown message type: ", data.type);
 		}
 			
 	}
-
-
-
 
 
 	getElementHTML() {

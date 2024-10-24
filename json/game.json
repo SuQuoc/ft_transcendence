@@ -18,19 +18,26 @@
 
 // Response
 {
-    "type": "your_side",
-    "side": "left" | "right"
+    "type": "initial_state",
+    "game_state": {
+        "ball_pos_x": 40,
+        "ball_pos_y": 140,
+        "player_l_y": 200,
+        "player_r_y": 100,
+        "score_l": 0,
+        "score_r": 0,
+
 }
 
 
 {
     "type": "state_update",
     "game_state": {
+        "ball_pos_x": 40,
+        "ball_pos_y": 140,
         "player_l_y": 200,
         "player_r_y": 100,
-        "ball_x": 40,
-        "ball_y": 140,
         "score_l": 0,
-        "score_r": 1
+        "score_r": 1,
     }
 }
