@@ -21,7 +21,7 @@ class Player {
 		//this.direction = "stop";
 	}
 
-	/** Draws the rectangle and sets the new y$. Y is the height of the left upper corner of the rectangle.
+	/** Draws the rectangle and sets the new y. Y is the height of the left upper corner of the rectangle.
 	 * @param {number} y - (optional: The y-coordinate of the left upper corner. Overwrites the current position)
 	*/
 	draw(y = this.y) {
