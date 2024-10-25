@@ -1,7 +1,7 @@
 import logging
 
-from asgiref.sync import async_to_sync
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
@@ -61,8 +61,10 @@ def send_otp_email(username, action, password):
 
 def create_one_time_password(related_user, action):
     try:
-        #password = generate_random_string(16)
-        password = '0000000000000000' # [aguilmea] for testing purposes, should be deleted in production
+        if settings.MOCK_OTP == True:
+            password = '0000000000000000'
+        else:
+            password = generate_random_string(16)
         otp_data = {
             'related_user': related_user,
             'action': action,

@@ -13,14 +13,13 @@ from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
 from ..tasks import create_user_send_otp
-
+from django.conf import settings
+from .utils_silk import conditional_silk_profile
 import logging
-from silk.profiling.profiler import silk_profile
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
-@silk_profile(name='login')
 def login(request):
     try:
         user = request.user
@@ -38,6 +37,8 @@ def login(request):
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+login = conditional_silk_profile(login, name=login)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -67,7 +68,6 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='signup')
 def signup(request):
     try:
         username = request.data.get('username')
@@ -102,6 +102,7 @@ def signup(request):
         return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+signup = conditional_silk_profile(signup, name=signup)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
