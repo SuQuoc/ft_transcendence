@@ -159,7 +159,7 @@ export class SignupPage extends ComponentBaseClass {
 	handleOTPInput() {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Z0-9a-z]{16}$/;
 
 		if (otpPattern.test(otp)) {
 			errorMessage.textContent = '';
@@ -177,7 +177,7 @@ export class SignupPage extends ComponentBaseClass {
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Z0-9a-z]{16}$/;
 
 		if (email && password1 && password2 && otpPattern.test(otp)) {
 			signupButton.removeAttribute('disabled');

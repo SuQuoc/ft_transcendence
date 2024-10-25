@@ -87,7 +87,7 @@ export class LoginPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Z0-9a-z]{16}$/;
 		const emailValid = this.validateEmail();
 		const otpButton = this.shadowRoot.getElementById('requestOTP');
 
