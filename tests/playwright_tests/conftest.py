@@ -181,7 +181,6 @@ def get_otp():
     with open(last_saved_file, 'r') as f:
         content = f.read().strip()
     match = re.search(r'The code is:\s*(\d{16})', content)
-    last_saved_file.unlink()
     if match:
         otp = match.group(1)  # Extract the matched OTP
         return otp
