@@ -2,15 +2,8 @@
 
 // Request
 {
-    "type": "up"
-}
-
-{
-    "type": "down",
-}
-
-{
-    "type": "stop",
+    "type": "move",
+    "move_to": 200
 }
 
 

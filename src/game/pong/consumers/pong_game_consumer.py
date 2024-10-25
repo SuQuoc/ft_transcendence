@@ -50,11 +50,11 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
 
-        if type == 'up' or type == 'down' or type == 'stop':
+        if type == 'move':
             if PongGameConsumer.game_instance is None:
                 return
             # changing the direction of the player that sent the message
-            PongGameConsumer.game_instance.change_player_direction(self.channel_name, type) # maybe raise error if player_id is not in players !!!
+            PongGameConsumer.game_instance.change_player_direction(self.channel_name, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
         else:
             return
 
@@ -117,24 +117,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    """ async def send_players_side(self):
-        await self.channel_layer.send(
-            self.players[0],
-            {
-                'type': 'your_side',
-                'side': 'left'
-            }
-        )
-
-        await self.channel_layer.send(
-            self.players[1],
-            {
-                'type': 'your_side',
-                'side': 'right'
-            }
-        ) """
-
-
     async def game_end(self, event):
         print("game end")
         await self.send(text_data=json.dumps({
@@ -143,8 +125,5 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         }))
 
     ### EVENTS - each Websocket sends message to frontend ###
-    """ async def your_side(self, event):
-        await self.send(text_data=json.dumps(event)) """
-
     async def initial_state(self, event):
         await self.send(text_data=json.dumps(event))

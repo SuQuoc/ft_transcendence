@@ -15,14 +15,16 @@ class Player:
         self.height = height
         self.speed = speed
         self.score = 0
-        self.dir = "stop"
+        self.move_to = -1
 
     def move(self, max_height):
-        if self.dir == "up":
+        if self.move_to == -1 or self.move_to <= self.pos.y + self.speed / 2 and self.move_to >= self.pos.y - self.speed / 2 :
+            return
+        if self.pos.y > self.move_to:
             self.pos.y -= self.speed
             if self.pos.y < 0:
                 self.pos.y = 0
-        elif self.dir == "down":
+        elif self.pos.y < self.move_to:
             self.pos.y += self.speed
             if self.pos.y + self.height > max_height:
                 self.pos.y = max_height - self.height
@@ -113,11 +115,11 @@ class Pong:
             ball.reset()
 
 
-    def change_player_direction(self, player_id, direction):
+    def change_player_direction(self, player_id, move_to):
         if player_id == self.player_l.id:
-            self.player_l.dir = direction
+            self.player_l.move_to = move_to
         elif player_id == self.player_r.id:
-            self.player_r.dir = direction
+            self.player_r.move_to = move_to
 
 
     def update_game_state(self):
