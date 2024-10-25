@@ -1,7 +1,6 @@
 from datetime import timedelta
 import os
 from pathlib import Path
-from core_app.validators import MyMaximumLengthValidator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = '/static/'
@@ -15,7 +14,6 @@ DEBUG = os.environ.get('DEBUG') == 'True'
 SILK = os.environ.get('SILK') == 'True'
 MOCK_EMAIL = os.environ.get('MOCK_EMAIL') == 'True'
 MOCK_OTP = os.environ.get('MOCK_OTP') == 'True'
-ENABLE_LOGGING = os.environ.get('LOGGING') == 'True'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -181,7 +179,7 @@ APPEND_SLASH=False # [aguilmea] changed temporarly
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
-if ENABLE_LOGGING == True:
+if DEBUG == True:
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,

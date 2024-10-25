@@ -41,10 +41,9 @@ services:
       DB_PORT: "${DB_PORT_REG:-5432}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DJANGO_DEBUG_REG:-True}
-      SILK: ${SILK:-True}
-      MOCK_EMAIL: ${MOCK_EMAIL:-True}
-      MOCK_OTP: ${MOCK_OTP:-True}
-      LOGGING: ${LOGGING:-False}
+      SILK: "${SILK:-False}"
+      MOCK_EMAIL: "${MOCK_EMAIL:-True}" #[aguilmea] to be changed once the variable is set in github for the workflows running automatically
+      MOCK_OTP: "${MOCK_OTP:-True}" #[aguilmea] to be changed once the front end check is changed
       SERVER_URL: ${SERVER_URL:-https://localhost:8000}
       DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
