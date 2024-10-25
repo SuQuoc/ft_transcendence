@@ -9,7 +9,6 @@ export class LoginPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.shadowRoot.getElementById('loginSubmitButton').addEventListener('click', this.login.bind(this));
-		this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
@@ -29,17 +28,14 @@ export class LoginPage extends ComponentBaseClass {
             	<hr class="text-white-50">
                 <form id="loginForm">
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
-                    <div class="input-group mb-3">
-                    	<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
-                    	<button class="btn btn-custom" type="button" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
-                    </div>
+                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
+                    <label for="loginPassword" class="form-label text-white-50">Password</label>
+                    <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
                     	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16">
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
-                    <label for="loginPassword" class="form-label text-white-50">Password</label>
-                    <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <span id="errorMessage" class="text-danger"></span>
                     <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
                     <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
@@ -59,11 +55,7 @@ export class LoginPage extends ComponentBaseClass {
 
 			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
 			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-			if (!otpSectionVisible) {
-				await this.requestOTP(event);
-			} else if (otpSectionVisible && loginButton.disabled === false) {
-				await this.login(event);
-			}
+			await this.login(event);
 		}
 	}
 
@@ -89,65 +81,12 @@ export class LoginPage extends ComponentBaseClass {
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 		const otpPattern = /^[A-Z0-9]{16}$/;
 		const emailValid = this.validateEmail();
-		const otpButton = this.shadowRoot.getElementById('requestOTP');
 
-		if (otpButton.disabled && emailValid && password.length > 0) {
-			otpButton.disabled = false;
+		if (this.shadowRoot.getElementById('otpSection').style.display === 'none') {
+			loginButton.disabled = !(emailValid && password.length > 0);
+			return;
 		}
-
 		loginButton.disabled = !(emailValid && password.length > 0 && otpPattern.test(otp));
-	}
-
-	async requestOTP(event) {
-		event.preventDefault();
-		const requestOTPButton = this.shadowRoot.getElementById('requestOTP');
-		if (requestOTPButton.disabled) return;
-
-		const email = this.shadowRoot.getElementById('loginEmail').value;
-		const errorMessage = this.shadowRoot.getElementById('errorMessage');
-		const password = this.shadowRoot.getElementById('loginPassword').value;
-
-		requestOTPButton.disabled = true;
-
-		try {
-			const loginResponse = await fetch('/registration/basic_login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ "username": email, password })
-			});
-
-			if (!loginResponse.ok) {
-				throw new Error('Requesting OTP failed');
-			}
-			this.startTimer(60, requestOTPButton);
-			this.shadowRoot.getElementById('otpSection').style.display = 'block';
-		} catch (error) {
-			console.error('Error during OTP request:', error);
-			errorMessage.textContent = 'Could not send OTP, check your credentials';
-			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
-			requestOTPButton.disabled = false;
-		}
-	}
-
-	startTimer(duration, button) {
-		let timer = duration, minutes, seconds;
-		this.timer = setInterval(() => {
-			minutes = parseInt(timer / 60, 10);
-			seconds = parseInt(timer % 60, 10);
-
-			minutes = minutes < 10 ? '0' + minutes : minutes;
-			seconds = seconds < 10 ? '0' + seconds : seconds;
-
-			button.textContent = `${minutes}:${seconds}`;
-
-			if (--timer < 0) {
-				clearInterval(this.timer);
-				button.textContent = 'Send OTP';
-				button.disabled = false;
-			}
-		}, 1000);
 	}
 
 	async login(event) {
@@ -162,49 +101,75 @@ export class LoginPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 
-		try {
-			const loginResponse = await fetch('/registration/basic_login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ "username": email, password, otp })
-			});
+		if (this.shadowRoot.getElementById('otpSection').style.display === 'none') {
+			try {
+				const loginResponse = await fetch('/registration/basic_login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ "username": email, password })
+				});
 
-			if (!loginResponse.ok) {
-				throw new Error('Login failed');
-			}
-            window.app.userData = window.app.userData || {};
-			window.app.userData.email = email;
-
-			// Check if the user already has a displayname
-			const displaynameResponse = await fetch ('/um/profile', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
+				if (!loginResponse.ok) {
+					throw new Error('Requesting OTP failed');
 				}
-			});
-
-			const displaynameData = await displaynameResponse.json();
-			// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
-			if (!displaynameResponse.ok || displaynameData.displayname === "") {
-				await app.router.go('/displayname', false);
-				console.log('displayname not ok:', displaynameResponse);
-			} else {
-				window.app.userData.username = displaynameData.displayname;
-				if (displaynameData.image) {
-					window.app.userData.profileImage = displaynameData.image;
-				}
-				await app.router.go("/", false);
+				this.shadowRoot.getElementById('otpSection').style.display = 'block';
+				this.shadowRoot.getElementById('otpCode').focus();
+			} catch (error) {
+				console.error('Error during OTP request:', error);
+				loginError.textContent = 'Could not send OTP, check your credentials';
+				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
+				loginButton.style.display = 'block';
+			} finally {
+				loginButton.style.display = 'block';
+				loginSpinner.style.display = 'none';
 			}
-		} catch (error) {
-			console.error('Error during login:', error);
-			loginError.textContent = 'Could not log in';
-			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
-			this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
-			loginButton.style.display = 'block';
-		} finally {
-			loginSpinner.style.display = 'none';
+		} else {
+			try {
+				const loginResponse = await fetch('/registration/basic_login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ "username": email, password, otp })
+				});
+
+				if (!loginResponse.ok) {
+					throw new Error('Login failed');
+				}
+				window.app.userData = window.app.userData || {};
+				window.app.userData.email = email;
+
+				// Check if the user already has a displayname
+				const displaynameResponse = await fetch('/um/profile', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+
+				const displaynameData = await displaynameResponse.json();
+				// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
+				if (!displaynameResponse.ok || displaynameData.displayname === "") {
+					await app.router.go('/displayname', false);
+					console.log('displayname not ok:', displaynameResponse);
+				} else {
+					window.app.userData.username = displaynameData.displayname;
+					if (displaynameData.image) {
+						window.app.userData.profileImage = displaynameData.image;
+					}
+					await app.router.go("/", false);
+				}
+			} catch (error) {
+				console.error('Error during login:', error);
+				loginError.textContent = 'Could not log in';
+				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
+				this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
+				loginButton.style.display = 'block';
+			} finally {
+				loginSpinner.style.display = 'none';
+			}
 		}
 	}
 }
