@@ -21,7 +21,6 @@ from django.core.cache import cache
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
-@silk_profile(name='login')
 def login(request):
     try:
         user = request.user
@@ -34,9 +33,12 @@ def login(request):
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        jwt_response = cache.get(f"jwt_{user.id}")
+        cache_key = f'jwt_{user.id}'
+        logging.warning(f"retrieving cache for key {cache_key}")
+        jwt_response = cache.get(cache_key)
         if jwt_response:
-            return jwt_response
+            logging.warning(f"found cached token {jwt_response}")
+            return Response(jwt_response, status=status.HTTP_200_OK)
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
@@ -71,7 +73,6 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='signup')
 def signup(request):
     try:
         username = request.data.get('username')
@@ -100,9 +101,12 @@ def signup(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         backup_code = user.generate_backup_code()
         user.set_verified( )
-        jwt_response = cache.get(f"jwt_{user.id}")
+        cache_key = f'jwt_{user.id}'
+        logging.warning(f"retrieving cache for key {cache_key}")
+        jwt_response = cache.get(cache_key)
         if jwt_response:
-            return jwt_response
+            logging.warning(f"found cached token {jwt_response}")
+            return Response(jwt_response, status=status.HTTP_200_OK)
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)

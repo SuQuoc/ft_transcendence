@@ -1,4 +1,5 @@
 from celery import shared_task
+from silk.profiling.profiler import silk_profile
 
 from .models import OneTimePassword
 import logging
@@ -11,15 +12,25 @@ from .views.utils_otp import create_one_time_password, send_otp_email
 
 from django.core.cache import cache
 from rest_framework import status
+from rest_framework.renderers import JSONRenderer
 
 @shared_task
 def generate_jwt_task(user_data, request_data):
     token_s = CustomTokenObtainPairSerializer(data=request_data)
     if token_s.is_valid():
         jwt_response = generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-        cache.set(f"jwt_{user_data['id']}", jwt_response, timeout=300)
+        jwt_response.accepted_renderer = JSONRenderer()
+        jwt_response.accepted_media_type = 'application/json'
+        jwt_response.renderer_context = {}
+        jwt_response.render()
+        rendered_content = jwt_response.content
+        cache_key = f"jwt_{user_data['id']}"
+        logging.warning(f"setting cache for key {cache_key} to {rendered_content}")
+        cache.set(cache_key, rendered_content, timeout=300)
     else:
-        cache.set(f"jwt_{user_data['id']}", None, timeout=300)
+        cache_key = f"jwt_{user_data['id']}"
+        logging.warning(f"setting cache for key {cache_key} to None")
+        cache.set(cache_key, None, timeout=300)
 
 @shared_task
 def delete_otp_task(otp_id):

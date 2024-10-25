@@ -51,6 +51,16 @@ if DEBUG:
     SILKY_PYTHON_PROFILER_BINARY = True
     INSTALLED_APPS.append('silk')
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
+    SILKY_DYNAMIC_PROFILING = [{
+        'module': 'core_app.views.basic',
+        'function': 'login',
+        'name': 'login',
+    },
+    {
+        'module': 'core_app.views.basic',
+        'function': 'signup',
+        'name': 'signup',
+    }]
 
 ROOT_URLCONF = 'project.urls'
 

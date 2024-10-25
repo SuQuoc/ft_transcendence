@@ -14,7 +14,6 @@ from ..common_utils import generate_random_string
 import os, requests, time, logging
 from silk.profiling.profiler import silk_profile
 
-@silk_profile(name='send_authorization_request')
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
@@ -33,7 +32,6 @@ def send_authorization_request(request):
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@silk_profile(name='exchange_code_against_access_token')
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):

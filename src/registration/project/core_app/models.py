@@ -20,6 +20,7 @@ class RegistrationUser(AbstractUser):
     backup_code = models.CharField(max_length=128, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=False)
 
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
@@ -54,6 +55,9 @@ class RegistrationUser(AbstractUser):
 
     def is_verified(self):
         return self.email_verified
+
+    def password_is_set(self):
+        return self.password_set
 
     #TODO: check if we actually want to hash the backup code
     def generate_backup_code(self):

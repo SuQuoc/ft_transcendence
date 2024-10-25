@@ -1,4 +1,6 @@
 import os, requests
+import secrets
+
 from rest_framework import status, serializers
 from rest_framework.response import Response
 
@@ -77,9 +79,8 @@ def login(email):
             'username': email,
             #'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
-        #token_s = TokenObtainPairSerializer(data=data)
         token_s = CustomTokenObtainPairSerializer(data=data)
-        if user.check_password(''):
+        if not user.password_is_set():
             return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
@@ -89,7 +90,7 @@ def login(email):
 def get_ft_email(ft_access_token):
     headers = {'Authorization': f'Bearer {ft_access_token}'}
     response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-    if (response.status_code != 200):
+    if response.status_code != 200:
         return Response({str(response)}, status=status.HTTP_401_UNAUTHORIZED)
     user_details = response.json()
     email = user_details.get('email')
@@ -100,7 +101,7 @@ def signup(email):
     try:
         data = {
             'username': email,
-            'password': '' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
+            'password': secrets.token_hex(16)
         }
         user_s = UserSerializer(data=data)
         logging.warning(f"signup: {data}")
@@ -109,7 +110,6 @@ def signup(email):
             return Response({'signup error': data}, status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
         token_s = CustomTokenObtainPairSerializer(data=data)
-        #token_s = TokenObtainPairSerializer(data=data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
