@@ -16,19 +16,19 @@ def change_password(request):
     try:
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
-        if not current_password or not new_password:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         user = request.user
-        if not user or not user.check_password(current_password):
+        if (not current_password and user.password_is_set()) or not new_password:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not user or (user.password_is_set() and not user.check_password(current_password)):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         otp = request.data.get('otp')
         if user.validate_password(new_password) is False:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if not otp:
+        if user.password_is_set() and not otp:
             otp = create_one_time_password(user.id, 'change_password')
             send_otp_email(user.username, 'change_password', otp)
             return Response(status=status.HTTP_202_ACCEPTED)
-        if not check_one_time_password(user, 'change_password', otp):
+        if user.password_is_set and not check_one_time_password(user, 'change_password', otp):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.validate_password(new_password)
         user.set_password(new_password)
@@ -109,7 +109,8 @@ def delete_user(request):
 def get_email(request):
     try:
         user = request.user
-        return Response({'email': user.username}, status=status.HTTP_200_OK)
+        password_set = user.password_is_set()
+        return Response({'email': user.username, 'password_set': password_set}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'get_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -21,8 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = RegistrationUser(**validated_data)
         user.set_password(password)
-        if not user.password_is_set():
-            user.password_set = True
         user.save()
         password_changed(password, user=user, password_validators=None)
         return user

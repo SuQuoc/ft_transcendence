@@ -21,6 +21,7 @@ from django.core.cache import cache
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
+@silk_profile(name='login')
 def login(request):
     try:
         user = request.user
@@ -47,6 +48,7 @@ def login(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@silk_profile(name='forgot_password')
 def forgot_password(request):
     try:
         username = request.data.get('username')
@@ -73,6 +75,7 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@silk_profile(name='signup')
 def signup(request):
     try:
         username = request.data.get('username')
@@ -117,6 +120,7 @@ def signup(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@silk_profile(name='signup_change_password')
 def signup_change_password(request):
     try:
         username = request.data.get('username')
@@ -141,6 +145,7 @@ def signup_change_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@silk_profile(name='signup_change_username')
 def signup_change_username(request):
     try:
         current_username = request.data.get('current_username')
