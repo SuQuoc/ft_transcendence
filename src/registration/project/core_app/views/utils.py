@@ -3,12 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.http import HttpResponseRedirect
+from .utils_silk import conditional_silk_profile
 
 from django.core.mail import send_mail
 
 import os, requests, logging
-
-from silk.profiling.profiler import silk_profile
 
 def send_200_with_expired_cookies():
     response = Response(status=status.HTTP_200_OK)
@@ -16,7 +15,6 @@ def send_200_with_expired_cookies():
     response.delete_cookie('refresh')
     return response
 
-#@silk_profile(name='generate_response_with_valid_JWT')
 def generate_response_with_valid_JWT(status_code, token_s, backup_code=None, response_body=None):
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -47,6 +45,8 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None, res
         secure=True,
         samesite = 'Strict')
     return response
+generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
+
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):
     response = HttpResponseRedirect(authorize_url)

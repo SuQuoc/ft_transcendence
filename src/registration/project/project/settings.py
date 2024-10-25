@@ -6,6 +6,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'project.urls'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+for static_dir in STATICFILES_DIRS:
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir)
+
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALLOWED_HOSTS = ['*']
@@ -45,20 +52,10 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 if SILK == True:
-    if not os.path.exists(STATIC_ROOT):
-        os.makedirs(STATIC_ROOT)
-    STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    ]
-    for static_dir in STATICFILES_DIRS:
-        if not os.path.exists(static_dir):
-            os.makedirs(static_dir)
     SILKY_PYTHON_PROFILER = True
     SILKY_PYTHON_PROFILER_BINARY = True
-    INSTALLED_APPS.append('silk')
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
-
-
+    INSTALLED_APPS.append('silk')
 
 TEMPLATES = [
     {
