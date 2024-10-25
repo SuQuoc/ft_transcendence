@@ -175,10 +175,8 @@ def delete_user(page: Page, password: str):
 def get_otp():
     base = Path(__file__).resolve().parent.parent.parent  # Correct usage of parent
     directory = base / 'src/registration/project/emails/'
+    time.sleep(2)  # Wait for 2 seconds the email to be created
     files = [f for f in directory.iterdir() if f.is_file()]
-    while not files:
-        time.sleep(1)  # Wait for 1 second
-        files = [f for f in directory.iterdir() if f.is_file()]
     last_saved_file = max(files, key=os.path.getmtime)
     with open(last_saved_file, 'r') as f:
         content = f.read().strip()
