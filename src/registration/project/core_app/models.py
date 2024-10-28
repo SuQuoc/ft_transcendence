@@ -55,8 +55,7 @@ class RegistrationUser(AbstractUser):
         return self.email_verified
 
     def generate_backup_codes(self):
-        if self.backup_codes is None:
-            self.backup_codes = []
+        self.backup_codes.clear()
         backup_codes = []
         for _ in range (10):
             backup_code = generate_random_string(32)
@@ -73,7 +72,7 @@ class RegistrationUser(AbstractUser):
                 self.save(update_fields=['backup_codes'])
                 return True
         return False
-
+    
 class OneTimePassword(models.Model):
 
     ACTION_CHOICES = [
