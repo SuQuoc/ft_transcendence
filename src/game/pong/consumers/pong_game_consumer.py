@@ -24,7 +24,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
         self.players.append(self.channel_name)
         if len(self.players) == 2:
-            PongGameConsumer.game_instance = Pong(self.players[0], self.players[1], points_to_win=15)
+            PongGameConsumer.game_instance = Pong(self.players[0], self.players[1], points_to_win=1)
             #await self.send_players_side()
             await self.send_initial_state(PongGameConsumer.game_instance.get_game_state())
             self.players.remove(self.players[0])
@@ -69,21 +69,42 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             PongGameConsumer.game_instance.update_game_state()
 
             game_state = PongGameConsumer.game_instance.get_game_state()
-            await self.channel_layer.group_send(
-                self.game_group,
-                {
-                    'type': 'state_update',
-                    'game_state': game_state
-                }
-            )
-            self.state_update(game_state)
+            await self.send_state_update(game_state)
             if game_state['score_l'] == points_to_win or game_state['score_r'] == points_to_win:
                 # send game end info to client
                 break
             await asyncio.sleep(tick_duration - (time.time() - start_time))  # Update the game state every 50ms
         print("end of game loop")
-        #self.game_end()
-        await self.channel_layer.group_send( # would love to get rid of this here and just make a function!!!
+        await self.send_game_end()
+        
+
+
+
+
+
+###### sending #######
+    async def send_initial_state(self, game_state):
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'initial_state',
+                'game_state': game_state
+            }
+        )
+            
+    
+    async def send_state_update(self, game_state):
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'state_update',
+                'game_state': game_state
+            }
+        )
+
+
+    async def send_game_end(self):
+        await self.channel_layer.group_send(
             self.game_group,
             {
                 'type': 'game_end'
@@ -92,38 +113,14 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
 
-###### sending #######
-    async def state_update(self, event):
-        game_state = event['game_state']
-        await self.send(text_data=json.dumps({
-            'type': 'state_update',
-            'game_state': game_state
-        }))
-
-
-    async def send_initial_state(self, game_state):
-        await self.channel_layer.send(
-            self.players[0],
-            {
-                'type': 'initial_state',
-                'game_state': game_state
-            }
-        )
-        await self.channel_layer.send(
-            self.players[1],
-            {
-                'type': 'initial_state',
-                'game_state': game_state
-            }
-        )
-
-    async def game_end(self, event):
-        print("game end")
-        await self.send(text_data=json.dumps({
-                'type': 'game_end',
-
-        }))
-
     ### EVENTS - each Websocket sends message to frontend ###
     async def initial_state(self, event):
+        await self.send(text_data=json.dumps(event))
+
+
+    async def state_update(self, event):
+        await self.send(text_data=json.dumps(event))
+
+
+    async def game_end(self, event):
         await self.send(text_data=json.dumps(event))
