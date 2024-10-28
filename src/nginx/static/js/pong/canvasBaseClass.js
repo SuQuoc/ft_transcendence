@@ -1,0 +1,115 @@
+import { Background } from './backgroundClass.js';
+
+export class canvasBaseClass extends HTMLElement {
+	constructor() {
+		super();
+
+		// Binds the method to this class instance so it can be used in the event listener
+		this.handleCanvasResize_var = this.handleCanvasResize.bind(this);
+		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
+	}
+
+	connectedCallback() {
+		const template = this.getElementHTML();
+		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
+		this.appendChild(content);
+
+		this.init(); // needs to happen after we got the html elements (which is why it is here and not in the constructor)
+
+		// waiting for the canvas to be rendered (https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame)
+		requestAnimationFrame(() => {
+			this.handleCanvasResize();
+			this.handleBackgroundCanvasResize();
+		});
+
+		// add event listeners
+		// maybe should be this or this.canvas not window !!??
+		window.addEventListener('resize', this.handleCanvasResize_var);
+		window.addEventListener('resize', this.handleBackgroundCanvasResize_var);
+	}
+
+	disconnectedCallback() {
+		// remove event listeners
+		window.removeEventListener('resize', this.handleCanvasResize_var);
+		window.removeEventListener('resize', this.handleBackgroundCanvasResize_var);
+	}
+
+
+	/// ----- Methods ----- ///
+	/** Initializes the canvases and other objects */
+	init() {
+		this.container =		this.querySelector('#pongCanvasContainer');
+		this.bg_canvas = 		this.querySelector('#pongBackgroundCanvas');
+		this.canvas =			this.querySelector('#pongGameCanvas');
+		this.bg_ctx = 			this.bg_canvas.getContext('2d');
+		this.ctx =				this.canvas.getContext('2d');
+		this.scale =			1;
+		this.ratio =			0.6;
+		this.width_unscaled =	1000;
+		this.height_unscaled =	this.width_unscaled * this.ratio;
+
+		this.background = 	new Background(this.width_unscaled,
+											this.height_unscaled,
+											50,
+											'grey',
+											'50px Arial',
+											this.bg_ctx);
+	}
+
+	/** Scales the canvas depending on the screensize and sets this.scale to the new scale. */
+	scaleCanvas(ctx, canvas_width, canvas_width_unscaled) {
+		this.scale = canvas_width / canvas_width_unscaled;
+	
+		ctx.scale(this.scale, this.scale);
+	}
+
+
+	/// ----- Event Handlers ----- ///
+
+	/** Resizes the (foreground) Canvas depending on the screensize. */
+	handleCanvasResize() {
+		const container_width = this.container.clientWidth;
+		const container_height = this.container.clientHeight;
+	
+		this.canvas.width = container_width;
+		this.canvas.height = this.canvas.width * this.ratio;
+		if (this.canvas.height > container_height) {
+			this.canvas.height = container_height;
+			this.canvas.width = this.canvas.height / this.ratio;
+		}
+	
+		this.scaleCanvas(this.ctx, this.canvas.width, this.width_unscaled);
+		this.player_left.draw();
+		this.player_right.draw();
+		this.ball.draw();
+	}
+	
+	/** Resizes the background Canvas depending on the screensize. */
+	handleBackgroundCanvasResize() {
+		const container_width = this.container.clientWidth;
+		const container_height = this.container.clientHeight;
+	
+		this.bg_canvas.width = container_width;
+		this.bg_canvas.height = this.bg_canvas.width * this.ratio;
+		if (this.bg_canvas.height > container_height) {
+			this.bg_canvas.height = container_height;
+			this.bg_canvas.width = this.bg_canvas.height / this.ratio;
+		}
+	
+		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
+		this.background.drawBackground(this.player_left.score, this.player_right.score)
+	}
+
+
+	getElementHTML() {
+		const template = document.createElement('template');
+		template.classList.add("w-100", "h-100");
+		template.innerHTML = `
+			<div id="pongCanvasContainer" class="canvas-container d-flex justify-content-center align-items-center w-100 h-100">
+				<canvas id="pongBackgroundCanvas" class="position-absolute bg-dark shadow" width="1000" height="600"></canvas>
+				<canvas id="pongGameCanvas" class="position-absolute" width="1000" height="600"></canvas>
+			</div>
+		`;
+		return template;
+	}
+}

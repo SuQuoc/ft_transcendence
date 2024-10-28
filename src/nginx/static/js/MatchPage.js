@@ -2,12 +2,6 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 import { PongCanvasElement } from "./pong/PongCanvasElement.js";
 
 export class MatchPage extends ComponentBaseClass {
-	constructor() {
-		super();
-
-		this.handlePongFullScreen_var = this.handlePongFullScreen.bind(this);
-	}
-
 	connectedCallback() {
 		super.connectedCallback();
 
@@ -27,25 +21,6 @@ export class MatchPage extends ComponentBaseClass {
 
 		// remove event listeners
 		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var);
-	}
-
-
-
-	/// ----- Event Handlers ----- ///
-
-	handlePongFullScreen() {
-		if (this.canvas.requestFullscreen) {
-			this.canvas.requestFullscreen();
-		} else if (this.canvas.mozRequestFullScreen) { // Firefox
-			this.canvas.mozRequestFullScreen();
-		} else if (this.canvas.webkitRequestFullscreen) { // Chrome, Safari and Opera
-			this.canvas.webkitRequestFullscreen();
-		} else if (this.canvas.msRequestFullscreen) { // IE/Edge
-			this.canvas.msRequestFullscreen();
-		}
-
-		this.canvas.handleCanvasResize();
-		this.canvas.handleBackgroundCanvasResize();
 	}
 
 

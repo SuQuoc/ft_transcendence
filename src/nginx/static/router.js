@@ -12,7 +12,12 @@ const validateToken = async () => {
 		});
 
 		if (response.status !== 200) {
-			throw new Error("Token is invalid");
+			const errorData = await response.json();
+			if (errorData.detail === "No access token provided") {
+				console.log("No access token provided");
+				return false;
+			}
+			throw new Error(errorData.detail || "Token is invalid");
 		}
 
 		return true;
@@ -178,7 +183,7 @@ const Router = {
 			window.app.pong_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
 			window.app.pong_socket.close();
 			window.app.pong_socket = null;
-			console.log("socket closed");
+			console.log("pong socket closed");
 		}
 	},
 

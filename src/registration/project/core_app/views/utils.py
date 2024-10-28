@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.http import HttpResponseRedirect
+from .utils_silk import conditional_silk_profile
 
 from django.core.mail import send_mail
 
@@ -44,6 +45,8 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_code=None, res
         secure=True,
         samesite = 'Strict')
     return response
+generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
+
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):
     response = HttpResponseRedirect(authorize_url)

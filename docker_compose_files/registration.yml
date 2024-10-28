@@ -40,7 +40,10 @@ services:
       DB_HOST: "${DB_HOST_REG:-db_registration}"
       DB_PORT: "${DB_PORT_REG:-5432}"
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      DEBUG: ${DJANGO_DEBUG_REG:-True}
+      DEBUG: ${DEBUG:-False}
+      SILK: "${SILK:-False}"
+      MOCK_EMAIL: "${MOCK_EMAIL:-True}" #[aguilmea] to be changed once the variable is set in github for the workflows running automatically
+      MOCK_OTP: "${MOCK_OTP:-True}" #[aguilmea] to be changed once the front end check is changed
       SERVER_URL: ${SERVER_URL:-https://localhost:8000}
       DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
@@ -48,9 +51,12 @@ services:
       EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
       EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
       EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
+      SENDGRID_API_KEY: "${SENDGRID_API_KEY:-SG.}"
     depends_on:
       db_registration:
         condition: service_healthy
+      redis_registration:
+        condition: service_started
     restart: on-failure
     profiles:
       - registration
@@ -61,3 +67,11 @@ services:
     secrets:
       - public_key.pem
       - private_key.pem
+
+  redis_registration:
+    container_name: pong_reg_redis
+    image: "redis:alpine"
+    expose:
+        - "6379"
+    networks:
+      - network_registration

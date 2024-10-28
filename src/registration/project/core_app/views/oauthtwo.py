@@ -12,11 +12,9 @@ from ..models import OauthTwo, RegistrationUser
 from ..common_utils import generate_random_string
 
 import os, requests, time, logging
-from silk.profiling.profiler import silk_profile
+from .utils_silk import conditional_silk_profile
 
-@silk_profile(name='send_authorization_request')
 @api_view(['POST'])
-@authentication_classes([AccessTokenAuthentication])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
     try:
@@ -33,8 +31,8 @@ def send_authorization_request(request):
         return generate_redirect_with_state_cookie(hashed_state, authorize_url)
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+send_authorization_request = conditional_silk_profile(send_authorization_request, name=send_authorization_request)
 
-@silk_profile(name='exchange_code_against_access_token')
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):
@@ -57,3 +55,4 @@ def exchange_code_against_access_token(request):
         raise Exception({'exchange_code_against_access_token: next_step not recognized' : oauthtwo.next_step})
     except Exception as e:
         return Response({'exchange_code_against_access_token': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+exchange_code_against_access_token = conditional_silk_profile(exchange_code_against_access_token, name=exchange_code_against_access_token)

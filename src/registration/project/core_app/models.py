@@ -1,8 +1,9 @@
 import uuid
-from encodings.base64_codec import base64_decode, base64_encode
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -28,8 +29,22 @@ class RegistrationUser(AbstractUser):
         return self.username
 
     def save(self, *args, **kwargs):
-        self.username = self.username.lower()  # Ensure username is stored in lowercase
-        super(RegistrationUser, self).save(*args, **kwargs)
+        self.username = self.username.lower()
+        if self.password:
+            try:
+                validate_password(self.password, user=self)
+            except ValidationError as e:
+                raise ValueError(f"Password validation error: {', '.join(e.messages)}")
+        if self.pk is None:
+            super(RegistrationUser, self).save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
+    def validate_password(self, password):
+        try:
+            validate_password(password, user=self)
+        except ValidationError as e:
+            raise ValueError(f"Password validation error: {', '.join(e.messages)}")
 
     def set_verified(self):
         self.email_verified = True
@@ -40,9 +55,9 @@ class RegistrationUser(AbstractUser):
         return self.email_verified
 
     def generate_backup_code(self):
-        backup_code = generate_random_string(128)
+        backup_code = generate_random_string(32)
         self.backup_code = make_password(backup_code)
-        self.save()
+        self.save(update_fields=['backup_code'])
         return backup_code
 
     def check_backup_code(self, backup_code):

@@ -8,7 +8,7 @@ mkdir -p $DIR
 
 ################### ROOT CERTIFICATES #####################
 
-openssl genrsa -out "${DIR}/root-ca.key" 4096
+openssl ecparam -genkey -name prime256v1 -out "${DIR}/root-ca.key"
 
 openssl req \
     -new -key "${DIR}/root-ca.key" \
@@ -26,7 +26,7 @@ openssl x509 -req  -days 3650  -in "${DIR}/root-ca.csr" \
 
 ################### LOCALHOSTS CERTIFICATES ###############
 
-openssl genrsa -out "${DIR}/localhost.key" 4096
+openssl ecparam -genkey -name prime256v1 -out "${DIR}/localhost.key"
 
 openssl req -new -key "${DIR}/localhost.key" -out "${DIR}/localhost.csr" -sha256 \
     -subj '/C=FR/ST=IDF/L=Paris/O=42Network/CN=local'
