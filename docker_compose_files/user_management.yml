@@ -1,4 +1,5 @@
 services:
+  # TODO: change _MANAGEMENT ending to _UM
   db_usermanagement:
     container_name: pong_um_db
     image: postgres:16
@@ -46,7 +47,6 @@ services:
       DJ_SUDO_USERNAME_MANAGEMENT: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
       DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
       DJ_SUDO_PASSWORD_MANAGEMENT: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
-      JWT_SECRET: "${JWT_SECRET:-somesecret}"
       SERVER_URL: ${SERVER_URL:-https://localhost:8000}
     depends_on:
       db_usermanagement:

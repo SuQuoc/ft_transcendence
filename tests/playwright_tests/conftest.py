@@ -19,7 +19,7 @@ print(f"Using BASE_URL !!!!!!!!!!!!: {BASE_URL}")
 AUTOMATION_USER_AGENT = "Chrome/91.0.4472.124"
 AUTH_STATE_PATH = os.path.join(os.path.dirname(__file__), "auth_state.json")
 USERMAIL = "transcendence42vienna+test1@gmail.com"
-USERPW = "password"
+USERPW = "RShLrG2vV3"
 USERDISPLAYNAME = "test1"
 
 # DEFINES for tournament tests
@@ -175,10 +175,8 @@ def delete_user(page: Page, password: str):
 def get_otp():
     base = Path(__file__).resolve().parent.parent.parent  # Correct usage of parent
     directory = base / 'src/registration/project/emails/'
+    time.sleep(2)  # Wait for 2 seconds the email to be created
     files = [f for f in directory.iterdir() if f.is_file()]
-    while not files:
-        time.sleep(1)  # Wait for 1 second
-        files = [f for f in directory.iterdir() if f.is_file()]
     last_saved_file = max(files, key=os.path.getmtime)
     with open(last_saved_file, 'r') as f:
         content = f.read().strip()

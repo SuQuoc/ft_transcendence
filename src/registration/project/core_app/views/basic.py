@@ -4,13 +4,17 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.core.exceptions import ValidationError
 
+from .token import CustomTokenObtainPairSerializer
 from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
-from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
-import time
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
+from ..tasks import create_user_send_otp
+from django.conf import settings
+from .utils_silk import conditional_silk_profile
 import logging
 
 @api_view(['POST'])
@@ -23,24 +27,18 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
         if not otp:
-            start_time = time.time()
-            created_otp = create_one_time_password(user.id, 'login')
-            logging.warning(f"time for creating OTP: {time.time() - start_time}")
-            start_time = time.time()
-            send_otp_email(user.username, 'login', created_otp)
-            logging.warning(f"time for sending OTP: {time.time() - start_time}")
+            #created_otp = create_one_time_password(user.id, 'login')
+            #send_otp_email.delay(user.username, 'login', created_otp)
+            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'login')
             return Response(status=status.HTTP_202_ACCEPTED)
-        start_time = time.time()
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        logging.warning(f"time for checking OTP: {time.time() - start_time}")
-        token_s = TokenObtainPairSerializer(data=request.data)
-        start_time = time.time()
-        temp = generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-        logging.warning(f"time for generating response: {time.time() - start_time}")
-        return temp
+        token_s = CustomTokenObtainPairSerializer(data=request.data)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+login = conditional_silk_profile(login, name=login)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -60,6 +58,7 @@ def forgot_password(request):
             return Response(status=status.HTTP_202_ACCEPTED)
         if not new_password or not check_one_time_password(user, 'reset_password', otp):
            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user.validate_password(new_password)
         user.set_password(new_password)
         user.save()
         return Response(status=status.HTTP_200_OK)
@@ -71,42 +70,39 @@ def forgot_password(request):
 @permission_classes([AllowAny])
 def signup(request):
     try:
-        start_time = time.time()
         username = request.data.get('username')
         password = request.data.get('password')
         otp = request.data.get('otp')
-        logging.warning(f"get data from request in: {time.time() - start_time}")
-        start_time = time.time()
         if not username or not password:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=username).first()
-        logging.warning(f"get user from db in: {time.time() - start_time}")
         if not user:
             if otp:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            user = user_s.create(request.data)
-            created_otp = create_one_time_password(user.id, 'signup')
-            send_otp_email(username, 'signup', created_otp)
+            user_data = user_s.validated_data
+            create_user_send_otp.delay(user_data, 'signup')
             return Response(status=status.HTTP_201_CREATED)
         if user.is_verified() is True:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
-            created_otp = create_one_time_password(user.id, 'signup')
-            send_otp_email(username, 'signup', created_otp)
+            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        backup_code = user.generate_backup_code()
         user.set_verified( )
         token_s = TokenObtainPairSerializer(data=request.data)
-        backup_code = user.generate_backup_code()
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
+    except ValidationError as e:
+        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+signup = conditional_silk_profile(signup, name=signup)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -121,13 +117,16 @@ def signup_change_password(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if user.is_verified():
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        created_otp = create_one_time_password(user.id, 'signup')
-        send_otp_email(username, 'signup', created_otp)
+        user.validate_password(password)
         user.set_password(password)
         user.save()
+        created_otp = create_one_time_password(user.id, 'signup')
+        send_otp_email(username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
+    except ValidationError as e:
+        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

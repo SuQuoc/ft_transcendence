@@ -162,7 +162,7 @@ export class ForgotPassword extends ComponentBaseClass {
         const otp = this.shadowRoot.getElementById('otpCode').value;
         const passwordSection = this.shadowRoot.getElementById('passwordSection');
         const otpError = this.shadowRoot.getElementById('otpErrorMessage');
-        const otpPattern = /^[A-Z0-9]{16}/;
+        const otpPattern = /^[A-Z0-9a-z]{16}/;
 
         if (otpPattern.test(otp)) {
             passwordSection.style.display = 'block';
@@ -196,7 +196,7 @@ export class ForgotPassword extends ComponentBaseClass {
         const password1 = this.shadowRoot.getElementById('newPassword1').value;
         const password2 = this.shadowRoot.getElementById('newPassword2').value;
         const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
-        const otpPattern = /^[A-Z0-9]{16}$/;
+        const otpPattern = /^[A-Z0-9a-z]{16}$/;
 
         if (email && otpPattern.test(otp) && password1 && password2 && password1 === password2) {
             resetButton.disabled = false;

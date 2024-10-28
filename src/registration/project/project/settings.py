@@ -3,9 +3,24 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_URL = '/static/'
+ROOT_URLCONF = 'project.urls'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+for static_dir in STATICFILES_DIRS:
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir)
+
+
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = os.environ.get('DEBUG') == 'True'
 ALLOWED_HOSTS = ['*']
+
+DEBUG = os.environ.get('DEBUG') == 'True'
+SILK = os.environ.get('SILK') == 'True'
+MOCK_EMAIL = os.environ.get('MOCK_EMAIL') == 'True'
+MOCK_OTP = os.environ.get('MOCK_OTP') == 'True'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -30,23 +45,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-if DEBUG:
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
-    if not os.path.exists(STATIC_ROOT):
-        os.makedirs(STATIC_ROOT)
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-    ]
-    for static_dir in STATICFILES_DIRS:
-        if not os.path.exists(static_dir):
-            os.makedirs(static_dir)  
+#values set for testing now
+CELERY_BROKER_URL = 'redis://redis_registration:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis_registration:6379/0'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+
+if SILK == True:
     SILKY_PYTHON_PROFILER = True
     SILKY_PYTHON_PROFILER_BINARY = True
-    INSTALLED_APPS.append('silk')
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
-
-ROOT_URLCONF = 'project.urls'
+    INSTALLED_APPS.append('silk')
 
 TEMPLATES = [
     {
@@ -79,26 +88,28 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
   {
-    # Checks the similarity between the password and a set of attributes of the user.
     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     'OPTIONS': {
       'user_attributes': ('username', 'ft_userid', 'backup_code'),
-      'max_similarity': 0.5,
+      'max_similarity': 0.9,
     }
   },
   {
-    # Checks whether the password meets a minimum length.
     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     'OPTIONS': {
       'min_length': 8,
     }
   },
   {
-    # Checks whether the password occurs in a list of common passwords
+    'NAME': 'core_app.validators.MyMaximumLengthValidator',
+    'OPTIONS': {
+      'max_length': 120,
+    }
+  },
+  {
     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
   },
   {
-    # Checks whether the password isn’t entirely numeric
     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
   }
 ]
@@ -142,7 +153,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
-if DEBUG:
+
+if MOCK_EMAIL == True:
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
     EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'emails/')
     if not os.path.exists(EMAIL_FILE_PATH):
@@ -164,26 +176,30 @@ APPEND_SLASH=False # [aguilmea] changed temporarly
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            },
         },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',  # Set the logging level for Django-specific messages
-            'propagate': True,
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
         },
-    },
-}
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+            'celery': {
+                'handlers': ['console'],
+                'level': 'WARNING',
+                'propagate': True,
+            }
+        },
+    }
 
-#  end of added manually

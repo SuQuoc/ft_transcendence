@@ -211,6 +211,8 @@ export class UserProfile extends ComponentBaseClass {
     async handleLogout() {
         await fetch('/registration/logout', { method: 'GET' })
             .then(() => {
+                window.localStorage.removeItem("oauthCode");
+				window.localStorage.removeItem("oauthState");
                 window.app.router.go('/login', true);
             })
             .catch((error) => {

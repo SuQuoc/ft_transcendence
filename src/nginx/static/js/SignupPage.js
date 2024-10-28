@@ -66,7 +66,7 @@ export class SignupPage extends ComponentBaseClass {
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
-                        <a href="/login" class="text-decoration-none text-white">
+                        <a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
                             Log in
                         </a>
                         here!
@@ -159,7 +159,7 @@ export class SignupPage extends ComponentBaseClass {
 	handleOTPInput() {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Z0-9a-z]{16}$/;
 
 		if (otpPattern.test(otp)) {
 			errorMessage.textContent = '';
@@ -177,7 +177,7 @@ export class SignupPage extends ComponentBaseClass {
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Z0-9a-z]{16}$/;
 
 		if (email && password1 && password2 && otpPattern.test(otp)) {
 			signupButton.removeAttribute('disabled');
@@ -232,7 +232,6 @@ export class SignupPage extends ComponentBaseClass {
 				});
 
 				if (!response.ok) {
-					console.log(response);
 					throw new Error('Signup failed');
 				}
 				window.app.userData.email = email;
