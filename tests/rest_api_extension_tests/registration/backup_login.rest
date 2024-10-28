@@ -20,7 +20,8 @@ Content-Type: application/json
 
 ###
 
-@CODE = {{signup.response.body.backup_code}}
+@CODE0 = {{signup.response.body.backup_code.0}}
+@CODE1 = {{signup.response.body.backup_code.1}}
 
 ###
 
@@ -51,7 +52,7 @@ Content-Type: application/json
 
 {
     "username": "{{username3}}",
-    "backup_code": "{{CODE}}"
+    "backup_code": "{{CODE0}}"
 }
 ###
 
@@ -61,5 +62,5 @@ Content-Type: application/json
 {
     "username": "{{username3}}",
     "password": "{{current_password3}}",
-    "backup_code": "{{CODE}}"
+    "backup_code": "{{CODE1}}"
 }

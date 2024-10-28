@@ -94,10 +94,10 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_code = user.generate_backup_code()
-        user.set_verified( )
+        backup_codes = user.generate_backup_codes()
+        user.set_verified()
         token_s = TokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
         return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
