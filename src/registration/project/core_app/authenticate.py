@@ -48,11 +48,3 @@ class BackupCodeAuthentication(BaseAuthentication):
             return None
         return user, None
 
-class UsernameAuthentication(BaseAuthentication):
-    def authenticate(self, request, password=None):
-        username = request.data.get('username')
-        if not username:
-            return None
-        user = RegistrationUser.objects.filter(username=username).first()
-        return user, None
-
