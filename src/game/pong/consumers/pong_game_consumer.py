@@ -64,6 +64,13 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         tick_duration = 0.03
         start_time = time.time()
 
+        # count down
+        for count in [5, 4, 3, 2, 1, 0]:
+            await self.send_count_down(count)
+            await asyncio.sleep(1)
+        # send initial state again, so the ball is in the right position
+        await self.send_initial_state(PongGameConsumer.game_instance.get_game_state())
+        # game loop
         while True:
             start_time = time.time()
             PongGameConsumer.game_instance.update_game_state()
@@ -73,16 +80,23 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             if game_state['score_l'] == points_to_win or game_state['score_r'] == points_to_win:
                 # send game end info to client
                 break
-            await asyncio.sleep(tick_duration - (time.time() - start_time))  # Update the game state every 50ms
+            await asyncio.sleep(tick_duration - (time.time() - start_time))
         print("end of game loop")
         await self.send_game_end()
         
 
 
-
-
-
 ###### sending #######
+    async def send_count_down(self, count):
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'count_down',
+                'count': count
+            }
+        )
+
+
     async def send_initial_state(self, game_state):
         await self.channel_layer.group_send(
             self.game_group,
@@ -114,6 +128,10 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     ### EVENTS - each Websocket sends message to frontend ###
+    async def count_down(self, event):
+        await self.send(text_data=json.dumps(event))
+
+
     async def initial_state(self, event):
         await self.send(text_data=json.dumps(event))
 

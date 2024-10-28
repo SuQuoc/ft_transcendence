@@ -63,6 +63,18 @@ class Ball:
                 self.pos.x = player_r.pos.x - self.size
                 self.vel.x *= -1
 
+        # this doesn't work because we don't know what sides were crossed
+        """  if bx < px + pw
+                # checking if the ball is in the upper half of the player
+                if by + bs >= py and by <= py + ph / 2
+                    by = py - bs
+                    bvy *= -1
+                # checking if the ball is in the lower half of the player
+                elif by + bs >= py + ph / 2 and by <= py + ph
+                    by = py + ph
+                    bvy *= -1
+        """
+
 
     def reset(self):
         self.pos.x = self.base_pos.x
