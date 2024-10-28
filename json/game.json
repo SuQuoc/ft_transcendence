@@ -19,8 +19,7 @@
         "player_r_y": 100,
         "score_l": 0,
         "score_r": 0,
-
-}
+}}
 
 
 {
@@ -33,4 +32,10 @@
         "score_l": 0,
         "score_r": 1,
     }
+}
+
+
+{
+    "type": "game_end",
+    "status": "won | lost"
 }
