@@ -2,6 +2,20 @@ from playwright.sync_api import expect
 from conftest import T_DISPLAYNAME, T_NAME, BASE_URL
 
 class TestTournamentMultiple:
+    """ def test_tournament_bracket(self, pages):
+        tname="tournament_bracket"
+
+        for page in pages:
+            page.locator("#playMenuGoToTournament").click()
+        expect(pages[0].locator("#createTournamentForm")).to_be_visible()
+        
+        create_tournament(pages[0], tournament_name=tname, n_players=4, points_to_win=5)
+        for page in pages[1:3]:
+            join_tournament(page, tournament_name=tname)
+        
+        import time
+        while 1:
+            time.sleep(2) """
 
     def test_create_tournament(self, pages):
         # going to tournament page

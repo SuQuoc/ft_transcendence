@@ -8,9 +8,10 @@ from .consumers.pong_game_consumer import PongGameConsumer
 
 websocket_urlpatterns = [
     # re_path(r"daphne/pong/(?P<room_name>\w+)/$", ChatConsumer.as_asgi()),
-    path('daphne/lobbies', LobbiesConsumer.as_asgi(), name='UNUSED-lobbies-page'), # TODO change name from lobbies to tournaments, also "daphne" to game or smth else
     # re_path(r'daphne/lobbies/(?P<room_name>\w+)/(?P<game_id>\d+)$', GameConsumer.as_asgi(), name='UNUSED-game-page'),
-    re_path(r'daphne/lobbies/(?P<room_name>\w+)$', PongGameConsumer.as_asgi(), name='UNUSED-pong-page'),
+    path('daphne/tournament', LobbiesConsumer.as_asgi(), name='UNUSED-lobbies-page'), # TODO: order of paths are important, maybe check in re_path if match id is in uuid format
+    re_path(r'daphne/tournament/(?P<match_id>\w+)$', PongGameConsumer.as_asgi(), name='UNUSED-pong-page'), # for tournaments
+    re_path(r'daphne/(?P<match_id>\w+)$', PongGameConsumer.as_asgi(), name='UNUSED-pong-page'), # for matchmaking
     
     # re_path for matchmaking
     # re_path for matchmaking-game

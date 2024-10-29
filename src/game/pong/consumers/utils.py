@@ -24,7 +24,7 @@ T_GET_ROOM_INFO = "get_room_info"
 T_ROOM_INFO = "room_info"
 
 T_START_TOURNAMENT = "start_tournament"
-T_TOURNAMENT_MATCH = "tournament_match"
+T_TOURNAMENT_BRACKET = "tournament_bracket"
 
 T_SUCCESS = "success"
 T_ERROR = "error"
