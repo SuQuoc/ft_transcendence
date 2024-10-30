@@ -3,24 +3,36 @@ import time
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
+from enum import Enum
+from .utils import get_user_id_from_jwt 
 
+
+class GameMode(Enum):
+    NORMAL = 'normal'
+    tournament = 'tournament'
 
 class PongGameConsumer(AsyncWebsocketConsumer):
     game_instance = None
     players = []
-    
-    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.mode = None # resolve from scope
+
     async def connect(self):
         #print(f"GameConsumer - connect")
+        token = self.scope["cookies"]["access"]
+        self.client_group = f"client_{get_user_id_from_jwt(token)}"
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.game_group = f'game_{self.room_name}'
         
-        await self.accept()
+        await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(
                 self.game_group,
                 self.channel_name
-        )
+        ) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
+        await self.accept()
 
         self.players.append(self.channel_name)
         if len(self.players) == 2:
@@ -31,7 +43,10 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             self.players.remove(self.players[0])
 
             #PongGameConsumer.game_loop_running = True
-            asyncio.create_task(self.game_loop())
+            
+            game_task = asyncio.create_task(self.game_loop())
+            # NOTE: should also work with as a class method or any other method? doesnt need to be an instance method
+            # the consumer 
 
 
 
@@ -39,6 +54,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         #print(f"GameConsumer - disconnect")
         if self.channel_name in self.players:
             self.players.remove(self.channel_name)
+
+        await self.channel_layer.group_discard(
+            self.client_group, 
+            self.channel_name
+        )
+        
         await self.channel_layer.group_discard(
             self.game_group,
             self.channel_name
@@ -81,9 +102,31 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 # send game end info to client
                 break
             await asyncio.sleep(tick_duration - (time.time() - start_time))
-        print("end of game loop")
-        await self.send_game_end()
         
+        print("end of game loop")
+        await self.send_game_end()            
+        
+        # NOTE: dont send THIS TO FRONTEND
+        await self.channel_layer.group_send(
+            self.client_group,
+            {
+                "type": "match_result",
+                "winner": "winner", 
+                "loser": "loser",
+                "winner_score": "winner_score",
+                "loser_score": "loser_score"
+            })
+
+
+        # TODO: 
+        # save the result of the game in the database - must be done in a task and not in consumer
+        # 1 match = 1 record in the database
+        # send message to tournament consumer if applicable
+
+        
+
+
+
 
 
 ###### sending #######
@@ -118,12 +161,22 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     async def send_game_end(self):
-        await self.channel_layer.group_send(
-            self.game_group,
-            {
-                'type': 'game_end'
-            }
-        )
+        game = PongGameConsumer.game_instance
+        if (game.player_l.id == self.channel_name and game.player_l.score == game.points_to_win) \
+            or (game.player_r.id == self.channel_name and game.player_r.score == game.points_to_win):
+            await self.send(json.dumps(
+                {
+                    'type': 'game_end',
+                    'status': "won"
+                }
+            ))
+        else:
+            await self.send(json.dumps(
+                {
+                    'type': 'game_end',
+                    'status': "lost"
+                }
+            ))
 
 
 
@@ -140,5 +193,5 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
 
-    async def game_end(self, event):
-        await self.send(text_data=json.dumps(event))
+    # async def game_end(self, event):
+    #     await self.send(text_data=json.dumps(event))

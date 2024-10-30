@@ -12,13 +12,10 @@ games = {}
 # TODO: Notion todo
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     lock = asyncio.Lock()
-    GROUP_ = 'matchmaking'
     group_matchm = 'matchmaking'
-    players = []
+    players = [] # stores the channel names of the players
 
     async def connect(self):
-        
-        # Trick: when performing the cpu task before IO i limit the len of the players list to be max of 2
         await self.accept()
         await self.channel_layer.group_add(
                 self.group_matchm,
@@ -31,23 +28,26 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             player2 = MatchmakingConsumer.players.pop(0)
             uuid = uuid.uuid4()
             
-            send_players_where_to_connect_to(uuid, player1, self.channel_name)
-            await self.channel_layer.send(
-            player1,
+            self.send_players_where_to_connect_to(uuid, player1)
+            self.send_players_where_to_connect_to(uuid, player2)
+            
+            # could store who is allowed to join the game
+            await self.disconnect(1000)
+        
+    
+    async def send_players_where_to_connect_to(self, uuid, channel_name):
+        await self.channel_layer.send(
+            channel_name,
             {
-                'type': 'game_room',
-                'id': "uuid"
+                'type': 'match_found',
+                'match_id': "uuid"
             })
 
 
-            await self.disconnect(1000)
-        
-        
-        
-
-
     async def disconnect(self, close_code):
-        MatchmakingConsumer.players.remove(self.channel_name) # Trick: wont need this
+        if self.channel_name in MatchmakingConsumer.players:
+            MatchmakingConsumer.players.remove(self.channel_name)
+        
         await self.channel_layer.group_discard(
             self.group_matchm,
             self.channel_name
