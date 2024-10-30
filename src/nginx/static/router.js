@@ -135,7 +135,7 @@ const Router = {
 	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies";
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/tournament";
 			window.app.socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -160,10 +160,12 @@ const Router = {
 	},
 
 	//opens the window.app.pong_socket if it is closed
-	makePongWebSocket: (type) => {
+	/** creates a Websocket connection to backend using a match id */
+	makePongWebSocket: (match_id="someMatchMakingID") => {
+		
 		if (!window.app.pong_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/lobbies/someNAME";
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/tournament/" + match_id;
 			window.app.pong_socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -173,7 +175,7 @@ const Router = {
 
 		window.app.pong_socket.onopen = () => {
 			console.log("pong socket opened");
-			window.app.pong_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+			// NOTE: window.app.pong_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
 		};
 	},
 
@@ -245,13 +247,13 @@ const Router = {
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
-				Router.makePongWebSocket("tournament"); // type needed??!!!
+				Router.makePongWebSocket();
 				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
 			case "/match":
 				console.log("match page created");
 				Router.closePongWebSocket(); //only closes the socket if it is open
-				Router.makePongWebSocket("match"); // maybe change to "on_match_page" ??!!
+				Router.makePongWebSocket("matchID");
 				pageElement = document.createElement("match-page");
 				break;
 			case "/pong": // needed??!!!

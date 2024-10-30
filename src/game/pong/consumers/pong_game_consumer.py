@@ -4,8 +4,7 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
 from enum import Enum
-from .utils import get_user_id_from_jwt 
-
+from .utils import get_user_id_from_jwt
 
 class GameMode(Enum):
     NORMAL = 'normal'
@@ -23,9 +22,17 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         #print(f"GameConsumer - connect")
         token = self.scope["cookies"]["access"]
         self.client_group = f"client_{get_user_id_from_jwt(token)}"
+        print(f"GAME CONSUMER client group: {self.client_group}")
 
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.game_group = f'game_{self.room_name}'
+        
+
+        self.match_id = self.scope['url_route']['kwargs']['match_id']
+        self.game_group = f'game_{self.match_id}'
+
+        url_path = self.scope['path']
+        print(f"url_path: {url_path}")
+        if '/daphne/tournaments/' in url_path:
+            self.mode = GameMode.tournament
         
         await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(
@@ -34,6 +41,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         ) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
         await self.accept()
 
+        await self.channel_layer.group_send(
+            self.client_group,
+            {
+                "type": "test",
+            })
+        
         self.players.append(self.channel_name)
         if len(self.players) == 2:
             PongGameConsumer.game_instance = Pong(self.players[0], self.players[1], points_to_win=1)
@@ -107,17 +120,17 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.send_game_end()            
         
         # NOTE: dont send THIS TO FRONTEND
+        # if is_tournament:
         await self.channel_layer.group_send(
-            self.client_group,
+            self.game_group,
             {
-                "type": "match_result",
+                "type": "forward_match_result",
                 "winner": "winner", 
                 "loser": "loser",
                 "winner_score": "winner_score",
                 "loser_score": "loser_score"
             })
-
-
+        print("end of game loop function !!!")
         # TODO: 
         # save the result of the game in the database - must be done in a task and not in consumer
         # 1 match = 1 record in the database
@@ -193,5 +206,26 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
 
+    async def test(self, event):
+        print("Game consumer test event")
+        pass
+
     # async def game_end(self, event):
     #     await self.send(text_data=json.dumps(event))
+
+    async def forward_match_result(self, event):
+        print("forward_match_result")
+        self.channel_layer.group_send(
+            self.client_group,
+            {
+                'type': 'match_result',
+                'winner': event['winner'],
+                'loser': event['loser'],
+                'winner_score': event['winner_score'],
+                'loser_score': event['loser_score']
+            }
+        )
+    
+    async def match_result(self, event):
+        print("match_result in game consumer")
+        pass

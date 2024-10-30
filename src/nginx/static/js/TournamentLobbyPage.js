@@ -37,6 +37,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// removing event listeners
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
 		window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
+		window.app.router.closePongWebSocket(); // QTRAN
 	}
 
 
@@ -99,6 +100,22 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 		else if (data.type === "room_info") {
 			this.initLobby(data.room);
+		}
+		else if (data.type === "tournament_bracket") {
+			// TODO: write clean
+			let match_id = null;
+			for (let match in data.matches) {
+				if (match.player1 == window.app.username) {
+					match_id = match.match_id;
+					break;
+				}
+				else if (match.player2 == window.app.username) {
+					match_id = match.match_id;
+					break;
+				}
+			}
+			console.log("match_id: ", match_id);
+			window.app.router.makePongWebSocket(match_id);
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
