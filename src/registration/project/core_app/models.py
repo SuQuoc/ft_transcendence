@@ -13,13 +13,12 @@ import base64
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     username = models.EmailField(max_length=254, unique=True)
+    setup_date = models.DateTimeField(default=timezone.now)
+    last_login = models.DateTimeField(default=timezone.now)
     password = models.CharField(max_length=128, blank=True)
     backup_code = models.CharField(max_length=128, blank=True)
     email_verified = models.BooleanField(default=False)
-    twofa_enabled = models.BooleanField(default=False)
-
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
     REQUIRED_FIELDS = []
@@ -54,6 +53,10 @@ class RegistrationUser(AbstractUser):
     def is_verified(self):
         return self.email_verified
 
+    def actualise_last_login(self):
+        self.last_login = timezone.now()
+        self.save(update_fields=['last_login'])
+
     def generate_backup_code(self):
         backup_code = generate_random_string(32)
         self.backup_code = make_password(backup_code)
@@ -63,6 +66,8 @@ class RegistrationUser(AbstractUser):
     def check_backup_code(self, backup_code):
         return check_password(backup_code, self.backup_code)
 
+def get_expiration_time():
+    return timezone.now() + timedelta(minutes=5)
 
 class OneTimePassword(models.Model):
 
@@ -79,7 +84,7 @@ class OneTimePassword(models.Model):
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     password = models.CharField(max_length=128)
-    expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
+    expire = models.DateTimeField(default=get_expiration_time)
 
     def delete(self):
         self.expire = timezone.now()
@@ -110,6 +115,7 @@ class OauthTwo(models.Model):
     state = models.CharField(max_length=128)
     next_step = models.CharField(max_length=16, choices=NEXT_STEP_CHOICES)
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, null=True, related_name='OauthTwo_related_user')
+    expire = models.DateTimeField(default=get_expiration_time)
 
     def delete(self):
         self.expire = timezone.now()
