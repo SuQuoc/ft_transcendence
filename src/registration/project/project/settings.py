@@ -203,3 +203,4 @@ if DEBUG == True:
         },
     }
 
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")] # [aguilmea] added for admin login

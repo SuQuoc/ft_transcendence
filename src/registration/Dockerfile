@@ -7,4 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./project .
 
-ENTRYPOINT ["./project/entrypoint.sh"]
+#ENTRYPOINT ["./project/entrypoint.sh"]
+ENTRYPOINT ["./project/entrypoint_admin.sh"]

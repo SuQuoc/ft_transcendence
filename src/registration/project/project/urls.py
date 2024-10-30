@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-
+from django.contrib import admin
 from core_app.views import common, oauthtwo, basic, backup
 from django.urls import path, include
 
@@ -43,6 +43,9 @@ urlpatterns = [
     # oauth2 views
     path('registration/oauthtwo_send_authorization_request', oauthtwo.send_authorization_request),
     path('registration/oauthtwo_exchange_code_against_access_token', oauthtwo.exchange_code_against_access_token),
+
+    #
+    path('registration/admin', admin.site.urls),
 ]
 
 if settings.SILK == True:
