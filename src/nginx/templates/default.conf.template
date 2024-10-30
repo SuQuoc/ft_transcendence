@@ -93,7 +93,6 @@ server {
 
     location = /custom_error.html {
     ssi on; # server side includes
-    ssi_types text/html;
     internal;
     root /usr/share/nginx/html;
     }
