@@ -26,6 +26,32 @@ services:
     networks:
       - network_user_management
 
+  redis:
+    container_name: pong_um_redis
+    image: redis:alpine3.20
+    environment: &redis_env
+      REDIS_ADMIN_USER: ${UM_REDIS_ADMIN_USER:-redisadmin}
+      REDIS_ADMIN_PASSWORD: ${UM_REDIS_ADMIN_PASSWORD:-redisadminpass}
+      REDIS_USER: "${UM_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
+    volumes:
+      - ./generate-redis-conf.sh:/usr/local/bin/generate-redis-conf.sh
+    expose:
+      - 6379
+    entrypoint: ["sh", "/usr/local/bin/generate-redis-conf.sh"]
+    #command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 4
+    networks:
+      - network_redis_um
+    profiles:
+      - all
+      - user_management
+
+
   usermanagement:
     container_name: pong_um
     build: ../src/user_management
@@ -58,6 +84,7 @@ services:
     networks:
       - network_user_management
       - network_django
+      - network_redis_um
     secrets:
       - public_key.pem
       - private_key.pem # TODO !!! delete this line

@@ -20,6 +20,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from pong.routing import websocket_urlpatterns
 
+# NOTE: whats this for?
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong.settings')
 django.setup()
 
