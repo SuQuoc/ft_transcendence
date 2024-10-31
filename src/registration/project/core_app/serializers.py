@@ -12,7 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
             'backup_code': {'read_only': True},
             'password_set': {'read_only': True},
             'email_verified': {'read_only': True},
-            'twofa_enabled': {'read_only': True},
         }
 
     def create(self, validated_data):

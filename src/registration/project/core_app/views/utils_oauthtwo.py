@@ -117,6 +117,8 @@ def signup(email):
             logging.warning(f"signup: {user_s.errors}")
             return Response({'signup error': data}, status=status.HTTP_400_BAD_REQUEST)
         user_s.save()
+        user = RegistrationUser.objects.filter(username=email).first()
+        user.set_verified()
         token_s = CustomTokenObtainPairSerializer(data=data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
     except Exception as e:

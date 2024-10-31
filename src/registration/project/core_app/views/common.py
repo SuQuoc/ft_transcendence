@@ -28,12 +28,13 @@ def change_password(request):
             otp = create_one_time_password(user.id, 'change_password')
             send_otp_email(user.username, 'change_password', otp)
             return Response(status=status.HTTP_202_ACCEPTED)
-        if user.password_is_set and not check_one_time_password(user, 'change_password', otp):
+        if user.password_is_set() and not check_one_time_password(user, 'change_password', otp):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.validate_password(new_password)
         user.set_password(new_password)
+        user.change_password_is_set()
         user.save()
-        return send_200_with_expired_cookies()
+        return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -71,7 +72,7 @@ def change_username(request):
         user.username = new_username
         user.ft_userid = None
         user.save()
-        return send_200_with_expired_cookies()
+        return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'change_username error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

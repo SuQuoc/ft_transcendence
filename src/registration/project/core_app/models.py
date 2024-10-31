@@ -33,10 +33,7 @@ class RegistrationUser(AbstractUser):
     def save(self, *args, **kwargs):
         self.username = self.username.lower()
         if self.password:
-            try:
-                validate_password(self.password, user=self)
-            except ValidationError as e:
-                raise ValueError(f"Password validation error: {', '.join(e.messages)}")
+            self.validate_password(self.password)
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
@@ -58,6 +55,11 @@ class RegistrationUser(AbstractUser):
 
     def password_is_set(self):
         return self.password_set
+
+    def change_password_is_set(self):
+        self.password_set = True
+        self.save()
+        return self
 
     #TODO: check if we actually want to hash the backup code
     def generate_backup_code(self):

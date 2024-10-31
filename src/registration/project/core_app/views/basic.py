@@ -25,6 +25,7 @@ from django.core.cache import cache
 def login(request):
     try:
         user = request.user
+        logging.warning(f"user {user.id} is verified {user.is_verified()}")
         if not user.is_verified():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
@@ -103,7 +104,9 @@ def signup(request):
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         backup_code = user.generate_backup_code()
-        user.set_verified( )
+        user.set_verified()
+        user.change_password_is_set()
+        logging.warning(f"password_set set to {user.password_is_set()}")
         cache_key = f'jwt_{user.id}'
         logging.warning(f"retrieving cache for key {cache_key}")
         jwt_response = cache.get(cache_key)

@@ -17,7 +17,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
 		this.displayname_warning = this.shadowRoot.getElementById("displayNameWarning");
-		this.password_warning = this.shadowRoot.getElementById("passwordWarning");
+		this.password_warning = null;
 
 		// adding event listeners
 		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
@@ -39,7 +39,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 	async fetchEmailandPasswordStatus() {
 		try {
-			const response = await this.apiFetch('/registration/get_email', 'GET');
+			const response = await this.apiFetch('/registration/get_email', {method: 'GET'});
 			if (!response.password_set) {
 				this.showPasswordFields();
 			}
@@ -53,16 +53,17 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 
 	showPasswordFields() {
 		const passwordFieldsHTML = `
-   			<label for="passwordInput" class="form-label text-white">Password</label>
-   			<input name="password" id="passwordInput" type="password" class="form-control" minlength="8" maxlength="120" required>
-   			<label for="confirmPasswordInput" class="form-label text-white">Confirm Password</label>
-   			<input name="confirmPassword" id="confirmPasswordInput" type="password" class="form-control mb-3" minlength="8" maxlength="120" required>
-			<div id="passwordWarning" class="form-text text-danger" style="display: none;"></div>  		
+   			<label for="displayNamePasswordInput" class="form-label text-white">Password</label>
+   			<input name="displayNamePassword" id="displayNamePasswordInput" type="password" class="form-control" minlength="8" maxlength="120" required>
+   			<label for="displayNameConfirmPasswordInput" class="form-label text-white">Confirm Password</label>
+   			<input name="displayNameConfirmPassword" id="displayNameConfirmPasswordInput" type="password" class="form-control mb-3" minlength="8" maxlength="120" required>
+			<div id="displayNamePasswordWarning" class="form-text text-danger" style="display: none;"></div>  		
 		`;
   		this.shadowRoot.getElementById("displayNameSubmitButton").insertAdjacentHTML('beforebegin', passwordFieldsHTML);
-		this.password_input = this.shadowRoot.getElementById("passwordInput");
-		this.confirm_password_input = this.shadowRoot.getElementById("confirmPasswordInput");
-		this.password_input.addEventListener("input", this.handlePasswordInputVar);
+		this.password_input = this.shadowRoot.getElementById("displayNamePasswordInput");
+		this.confirm_password_input = this.shadowRoot.getElementById("displayNameConfirmPasswordInput");
+		this.password_warning = this.shadowRoot.getElementById("displayNamePasswordWarning");
+ 		this.password_input.addEventListener("input", this.handlePasswordInputVar);
 		this.confirm_password_input.addEventListener("input", this.handlePasswordInputVar);
 	}
 
@@ -123,9 +124,13 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				return;
 			}
 			try {
-				await this.apiFetch("/registration/change_password", "POST", JSON.stringify({ "current_password": "", 'new_password': password}));
+				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: "", new_password: password})});
 			} catch (error) {
 				console.error('Error changing password:', error);
+				this.password_warning.innerHTML = "Error setting password";
+				this.password_warning.setAttribute("aria-invalid", "true");
+				this.password_warning.style.display = "";
+				return;
 			}
 		}
 		try {
@@ -133,7 +138,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					credentials: 'include'
 				},
 				body: JSON.stringify({ displayname })
 			});
