@@ -33,7 +33,7 @@ export class LoginPage extends ComponentBaseClass {
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16">
+                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <span id="errorMessage" class="text-danger"></span>
@@ -79,7 +79,7 @@ export class LoginPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById('loginPassword').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Za-z0-9]{16}$/;
 		const emailValid = this.validateEmail();
 
 		if (this.shadowRoot.getElementById('otpSection').style.display === 'none') {

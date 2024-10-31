@@ -62,7 +62,7 @@ export class SignupPage extends ComponentBaseClass {
 					</div>
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16">
+                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
@@ -159,7 +159,7 @@ export class SignupPage extends ComponentBaseClass {
 	handleOTPInput() {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');
-		const otpPattern = /^[A-Z0-9]{16}$/;
+		const otpPattern = /^[A-Za-z0-9]{16}$/;
 
 		if (otpPattern.test(otp)) {
 			errorMessage.textContent = '';

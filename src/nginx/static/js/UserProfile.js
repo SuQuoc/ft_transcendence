@@ -19,7 +19,7 @@ export class UserProfile extends ComponentBaseClass {
       .form-container {
         padding: 1rem;
         width: 100vw;
-        max-width: 400px;
+        max-width: 100%;
       }
       .form-container form {
         margin-bottom: 1rem;
@@ -52,7 +52,7 @@ export class UserProfile extends ComponentBaseClass {
         border-width: 0.2em;
       }
     </style>
-    <div class="form-container bg-dark text-white">
+    <div class="form-container text-white" style="background-color: var(--custom-bg-color); border-radius: 6px;">
     <div id="userManagement">
         <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "https://i.pravatar.cc/150?img=52"'>
         <div id="imageWarning" class="mt-2"></div>
@@ -256,6 +256,11 @@ export class UserProfile extends ComponentBaseClass {
             if ('image' in response) {
                 window.app.userData.profileImage = response.image;
                 this.shadowRoot.getElementById('profileImage').src = window.app.userData.profileImage;
+            }
+            if (!window.app.userData.email || window.app.userData.email === undefined) {
+                console.log('Email not found in global app object, fetching from API');
+                const email_response = await this.apiFetch('/registration/get_email', { method: 'GET', cache: 'no-store' });
+                window.app.userData.email = email_response.email;
             }
             this.shadowRoot.getElementById('email').value = window.app.userData.email;
         } catch (error) {
