@@ -23,6 +23,7 @@ urlpatterns = [
 
     # backup_views
     path('registration/backup_login', backup.login),
+    path('registration/backup_rotate_codes', backup.rotate_codes),
 
     # basic views
     path('registration/basic_login', basic.login),
