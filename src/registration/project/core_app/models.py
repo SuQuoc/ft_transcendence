@@ -10,14 +10,14 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .common_utils import generate_random_string
-import base64
+import base64, logging
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     username = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128, blank=True)
-    backup_code = models.CharField(max_length=128, blank=True)
+    backup_codes = models.JSONField(default=list, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
     password_set = models.BooleanField(default=False)
@@ -62,18 +62,24 @@ class RegistrationUser(AbstractUser):
         return self
 
     #TODO: check if we actually want to hash the backup code
-    def generate_backup_code(self):
-        backup_code = secrets.token_hex(12)
-        self.backup_code = backup_code
-        #backup_code = generate_random_string(32)
-        #self.backup_code = make_password(backup_code)
-        self.save(update_fields=['backup_code'])
-        return backup_code
+    def generate_backup_codes(self):
+        self.backup_codes.clear()
+        backup_codes = []
+        for _ in range (10):
+            backup_code = generate_random_string(32)
+            hashed_code = make_password(backup_code)
+            self.backup_codes.append(hashed_code)
+            backup_codes.append(backup_code)
+        self.save(update_fields=['backup_codes'])
+        return backup_codes
 
     def check_backup_code(self, backup_code):
-        #return check_password(backup_code, self.backup_code)
-        return backup_code == self.backup_code
-
+        for hashed_code in self.backup_codes:
+            if check_password(backup_code, hashed_code):
+                self.backup_codes.remove(hashed_code)
+                self.save(update_fields=['backup_codes'])
+                return True
+        return False
 
 class OneTimePassword(models.Model):
 

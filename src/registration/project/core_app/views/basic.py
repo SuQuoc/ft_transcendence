@@ -103,7 +103,7 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_code = user.generate_backup_code()
+        backup_codes = user.generate_backup_codes()
         user.set_verified()
         user.change_password_is_set()
         logging.warning(f"password_set set to {user.password_is_set()}")
@@ -115,7 +115,7 @@ def signup(request):
             return Response(jwt_response, status=status.HTTP_200_OK)
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
         return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

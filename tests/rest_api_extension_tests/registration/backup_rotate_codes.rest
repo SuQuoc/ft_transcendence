@@ -8,7 +8,7 @@ Content-Type: application/json
 
 ###
 
-# @name signup
+# @name signup1
 POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
 
@@ -20,25 +20,26 @@ Content-Type: application/json
 
 ###
 
-@CODE0 = {{signup.response.body.backup_code.0}}
-@CODE1 = {{signup.response.body.backup_code.1}}
-
+@CODEA0 = {{signup1.response.body.backup_code.0}}
+@CODEA1 = {{signup1.response.body.backup_code.1}}
 ###
 
+# @name backup_login1
 POST {{base_url}}/registration/backup_login
 Content-Type: application/json
 
 {
     "username": "{{username3}}",
-    "password": "{{current_password3}}",
-    "backup_code": "notcorrect1234"
-
+    "backup_code": "{{CODEA0}}"
 }
 
 ###
-
-POST {{base_url}}/registration/backup_login
+@ACCESS_COOKIE = {{backup_login1.response.headers.Set-Cookie}};
+###
+# @name rotate1
+POST {{base_url}}/registration/backup_rotate_codes
 Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
 
 {
     "username": "{{username3}}",
@@ -46,21 +47,23 @@ Content-Type: application/json
 }
 
 ###
-
-POST {{base_url}}/registration/backup_login
-Content-Type: application/json
-
-{
-    "username": "{{username3}}",
-    "backup_code": "{{CODE0}}"
-}
+@CODEB0 = {{rotate1.response.body.backup_code.0}}
 ###
 
 POST {{base_url}}/registration/backup_login
 Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
 
 {
     "username": "{{username3}}",
-    "password": "{{current_password3}}",
-    "backup_code": "{{CODE1}}"
+    "backup_code": "{{CODEA1}}"
+}
+###
+POST {{base_url}}/registration/backup_login
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+    "username": "{{username3}}",
+    "backup_code": "{{CODEB0}}"
 }
