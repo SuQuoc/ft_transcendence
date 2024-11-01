@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit immediately if any command exits with a non-zero status
+set -e
+
 python project/manage.py makemigrations
 python project/manage.py migrate
 python project/manage.py collectstatic --noinput
@@ -14,5 +17,5 @@ EOF
 ###
 python project/manage.py runserver 0.0.0.0:8000 &
 cd project
-exec celery -A project worker --loglevel=info
+exec celery -A project worker --loglevel=info -B
 exec "$@"
