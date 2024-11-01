@@ -28,7 +28,6 @@ from django.conf import settings
 def login(request):
     try:
         user = request.user
-        logging.warning(f"user {user.id} is verified {user.is_verified()}")
         if not user.is_verified():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
@@ -39,14 +38,34 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         cache_key = f'jwt_{user.id}'
-        logging.warning(f"retrieving cache for key {cache_key}")
+        backup_codes_key = f'backup_codes_{user.id}'
+
         jwt_response = cache.get(cache_key)
+        backup_codes = cache.get(backup_codes_key)
         if jwt_response:
-            logging.warning(f"found cached token {jwt_response}")
-            return Response(jwt_response, status=status.HTTP_200_OK)
+            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='access',
+                value=jwt_response['access'],
+                expires=access_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite='Strict')
+            refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='refresh',
+                value=jwt_response['refresh'],
+                expires=refresh_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite='Strict')
+            return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -106,12 +125,11 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        #backup_codes = user.generate_backup_codes()
         user.set_verified()
         user.change_password_is_set()
         cache_key = f'jwt_{user.id}'
         backup_codes_key = f'backup_codes_{user.id}'
-        
+
         jwt_response = cache.get(cache_key)
         backup_codes = cache.get(backup_codes_key)
         if jwt_response:
@@ -139,7 +157,7 @@ def signup(request):
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
-        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -164,7 +182,7 @@ def signup_change_password(request):
         send_otp_email(username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
     except ValidationError as e:
-        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -177,7 +195,7 @@ def signup_change_username(request):
         new_username = request.data.get('new_username')
         if not current_username or not new_username:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if (RegistrationUser.objects.filter(username=new_username).exists()):
+        if RegistrationUser.objects.filter(username=new_username).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=current_username).first()
         if not user:
