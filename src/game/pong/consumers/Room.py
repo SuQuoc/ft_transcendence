@@ -11,7 +11,7 @@ class Player:
         
         self.channel_name = kwargs.get("channel_name")
         self.name = kwargs.get("name")
-        self.user_id = None
+        self.id = None
     
     @staticmethod
     def from_dict(data: dict):

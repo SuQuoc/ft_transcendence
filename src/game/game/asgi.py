@@ -47,8 +47,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         
         from jwt import decode as jwt_decode
         from django.conf import settings
-        
-        """ try:
+        try:
             data = jwt_decode(raw_token, settings.PUBLIC_KEY, algorithms=["RS256"])
             scope["user_id"] = data["user_id"] # add user_id to the scope
         except Exception as e:
@@ -59,12 +58,10 @@ class JWTAuthMiddleware(BaseMiddleware):
                 'code': 4001  # Unauthorized access code, no cookies provided at all, no access cookie provided
             })
             return
-        print(f" uuid: {data}\n") """
+        print(f" uuid: {data}\n")
         
-
-        
-        # FOR SOME REASON THIS BLOCK OF CODE DOESN'T WORK
-        auth = JWTStatelessUserAuthentication()
+        # NOTE: FOR SOME REASON THIS BLOCK OF CODE DOESN'T WORK, DOES IT WORK IN UM?
+        """ auth = JWTStatelessUserAuthentication()
         from django.conf import settings
         print(f"raw_token {raw_token}, public key {settings.PUBLIC_KEY}\n")
         # If token exists, validate it (this part stays the same)
@@ -85,7 +82,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         except Exception as e:
             print("EMERGENCY EMERGENCY")
             print(e)
-            return
+            return """
 
         # Proceed to the next layer (e.g., the consumer)
         return await super().__call__(scope, receive, send)

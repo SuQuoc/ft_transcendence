@@ -78,7 +78,11 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             return
 
         await self.accept()
-        await self.channel_layer.group_add(self.client_group, self.channel_name)
+        
+        # TODO: does the game consumer must be in the group? 
+        # I could just send without him in the group, 
+        # if only game consumer needs to send message to tournament
+        await self.channel_layer.group_add(self.client_group, self.channel_name) 
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
 
         await self.channel_layer.group_send(
@@ -191,7 +195,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     def valid_user_id(self):
         allowed_user_ids = cache.get(self.match_id)
         if allowed_user_ids is None:
-            raise ValueError("SNH - cache must be set by matchmaking or user_id")
+            raise ValueError("SNH - cache must be set by matchmaking consumer or tournament consumer")
         for id in allowed_user_ids:
             if id == self.user_id:
                 return True
