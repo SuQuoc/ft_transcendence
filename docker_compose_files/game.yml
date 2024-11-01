@@ -91,3 +91,5 @@ services:
     profiles:
       - all
       - game
+    secrets:
+      - public_key.pem

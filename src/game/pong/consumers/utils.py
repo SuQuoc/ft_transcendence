@@ -43,7 +43,7 @@ class Errors(Enum):
     ALREADY_IN_ROOM = "already_in_room"
 
 
-def get_user_id_from_jwt(jwt_token):
+def get_user_id_from_jwt(jwt_token: str):
     try:
         # Split the token to get the payload part (YY)
         payload_part = jwt_token.split('.')[1]

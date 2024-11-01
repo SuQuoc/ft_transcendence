@@ -32,8 +32,11 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         print(self.scope)
         self.user = Player(channel_name=self.channel_name)
         
-        token = self.scope["cookies"]["access"]
-        user_id = get_user_id_from_jwt(token)
+        # token = self.scope["cookies"]["access"]
+        # user_id = get_user_id_from_jwt(token)
+        user_id = self.scope["user_id"]
+        print(f"LOBBIE CONSUMER: user_id {user_id}")
+        
         self.client_group = f"client_{user_id}"
         print(f"LOBBIE CONSUMER: client group {self.client_group}")
         print(f"SCOPE[USER]: {self.scope['user']}")

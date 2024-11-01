@@ -57,8 +57,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     
     def set_instance_values(self):
         #print(f"GameConsumer - connect")
-        token = self.scope["cookies"]["access"]
-        self.user_id = get_user_id_from_jwt(token)
+        # token = self.scope["cookies"]["access"]
+        self.user_id = self.scope["user_id"]
         self.client_group = f"client_{self.user_id}"
         print(f"GAME CONSUMER client group: {self.client_group}")
 

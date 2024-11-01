@@ -60,4 +60,4 @@ services:
       - network_django
     secrets:
       - public_key.pem
-      - private_key.pem # TODO !!! delete this line
+      - private_key.pem # TODO: !!! delete this line
