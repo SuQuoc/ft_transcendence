@@ -26,19 +26,25 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         super().__init__(args, kwargs)
         self.user = None
         self.current_room = None
-
-    async def connect(self):
-        #print(self.scope["user"])
+        self.client_group = None
+    
+    def set_instance_values(self):
+        print(self.scope)
         self.user = Player(channel_name=self.channel_name)
         
         token = self.scope["cookies"]["access"]
         user_id = get_user_id_from_jwt(token)
         self.client_group = f"client_{user_id}"
         print(f"LOBBIE CONSUMER: client group {self.client_group}")
+        print(f"SCOPE[USER]: {self.scope['user']}")
 
+    async def connect(self):
+        self.set_instance_values()
+        
+
+        await self.accept()
         await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(AVA_ROOMS, self.channel_name)
-        await self.accept()
         print(f"Lobbies-Consumer - connect")
 
         #time.sleep(100) # no can do anything with the consumer for the time 
