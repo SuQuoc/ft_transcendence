@@ -15,10 +15,11 @@ from .utils_otp import create_one_time_password, send_otp_email, check_one_time_
 from ..tasks import create_user_send_otp, generate_jwt_task, generate_backup_codes_task
 
 import logging
+from django.utils import timezone
 from silk.profiling.profiler import silk_profile
 from django.core.cache import cache
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from django.conf import settings
 
 @api_view(['POST'])
@@ -65,7 +66,8 @@ def login(request):
             return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
+        user.actualise_last_login()
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core_app',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -213,3 +214,23 @@ if DEBUG == True:
         },
     }
 
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")] # [aguilmea] added for admin login
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "non_verified_users_after_one_day": {
+        "task": "project.celery.non_verified_users_after_one_day",
+        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        "schedule": crontab(minute=0, hour=0),
+    },
+    "users_without_login_within_one_year": {
+        "task": "project.celery.users_without_login_within_one_year",
+        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        "schedule": crontab(minute=0, hour=0),
+    },
+}
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+CELERY_IMPORTS = ("core_app.tasks",)
