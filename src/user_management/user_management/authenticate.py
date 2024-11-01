@@ -1,12 +1,5 @@
-from api.models import CustomUser
-from django.conf import settings
-from django.contrib.auth import get_user_model
-import jwt
-from jwt.exceptions import InvalidTokenError
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.authentication import JWTStatelessUserAuthentication
 
+from rest_framework_simplejwt.authentication import JWTStatelessUserAuthentication
 
 
 ACCESS = "access"

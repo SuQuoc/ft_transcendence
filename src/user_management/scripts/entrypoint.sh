@@ -18,6 +18,6 @@ if not User.objects.filter(username='$DJ_SUDO_USERNAME_MANAGEMENT').exists():
 EOF
 
 # Run custom command
-python manage.py create_testusers
+python manage.py create_testusers # TODO: delete this line when deploying
 
 exec "$@"

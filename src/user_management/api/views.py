@@ -19,11 +19,8 @@ from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
 
 
-
 def profile(request):
     return HttpResponse("This is the profile page")
-
-
 
 
 class CustomUserCreate(generics.CreateAPIView):
@@ -40,6 +37,9 @@ class CustomUserProfile(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
 
     def get(self, request):
+        print("sdasdasddasds")
+        for header, value in request.headers.items():
+            print(f"{header}: {value}")
         user = get_user_from_jwt(request)
         serializer = CustomUserProfileSerializer(user)
         return Response(serializer.data)
