@@ -257,7 +257,7 @@ export class UserProfile extends ComponentBaseClass {
                 window.app.userData.profileImage = response.image;
                 this.shadowRoot.getElementById('profileImage').src = window.app.userData.profileImage;
             }
-            if (!window.app.userData.email || window.app.userData.email === undefined) {
+            if (!window.app.userData.email) {
                 console.log('Email not found in global app object, fetching from API');
                 const email_response = await this.apiFetch('/registration/get_email', { method: 'GET', cache: 'no-store' });
                 window.app.userData.email = email_response.email;

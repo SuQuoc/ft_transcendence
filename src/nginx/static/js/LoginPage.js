@@ -18,7 +18,7 @@ export class LoginPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
-            <div class="p-3 rounded-3 bg-dark">
+            <div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
 				<h3 class="text-center text-white">Login</h3>
             	<form id="42LoginForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
             		<input type="hidden" name="next_step" value="login">

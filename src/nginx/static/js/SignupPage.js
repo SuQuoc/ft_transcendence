@@ -20,7 +20,7 @@ export class SignupPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
-            <div class="p-3 rounded-3 bg-dark">
+            <div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
             	<h3 class="text-center text-white">Signup</h3>
             	<form id="42SignupForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
             		<input type="hidden" name="next_step" value="signup">
@@ -38,6 +38,7 @@ export class SignupPage extends ComponentBaseClass {
 							placeholder="name@example.com"
 							aria-required="true"
 							aria-describedby="errorMessageEmail"
+							required
 						/>
 					</div>
                     <span id="errorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
@@ -49,6 +50,10 @@ export class SignupPage extends ComponentBaseClass {
 							class="form-control mb-1"
 							aria-required="true"
 							aria-describedby="errorMessagePassword"
+							minlength="8"
+							maxlength="120"
+							pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+							required
 						/>
 						<label for="signupPassword2" class="form-label text-white-50">Password again</label>
 						<input name="password2"
@@ -57,12 +62,16 @@ export class SignupPage extends ComponentBaseClass {
 							class="form-control mb-3"
 							aria-required="true"
 							aria-describedby="errorMessagePassword"
+							minlength="8"
+							maxlength="120"
+							pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+							required
 						/>
                     	<span id="errorMessagePassword" class="text-danger mb-3"></span>
 					</div>
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16" required>
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
@@ -91,10 +100,11 @@ export class SignupPage extends ComponentBaseClass {
 		const passwordWarning = this.shadowRoot.getElementById('errorMessagePassword');
 
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+		const passwordValid = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$/.test(password1);
 		const passwordsMatch = password1 === password2;
 		const otpSection = this.shadowRoot.getElementById('otpSection');
 
-		if (emailValid && passwordsMatch) {
+		if (emailValid && passwordsMatch && passwordValid) {
 			if (otpSection.style.display === 'block') {
 				this.handleOTPInput();
 			} else {
@@ -112,10 +122,14 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById('signupEmail').removeAttribute('aria-invalid');
 				emailWarning.textContent = '';
 			}
-			if (!passwordsMatch) {
+			if ((!passwordsMatch || !passwordValid) && password1.length > 0) {
 				this.shadowRoot.getElementById('signupPassword1').setAttribute('aria-invalid', 'true');
 				this.shadowRoot.getElementById('signupPassword2').setAttribute('aria-invalid', 'true');
-				passwordWarning.textContent = "Passwords don't match";
+				if (!passwordValid) {
+					passwordWarning.textContent = 'Password must be at least 8 characters long and contain at least one letter';
+				} else {
+					passwordWarning.textContent = "Passwords don't match";
+				}
 			} else {
 				this.shadowRoot.getElementById('signupPassword1').removeAttribute('aria-invalid');
 				this.shadowRoot.getElementById('signupPassword2').removeAttribute('aria-invalid');

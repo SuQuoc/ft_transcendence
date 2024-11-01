@@ -13,10 +13,10 @@ from ..common_utils import generate_random_string
 
 import os, requests, time, logging
 from .utils_silk import conditional_silk_profile
+from silk.profiling.profiler import silk_profile
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='send_authorization_request')
 def send_authorization_request(request):
     try:
         redirect_uri = os.environ.get('SERVER_URL') + '/callback'
@@ -36,7 +36,6 @@ send_authorization_request = conditional_silk_profile(send_authorization_request
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='exchange_code_against_access_token')
 def exchange_code_against_access_token(request):
     try:
         returned_authorization_code = request.data.get("code")
