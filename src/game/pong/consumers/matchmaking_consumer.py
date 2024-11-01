@@ -7,7 +7,8 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
 from .utils import get_user_id_from_jwt
-from django.core.cache import cache 
+from django.core.cache import cache
+from .utils import create_match_access_list
 
 games = {}
 
@@ -24,8 +25,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         
-        token = self.scope["cookies"]["access"]
-        self.user_id = await get_user_id_from_jwt(token)
+        self.user_id = self.scope["user_id"]
         MatchmakingConsumer.players.append(
             {
                 "channel_name": self.channel_name,
@@ -35,9 +35,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         if len(MatchmakingConsumer.players) == 2:
             player1 = MatchmakingConsumer.players.pop(0)
             player2 = MatchmakingConsumer.players.pop(0)
-            id = str(uuid.uuid4())
-
-            cache.set(id, [player1["uuid"], player2["uuid"]]) # used to confirm client to connecting to game
+                        
+            create_match_access_list([player1["user_id"], player2["user_id"]])
             
             await self.send_players_where_to_connect_to(id, player1["channel_name"])
             await self.send_players_where_to_connect_to(id, player2["channel_name"])

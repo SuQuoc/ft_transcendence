@@ -10,6 +10,7 @@ import uuid
 import json
 import asyncio
 from typing import List
+from .utils import create_match_access_list
 
 
 #asyncio.create_task()
@@ -26,14 +27,16 @@ async def tournament_loop(room: TournamentRoom, queue):
         losers = []
         matches = [
             {
-                "match_id": str(uuid.uuid4()),
+                "match_id": create_match_access_list([pair[0].id, pair[1].id]),
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }
             for pair in pairs
         ]
 
+
         print("2) tournament loop - sending brackets to clients")
+
         await send_matches(get_room_group(room.name), matches)
         
         match_results = []

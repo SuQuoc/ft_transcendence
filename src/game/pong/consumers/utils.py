@@ -2,6 +2,7 @@ import base64
 import json
 from django.core.cache import cache
 from enum import Enum
+import uuid
 
 
 # TYPES of messages
@@ -95,3 +96,11 @@ def get_room_dict(room_name, available_rooms: dict, all_rooms: dict) -> dict:
 def get_room_group(room_name: str):
     return f"tournament_{room_name}"
 
+
+def create_match_access_list(user_id_list):
+    """
+    Creates an entry in cache to check which client is allowed to connect to which game
+    """
+    match_id = str(uuid.uuid4())
+    cache.set(match_id, user_id_list) # used to confirm client to connecting to game
+    return match_id
