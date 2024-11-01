@@ -134,27 +134,13 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			}
 		}
 		try {
-			const response = await fetch('/um/user-creation', {
-				method: 'POST',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json',
-					credentials: 'include'
-				},
-				body: JSON.stringify({ displayname })
-			});
-
-			if (response.ok) {
-				window.app.userData.username = displayname;
-				window.app.router.go("/", false);
-			} else {
-				// if displayname is already taken
-				this.displayname_warning.innerHTML = "This displayname is already taken";
-				this.displayname_warning.setAttribute("aria-invalid", "true");
-				this.displayname_warning.style.display = "";
-				console.log("displayname already taken");
-			}
+			await this.apiFetch('/um/user-creation', {method: 'POST', body: JSON.stringify({ displayname })});
+			window.app.userData.username = displayname;
+			window.app.router.go("/", false);
 		} catch (error) {
+			this.displayname_warning.innerHTML = "This displayname is already taken";
+			this.displayname_warning.setAttribute("aria-invalid", "true");
+			this.displayname_warning.style.display = "";
 			console.error('Error selecting displayname:', error);
 		}
 	}

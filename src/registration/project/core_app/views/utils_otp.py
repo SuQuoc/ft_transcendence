@@ -10,6 +10,8 @@ from ..common_utils import generate_random_string
 import os
 from celery import shared_task
 
+from django.conf import settings
+
 """
 @shared_task
 def create_user_send_otp(data, action):

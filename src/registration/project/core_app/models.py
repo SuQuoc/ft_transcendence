@@ -61,7 +61,6 @@ class RegistrationUser(AbstractUser):
         self.save()
         return self
 
-    #TODO: check if we actually want to hash the backup code
     def generate_backup_codes(self):
         self.backup_codes.clear()
         backup_codes = []

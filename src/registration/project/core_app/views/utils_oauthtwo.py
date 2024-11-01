@@ -87,7 +87,6 @@ def login(email):
             #'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
         token_s = CustomTokenObtainPairSerializer(data=data)
-        logging.warning(f"password_is_set: {user.password_is_set()}")
         if not user.password_is_set():
             return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)

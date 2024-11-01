@@ -71,7 +71,7 @@ export class SignupPage extends ComponentBaseClass {
 					</div>
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16" required>
+                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
@@ -249,7 +249,6 @@ export class SignupPage extends ComponentBaseClass {
 					throw new Error('Signup failed');
 				}
 				window.app.userData.email = email;
-
 				app.router.go('/displayname', false);
 			} catch (error) {
 				console.error('Error during signup:', error);

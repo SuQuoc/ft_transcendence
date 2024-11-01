@@ -12,11 +12,14 @@ from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
-from ..tasks import create_user_send_otp, generate_jwt_task
+from ..tasks import create_user_send_otp, generate_jwt_task, generate_backup_codes_task
 
 import logging
 from silk.profiling.profiler import silk_profile
 from django.core.cache import cache
+import os
+from datetime import datetime, timezone
+from django.conf import settings
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -103,16 +106,35 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_codes = user.generate_backup_codes()
+        #backup_codes = user.generate_backup_codes()
         user.set_verified()
         user.change_password_is_set()
-        logging.warning(f"password_set set to {user.password_is_set()}")
         cache_key = f'jwt_{user.id}'
-        logging.warning(f"retrieving cache for key {cache_key}")
+        backup_codes_key = f'backup_codes_{user.id}'
+        
         jwt_response = cache.get(cache_key)
+        backup_codes = cache.get(backup_codes_key)
         if jwt_response:
-            logging.warning(f"found cached token {jwt_response}")
-            return Response(jwt_response, status=status.HTTP_200_OK)
+            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+            response.set_cookie(
+				key='access',
+				value=jwt_response['access'],
+				expires=access_token_expiration,
+				domain=os.environ.get('DOMAIN'),
+				httponly=True,
+				secure=True,
+				samesite = 'Strict')
+            refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='refresh',
+                value=jwt_response['refresh'],
+                expires=refresh_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite = 'Strict')
+            return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)

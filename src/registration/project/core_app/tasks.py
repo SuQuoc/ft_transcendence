@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.shortcuts import render
 from silk.profiling.profiler import silk_profile
 
 from .models import OneTimePassword
@@ -14,23 +15,29 @@ from django.core.cache import cache
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
+from django.conf import settings
+
 @shared_task
 def generate_jwt_task(user_data, request_data):
-    token_s = CustomTokenObtainPairSerializer(data=request_data)
-    if token_s.is_valid():
-        jwt_response = generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
-        jwt_response.accepted_renderer = JSONRenderer()
-        jwt_response.accepted_media_type = 'application/json'
-        jwt_response.renderer_context = {}
-        jwt_response.render()
-        rendered_content = jwt_response.content
-        cache_key = f"jwt_{user_data['id']}"
-        logging.warning(f"setting cache for key {cache_key} to {rendered_content}")
-        cache.set(cache_key, rendered_content, timeout=300)
-    else:
-        cache_key = f"jwt_{user_data['id']}"
-        logging.warning(f"setting cache for key {cache_key} to None")
-        cache.set(cache_key, None, timeout=300)
+    try:
+        token_s = CustomTokenObtainPairSerializer(data=request_data)
+        if token_s.is_valid():
+            token_data = {
+                'access': token_s.validated_data['access'],
+                'refresh': token_s.validated_data['refresh']
+            }
+            cache_key = f"jwt_{user_data['id']}"
+            cache.set(cache_key, token_data, timeout=300)
+            return True
+        else:
+            logging.warning(f"Token validation failed: {token_s.errors}")
+            cache_key = f"jwt_{user_data['id']}"
+            logging.warning(f"invalid token, setting cache for key {cache_key} to None")
+            cache.set(cache_key, None, timeout=300)
+            return False
+    except Exception as e:
+        logging.warning(f"generate_jwt_task error: {str(e)}")
+        return False
 
 @shared_task
 def delete_otp_task(otp_id):
@@ -46,6 +53,7 @@ def create_user_send_otp(data, action):
         if action == 'signup':
             data['password'] = make_password(data['password'])
             user_s = RegistrationUser.objects.create(**data)
+            generate_backup_codes_task.delay({'id': user_s.id})
         elif action == 'otp':
             user_s = RegistrationUser.objects.get(id=data['id'])
             action = 'signup'
@@ -57,5 +65,21 @@ def create_user_send_otp(data, action):
         created_otp = create_one_time_password(user_s.id, action)
         send_otp_email.delay(user_s.username, action, created_otp)
     except Exception as e:
-        logging.warning(f"create_user_send_otp: {str(e)}")
+        logging.warning(f"unexpected create_user_send_otp error: {str(e)}")
 
+@shared_task
+def generate_backup_codes_task(user_data):
+    try:
+        from core_app.models import RegistrationUser
+        from core_app.serializers import UserSerializer
+        
+        user = RegistrationUser.objects.get(id=user_data['id'])
+        backup_codes = user.generate_backup_codes()
+        
+        cache_key = f"backup_codes_{user_data['id']}"
+        logging.warning(f"Storing backup codes for user {user_data['id']}")
+        cache.set(cache_key, backup_codes, timeout=300)
+        return True
+    except Exception as e:
+        logging.warning(f"generate_backup_codes_task error: {str(e)}")
+        return False
