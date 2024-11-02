@@ -15,7 +15,7 @@ from .utils_otp import create_one_time_password, send_otp_email, check_one_time_
 from ..tasks import create_user_send_otp, generate_jwt_task, generate_backup_codes_task
 
 import logging
-from django.utils import timezone
+from datetime import timezone
 from silk.profiling.profiler import silk_profile
 from django.core.cache import cache
 import os
@@ -25,7 +25,6 @@ from django.conf import settings
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([IsAuthenticated])
-@silk_profile(name='login')
 def login(request):
     try:
         user = request.user
@@ -63,6 +62,7 @@ def login(request):
                 httponly=True,
                 secure=True,
                 samesite='Strict')
+            user.actualise_last_login()
             return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
@@ -100,7 +100,6 @@ def forgot_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='signup')
 def signup(request):
     try:
         username = request.data.get('username')

@@ -138,38 +138,6 @@ export class SignupPage extends ComponentBaseClass {
 		}
 	}
 
-	async requestOTP(event) {
-		event.preventDefault();
-		const requestOTPButton = this.shadowRoot.getElementById('requestOTP');
-		if (requestOTPButton.disabled) return;
-
-		const email = this.shadowRoot.getElementById('signupEmail').value;
-		const errorMessage = this.shadowRoot.getElementById('errorMessageEmail');
-		const password = this.shadowRoot.getElementById('signupPassword1').value;
-
-		requestOTPButton.disabled = true;
-
-		try {
-			const response = await fetch('/registration/basic_signup', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ "username": email, password })
-			});
-
-			if (!response.ok) {
-				throw new Error('Requesting OTP failed');
-			}
-			this.shadowRoot.getElementById('otpSection').style.display = 'block';
-		} catch (error) {
-			console.error('Error during OTP request:', error);
-			errorMessage.textContent = 'Could not send OTP';
-			this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
-			requestOTPButton.disabled = false;
-		}
-	}
-
 	handleOTPInput() {
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const errorMessage = this.shadowRoot.getElementById('otpErrorMessage');

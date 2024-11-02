@@ -23,6 +23,9 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
 		this.input_field.addEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
 
+		// adding event listener for logout button
+		this.shadowRoot.getElementById("logoutButton").addEventListener("click", this.handleLogout);
+
 		// setting focus on displayname input when the page is loaded 
 		this.shadowRoot.getElementById("displayNameInput").focus();
 
@@ -150,7 +153,18 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.displayname_warning.innerHTML = "";
 		this.displayname_warning.setAttribute("aria-invalid", "false");
 	}
-	
+
+	async handleLogout() {
+        await fetch('/registration/logout', { method: 'GET' })
+            .then(() => {
+                window.localStorage.removeItem("oauthCode");
+				window.localStorage.removeItem("oauthState");
+                window.app.router.go('/login', true);
+            })
+            .catch((error) => {
+                console.error('Error logging out:', error);
+            });
+    }
 
 	getElementHTML() {
 		const template = document.createElement('template');
@@ -174,7 +188,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 					<div id="displayNameWarning" class="form-text text-danger" style="display: none;"></div>
 					
 					<button type="submit" class="btn btn-custom w-100" id="displayNameSubmitButton" form="displayNameForm">submit</button>
-
+					<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
 					<div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
 						<span class="visually-hidden">Loading...</span>
 					</div>

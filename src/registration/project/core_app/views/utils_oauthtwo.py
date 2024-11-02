@@ -13,7 +13,6 @@ from .utils import generate_response_with_valid_JWT
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .token import CustomTokenObtainPairSerializer
 import logging
-from django.utils import timezone
 
 
 @silk_profile(name='generate_authorization_request_data')
