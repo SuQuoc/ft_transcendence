@@ -51,8 +51,9 @@ async def tournament_loop(room: TournamentRoom, queue):
         losers = [result.get("loser") for result in match_results]
         players = winners
 
-
-    await send_tournament_winner(get_room_group(room.name), winners[0])
+    
+    print("END OF TOURNAMENT ======\n")
+    # await send_tournament_winner(get_room_group(room.name), winners[0])
     return room.name
 
 

@@ -381,12 +381,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         print("1) start tournament - creating queue")
         LobbiesConsumer.room_queues[room.name] = asyncio.Queue() # or a queue for each player?
         task = asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
-        task.add_done_callback(self.cleanup_tournament_task(room.name))
+        task.add_done_callback(lambda t: self.cleanup_tournament_task(room.name))
 
     def cleanup_tournament_task(self, room_name):
         LobbiesConsumer.room_queues.pop(room_name)
         if LobbiesConsumer.room_queues.get(room_name):
             print("Queue still exists")
+        else:
+            print("Queue deleted")
 
     async def group_remove(self, group_name: str):
         """

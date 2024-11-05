@@ -134,7 +134,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         
         self.game_mode = self.get_game_mode()
         if self.game_mode == GameMode.TOURNAMENT:
-            print("TOURNAMENT")
+            print("GameConsumer: GAME MODE=TOURNAMENT")
             # self.client_group = f"client_{self.user_id}"
             # await self.channel_layer.group_add(self.client_group, self.channel_name) 
     
@@ -165,7 +165,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 PongGameConsumer.waiting_games.pop(self.match_id)
 
                 # await self.send_initial_state(pong.get_game_state())
-
+                
+                await asyncio.sleep(5)
                 await self.channel_layer.group_send(
                     self.game_group,
                     {
@@ -286,10 +287,10 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     # EVENTS - no message to frontend
     async def cleanup(self, event):
+        PongGameConsumer.running_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
+        cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT:
             await self.forward_match_result(event)
-        cache.delete(self.match_id)
-        PongGameConsumer.running_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
         self.close()
 
     # Communication with other consumer
