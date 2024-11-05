@@ -20,13 +20,13 @@ async def matchmaking_loop():
         # Implement logic to notify players they’ve been matched
         print(f"Matched {player1["uuid"]} and {player2["uuid"]}")
 
-        id = str(uuid.uuid4())
-        cache.set(id, [player1["uuid"], player2["uuid"]])
+        match_id = str(uuid.uuid4())
+        cache.set(match_id, [player1["uuid"], player2["uuid"]])
 
         # Notify the players (This can be via a websocket, etc.)
         # Here you would send messages through Django Channels or other methods
-        send_players_where_to_connect_to(id, player1["channel_name"])
-        send_players_where_to_connect_to(id, player2["channel_name"])
+        send_players_where_to_connect_to(match_id, player1["channel_name"])
+        send_players_where_to_connect_to(match_id, player2["channel_name"])
 
 
 async def send_players_where_to_connect_to(uuid: str, channel_name):

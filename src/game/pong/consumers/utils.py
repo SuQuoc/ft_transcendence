@@ -58,6 +58,15 @@ def get_user_id_from_jwt(jwt_token: str):
         print(f"Error decoding JWT payload: {e}")
 
 
+def get_room_dict(room_name, available_rooms: dict, all_rooms: dict) -> dict:
+    return available_rooms.get(room_name) or all_rooms.get(room_name)
+
+
+def get_room_group(room_name: str):
+    return f"tournament_{room_name}"
+
+
+# CACHING
 def update_or_add_room_to_cache(room: dict, cache_name, cached_data: dict=None, ):
     """
     Updates or adds a room to the cache. 
@@ -87,14 +96,6 @@ def del_room_from_cache(room_name, cache_name, cached_data: dict=None):
 
     del cached_data[room_name]
     cache.set(cache_name, cached_data)
-
-
-def get_room_dict(room_name, available_rooms: dict, all_rooms: dict) -> dict:
-    return available_rooms.get(room_name) or all_rooms.get(room_name)
-
-
-def get_room_group(room_name: str):
-    return f"tournament_{room_name}"
 
 
 def create_match_access_list(user_id_list, game_mode):

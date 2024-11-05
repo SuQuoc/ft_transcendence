@@ -73,15 +73,15 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.send(
             channel_name,
             {
-                'type': 'match_found',
-                'match_id': match_id
+                "type": "match_found",
+                "match_id": match_id
             })
 
     async def trigger_disconnection(self, channel_name):
         await self.channel_layer.send(
             channel_name,
             {
-                'type': 'disconnect_from_matchmaking'
+                "type": "disconnect_from_matchmaking"
             })
         
 

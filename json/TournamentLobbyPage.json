@@ -48,7 +48,6 @@
 
 
 // tournament
-
 {
     "type": "tournament_bracket",
     "matches": [
@@ -65,4 +64,9 @@
         
         }
     ]
+}
+
+{
+    "type": "tournament_end",
+    "winner": displayname
 }

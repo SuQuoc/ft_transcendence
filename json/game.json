@@ -1,5 +1,6 @@
 
 
+
 // Request
 {
     "type": "move",
@@ -42,4 +43,12 @@
 {
     "type": "game_end",
     "status": "won | lost"
+}
+
+
+
+// Backend Cache
+"match_id": {
+    "user_id_list": ["uuid1", "uuid2"],
+    "game_mode": "GameMode.NORMAL | GameMode.TOURNAMENT",
 }
