@@ -123,7 +123,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             available_rooms = cache.get(AVA_ROOMS, {})
             # current_room_name = cache.get(f"current_room_{self.user.name}")
             
-            
             if self.current_room is not None:
                 await self.send_error(Errors.ALREADY_IN_ROOM)
                 return
@@ -146,7 +145,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # cache.set(f"current_room_{self.user.name}", room.name)
 
         # add user to the channel group
-        await self.group_add(get_room_group(room_name))
+        await self.group_switch(AVA_ROOMS, get_room_group(room_name))
         await self.send_success(room_name)
 
         # Notify others about the new lobby
@@ -177,10 +176,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
        
     async def leave_room(self):
         """Helper method to remove a user from a lobby."""
-        
-        #print(T_LEAVE_ROOM)
         async with self.update_lock:
-            # room_name = cache.get(f"current_room_{self.user.name}")
             available_rooms = cache.get(AVA_ROOMS, {})
             full_rooms = cache.get(FULL_ROOMS, {})
 
@@ -197,10 +193,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
             
             room.remove_player(self.user)
-            # cache.delete(f"current_room_{self.user.name}")
             
             # CHANNELS: Remove user from the tournament room group
-            await self.group_remove(get_room_group(self.current_room))
+            await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
             await self.group_send_Room(T_PLAYER_LEFT_ROOM, room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
             self.current_room = None
 
@@ -367,7 +362,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             room.add_player(self.user)
             self.current_room = room.name
-            # cache.set(f"current_room_{self.user.name}", room.name)
+            self.group_switch(AVA_ROOMS, get_room_group(room.name))
         except Exception as e:
             print(f"Exception: {e}") # IF CACHE FAILS
 
@@ -380,14 +375,16 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             del_room_from_cache(room.name, AVA_ROOMS, available_rooms)
             update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS)
             await self.group_send_AvailableTournaments(T_DELETE_ROOM, room)
+            
             # self.start_tournament(room)
         else:
             # Notify ALL in the AVA_ROOMS group, including users who already are in a lobby-room
             # SIMPLE, adding and removing the users of the AVA_ROOMS group frequently has also drawbacks
             update_or_add_room_to_cache(room.to_dict(), AVA_ROOMS, available_rooms)
             await self.group_send_AvailableTournaments(T_ROOM_SIZE_UPDATE, room)
+            
             await asyncio.sleep(2) # NOTE: frontend hasnt loaded from JoinTournamentPage to TournamentLobbyPage
-            self.start_tournament(room) # NOTE: ONLY FOR TESTING
+            # self.start_tournament(room) # NOTE: ONLY FOR TESTING
             
         return room
 
@@ -419,3 +416,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         Add the channel to the specified channel group.
         """
         await self.channel_layer.group_add(group_name, self.channel_name)
+
+    async def group_switch(self, switch_from, switch_to):
+        """
+        Switch the channel from one group to another.
+        """
+        await self.group_remove(switch_from)
+        await self.group_add(switch_to)
