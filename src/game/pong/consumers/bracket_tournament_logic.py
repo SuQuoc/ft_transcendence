@@ -21,10 +21,9 @@ async def tournament_loop(room: TournamentRoom, queue):
     players = room.players
     while len(players) > 1:
         random.shuffle(players)
-        pairs: List[Player] = make_pairs(players)
-        # pairs = players # NOTE: JUST FOR TESTING
+        pairs = make_pairs(players)
         print(f"pairs: {pairs}")
-        await asyncio.sleep(20)
+        # await asyncio.sleep(20)
         winners = []
         losers = []
         matches = [
@@ -49,21 +48,20 @@ async def tournament_loop(room: TournamentRoom, queue):
         print(f"match_results: {json.dumps(match_results, indent=4)}")
         winners = [result.get("winner") for result in match_results]    
         losers = [result.get("loser") for result in match_results]
-        players = winners
+        players = [player for player in players if player.id in winners]
 
     
     print("END OF TOURNAMENT ======\n")
-    # await send_tournament_winner(get_room_group(room.name), winners[0])
-    return room.name
+    await send_tournament_end(get_room_group(room.name), winners[0])
 
 
 
-async def send_tournament_winner(group_name, winner):
+async def send_tournament_end(group_name, winner):
     await get_channel_layer().group_send(
         group_name,
         {
-            "type": "tournament_winner",
-            "winner": "winner" 
+            "type": "tournament_end",
+            "winner": winner 
         })
     
 
@@ -78,7 +76,7 @@ async def send_matches(group_name, matches):
         })
     
 
-def make_pairs(list) -> list:
+def make_pairs(list) -> List[tuple]:
     return [tuple(list[i:i+2]) for i in range(0, len(list), 2)]
 
 

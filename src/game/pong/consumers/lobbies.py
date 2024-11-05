@@ -142,7 +142,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             available_rooms[room_name] = room.to_dict()
             cache.set(AVA_ROOMS, available_rooms)
             self.current_room = room_name
-            # cache.set(f"current_room_{self.user.name}", room.name)
 
         # add user to the channel group
         await self.group_switch(AVA_ROOMS, get_room_group(room_name))
@@ -317,6 +316,14 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def player_left_room(self, event):
         await self.send(text_data=json.dumps(event))
+    
+    async def tournament_bracket(self, event):
+        """Sends the list of matches to the client."""
+        await self.send(text_data=json.dumps(event))
+
+    async def tournament_end(self, event):
+        """Sends the winner of the tournament to the client."""
+        await self.send(text_data=json.dumps(event))
 
     async def match_result(self, event):
         """
@@ -333,9 +340,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # NOTE: i could store the queue from the dict as a self.variable so every consumer sets it when the tournament starts
     
 
-    async def tournament_bracket(self, event):
-        """Sends the list of matches to the client."""
-        await self.send(text_data=json.dumps(event))
+    
 
     ## Send to own websocket ##
     async def send_success(self, room_name: str):
