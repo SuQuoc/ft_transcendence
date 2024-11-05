@@ -7,15 +7,27 @@ from django.core.cache import cache  # Import Django"s cache
 from django.core.cache.backends.redis import RedisCache
 from .Room import TournamentRoom, Player
 from .utils import *
-# from .bracket_tournament_logic import start_tournament
-# from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework.response import Response
+from rest_framework.request import Request
+from rest_framework import status
+import httpx
+import asyncio
 
-# from .game_code.ball import GameBall
-# from .game_code.lobby import Lobby
-# from .game_code.match import Match
-# from .game_code.pongPlayer import PongPlayer
-# from .game_code.storageClasses import SlotXy
-# from .game_code.createMsg import SendToClient
+# Dependency to other Microservice
+async def get_displayname(cookie_dict):
+        if not cookie_dict:
+            raise Exception('No cookie provided')
+
+        cookie = httpx.Cookies(cookie_dict)
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://usermanagement:8000/um/profile", headers=headers, cookies=cookie_dict)
+            if response.status_code != 200:
+                raise Exception('Error getting displayname from UM')
+            return response.json().get("displayname")
 
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
@@ -29,7 +41,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         self.client_group = None
 
     
-    def set_instance_values(self):
+    async def set_instance_values(self):
+        print(self.scope["cookies"])
         # token = self.scope["cookies"]["access"]
         # user_id = get_user_id_from_jwt(token)
         
@@ -37,11 +50,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
         self.client_group = f"client_{self.user.id}"
-        # print(f"LOBBIE CONSUMER: client group {self.client_group}")
-       
+
+        # print(f"LOBBIE CONSUMER: user_id = {self.user.id}")
+        self.user.name = await get_displayname(self.scope.get("cookies"))
+    
+
     async def connect(self):
-        self.set_instance_values()
-        
+        await self.set_instance_values()
         await self.accept()
         await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(AVA_ROOMS, self.channel_name)
@@ -52,7 +67,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
 
     async def disconnect(self, close_code): 
-        # print(f"Lobbies-Consumer disconnect - close_code: {close_code}")
         if self.current_room: # cache.get(f"current_room_{self.user.name}"):
             await self.leave_room()
         
@@ -138,7 +152,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # Notify others about the new lobby
         # await self.group_send_new_room(available_rooms[room_name])
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
-        
         print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
 
 
@@ -182,6 +195,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             room = TournamentRoom.from_dict(room_dict)
             if self.user not in room.players:
                 raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
+            
             room.remove_player(self.user)
             # cache.delete(f"current_room_{self.user.name}")
             
@@ -310,7 +324,11 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     async def match_result(self, event):
-        """Puts the match results from the game consumer into the shared queue for the tournament task"""
+        """
+        Triggered by GameConsumer
+        Puts match result from  game consumer into 
+        shared queue for tournament task
+        """
         
         queue = LobbiesConsumer.room_queues[self.current_room]
         print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}")
