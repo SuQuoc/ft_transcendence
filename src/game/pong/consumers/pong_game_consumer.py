@@ -174,22 +174,13 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     async def send_game_end(self):
-        game = PongGameConsumer.game_instance
-        if (game.player_l.id == self.channel_name and game.player_l.score == game.points_to_win) \
-            or (game.player_r.id == self.channel_name and game.player_r.score == game.points_to_win):
-            await self.send(json.dumps(
-                {
-                    'type': 'game_end',
-                    'status': "won"
-                }
-            ))
-        else:
-            await self.send(json.dumps(
-                {
-                    'type': 'game_end',
-                    'status': "lost"
-                }
-            ))
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'game_end',
+                'status': 'won | lost' # gets added in the actual send function (game_end)
+            }
+        )
 
 
 
@@ -210,8 +201,10 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         print("Game consumer test event")
         pass
 
+
     # async def game_end(self, event):
     #     await self.send(text_data=json.dumps(event))
+
 
     async def forward_match_result(self, event):
         print("forward_match_result")
@@ -226,6 +219,27 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             }
         )
     
+
     async def match_result(self, event):
         print("match_result in game consumer")
         pass
+
+
+    async def game_end(self, event):
+        print("send    game_end")
+        game = PongGameConsumer.game_instance
+        if (game.player_l.id == self.channel_name and game.player_l.score == game.points_to_win) \
+            or (game.player_r.id == self.channel_name and game.player_r.score == game.points_to_win):
+            await self.send(text_data=json.dumps(
+                {
+                    'type': 'game_end',
+                    'status': "lost"
+                }
+            ))
+        else:
+            await self.send(text_data=json.dumps(
+                {
+                    'type': 'game_end',
+                    'status': "won"
+                }
+            ))
