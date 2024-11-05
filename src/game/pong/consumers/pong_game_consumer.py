@@ -48,99 +48,52 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.mode = None
         self.user_id = None
+        
         self.client_group = None
         self.game_group = None
+
+        self.match_id = None
         self.game = None
+        self.game_mode = None
         self.in_game = False
     
     def set_instance_values(self):
         #print(f"GameConsumer - connect")
         # token = self.scope["cookies"]["access"]
         self.user_id = self.scope["user_id"]
-        self.client_group = f"client_{self.user_id}"
-        print(f"GAME CONSUMER client group: {self.client_group}")
-
-        self.match_id = self.scope['url_route']['kwargs']['match_id']
-        self.game_group = f'game_{self.match_id}'
-
-        url_path = self.scope['path']
-        print(f"url_path: {url_path}")
-        if '/daphne/tournaments/' in url_path:
-            self.mode = GameMode.TOURNAMENT
-
+        
     async def connect(self):
         self.set_instance_values()
-
-        if not self.valid_user_id():
-            await self.send_error() # should i accept the connection just to inform client that his id is invalid?
-            return
-
         await self.accept()
         
         # TODO: does the game consumer must be in the group? 
         # I could just send without him in the group, 
         # if only game consumer needs to send message to tournament
-        await self.channel_layer.group_add(self.client_group, self.channel_name) 
-        await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
-
-        await self.channel_layer.group_send(
-            self.client_group,
-            {
-                "type": "test",
-            })
         
-        waiting_game = PongGameConsumer.waiting_games[self.match_id]
-        if waiting_game is None:
-            PongGameConsumer.waiting_games[self.match_id] = Match(self.channel_name)
-        else:
-            waiting_game.add_player(self.channel_name)
-            
-        if waiting_game.is_full():
-            player1 = waiting_game.players[0]
-            player2 = waiting_game.players[1]
-            pong = Pong(player1, player2, points_to_win=1)
-
-            PongGameConsumer.running_games[self.match_id] = pong
-            PongGameConsumer.waiting_games.pop(self.match_id)
-
-            await self.send_initial_state(pong.get_game_state())
-            # self.players.remove(self.players[0])
-            # self.players.remove(self.players[0])
-
-            game_task = asyncio.create_task(self.game_loop())
-            # NOTE: should also work with as a class method or any other method? doesnt need to be an instance method
-            
-            cache.delete(self.match_id)
-
 
     async def disconnect(self, close_code):
         #print(f"GameConsumer - disconnect")
-        
         if self.in_game:
             # if the game was still running the other person wins
-
             pass
         else:
-            waiting_game = PongGameConsumer.waiting_games[self.match_id]
+            waiting_game = PongGameConsumer.waiting_games.get(self.match_id)
             if waiting_game:
                 waiting_game.rem_player(self.channel_name)
+            
+        if self.game_group:
+            await self.channel_layer.group_discard(
+                self.game_group,
+                self.channel_name
+            )
 
+        # if self.client_group:
+        #     await self.channel_layer.group_discard(
+        #         self.client_group, 
+        #         self.channel_name
+        #     )
 
-        # TODO: check if still needed
-        if self.channel_name in self.players:
-            self.players.remove(self.channel_name)
-        
-        await self.channel_layer.group_discard(
-            self.client_group, 
-            self.channel_name
-        )
-        
-        await self.channel_layer.group_discard(
-            self.game_group,
-            self.channel_name
-        )
         await super().disconnect(close_code)
 
 
@@ -153,10 +106,78 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 return
             # changing the direction of the player that sent the message
             PongGameConsumer.running_games.change_player_direction(self.channel_name, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
+        elif type == 'connect_to_match':
+            await self.connect_to_match(text_data_json)
         else:
             return
 
+    def get_game_mode(self):
+        match = cache.get(self.match_id)
+        if match is None:
+            raise ValueError("SNH")
+        mode = match.get('game_mode')
+        try:
+            return GameMode(mode)
+        except ValueError:
+            raise ValueError("Invalid game mode")
+        except KeyError:
+            raise KeyError("Invalid game mode")
+
+    async def connect_to_match(self, data):
+        self.match_id = data.get('match_id')
+        if self.match_id is None:
+            raise ValueError("SNH - match_id is not provided")
         
+        if not self.valid_match_id():
+            await self.send_error()
+            return
+        
+        self.game_mode = self.get_game_mode()
+        if self.game_mode == GameMode.TOURNAMENT:
+            print("TOURNAMENT")
+            # self.client_group = f"client_{self.user_id}"
+            # await self.channel_layer.group_add(self.client_group, self.channel_name) 
+    
+        self.game_group = f'game_{self.match_id}'
+        await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
+        
+        
+        # await self.channel_layer.group_send(
+        #     self.client_group,
+        #     {
+        #         "type": "test",
+        #     })
+        
+        waiting_game = PongGameConsumer.waiting_games.get(self.match_id)
+        if waiting_game is None:
+            PongGameConsumer.waiting_games[self.match_id] = Match(self.channel_name)
+        else:
+            waiting_game.add_player(self.channel_name)
+            
+            # NOTE: in our case with only 2 players, this is alomost always true,
+            # maybe except what happens if a 1 client joins and disconnects before the 2nd even joins
+            if waiting_game.is_full(): 
+                player1 = waiting_game.players[0]
+                player2 = waiting_game.players[1]
+                pong = Pong(player1, player2, points_to_win=1)
+
+                PongGameConsumer.running_games[self.match_id] = pong
+                PongGameConsumer.waiting_games.pop(self.match_id)
+
+                # await self.send_initial_state(pong.get_game_state())
+
+                await self.channel_layer.group_send(
+                    self.game_group,
+                    {
+                        'type': "cleanup"
+                    })
+                
+                # game_task = asyncio.create_task(self.game_loop())
+                # NOTE: should also work with as a class method or any other method? doesnt need to be an instance method
+
+                
+
+
     async def game_loop(self):
         points_to_win = PongGameConsumer.running_games.points_to_win
         tick_duration = 0.03
@@ -174,26 +195,18 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(tick_duration - (time.time() - start_time))
         
         print("end of game loop")
-        await self.send_game_end()            
+        await self.send_game_end()       
         
-        # NOTE: dont send THIS TO FRONTEND
-        # if is_tournament:
-        await self.channel_layer.group_send(
-            self.game_group,
-            {
-                "type": "forward_match_result",
-                "winner": "winner", 
-                "loser": "loser",
-                "winner_score": "winner_score",
-                "loser_score": "loser_score"
-            })
-        print("end of game loop function !!!")
         # TODO: 
         # save the result of the game in the database - must be done in a task and not in consumer
         # 1 match = 1 record in the database
         
-    def valid_user_id(self):
-        allowed_user_ids = cache.get(self.match_id)
+    def valid_match_id(self):
+        """
+        Checks if user provided correct match_id
+        """
+        match_data = cache.get(self.match_id)
+        allowed_user_ids = match_data['user_id_list']
         if allowed_user_ids is None:
             raise ValueError("SNH - cache must be set by matchmaking consumer or tournament consumer")
         for id in allowed_user_ids:
@@ -201,7 +214,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 return True
         return False
 
-###### sending #######
+    ###### sending #######
     async def send_initial_state(self, game_state):
         await self.channel_layer.group_send(
             self.game_group,
@@ -272,29 +285,25 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     # EVENTS - no message to frontend
-    async def test(self, event):
-        print("Game consumer test event")
-        pass
-    
     async def cleanup(self, event):
-        PongGameConsumer.running_games.pop(self.match_id) # removes the key if it exists, or do nothing if it does not
-        if self.mode == GameMode.TOURNAMENT:
+        if self.game_mode == GameMode.TOURNAMENT:
             await self.forward_match_result(event)
-        
+        cache.delete(self.match_id)
+        PongGameConsumer.running_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
         self.close()
 
+    # Communication with other consumer
     async def forward_match_result(self, event):
         print("forward_match_result")
+
+        client_group = f"client_{self.user_id}"
         await self.channel_layer.group_send(
-            self.client_group,
+            client_group,
             {
                 'type': 'match_result',
-                'winner': event['winner'],
-                'loser': event['loser'],
+                'winner': "Pink",
+                'loser': "Black",
                 #'winner_score': event['winner_score'],
                 #'loser_score': event['loser_score']
             })
-    
-    async def match_result(self, event):
-        print("match_result in game consumer")
-        pass
+        

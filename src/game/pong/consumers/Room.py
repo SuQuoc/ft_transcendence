@@ -2,16 +2,16 @@ import json
 
 class Player:
     creation_keys = ["channel_name"]
-    converting_keys = ["name"] # "user_id"]
+    converting_keys = ["name, user_id"]
 
     def __init__(self, **kwargs):
         for key in Player.creation_keys:
             if key not in kwargs:
                 raise ValueError(f"Missing required key for instantiating: {key}")
         
-        self.channel_name = kwargs.get("channel_name")
-        self.name = kwargs.get("name")
-        self.id = None
+        self.channel_name   = kwargs.get("channel_name") # TODO: when is this used?
+        self.name           = kwargs.get("name")
+        self.id             = kwargs.get("id")
     
     @staticmethod
     def from_dict(data: dict):
@@ -23,15 +23,22 @@ class Player:
     def to_dict(self):
         return {
             "channel_name": self.channel_name,
-            "name": self.name
+            "name": self.name,
+            "id": self.id
         }
 
     def __eq__(self, other):
+        # Mainly to check if instance is in another data structure
         if isinstance(other, Player):
             return self.channel_name == other.channel_name
         raise ValueError("other must be an instance of Player")
         return False
 
+    def __str__(self) -> str:
+        return f"Player: {self.name}, user_id: {self.id}"
+    
+    def __repr__(self) -> str:
+        return f"Player: {self.name}, user_id: {self.id}"
     
 
 # Potential Room class for tournaments
@@ -60,24 +67,35 @@ class TournamentRoom:
         # creation keys
         self.name = kwargs.get("name")
         self.creator = Player(**kwargs.get("creator"))
-
+        self.creator_name = self.creator.name
         self.points_to_win = int(kwargs.get("points_to_win"))
         self.max_player_num = int(kwargs.get("max_player_num"))
 
         # + converting keys
-        if "players" in kwargs:
+        if "players" in kwargs: # if instance is created from data in cache
             self.players = [Player(**player_dict) for player_dict in kwargs.get("players")]
-        else:
+        else: # if instance newly created
             self.players = [self.creator]
-
+        self.player_names = [player.name for player in self.players]
+        
         self.cur_player_num = int(kwargs.get("cur_player_num", 1))
         self.status = kwargs.get("status", TournamentRoom.AVAILABLE)
 
+        # NOTE: not necessary if django form validation is used
+        # which means validating user input before going any further
         if self.points_to_win <= 0:
             raise ValueError("points_to_win must be a positive integer")
         if self.max_player_num <= 0:
             raise ValueError("max_player_num must be a positive integer")
-        
+
+    @staticmethod
+    def clean_data(rooms: dict):
+        for room in rooms.values():
+            room: dict
+            room.pop("creator", None)
+            room.pop("players_backend", None)
+        return 
+
     @staticmethod
     def from_dict(data: dict):
         for key in TournamentRoom.converting_keys:
@@ -91,7 +109,9 @@ class TournamentRoom:
         return {
             "name": self.name,
             "creator": self.creator.to_dict(),
-            "players": [player.to_dict() for player in self.players] ,
+            "creator_name": self.creator_name,
+            "players": [player.to_dict() for player in self.players],
+            "player_names": [player.name for player in self.players],
             "points_to_win": self.points_to_win,
             "max_player_num": self.max_player_num,
             "cur_player_num": self.cur_player_num,
@@ -100,7 +120,7 @@ class TournamentRoom:
     
     def to_data_for_client(self):
         """
-        does the same as to_dict but without sensitive data
+        does the same as to_dict but without sensitive data, only leaves out the channel_name
         """
         # json.dumps(
         return {
@@ -124,6 +144,8 @@ class TournamentRoom:
             raise ValueError("player must be an instance of Player")
         if self.is_full():
             raise ValueError(f"Lobby room '{self.name}' is max - SHOULD NEVER HAPPEN.")
+        
+        print(f"Adding player {player.name} to room {self.name}")
 
         self.players.append(player)
         self.cur_player_num += 1

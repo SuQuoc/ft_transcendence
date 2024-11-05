@@ -41,3 +41,28 @@
     "type": "error",
     "error": "not_in_room, room_does_not_exist"
 }
+
+
+
+
+
+
+// tournament
+
+{
+    "type": "tournament_bracket",
+    "matches": [
+        {
+            "match_id": "uuid",
+            "player1": "displayname",
+            "player2": "displayname",
+        },
+        
+        {
+            "match_id": "uuid",
+            "player1": "displayname",
+            "player2": "displayname",
+        
+        }
+    ]
+}

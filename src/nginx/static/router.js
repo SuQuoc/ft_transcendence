@@ -247,6 +247,7 @@ const Router = {
 				break;
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
+				Router.closePongWebSocket(); //only closes the socket if it is open
 				Router.makePongWebSocket();
 				pageElement = new TournamentLobbyPage(tournamentName);
 				break;

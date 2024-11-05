@@ -25,40 +25,34 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.user = None
-        
         self.current_room = None
         self.client_group = None
 
     
     def set_instance_values(self):
-        user_id = self.scope["user_id"]
-        # TODO: get the displayname from UM with user_id
-        print(f"LOBBIE CONSUMER: user_id {user_id}")
-        self.user = Player(channel_name=self.channel_name)
-        
         # token = self.scope["cookies"]["access"]
         # user_id = get_user_id_from_jwt(token)
         
-        
-        self.client_group = f"client_{user_id}"
-        print(f"LOBBIE CONSUMER: client group {self.client_group}")
-        print(f"SCOPE[USER]: {self.scope['user']}")
-
+        # TODO: get the displayname from UM with user_id
+        self.user = Player(channel_name=self.channel_name)
+        self.user.id = self.scope["user_id"]
+        self.client_group = f"client_{self.user.id}"
+        # print(f"LOBBIE CONSUMER: client group {self.client_group}")
+       
     async def connect(self):
         self.set_instance_values()
         
         await self.accept()
         await self.channel_layer.group_add(self.client_group, self.channel_name)
         await self.channel_layer.group_add(AVA_ROOMS, self.channel_name)
-        print(f"Lobbies-Consumer - connect")
 
         #time.sleep(100) # no can do anything with the consumer for the time 
         #await asyncio.sleep(10) # others can still connect instantly, but the client connecting has to wait T time for messages following connect to be handled
-        #asyncio.sleep(10) # doesnt do anything 
+        #asyncio.sleep(10) # doesnt do anything
         
 
     async def disconnect(self, close_code): 
-        print(f"Lobbies-Consumer disconnect - close_code: {close_code}")
+        # print(f"Lobbies-Consumer disconnect - close_code: {close_code}")
         if self.current_room: # cache.get(f"current_room_{self.user.name}"):
             await self.leave_room()
         
@@ -103,8 +97,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     ### Client MESSAGES ###
     async def create_room(self, dict_data):
-        print("CREATE ROOOOOOOOOM")
-
         room_name = dict_data.get("room_name")
         points_to_win = dict_data.get("points_to_win")
         max_player_num = dict_data.get("max_player_num")
@@ -141,11 +133,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         # add user to the channel group
         await self.group_add(get_room_group(room_name))
-        print("sending success")
         await self.send_success(room_name)
 
         # Notify others about the new lobby
-        #await self.group_send_new_room(available_rooms[room_name])
+        # await self.group_send_new_room(available_rooms[room_name])
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
         
         print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
@@ -191,7 +182,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             room = TournamentRoom.from_dict(room_dict)
             if self.user not in room.players:
                 raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
-
             room.remove_player(self.user)
             # cache.delete(f"current_room_{self.user.name}")
             
@@ -220,6 +210,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         """Sends the list of AVAILABLE tournament rooms to the client."""
 
         available_rooms = cache.get(AVA_ROOMS, {})
+        TournamentRoom.clean_data(available_rooms)
+        
         text_data=json.dumps({
             "type": T_TOURNAMENT_LIST,
             "tournaments": available_rooms
@@ -300,14 +292,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     # image
                 }
             )
-        """ elif type == T_START_TOURNAMENT:
-            await self.channel_layer.group_send(
-                get_room_group(room.name),
-                {
-                    "type": type, # TODO: change to type
-                    "test": "test"
-                }
-            ) """
 
     ### EVENTS - each Websocket in the group sends message to it's client ###
     async def new_room(self, event):
@@ -325,15 +309,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def player_left_room(self, event):
         await self.send(text_data=json.dumps(event))
 
-    # async def start_tournament(self, event):
-    #     await self.send(text_data=json.dumps(event))
-
     async def match_result(self, event):
-        """Puts the match result into the shared queue for the tournament task"""    
+        """Puts the match results from the game consumer into the shared queue for the tournament task"""
         
         queue = LobbiesConsumer.room_queues[self.current_room]
-        print(f"EVENT IN match_result: {json.dumps(event)}")
-        await queue.put(json.dumps(event))
+        print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}")
+        await queue.put(event)
+        
         # await self.send(text_data=json.dumps(event))
         # NOTE: i could store the queue from the dict as a self.variable so every consumer sets it when the tournament starts
     
@@ -341,15 +323,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def tournament_bracket(self, event):
         """Sends the list of matches to the client."""
         await self.send(text_data=json.dumps(event))
-
-    #async def start_tournament(self, event):
-    #    await self.send(text_data=json.dumps(event))
-
-    async def test(self, event):
-        print("Lobbie consumer test event")
-        pass
-
-
 
     ## Send to own websocket ##
     async def send_success(self, room_name: str):
@@ -360,7 +333,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
 
     async def send_error(self, error: Enum):
-        # print(f"ERROR: {error}=========================")
         await self.send(text_data=json.dumps({
             "type": T_ERROR,
             "error": error.value,
@@ -385,37 +357,36 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
         await self.group_add(get_room_group(room.name))
         await self.send_success(room.name)
-        # NOTE: this await block may be a candidate for asyncio.gather() OR NOT
-        # since sending the message to the clients and adding the new client to the channel group can happen at the same time
-        # independent from each other but i dont want to send the T_PLAYER_JOINED_ROOM message 
-        # to the JOINING CLIENT which may happen if the group_add happens before the send room the user is in the group
-
+        
         if room.is_full():
             del_room_from_cache(room.name, AVA_ROOMS, available_rooms)
             update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS)
             await self.group_send_AvailableTournaments(T_DELETE_ROOM, room)
-            
             # self.start_tournament(room)
-            # await self.group_send_Room(T_START_TOURNAMENT, room)
-            # asyncio.create_task(tournament_start(room))
         else:
             # Notify ALL in the AVA_ROOMS group, including users who already are in a lobby-room
             # SIMPLE, adding and removing the users of the AVA_ROOMS group frequently has also drawbacks
             update_or_add_room_to_cache(room.to_dict(), AVA_ROOMS, available_rooms)
             await self.group_send_AvailableTournaments(T_ROOM_SIZE_UPDATE, room)
-            # await asyncio.sleep(1) # NOTE: frontend hasnt loaded from JoinTournamentPage to TournamentLobbyPage
-            # self.start_tournament(room) # NOTE: ONLY FOR TESTING
+            await asyncio.sleep(2) # NOTE: frontend hasnt loaded from JoinTournamentPage to TournamentLobbyPage
+            self.start_tournament(room) # NOTE: ONLY FOR TESTING
             
         return room
 
     def start_tournament(self, room: TournamentRoom):
         from .bracket_tournament_logic import tournament_loop
-
+        
+        # await self.group_send_Room(T_START_TOURNAMENT, room)
         # for player in room.players:
         print("1) start tournament - creating queue")
         LobbiesConsumer.room_queues[room.name] = asyncio.Queue() # or a queue for each player?
-        asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
+        task = asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
+        task.add_done_callback(self.cleanup_tournament_task(room.name))
 
+    def cleanup_tournament_task(self, room_name):
+        LobbiesConsumer.room_queues.pop(room_name)
+        if LobbiesConsumer.room_queues.get(room_name):
+            print("Queue still exists")
 
     async def group_remove(self, group_name: str):
         """

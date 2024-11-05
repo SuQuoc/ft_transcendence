@@ -9,6 +9,7 @@ from .pong import Pong
 from .utils import get_user_id_from_jwt
 from django.core.cache import cache
 from .utils import create_match_access_list
+from .pong_game_consumer import GameMode
 
 games = {}
 
@@ -36,10 +37,10 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             player1 = MatchmakingConsumer.players.pop(0)
             player2 = MatchmakingConsumer.players.pop(0)
                         
-            create_match_access_list([player1["user_id"], player2["user_id"]])
+            match_id = create_match_access_list([player1["user_id"], player2["user_id"]], GameMode.NORMAL.value)
             
-            await self.send_players_where_to_connect_to(id, player1["channel_name"])
-            await self.send_players_where_to_connect_to(id, player2["channel_name"])
+            await self.send_players_where_to_connect_to(match_id, player1["channel_name"])
+            await self.send_players_where_to_connect_to(match_id, player2["channel_name"])
             
             await self.trigger_disconnection(player1["channel_name"])
             await self.trigger_disconnection(player2["channel_name"])

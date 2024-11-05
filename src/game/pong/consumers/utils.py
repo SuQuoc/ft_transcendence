@@ -97,10 +97,15 @@ def get_room_group(room_name: str):
     return f"tournament_{room_name}"
 
 
-def create_match_access_list(user_id_list):
+def create_match_access_list(user_id_list, game_mode):
     """
     Creates an entry in cache to check which client is allowed to connect to which game
     """
+    match_data = {
+        "user_id_list": user_id_list,
+        "game_mode": game_mode
+    }
     match_id = str(uuid.uuid4())
-    cache.set(match_id, user_id_list) # used to confirm client to connecting to game
+    print(f"match_id: {match_id}, match_data: {match_data}")
+    cache.set(match_id, match_data) # used to confirm client to connecting to game
     return match_id

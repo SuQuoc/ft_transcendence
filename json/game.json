@@ -6,6 +6,10 @@
     "move_to": 200
 }
 
+{
+    "type": "connect_to_match",
+    "match_id": uuid,
+}
 
 
 

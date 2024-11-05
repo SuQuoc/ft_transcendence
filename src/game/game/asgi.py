@@ -31,7 +31,7 @@ import json
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         # Extract JWT or other auth token
-        print(scope)
+        # print(scope)
         
         cookies = self.get_cookies_from_header(scope['headers'])
         token_str = cookies.get(ACCESS)
@@ -58,7 +58,7 @@ class JWTAuthMiddleware(BaseMiddleware):
                 'code': 4001  # Unauthorized access code, no cookies provided at all, no access cookie provided
             })
             return
-        print(f" uuid: {data}\n")
+        # print(f" uuid: {data}\n")
         
         # NOTE: FOR SOME REASON THIS BLOCK OF CODE DOESN'T WORK, DOES IT WORK IN UM?
         """ auth = JWTStatelessUserAuthentication()

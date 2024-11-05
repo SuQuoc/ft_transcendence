@@ -89,6 +89,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	/** gets called when the websocket receives a message */
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
+		console.log("TournamentLobbyPage: handleReceivedMessage: ", data);
 				
 		if (data.type === "player_joined_room") {
 			this.addPlayerElement(data.displayname); // needs the avatar too !!!
@@ -103,19 +104,21 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 		else if (data.type === "tournament_bracket") {
 			// TODO: write clean
-			let match_id = null;
-			for (let match in data.matches) {
-				if (match.player1 == window.app.username) {
-					match_id = match.match_id;
+			let id = null;
+			for (let match of data.matches) {
+				if (match.player1 === window.app.userData.username) {
+					id = match.match_id;
+					console.log("username: ", window.app.userData.username);
 					break;
 				}
-				else if (match.player2 == window.app.username) {
-					match_id = match.match_id;
+				else if (match.player2 === window.app.userData.username) {
+					id = match.match_id;
+					console.log("username: ", window.app.userData.username);
 					break;
 				}
 			}
-			console.log("match_id: ", match_id);
-			window.app.router.makePongWebSocket(match_id);
+			console.log("match_id: ", id);
+			window.app.pong_socket.send(JSON.stringify({type: "connect_to_match", match_id: id}));
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);

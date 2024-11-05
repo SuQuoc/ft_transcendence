@@ -11,7 +11,7 @@ import json
 import asyncio
 from typing import List
 from .utils import create_match_access_list
-
+from .pong_game_consumer import GameMode
 
 #asyncio.create_task()
 async def tournament_loop(room: TournamentRoom, queue):
@@ -22,34 +22,50 @@ async def tournament_loop(room: TournamentRoom, queue):
     while len(players) > 1:
         random.shuffle(players)
         pairs: List[Player] = make_pairs(players)
-        
+        # pairs = players # NOTE: JUST FOR TESTING
+        print(f"pairs: {pairs}")
+        await asyncio.sleep(20)
         winners = []
         losers = []
         matches = [
             {
-                "match_id": create_match_access_list([pair[0].id, pair[1].id]),
+                "match_id": create_match_access_list([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }
             for pair in pairs
         ]
-
-
-        print("2) tournament loop - sending brackets to clients")
-
+        print(json.dumps(matches, indent=4))
         await send_matches(get_room_group(room.name), matches)
         
         match_results = []
         for player in players:
             match_result = await queue.get()
-            print(f"match_result: {match_result}")
+            print(f"match_result IN TOURNAMENT TASK: {match_result}")
             match_results.append(match_result)
             queue.task_done() # NOTE: necessary in our case?
+
         match_results = remove_duplicates(match_results)
         print(f"match_results: {json.dumps(match_results, indent=4)}")
-        winners = [result["winner"] for result in match_results]    
-        losers = [result["loser"] for result in match_results]
+        winners = [result.get("winner") for result in match_results]    
+        losers = [result.get("loser") for result in match_results]
         players = winners
+
+
+    await send_tournament_winner(get_room_group(room.name), winners[0])
+    return room.name
+
+
+
+async def send_tournament_winner(group_name, winner):
+    await get_channel_layer().group_send(
+        group_name,
+        {
+            "type": "tournament_winner",
+            "winner": "winner" 
+        })
+    
+
 
 
 async def send_matches(group_name, matches):
@@ -62,7 +78,7 @@ async def send_matches(group_name, matches):
     
 
 def make_pairs(list) -> list:
-    return [list[i:i+2] for i in range(0, len(list), 2)]
+    return [tuple(list[i:i+2]) for i in range(0, len(list), 2)]
 
 
 def remove_duplicates(match_results):
@@ -79,6 +95,9 @@ def remove_duplicates(match_results):
     unique_results = []
     
     for result in match_results:
+        if not isinstance(result, dict):
+            result = json.loads(result)
+
         # Convert the dictionary to a frozenset of tuples to make it hashable
         result_tuple = frozenset(result.items())
         
@@ -88,15 +107,3 @@ def remove_duplicates(match_results):
     
     return unique_results
 
-
-
-# OLDIES
-async def send_match_id(self, channel_name):
-    await self.channel_layer.send(
-        channel_name,
-        {
-            "type": "tournament_match",
-            "match_id": "uuid",
-            "player1": "player1",
-            "player2": "player2"
-        })
