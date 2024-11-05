@@ -11,6 +11,7 @@ window.app = {
 	router: Router,
 	socket: null,
 	pong_socket: null,
+	match_socket: null,
 	userData: storedUserData,
 };
 

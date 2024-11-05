@@ -161,11 +161,11 @@ const Router = {
 
 	//opens the window.app.pong_socket if it is closed
 	/** creates a Websocket connection to backend using a match id */
-	makePongWebSocket: (match_id="someMatchMakingID") => {
+	makePongWebSocket: () => {
 		
 		if (!window.app.pong_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/tournament/" + match_id;
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/tournament/";
 			window.app.pong_socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -186,6 +186,36 @@ const Router = {
 			window.app.pong_socket.close();
 			window.app.pong_socket = null;
 			console.log("pong socket closed");
+		}
+	},
+
+	//opens the window.app.match_socket if it is closed
+	/** creates a Websocket connection to backend using a match id */
+	makeMatchWebSocket: () => {
+		
+		if (!window.app.match_socket) {
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/matchmaking/" + match_id;
+			window.app.match_socket = new WebSocket(ws_path);
+
+			// add event listeners
+			//window.app.match_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
+			console.log("match socket created");
+		};
+
+		window.app.match_socket.onopen = () => {
+			console.log("match socket opened");
+			// NOTE: window.app.match_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+		};
+	},
+
+	/** closes the window.app.match_socket if it is open */
+	closeMatchWebSocket: () => {
+		if (window.app.match_socket) {
+			window.app.match_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
+			window.app.match_socket.close();
+			window.app.match_socket = null;
+			console.log("match socket closed");
 		}
 	},
 
@@ -255,6 +285,8 @@ const Router = {
 				console.log("match page created");
 				Router.closePongWebSocket(); //only closes the socket if it is open
 				Router.makePongWebSocket("matchID");
+				Router.closeMatchWebSocket(); //only closes the socket if it is open
+				Router.makeMatchWebSocket();
 				pageElement = document.createElement("match-page");
 				break;
 			case "/pong": // needed??!!!
