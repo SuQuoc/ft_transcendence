@@ -142,12 +142,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
         
         
-        # await self.channel_layer.group_send(
-        #     self.client_group,
-        #     {
-        #         "type": "test",
-        #     })
-        
         waiting_game = PongGameConsumer.waiting_games.get(self.match_id)
         if waiting_game is None:
             PongGameConsumer.waiting_games[self.match_id] = Match(self.channel_name)
@@ -166,21 +160,22 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
                 # await self.send_initial_state(pong.get_game_state())
                 
-                await asyncio.sleep(5)
-                await self.channel_layer.group_send(
-                    self.game_group,
-                    {
-                        'type': "cleanup"
-                    })
+                # await asyncio.sleep(5)
+                # await self.channel_layer.group_send(
+                #     self.game_group,
+                #     {
+                #         'type': "cleanup"
+                #     })
                 
                 # game_task = asyncio.create_task(self.game_loop())
                 # NOTE: should also work with as a class method or any other method? doesnt need to be an instance method
 
                 
-
-
     async def game_loop(self):
-        points_to_win = PongGameConsumer.running_games.points_to_win
+        # needs only the group_name to message all the clients in the group
+
+        game = self.game
+        points_to_win = game.points_to_win
         tick_duration = 0.03
         start_time = time.time()
 
@@ -189,21 +184,20 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await self.send_count_down(count)
             await asyncio.sleep(1)
         # send initial state again, so the ball is in the right position
-        await self.send_initial_state(PongGameConsumer.game_instance.get_game_state())
+        await self.send_initial_state(game.get_game_state())
         # game loop
         while True:
             start_time = time.time()
-            PongGameConsumer.running_games.update_game_state()
+            game.update_game_state()
 
-            game_state = PongGameConsumer.running_games.get_game_state()
+            game_state = game.get_game_state()
             await self.send_state_update(game_state)
             if game_state['score_l'] == points_to_win or game_state['score_r'] == points_to_win:
-                # send game end info to client
                 break
             await asyncio.sleep(tick_duration - (time.time() - start_time))
         
         print("end of game loop")
-        await self.send_game_end()       
+        await self.send_game_end()
         
         # TODO: 
         # save the result of the game in the database - must be done in a task and not in consumer
@@ -258,9 +252,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             self.game_group,
             {
                 'type': 'game_end',
-                'status': 'won | lost' # gets added in the actual send function (game_end)
-            }
-        )
+            })
 
         # cleanup the game in backend
         await self.channel_layer.group_send(
@@ -318,16 +310,11 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 'loser_score': event['loser_score']
             }
         )
-    
-
-    async def match_result(self, event):
-        print("match_result in game consumer")
-        pass
 
 
     async def game_end(self, event):
         print("send    game_end")
-        game = PongGameConsumer.game_instance
+        game = self.game
         if (game.player_l.id == self.channel_name and game.player_l.score == game.points_to_win) \
             or (game.player_r.id == self.channel_name and game.player_r.score == game.points_to_win):
             await self.send(text_data=json.dumps(
