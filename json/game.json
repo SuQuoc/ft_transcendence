@@ -13,8 +13,13 @@
 }
 
 
-
 // Response
+{
+    "type": "count_down",
+    "count": "5 | 4 | 3 | 2 | 1 | 0"
+}
+
+
 {
     "type": "initial_state",
     "game_state": {

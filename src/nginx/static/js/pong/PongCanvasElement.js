@@ -99,6 +99,10 @@ export class PongCanvasElement extends canvasBaseClass {
 
 	async updateGame(state) {
 		this.sent_state = state;
+		if (this.curr_state === null) {
+			this.curr_state = state;
+			this.next_state = state;
+		}
 
 		// rendering
 		this.renderForeground(this.curr_state);
@@ -170,13 +174,22 @@ export class PongCanvasElement extends canvasBaseClass {
 		if (data.type === "state_update") {
 			await this.updateGame(data.game_state);
 		}
+		else if (data.type === "count_down") {
+			console.log("count_down: ", data.count);
+			this.clearTextForeground(); // the ball is still visible the first time !!
+			this.writeTextForeground(data.count);
+		}
 		else if (data.type === "initial_state") {
+			this.clearTextForeground();
 			this.curr_state = data.game_state;
 			this.next_state = data.game_state;
+			await this.renderForeground(data.game_state);
 		}
 		else if (data.type === "game_end") {
 			console.log("game_end");
 			clearInterval(this.interval_id);
+			this.clearTextForeground();
+			this.writeTextForeground("You " + data.status + "!");
 		}
 		else {
 			console.error("Unknown message type: ", data.type);

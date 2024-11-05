@@ -63,6 +63,26 @@ export class canvasBaseClass extends HTMLElement {
 		ctx.scale(this.scale, this.scale);
 	}
 
+	/** Writes text on the foreground canvas. 
+	 * @param {string} text - The text to write on the canvas.
+	 * @param {string} font - (optional: The font of the text. Default: 50px Arial)
+	 * @param {string} color - (optional: The color of the text. Default: white)
+	*/
+	writeTextForeground(text, font='50px Arial', color="white",)
+	{
+		this.ctx.fillStyle = color;
+		this.ctx.font = font;
+		this.ctx.textAlign = 'center';
+		this.ctx.textBaseline = 'middle'; // Center text vertically
+		this.ctx.fillText(text, this.width_unscaled / 2, this.height_unscaled / 2);
+	}
+
+	/** Clears the foreground canvas except for the players. (30px padding on the left and right) */
+	clearTextForeground()
+	{
+		this.ctx.clearRect(30, 0, this.width_unscaled - 60, this.height_unscaled);
+	}
+
 
 	/// ----- Event Handlers ----- ///
 
