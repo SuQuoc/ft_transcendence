@@ -10,7 +10,7 @@ import uuid
 import json
 import asyncio
 from typing import List
-from .utils import create_match_access_list
+from .utils import create_match_config
 from .pong_game_consumer import GameMode
 
 #asyncio.create_task()
@@ -28,7 +28,7 @@ async def tournament_loop(room: TournamentRoom, queue):
         losers = []
         matches = [
             {
-                "match_id": create_match_access_list([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
+                "match_id": create_match_config([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }

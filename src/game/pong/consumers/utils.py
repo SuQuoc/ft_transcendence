@@ -98,7 +98,7 @@ def del_room_from_cache(room_name, cache_name, cached_data: dict=None):
     cache.set(cache_name, cached_data)
 
 
-def create_match_access_list(user_id_list, game_mode):
+def create_match_config(user_id_list, game_mode, points_to_win=None):
     """
     Creates an entry in cache to check which client is allowed to connect to which game
     """
@@ -106,6 +106,10 @@ def create_match_access_list(user_id_list, game_mode):
         "user_id_list": user_id_list,
         "game_mode": game_mode
     }
+
+    if points_to_win:
+        match_data["points_to_win"] = points_to_win
+
     match_id = str(uuid.uuid4())
     print(f"match_id: {match_id}, match_data: {match_data}")
     cache.set(match_id, match_data) # used to confirm client to connecting to game
