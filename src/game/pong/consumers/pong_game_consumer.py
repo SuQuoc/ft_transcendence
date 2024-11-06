@@ -9,24 +9,6 @@ from django.core.cache import cache
 from .Room import Player
 from typing import Dict
 
-# TODO: should be in the Pong class, no need to have that separate
-# Problem: Pong class requires 2 players to be created, but we need to create it with 1 player
-class Match:
-    def __init__(self, channel_name):
-        self.size = 1
-        self.players = [channel_name]
-
-    def add_player(self, channel_name):
-        self.players.append(channel_name)
-        self.size += 1
-
-    def rem_player(self, channel_name):
-        self.players.remove(channel_name)
-        self.size -= 1
-
-    def is_full(self):
-        return self.size == 2
-
 class GameMode(Enum):
     NORMAL = 'normal'
     TOURNAMENT = 'tournament'
@@ -43,9 +25,7 @@ class Type(Enum):
 
 
 class PongGameConsumer(AsyncWebsocketConsumer):
-    running_games: Dict[str, Pong] = {}
-    waiting_games: Dict[str, Match] = {}
-    players = []
+    all_games: Dict[str, Pong] = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
@@ -66,19 +46,16 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         self.set_instance_values()
         await self.accept()
         
-        # TODO: does the game consumer must be in the group? 
-        # I could just send without him in the group, 
-        # if only game consumer needs to send message to tournament
-        
+    
 
     async def disconnect(self, close_code):
         if self.in_game:
             # if the game was still running set other persons score to max
             pass
         else:
-            waiting_game = PongGameConsumer.waiting_games.get(self.match_id)
-            if waiting_game:
-                waiting_game.rem_player(self.channel_name)
+            game = PongGameConsumer.all_games.get(self.match_id)
+            if game:
+                game.rem_player(self.channel_name)
             
         if self.game_group:
             await self.channel_layer.group_discard(
@@ -137,27 +114,20 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
         
         
-        waiting_game = PongGameConsumer.waiting_games.get(self.match_id)
-        if waiting_game is None:
-            PongGameConsumer.waiting_games[self.match_id] = Match(self.channel_name)
-        else:
-            waiting_game.add_player(self.channel_name)
-            
-            # NOTE: in our case with only 2 players, this is alomost always true,
-            # maybe except what happens if a 1 client joins and disconnects before the 2nd even joins
-            if waiting_game.is_full(): 
-                player1 = waiting_game.players[0]
-                player2 = waiting_game.players[1]
-                ptw     = self.match_config.get('points_to_win')
-                if ptw is None:
+        game = PongGameConsumer.all_games.get(self.match_id)
+        if game is None:
+            ptw = self.match_config.get('points_to_win')
+            if ptw is None:
                     ptw = 4
-                
-                pong = Pong(self.game_group, player1, player2, ptw)
-
-                PongGameConsumer.running_games[self.match_id] = pong
-                PongGameConsumer.waiting_games.pop(self.match_id)
-                
-                game_task = asyncio.create_task(pong.start_game_loop())
+            PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.channel_name, ptw)
+        else:
+            game.add_player(self.channel_name)
+            
+            # NOTE: in our case with only 2 players, this is almost always true,
+            # maybe except what happens if a 1 client joins and disconnects before the 2nd even joins
+            if game.is_full():                 
+                game_task = asyncio.create_task(game.start_game_loop())
+    
 
         
     def valid_match_id(self):
@@ -189,7 +159,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     async def initial_state(self, event):
         self.in_game = True
-        self.game = PongGameConsumer.running_games[self.match_id]
+        self.game = PongGameConsumer.all_games[self.match_id]
         if self.game is None:
             raise ValueError("Game not found")
         await self.send(text_data=json.dumps(event))
@@ -220,7 +190,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     
 
     async def cleanup(self, data):
-        PongGameConsumer.running_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
+        PongGameConsumer.all_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
         cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT:
             await self.forward_match_result(data)

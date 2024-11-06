@@ -86,8 +86,10 @@ class Pong:
     from channels.layers import get_channel_layer
     CHANNEL_LAYER = get_channel_layer()
 
-    def __init__(self, channel_group, player_l, player_r, points_to_win=1):
+    def __init__(self, channel_group, player_l, points_to_win=1):
         self.channel_group = channel_group # Messaging to Game Consumer
+        self.size = 1
+        self.running = False
 
         self.points_to_win = points_to_win
 
@@ -103,13 +105,29 @@ class Pong:
                                         width = self.player_width,
                                         height = self.player_height,
                                         speed = 10)
-        self.player_r: Player  =  Player(id = player_r,
-                                        pos_x = self.canvas_width - self.player_width - 10,
-                                        pos_y = self.canvas_height/2 - self.player_height/2,
-                                        width = self.player_width,
-                                        height = self.player_height,
-                                        speed = 10)
+        self.player_r: Player  =  None
+        
+    def add_player(self, player_r):
+        self.player_r = Player(id = player_r,
+                                pos_x = self.canvas_width - self.player_width - 10,
+                                pos_y = self.canvas_height/2 - self.player_height/2,
+                                width = self.player_width,
+                                height = self.player_height,
+                                speed = 10)
+        
+        self.size += 1
+        
+        
+    def rem_player(self, player):
+        if player == self.player_l.id:
+            self.player_l = None
+        elif player == self.player_r.id:
+            self.player_r = None
+        self.size -= 1
 
+    def is_full(self):
+        return self.size == 2
+    
 
     def get_game_state(self):
         return {
@@ -149,24 +167,14 @@ class Pong:
         self.check_if_scored(self.ball, self.canvas_width)
 
 
-    async def save_game_to_db(self):
-        from asgiref.sync import sync_to_async
-        from pong.models import MatchRecord
-
-        winner_id = None
-        loser_id = None
-        winner_score = None
-        loser_score = None
-        await sync_to_async(MatchRecord.objects.create)(
-            winner          = winner_id,
-            loser           = loser_id,
-            winner_score    = winner_score,
-            loser_score     = loser_score)
-
     async def start_game_loop(self):
         import time
         import asyncio
-        # needs only the group_name to message all the clients in the group
+        
+        if not self.is_full():
+            raise Exception("Not enough players to start game")
+        
+        self.running = True
         tick_duration = 0.03
         start_time = time.time()
 
@@ -197,7 +205,7 @@ class Pong:
             return True
         return False
     
-    
+
     # Sending messages to the Game Consumer
     async def send_count_down(self, count):
         await Pong.CHANNEL_LAYER.group_send(
@@ -208,6 +216,19 @@ class Pong:
             }
         )
 
+    async def save_game_to_db(self):
+        from asgiref.sync import sync_to_async
+        from pong.models import MatchRecord
+
+        winner_id = None
+        loser_id = None
+        winner_score = None
+        loser_score = None
+        await sync_to_async(MatchRecord.objects.create)(
+            winner          = winner_id,
+            loser           = loser_id,
+            winner_score    = winner_score,
+            loser_score     = loser_score)
 
     async def send_initial_state(self, game_state):
         await Pong.CHANNEL_LAYER.group_send(

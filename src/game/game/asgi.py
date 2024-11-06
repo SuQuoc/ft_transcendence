@@ -106,7 +106,6 @@ django.setup()
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
-        #"websocket": URLRouter(websocket_urlpatterns)
         "websocket": AllowedHostsOriginValidator(
             JWTAuthMiddleware(AuthMiddlewareStack( # only used authMiddleware to get the cookies from scope inside the consumer
                 URLRouter(websocket_urlpatterns)))
