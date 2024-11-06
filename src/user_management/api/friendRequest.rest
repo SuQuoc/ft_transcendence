@@ -1,5 +1,5 @@
 
-@baseUrl = https://localhost:8000
+@baseUrl = https://localhost:8443
 
 # @name postSignup
 POST {{baseUrl}}/registration/signup/
