@@ -13,9 +13,12 @@ services:
     volumes: # [aguilmea]  this has to be deleted once dev is ready
       - ../src/nginx/static:/usr/share/nginx/html
     environment:
-      - NGINX_HOST=${SERVER_URL:-https://localhost}
+      - DOMAIN=${DOMAIN:-localhost}
+      - SSL_PORT=${SSL_PORT:-8443}
+      - PLAIN_PORT=${PLAIN_PORT:-8080}
     ports:
-      - 8000:443
+      - ${PLAIN_PORT:-8080}:80
+      - ${SSL_PORT:-8443}:443
     depends_on:
       - registration
       - usermanagement
