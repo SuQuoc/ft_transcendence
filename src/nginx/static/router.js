@@ -284,7 +284,7 @@ const Router = {
 			case "/match":
 				console.log("match page created");
 				Router.closePongWebSocket(); //only closes the socket if it is open
-				Router.makePongWebSocket("matchID");
+				Router.makePongWebSocket();
 				Router.closeMatchWebSocket(); //only closes the socket if it is open
 				Router.makeMatchWebSocket();
 				pageElement = document.createElement("match-page");

@@ -11,6 +11,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 	}
+	
 	connectedCallback() {
 		super.connectedCallback();
 
@@ -118,6 +119,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 				}
 			}
 			console.log("match_id: ", id);
+			// protection for pong_socket !!??
 			window.app.pong_socket.send(JSON.stringify({type: "connect_to_match", match_id: id}));
 		}
 		else if (data.type === "error") {
