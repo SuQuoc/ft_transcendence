@@ -1,5 +1,5 @@
 import random # for old version of pong # maybe needed for ball in the new version (but i don't think so)!!
-
+import json
 
 class Vector:
     def __init__(self, x, y):
@@ -83,7 +83,12 @@ class Ball:
 
 
 class Pong:
-    def __init__(self, player_l, player_r, points_to_win):
+    from channels.layers import get_channel_layer
+    CHANNEL_LAYER = get_channel_layer()
+
+    def __init__(self, channel_group, player_l, player_r, points_to_win=1):
+        self.channel_group = channel_group # Messaging to Game Consumer
+
         self.points_to_win = points_to_win
 
         self.canvas_width = 1000
@@ -142,3 +147,91 @@ class Pong:
         self.ball.check_player_collision(self.player_l, self.player_r)
         self.ball.check_wall_collision(self.canvas_height)
         self.check_if_scored(self.ball, self.canvas_width)
+
+
+    async def save_game_to_db(self):
+        from asgiref.sync import sync_to_async
+        from pong.models import MatchRecord
+
+        winner_id = None
+        loser_id = None
+        winner_score = None
+        loser_score = None
+        await sync_to_async(MatchRecord.objects.create)(
+            winner          = winner_id,
+            loser           = loser_id,
+            winner_score    = winner_score,
+            loser_score     = loser_score)
+
+    async def start_game_loop(self):
+        import time
+        import asyncio
+        # needs only the group_name to message all the clients in the group
+        tick_duration = 0.03
+        start_time = time.time()
+
+        # count down
+        for count in [5, 4, 3, 2, 1, 0]:
+            await self.send_count_down(count)
+            await asyncio.sleep(1)
+        # send initial state again, so the ball is in the right position
+        await self.send_initial_state(self.get_game_state())
+        # game loop
+        while True:
+            start_time = time.time()
+            self.update_game_state()
+
+            game_state = self.get_game_state()
+            await self.send_state_update(game_state)
+            if self.game_over():
+                break
+            await asyncio.sleep(tick_duration - (time.time() - start_time))
+        
+        
+        print("end of game loop")
+        # save game to db()
+        await self.send_game_end()
+
+    def game_over(self):
+        if self.player_l.score == self.points_to_win or self.player_r.score == self.points_to_win:
+            return True
+        return False
+    
+    
+    # Sending messages to the Game Consumer
+    async def send_count_down(self, count):
+        await Pong.CHANNEL_LAYER.group_send(
+            self.channel_group,
+            {
+                'type': 'count_down',
+                'count': count
+            }
+        )
+
+
+    async def send_initial_state(self, game_state):
+        await Pong.CHANNEL_LAYER.group_send(
+            self.channel_group,
+            {
+                'type': 'initial_state',
+                'game_state': game_state
+            }
+        )
+    
+    async def send_state_update(self, game_state):
+        await Pong.CHANNEL_LAYER.group_send(
+            self.channel_group,
+            {
+                'type': 'state_update',
+                'game_state': game_state
+            }
+        )
+
+    async def send_game_end(self):
+        await Pong.CHANNEL_LAYER.group_send(
+            self.channel_group,
+            {
+                'type': 'game_end',
+                "winner": "winner",
+                "loser": "loser"
+            })

@@ -39,8 +39,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                         
             match_id = create_match_access_list([player1["user_id"], player2["user_id"]], GameMode.NORMAL.value)
             
-            await self.send_players_where_to_connect_to(match_id, player1["channel_name"])
-            await self.send_players_where_to_connect_to(match_id, player2["channel_name"])
+            await self.trigger_match_found(match_id, player1["channel_name"])
+            await self.trigger_match_found(match_id, player2["channel_name"])
             
             await self.trigger_disconnection(player1["channel_name"])
             await self.trigger_disconnection(player2["channel_name"])
@@ -66,7 +66,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             await self.close()
             
     
-    async def send_players_where_to_connect_to(self, match_id: str, channel_name):
+    async def trigger_match_found(self, match_id: str, channel_name):
         if not isinstance(match_id, str):
             match_id = str(match_id)
 
@@ -86,5 +86,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         
 
     # EVENTS
+    async def match_found(self, event):
+        await self.send(text_data=json.dumps(event))
+
     async def disconnect_from_matchmaking(self, event):
         await self.close()
