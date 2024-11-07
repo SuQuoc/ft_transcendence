@@ -16,8 +16,8 @@ games = {}
 # TODO: Notion todo
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     lock = asyncio.Lock()
-    players = [] # NOTE: cache in production? 
-
+    players = {} # NOTE: cache in production? 
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.user_id = None 
@@ -26,33 +26,31 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.accept()
         
         self.user_id = self.scope["user_id"]
-        MatchmakingConsumer.players.append(
-            {
-                "channel_name": self.channel_name,
-                "user_id": self.user_id
-            })
+        MatchmakingConsumer.players[self.user_id] = self.channel_name
         
         if len(MatchmakingConsumer.players) == 2:
-            player1 = MatchmakingConsumer.players.pop(0)
-            player2 = MatchmakingConsumer.players.pop(0)
+            playerL_id, playerL_channel = MatchmakingConsumer.players.popitem()
+            playerR_id, playerR_channel = MatchmakingConsumer.players.popitem()
                         
-            match_id = create_match_config([player1["user_id"], player2["user_id"]], GameMode.NORMAL.value)
+            match_id = create_match_config([playerL_id, playerR_id], GameMode.NORMAL.value)
             
-            await self.trigger_match_found(match_id, player1["channel_name"])
-            await self.trigger_match_found(match_id, player2["channel_name"])
+            await self.trigger_match_found(match_id, playerL_channel)
+            await self.trigger_match_found(match_id, playerR_channel)
             
-            await self.trigger_disconnection(player1["channel_name"])
-            await self.trigger_disconnection(player2["channel_name"])
+            await self.trigger_disconnection(playerL_channel)
+            await self.trigger_disconnection(playerR_channel)
 
 
     async def disconnect(self, close_code):
         # NOTE: using a dict instead of a list would be more efficient i think
-        if any(self.channel_name in player.values() for player in MatchmakingConsumer.players):
+        MatchmakingConsumer.players.pop(self.user_id, None)
+        
+        """ if any(self.channel_name in player.values() for player in MatchmakingConsumer.players):
             MatchmakingConsumer.players.remove(
                 {
                     "channel_name": self.channel_name, 
                     "user_id": self.user_id
-                })
+                }) """
         
         await super().disconnect(close_code)
 
