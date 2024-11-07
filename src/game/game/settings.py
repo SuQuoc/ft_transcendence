@@ -137,6 +137,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ASGI_APPLICATION = "game.asgi.application"
 
 
+# SECURITY --------------------------------
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
+
 
 # REST framework -------------------------
 REST_FRAMEWORK = {

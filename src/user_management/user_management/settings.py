@@ -143,7 +143,7 @@ MEDIA_ROOT = BASE_DIR / "uploads"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ADDED BY US--------------------------------------------- #
+# SECURITY --------------------------------
 CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
 
