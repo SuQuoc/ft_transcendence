@@ -58,6 +58,9 @@ if SILK == True:
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
     INSTALLED_APPS.append('silk')
 
+if DEBUG == True:
+    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
