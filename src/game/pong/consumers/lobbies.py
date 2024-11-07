@@ -29,6 +29,7 @@ async def get_displayname(cookie_dict):
                 raise Exception('Error getting displayname from UM')
             return response.json().get("displayname")
 
+# PROVING: global_connection_list = []
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
@@ -42,10 +43,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     
     async def set_instance_values(self):
-        print(self.scope["cookies"])
-        # token = self.scope["cookies"]["access"]
-        # user_id = get_user_id_from_jwt(token)
-        
         # TODO: get the displayname from UM with user_id
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
@@ -56,6 +53,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     
 
     async def connect(self):
+        # PROVING: connection_id = self.channel_name[-4:]
+        # PROVING: global_connection_list.append(connection_id)
+        # PROVING: print(f"global_list: {global_connection_list}")
+
         await self.set_instance_values()
         await self.accept()
         await self.channel_layer.group_add(self.client_group, self.channel_name)
@@ -79,9 +80,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             dict_data = json.loads(text_data) # convert message from client to dict
             type = dict_data.get("type")
-            print(f"LOBBIES-Consumer - receive:")
-            print(json.dumps(dict_data))
-            print("\n")
+            # print(f"LOBBIES-Consumer - receive:")
+            # print(json.dumps(dict_data))
+            # print("\n")
 
             # handle websocket message from client
             if type == T_ON_TOURNAMENT_PAGE:
@@ -150,7 +151,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # Notify others about the new lobby
         # await self.group_send_new_room(available_rooms[room_name])
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
-        print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
+        # print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
 
 
     async def join_room(self, dict_data):
@@ -170,7 +171,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 return
             
             room = await self.add_player_to_room(room_name, available_rooms)
-        print(f"ROOM_NAME: {json.dumps(room.to_dict())} - {self.user.name} joined")
+        # print(f"ROOM_NAME: {json.dumps(room.to_dict())} - {self.user.name} joined")
 
        
     async def leave_room(self):
@@ -212,7 +213,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 else:
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
-            print(f"ROOM_NAME: {room.name} - {self.user.name} left")
+            # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
 
     async def get_tournament_list(self):
         """Sends the list of AVAILABLE tournament rooms to the client."""
@@ -404,8 +405,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         task.add_done_callback(lambda t: self.cleanup_tournament_task(room.name))
 
     def cleanup_tournament_task(self, room_name):
-        LobbiesConsumer.room_queues.pop(room_name)
-        if LobbiesConsumer.room_queues.get(room_name):
+        queue = LobbiesConsumer.room_queues.pop(room_name, None)
+        if queue:
             print("Queue still exists")
         else:
             print("Queue deleted")
