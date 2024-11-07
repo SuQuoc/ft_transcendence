@@ -46,16 +46,11 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         self.set_instance_values()
         await self.accept()
         
-    
-
     async def disconnect(self, close_code):
-        if self.in_game:
-            # if the game was still running set other persons score to max
-            pass
-        else:
+        """ if not self.in_game: 
             game = PongGameConsumer.all_games.get(self.match_id)
             if game:
-                game.rem_player(self.channel_name)
+                game.rem_player(self.user_id) """
             
         if self.game_group:
             await self.channel_layer.group_discard(
@@ -80,7 +75,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             if self.game is None:
                 return
             # changing the direction of the player that sent the message
-            self.game.change_player_direction(self.channel_name, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
+            self.game.change_player_direction(self.user_id, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
         elif type == 'connect_to_match':
             await self.connect_to_match(text_data_json)
         else:
@@ -119,15 +114,16 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             ptw = self.match_config.get('points_to_win')
             if ptw is None:
                     ptw = 4
-            PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.channel_name, ptw)
+            PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.user_id, ptw)
         else:
-            game.add_player(self.channel_name)
+            game.add_player(self.user_id)
             
             # NOTE: in our case with only 2 players, this is almost always true,
             # maybe except what happens if a 1 client joins and disconnects before the 2nd even joins
             if game.is_full():                 
                 game_task = asyncio.create_task(game.start_game_loop())
-    
+                callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
+                game_task.add_done_callback(lambda t: self.cleanup(callback_match_id))
 
         
     def valid_match_id(self):
@@ -171,8 +167,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     async def game_end(self, event):
         game = self.game
-        if (game.player_l.id == self.channel_name and game.player_l.score == game.points_to_win) \
-            or (game.player_r.id == self.channel_name and game.player_r.score == game.points_to_win):
+        if (game.player_l.id == self.user_id and game.player_l.score == game.points_to_win) \
+            or (game.player_r.id == self.user_id and game.player_r.score == game.points_to_win):
             await self.send(text_data=json.dumps(
                 {
                     'type': 'game_end',
@@ -186,13 +182,15 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                     'status': "won"
                 }
             ))
-        self.cleanup(event)
+        # self.cleanup(event)
     
 
     async def cleanup(self, data):
         PongGameConsumer.all_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
         cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT:
+            # NOTE: if parent-method is called via task callback, 
+            # no duplicate messages will be sent to tournament consumer
             await self.forward_match_result(data)
         else:
             self.close()
