@@ -238,7 +238,7 @@ class Pong:
 
         if self.collision < 0:
             # checking player top and bottom collision
-            if self.collision_with_player(next_pos, self.ball.vel.x):
+            if self.collision_with_player(next_pos, self.ball.vel.x):   #if you move into the ball with a player the ball jumps very noticeably !!!!!
                 next_pos = self.go_to_player_top_bottom(self.ball.pos, self.ball.vel)
                 self.ball.vel.y *= -1
 
