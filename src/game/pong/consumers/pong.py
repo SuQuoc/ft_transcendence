@@ -199,7 +199,7 @@ class Pong:
         
         print("end of game loop")
         self.set_result()
-        self.save_game_to_db()
+        await self.save_game_to_db()
         await self.send_game_end()
 
     def game_over(self):

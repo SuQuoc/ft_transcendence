@@ -82,19 +82,10 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             return
     
 
-    def get_match_config(self):
-        match = cache.get(self.match_id)
-        if match is None:
-            raise ValueError("SNH")
-        return match
-
+   
     async def connect_to_match(self, data):
         self.match_id = data.get('match_id')
-        if self.match_id is None:
-            raise ValueError("SNH - match_id is not provided")
         
-        self.match_config = self.get_match_config()
-
         if not self.valid_match_id():
             await self.send_error()
             return
@@ -125,17 +116,35 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
                 game_task.add_done_callback(lambda t: self.cleanup(callback_match_id))
 
-        
+
+    async def reconnect_to_match(self, data):
+        self.match_id = data.get('match_id')
+        if not self.valid_match_id():
+            await self.send_error()
+            return
+
+        self.game_group = f'game_{self.match_id}'
+        await self.channel_layer.group_add(self.game_group, self.channel_name)
+
+
     def valid_match_id(self):
         """
-        Checks if user provided correct match_id
+        Checks provided match_id and sets self.match_config if valid
         """
+        if self.match_id is None:
+            return False
         
-        allowed_user_ids = self.match_config.get('user_id_list')
+        match_config = cache.get(self.match_id)
+        if match_config is None:
+            return False
+
+        allowed_user_ids = match_config.get('user_id_list')
         if allowed_user_ids is None:
             raise ValueError("SNH - cache must be set by matchmaking consumer or tournament consumer")
+            return False
         for id in allowed_user_ids:
             if id == self.user_id:
+                self.match_config = match_config
                 return True
         return False
 

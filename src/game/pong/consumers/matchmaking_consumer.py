@@ -16,8 +16,7 @@ games = {}
 # TODO: Notion todo
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     lock = asyncio.Lock()
-    players = [] # stores the channel names and user_ids
-    # uuid.uuid4()
+    players = [] # NOTE: cache in production? 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,7 +46,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
 
     async def disconnect(self, close_code):
-        # using a dict instead of a list would be more efficient i think
+        # NOTE: using a dict instead of a list would be more efficient i think
         if any(self.channel_name in player.values() for player in MatchmakingConsumer.players):
             MatchmakingConsumer.players.remove(
                 {
@@ -62,7 +61,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message_type = text_data_json['type']
 
-        if message_type == 'cancel':
+        if message_type == 'cancel': # NOTE: not implemented yet, not a must
             await self.close()
             
     
