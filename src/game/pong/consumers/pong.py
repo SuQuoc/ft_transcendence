@@ -90,6 +90,7 @@ class Pong:
         self.channel_group = channel_group # Messaging to Game Consumer
         self.size = 1
         self.running = False
+        self.result = {}
 
         self.points_to_win = points_to_win
 
@@ -197,7 +198,8 @@ class Pong:
         
         
         print("end of game loop")
-        # save game to db()
+        self.set_result()
+        self.save_game_to_db()
         await self.send_game_end()
 
     def game_over(self):
@@ -216,19 +218,23 @@ class Pong:
             }
         )
 
+    def set_result(self):
+        if self.player_l.score == self.points_to_win:
+            self.result['winner'] = self.player_l.id
+            self.result['winner_score'] = self.player_l.score
+            self.result['loser'] = self.player_r.id
+            self.result['loser_score'] = self.player_r.score
+        else:
+            self.result['winner'] = self.player_r.id
+            self.result['winner_score'] = self.player_r.score
+            self.result['loser'] = self.player_l.id
+            self.result['loser_score'] = self.player_l.score
+
     async def save_game_to_db(self):
         from asgiref.sync import sync_to_async
         from pong.models import MatchRecord
 
-        winner_id = None
-        loser_id = None
-        winner_score = None
-        loser_score = None
-        await sync_to_async(MatchRecord.objects.create)(
-            winner          = winner_id,
-            loser           = loser_id,
-            winner_score    = winner_score,
-            loser_score     = loser_score)
+        await sync_to_async(MatchRecord.objects.create)(**self.result)
 
     async def send_initial_state(self, game_state):
         await Pong.CHANNEL_LAYER.group_send(
