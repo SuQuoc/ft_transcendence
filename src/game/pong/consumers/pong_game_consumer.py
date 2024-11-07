@@ -150,7 +150,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 player2 = waiting_game.players[1]
                 ptw     = self.match_config.get('points_to_win')
                 if ptw is None:
-                    ptw = 4
+                    ptw = 5
                 
                 pong = Pong(self.game_group, player1, player2, ptw)
 
