@@ -9,11 +9,6 @@ set -e  # for the subshell: exit the shell on error of subshell
 (
     mkdir -p $DIR
 
-    if [ ! -f docker_compose_files/.env ]; then
-        printf "${RED}Error: srcs/.env file not found${DEFAULT}\n";
-        exit 1;
-    fi
-
     if ! grep -q "DOMAIN" docker_compose_files/.env; then
         DOMAIN="localhost"
     else
