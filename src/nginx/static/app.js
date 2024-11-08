@@ -10,6 +10,8 @@ const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
 window.app = {
 	router: Router,
 	socket: null,
+	pong_socket: null,
+	match_socket: null,
 	userData: storedUserData,
 };
 
@@ -19,7 +21,7 @@ window.addEventListener('beforeunload', () => {
 });
 
 // link custom web components
-import { FindOpponentPage } from './js/FindOpponentPage.js';
+import { MatchPage } from './js/MatchPage.js';
 import { LoginPage } from './js/LoginPage.js';
 import { SelectDisplaynamePage } from './js/SelectDisplaynamePage.js';
 import { SignupPage } from './js/SignupPage.js';

@@ -17,6 +17,7 @@
     {
         "name": "room_name",
         "creator_name": "display_name",
+        "players": ["display_name1", "display_name2", "display_name3, display_name4"],
         "points_to_win": "points_to_win",
         "cur_player_num": "cur_player_num",
         "max_player_num": "max_player_num"
@@ -39,4 +40,33 @@
 {
     "type": "error",
     "error": "not_in_room, room_does_not_exist"
+}
+
+
+
+
+
+
+// tournament
+{
+    "type": "tournament_bracket",
+    "matches": [
+        {
+            "match_id": "uuid",
+            "player1": "displayname",
+            "player2": "displayname",
+        },
+        
+        {
+            "match_id": "uuid",
+            "player1": "displayname",
+            "player2": "displayname",
+        
+        }
+    ]
+}
+
+{
+    "type": "tournament_end",
+    "winner": displayname
 }

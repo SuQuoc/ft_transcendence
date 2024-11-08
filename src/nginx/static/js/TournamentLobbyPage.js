@@ -10,8 +10,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
-		this.handlePongFullScreen_var = this.handlePongFullScreen.bind(this);
 	}
+	
 	connectedCallback() {
 		super.connectedCallback();
 
@@ -25,7 +25,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.current_player_num = this.root.getElementById("lobbyCurrentPlayerNum");
 
 		// adding event listeners
-		this.canvas.addEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
 		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 
@@ -37,9 +36,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super.disconnectedCallback();
 
 		// removing event listeners
-		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var);
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
 		window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
+		window.app.router.closePongWebSocket(); // QTRAN
 	}
 
 
@@ -88,27 +87,11 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		window.app.router.go("/tournament", false); // isn't added to the history
 	}
 
-	handlePongFullScreen() {
-		if (this.canvas.requestFullscreen) {
-			this.canvas.requestFullscreen();
-		} else if (this.canvas.mozRequestFullScreen) { // Firefox
-			this.canvas.mozRequestFullScreen();
-		} else if (this.canvas.webkitRequestFullscreen) { // Chrome, Safari and Opera
-			this.canvas.webkitRequestFullscreen();
-		} else if (this.canvas.msRequestFullscreen) { // IE/Edge
-			this.canvas.msRequestFullscreen();
-		}
-
-		this.canvas.handleCanvasResize();
-		this.canvas.handleBackgroundCanvasResize();
-	}
-
 	/** gets called when the websocket receives a message */
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
-		
-		console.log("received message on tournament-lobby-page: ", data);
-		
+		console.log("TournamentLobbyPage: handleReceivedMessage: ", data);
+				
 		if (data.type === "player_joined_room") {
 			this.addPlayerElement(data.displayname); // needs the avatar too !!!
 			this.current_player_num.innerText = data.cur_player_num;
@@ -119,6 +102,24 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 		else if (data.type === "room_info") {
 			this.initLobby(data.room);
+		}
+		else if (data.type === "tournament_bracket") {
+			// TODO: write clean
+			let id = null;
+			for (let match of data.matches) {
+				if (match.player1 === window.app.userData.username) {
+					id = match.match_id;
+					console.log("username: ", window.app.userData.username);
+					break;
+				}
+				else if (match.player2 === window.app.userData.username) {
+					id = match.match_id;
+					console.log("username: ", window.app.userData.username);
+					break;
+				}
+			}
+			console.log("match_id: ", id);
+			// protection for pong_socket !!??
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);

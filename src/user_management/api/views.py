@@ -19,11 +19,8 @@ from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
 
 
-
 def profile(request):
     return HttpResponse("This is the profile page")
-
-
 
 
 class CustomUserCreate(generics.CreateAPIView):
