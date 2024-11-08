@@ -7,7 +7,7 @@ Content-Type: application/json
 
 ###
 # after authorization with own user gets redirected to
-# https://localhost:8000/callback
+# https://localhost:8443/callback
 # with for example following parameters 
 # code=55fa7c56644d8329d5bb4a5ab6035224d6ac6955653d6cecb4c7215e92dda270
 # state=4EX3QD6D5944J8SVZITZJY87RJ8THS05YQEX0TYKR7VFQX3ZAKRDG57KU9KUGSTCA8R02VINOKRMHI17DOZET05GIW9P68B43Q1KMXBV2FUKPHYLVLQQT6GDEFQTQBKX

@@ -12,7 +12,7 @@ from pathlib import Path
 # the .env file will not be found (e.g. you are in the tests folder and run pytest from there)
  
 load_dotenv("./docker_compose_files/.env")
-BASE_URL = os.getenv("SERVER_URL", "https://localhost:8000") # Using the defined SERVER_URL from the env, if not defined, use localhost
+BASE_URL = os.getenv("SERVER_URL", "https://localhost:8443") # Using the defined SERVER_URL from the env, if not defined, use localhost
 print(f"Using BASE_URL !!!!!!!!!!!!: {BASE_URL}")
 
 # Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36

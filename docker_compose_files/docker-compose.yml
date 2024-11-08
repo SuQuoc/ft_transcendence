@@ -13,9 +13,12 @@ services:
     volumes: # [aguilmea]  this has to be deleted once dev is ready
       - ../src/nginx/static:/usr/share/nginx/html
     environment:
-      - NGINX_HOST=${SERVER_URL:-https://localhost}
+      - DOMAIN=${DOMAIN:-localhost}
+      - SSL_PORT=${SSL_PORT:-8443}
+      - PLAIN_PORT=${PLAIN_PORT:-8080}
     ports:
-      - 8000:443
+      - ${PLAIN_PORT:-8080}:80
+      - ${SSL_PORT:-8443}:443
     depends_on:
       - registration
       - usermanagement
@@ -26,8 +29,10 @@ services:
       - network_registration
       - network_django
     secrets:
-      - localhost.crt
-      - localhost.key
+      - source: ssl_webpage.crt
+        target: /run/secrets/${DOMAIN:-localhost}.crt
+      - source: ssl_webpage.key
+        target: /run/secrets/${DOMAIN:-localhost}.key
     profiles:
       - all
     restart: on-failure
@@ -54,7 +59,7 @@ secrets:
     file: ../src/common_files/jwt_keys/public_key.pem
   private_key.pem:
     file: ../src/common_files/jwt_keys/private_key.pem
-  localhost.crt:
-    file: ../src/common_files/ssl_certs/localhost.crt
-  localhost.key:
-    file: ../src/common_files/ssl_certs/localhost.key
+  ssl_webpage.crt:
+    file: ../src/common_files/ssl_certs/ssl_webpage.crt
+  ssl_webpage.key:
+    file: ../src/common_files/ssl_certs/ssl_webpage.key
