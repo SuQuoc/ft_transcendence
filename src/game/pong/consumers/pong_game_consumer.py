@@ -202,7 +202,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             # no duplicate messages will be sent to tournament consumer
             await self.forward_match_result(data)
         else:
-            self.close()
+            self.close(1000)
 
     ### EVENTS - Communication with other consumer
     async def forward_match_result(self, event):

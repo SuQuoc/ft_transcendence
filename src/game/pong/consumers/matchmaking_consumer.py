@@ -31,14 +31,14 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         if len(MatchmakingConsumer.players) == 2:
             playerL_id, playerL_channel = MatchmakingConsumer.players.popitem()
             playerR_id, playerR_channel = MatchmakingConsumer.players.popitem()
-                        
+
             match_id = create_match_config([playerL_id, playerR_id], GameMode.NORMAL.value)
             
             await self.trigger_match_found(match_id, playerL_channel)
             await self.trigger_match_found(match_id, playerR_channel)
             
-            await self.trigger_disconnection(playerL_channel)
-            await self.trigger_disconnection(playerR_channel)
+            # await self.trigger_disconnection(playerL_channel) # NOTE: i guess closing before accept causes the recv error
+            # await self.trigger_disconnection(playerR_channel)
 
 
     async def disconnect(self, close_code):
@@ -51,16 +51,17 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                     "channel_name": self.channel_name, 
                     "user_id": self.user_id
                 }) """
-        
-        await super().disconnect(close_code)
-
+        print("DISCONNECTING GRACEFULLY?")
+        await super().disconnect(close_code) # NOTE: parent method only has a pass so not needed i guess
+        # self.close(close_code)
     
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message_type = text_data_json['type']
 
         if message_type == 'cancel': # NOTE: not implemented yet, not a must
-            await self.close()
+            await self.disconnect(1000)
+            
             
     
     async def trigger_match_found(self, match_id: str, channel_name):
@@ -87,4 +88,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     async def disconnect_from_matchmaking(self, event):
-        await self.close()
+        MatchmakingConsumer.players.pop(self.user_id, None)
+        await self.close(1000)
+        #await self.disconnect(1000)
