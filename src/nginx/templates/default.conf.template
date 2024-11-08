@@ -59,7 +59,6 @@ map $status $status_text {
 
 server {
         listen 80;
-		listen [::]:80 ; #[aguilmea] we should check if ipv6 works
         server_name ${DOMAIN};
 
 		return 301 https://$host:${SSL_PORT}$request_uri;
@@ -68,7 +67,6 @@ server {
 server {
 
     listen 443 ssl;
-    listen [::]:443 ssl ; #[aguilmea] we should check if ipv6 works
     http2 on;
 
     server_name ${DOMAIN};
