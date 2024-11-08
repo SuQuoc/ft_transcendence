@@ -20,7 +20,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         token = self.scope['cookies']['access']
         self.user_id = get_user_id_from_jwt(token)
-        connection_registry[self.user_id] = self.channel_name
+        connection_registry[self.user_id] = self.channel_name # NOTE: use cache in prod?
         
         await self.accept()
         await self.send_status_to_friends(Status.ONLINE)
@@ -34,37 +34,47 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
 
-        if type == 'get_friends_online_status': # NOTE: might help? if not than just remove
+        if type == 'get_friends_online_status': # TODO: might help? if not than just remove, problem if a friends get a added while im online
             # await self.send_status_to_friends(Status.ONLINE)
             pass
 
-    # EVENTS
-    async def online_status(self, event):
-        if event['status'] == Status.ONLINE:
-            friends_channel = event['sender_channel']
-            if friends_channel:
-                self.channel_layer.send(friends_channel, {
-                    'type': 'online_status',
-                    'status': Status.ONLINE
-                })
-
-        await self.send(text_data=json.dumps(event))
-            
-    # 
+    
     async def send_status_to_friends(self, status):
         friend_list = FriendList.objects.get(user=self.user_id)
         friends = friend_list.friends.all()
+
+        message = {
+            'type': 'online_status',
+            'status': status,
+            "sender_id": self.user_id
+        }
+        
+        if status != Status.OFFLINE: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
+            message["sender_channel"] = self.channel_name
+
         for friend in friends:
-            friend_id = friend.user_id
-            friend_channel = connection_registry[friend_id]
+            friend_channel = connection_registry.get(friend.user_id, None)
             if friend_channel:
-                await self.channel_layer.send(
-                    friend_channel,
-                    {
-                        'type': 'online_status',
-                        'status': status,
-                        "sender_channel": self.channel_name,
-                    })
+                await self.channel_layer.send(friend_channel, message)
+
+
+    async def send_friend_my_status(self, friends_channel):
+        await self.channel_layer.send(friends_channel, {
+                    'type': 'online_status',
+                    'status': Status.ONLINE,
+                    "sender_id": self.user_id 
+                    # NOTE: dont include sender_channel, else: endless message loop
+                })
+
+    # EVENTS
+    async def online_status(self, event: dict):
+        if event.get('status', None) != Status.OFFLINE:
+            friends_channel = event.get('sender_channel', None)
+            if friends_channel:
+                await self.send_friend_my_status(friends_channel)
+                event.pop('sender_channel') # NOTE: remove sensitive data before sending to client
+        await self.send(text_data=json.dumps(event))
+
 
 def get_user_id_from_jwt(jwt_token):
     try:
