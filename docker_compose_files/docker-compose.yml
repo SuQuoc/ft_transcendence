@@ -29,8 +29,10 @@ services:
       - network_registration
       - network_django
     secrets:
-      - localhost.crt
-      - localhost.key
+      - source: ssl_webpage.crt
+        target: /run/secrets/${DOMAIN:-localhost}.crt
+      - source: ssl_webpage.key
+        target: /run/secrets/${DOMAIN:-localhost}.key
     profiles:
       - all
     restart: on-failure
@@ -57,7 +59,7 @@ secrets:
     file: ../src/common_files/jwt_keys/public_key.pem
   private_key.pem:
     file: ../src/common_files/jwt_keys/private_key.pem
-  localhost.crt:
-    file: ../src/common_files/ssl_certs/localhost.crt
-  localhost.key:
-    file: ../src/common_files/ssl_certs/localhost.key
+  ssl_webpage.crt:
+    file: ../src/common_files/ssl_certs/ssl_webpage.crt
+  ssl_webpage.key:
+    file: ../src/common_files/ssl_certs/ssl_webpage.key

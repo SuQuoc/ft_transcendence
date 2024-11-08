@@ -70,8 +70,6 @@ services:
     secrets:
       - public_key.pem
       - private_key.pem
-      - source: localhost.crt
-        target: /usr/local/share/ca-certificates/pong.crt
 
   redis_registration:
     container_name: pong_reg_redis
