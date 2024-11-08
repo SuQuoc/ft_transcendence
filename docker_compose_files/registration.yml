@@ -34,6 +34,9 @@ services:
     expose:
       - "8000/tcp"
     environment:
+      ADMIN_USERNAME: "${ADMIN_USERNAME_REG:-admin}" #[aguilmea] to be deleted
+      ADMIN_EMAIL: "${ADMIN_EMAIL_REG:-email@gmail.com}" #[aguilmea] to be deleted
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD_REG:-password}" #[aguilmea] to be deleted
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
       POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
       POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_access_password}"
@@ -44,7 +47,7 @@ services:
       SILK: "${SILK:-False}"
       MOCK_EMAIL: "${MOCK_EMAIL:-True}" #[aguilmea] to be changed once the variable is set in github for the workflows running automatically
       MOCK_OTP: "${MOCK_OTP:-True}" #[aguilmea] to be changed once the front end check is changed
-      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
+      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
       DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
       FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"

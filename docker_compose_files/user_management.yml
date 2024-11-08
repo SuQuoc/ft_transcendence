@@ -70,10 +70,10 @@ services:
       DJ_SECRET_KEY: ${DJ_SECRET_KEY_MANAGEMENT:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DEBUG:-True} # TODO !!
       DJ_ALLOWED_HOSTS: "${DJ_ALLOWED_HOSTS:-localhost}"
-      DJ_SUDO_USERNAME_MANAGEMENT: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
-      DJ_SUDO_EMAIL_MANAGEMENT: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
-      DJ_SUDO_PASSWORD_MANAGEMENT: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
-      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
+      DJ_SUDO_USERNAME: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
+      DJ_SUDO_EMAIL: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
+      DJ_SUDO_PASSWORD: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
+      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
     depends_on:
       db_usermanagement:
         condition: service_healthy
@@ -87,4 +87,4 @@ services:
       - network_redis_um
     secrets:
       - public_key.pem
-      - private_key.pem # TODO !!! delete this line
+      - private_key.pem # TODO: !!! delete this line
