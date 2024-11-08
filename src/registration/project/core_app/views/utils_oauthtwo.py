@@ -8,7 +8,9 @@ from .utils import generate_response_with_valid_JWT
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .token import CustomTokenObtainPairSerializer
-import time, logging
+import logging
+from django.utils import timezone
+
 
 def generate_authorization_request_data(request, state):
     try:
@@ -75,12 +77,11 @@ def login(email):
             return Response({'login error': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
         data = {
             'username': email,
-            #'password': 'to be changed' # [aguilmea] I have to check how to send JWT without valid password and write a own TokenObtainSerializer
         }
-        #token_s = TokenObtainPairSerializer(data=data)
         token_s = CustomTokenObtainPairSerializer(data=data)
         if user.check_password(''):
             return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
+        user.actualise_last_login()
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

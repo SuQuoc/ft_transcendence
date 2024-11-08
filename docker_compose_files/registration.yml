@@ -34,6 +34,9 @@ services:
     expose:
       - "8000/tcp"
     environment:
+      ADMIN_USERNAME: "${ADMIN_USERNAME_REG:-admin}" #[aguilmea] to be deleted
+      ADMIN_EMAIL: "${ADMIN_EMAIL_REG:-email@gmail.com}" #[aguilmea] to be deleted
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD_REG:-password}" #[aguilmea] to be deleted
       POSTGRES_DB: "${POSTGRES_DB_REG:-reg_postgress_db}"
       POSTGRES_ACCESS_USER: "${POSTGRES_USER_REG:-reg_postgress_access_user}"
       POSTGRES_ACCESS_PASSWORD: "${POSTGRES_PASSWORD_REG:-reg_postgress_access_password}"

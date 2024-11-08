@@ -16,6 +16,7 @@ from ..tasks import create_user_send_otp
 from django.conf import settings
 from .utils_silk import conditional_silk_profile
 import logging
+from django.utils import timezone
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -34,6 +35,7 @@ def login(request):
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token_s = CustomTokenObtainPairSerializer(data=request.data)
+        user.actualise_last_login()
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -94,10 +96,10 @@ def signup(request):
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_code = user.generate_backup_code()
-        user.set_verified( )
+        backup_codes = user.generate_backup_codes()
+        user.set_verified()
         token_s = TokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_code)
+        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
         return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
