@@ -30,3 +30,32 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token.pop('password', None)
         token.pop('email', None)
         return token
+
+
+class DeleteTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('password', None)
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        user_exists = RegistrationUser.objects.filter(username=username).exists()
+
+        if not user_exists:
+            raise serializers.ValidationError('No active account found with the given credentials')
+
+        user = RegistrationUser.objects.only('id', 'username').get(username=username)
+        refresh = RefreshToken.for_user(user)
+
+        return {
+            'access': str(refresh.access_token),
+		}
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        token['delete'] = 'True'
+        token.pop('password', None)
+        token.pop('email', None)
+        return token
