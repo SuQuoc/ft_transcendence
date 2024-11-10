@@ -46,7 +46,8 @@ class DeleteTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         user = RegistrationUser.objects.only('id', 'username').get(username=username)
         refresh = RefreshToken.for_user(user)
-
+        refresh["delete"] = True
+        
         return {
             'access': str(refresh.access_token),
 		}
@@ -55,7 +56,7 @@ class DeleteTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['username'] = user.username
-        token['delete'] = 'True'
+        token['delete'] = True
         token.pop('password', None)
         token.pop('email', None)
         return token
