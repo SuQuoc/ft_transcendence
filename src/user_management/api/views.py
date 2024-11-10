@@ -55,6 +55,10 @@ class CustomUserProfile(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
+        
+        delete_claim  = request.auth.get('delete')
+        if not delete_claim or delete_claim != True:
+            return Response({'error': 'No delete parameter'}, status=status.HTTP_403_FORBIDDEN)
         user = get_user_from_jwt(request)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
