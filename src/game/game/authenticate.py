@@ -10,6 +10,9 @@ class CookieJWTAuthentication(JWTStatelessUserAuthentication):
         if not raw_token:
             return None
         validated_token = self.get_validated_token(raw_token)
-        # enforce_csrf(request)
+        request.validated_token = validated_token
+		# enforce_csrf(request)
         # raise AuthenticationFailed('CreateUserAuth')
         return self.get_user(validated_token), validated_token
+    
+	
