@@ -73,6 +73,14 @@ POST {{base_url}}/registration/delete_user
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE2}} 
 
+{"password": "{{current_password5}}"}
+
+###
+
+POST {{base_url}}/registration/delete_user
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE2}} 
+
 {
     "password": "{{current_password5}}",
     "otp": "{{otp}}"

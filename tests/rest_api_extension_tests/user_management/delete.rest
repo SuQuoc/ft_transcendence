@@ -1,0 +1,67 @@
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}"
+}
+
+###
+
+# @name signup
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}",
+	"otp": "0000000000000000"
+}
+
+###
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}"
+}
+
+###
+
+# @name login
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}",
+	"otp": "0000000000000000"
+}
+
+###
+
+@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+
+###
+
+
+@displayname = ProCoder
+POST {{base_url}}/um/user-creation
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+    "displayname": "{{displayname}}"
+}
+
+
+###
+
+
+DELETE {{base_url}}/um/profile
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+}

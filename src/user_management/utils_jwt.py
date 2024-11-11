@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 def generate_token(user_id):
     refresh = RefreshToken()
     refresh["user_id"] = str(user_id)
+    refresh["delete"] = True # NOTE: custom claim added to every token, just to make sure the delete endpoint works
     access_token = str(refresh.access_token)
     return access_token
 

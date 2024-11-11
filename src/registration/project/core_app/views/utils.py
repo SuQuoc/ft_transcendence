@@ -90,13 +90,24 @@ def send_reset_email(recipient, token):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def send_delete_request_to_um(request):
+def send_delete_request_to_um(request, token_s):
     request_uri = 'http://usermanagement:8000/um/profile'
-    headers = {
-        'Content-Type': 'application/json',
-        'Cookie': 'access=' + request.COOKIES.get('access')
+    headers = {'Content-Type': 'application/json',}
+    access_token = token_s.validated_data['access']
+    cookies = {
+        'access': access_token,
     }
-    response = requests.delete(request_uri, headers=headers)
+    response = requests.delete(request_uri, headers=headers, cookies=cookies)
     if response.status_code != 204:
         raise Exception('Error deleting user in UM')
-    return Response(status=status.HTTP_200_OK)
+
+def send_delete_request_to_game(request, token_s):
+    request_uri = 'http://game:8000/daphne/delete_user_stats'
+    headers = {'Content-Type': 'application/json',}
+    access_token = token_s.validated_data['access']
+    cookies = {
+        'access': access_token,
+    }
+    response = requests.post(request_uri, headers=headers, cookies=cookies)
+    if response.status_code != 204:
+        raise Exception('Error deleting user in game: ' + str(response.status_code) + ' ' + str(response.text))
