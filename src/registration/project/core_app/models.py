@@ -14,7 +14,7 @@ import base64, logging
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.EmailField(max_length=254, unique=True)
-    setup_date = models.DateTimeField(default=timezone.now)
+    setup_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(default=timezone.now)
     password = models.CharField(max_length=128, blank=True)
     backup_codes = models.JSONField(default=list, blank=True)
