@@ -21,12 +21,15 @@ def delete_user_stats(request):
 		delete_claim  = request.auth.get('delete')
 		if not delete_claim or delete_claim != True:
 			return Response({'error': 'No delete parameter'}, status=status.HTTP_403_FORBIDDEN)
-		userid = request.auth.get('user_id')
+		# userid = request.auth.get('user_id')
+		userid = request.user.user_id
 		matchs = MatchRecord.objects.filter(winner=userid)
 		for match in matchs:
 			if match.winner == userid:
 				match.winner = None
 				match.save()
+			if match.winner is None and match.loser is None:
+				match.delete()
 		matchs = MatchRecord.objects.filter(loser=userid)
 		for match in matchs:
 			if match.loser == userid:
