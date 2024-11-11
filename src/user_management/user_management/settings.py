@@ -58,6 +58,31 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if DEBUG == True:
+    MIDDLEWARE.insert(0, 'api.middleware.LogRequestMiddleware')
+
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+        },
+    }
+
 ROOT_URLCONF = "user_management.urls"
 
 TEMPLATES = [
