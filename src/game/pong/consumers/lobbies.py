@@ -47,8 +47,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
         self.client_group = f"client_{self.user.id}"
-
-        # print(f"LOBBIE CONSUMER: user_id = {self.user.id}")
+        
         self.user.name = await get_displayname(self.scope.get("cookies"))
     
 
@@ -180,25 +179,26 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             available_rooms = cache.get(AVA_ROOMS, {})
             full_rooms = cache.get(FULL_ROOMS, {})
 
-            if self.current_room is None: # SHOULD NOT HAPPEN with our Frontend
-                await self.send_error(Errors.NO_CURRENT_ROOM)
-                return
-            
-            room_dict = get_room_dict(self.current_room, available_rooms, full_rooms)
-            if room_dict is None:
-                raise ValueError(Errors.ROOM_DOES_NOT_EXIST) # SHOULD NEVER HAPPEN
-            
-            room = TournamentRoom.from_dict(room_dict)
-            if self.user not in room.players:
-                raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
-            
-            room.remove_player(self.user)
-            
-            # CHANNELS: Remove user from the tournament room group
-            await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
-            await self.group_send_Room(T_PLAYER_LEFT_ROOM, room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
-            self.current_room = None
+        if self.current_room is None: # SHOULD NOT HAPPEN with our Frontend
+            await self.send_error(Errors.NO_CURRENT_ROOM)
+            return
+        
+        room_dict = get_room_dict(self.current_room, available_rooms, full_rooms)
+        if room_dict is None:
+            raise ValueError(Errors.ROOM_DOES_NOT_EXIST) # SHOULD NEVER HAPPEN
+        
+        room = TournamentRoom.from_dict(room_dict)
+        if self.user not in room.players:
+            raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
+        
+        room.remove_player(self.user)
+        
+        # CHANNELS: Remove user from the tournament room group
+        await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
+        await self.group_send_Room(T_PLAYER_LEFT_ROOM, room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
+        self.current_room = None
 
+        async with self.update_lock:
             if room.status == TournamentRoom.AVAILABLE:
                 if room.is_empty():
                     del_room_from_cache(room.name, AVA_ROOMS, available_rooms)
