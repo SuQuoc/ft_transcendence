@@ -84,7 +84,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # print("\n")
 
             # handle websocket message from client
-            if type == T_ON_TOURNAMENT_PAGE:
+            if type == T_ON_TOURNAMENT_PAGE: # NOTE: is this still needed?
                 self.user.name = dict_data.get("displayname")
 
             elif type == T_CREATE_ROOM:
@@ -182,7 +182,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             available_rooms = cache.get(AVA_ROOMS, {})
             full_rooms = cache.get(FULL_ROOMS, {})
 
-        if self.current_room is None: # SHOULD NOT HAPPEN with our Frontend
+        if self.current_room is None: # SHOULD NEVER with our Frontend
             await self.send_error(Errors.NO_CURRENT_ROOM)
             return
         
