@@ -17,11 +17,26 @@ from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
-
+from rest_framework.decorators import api_view
+import logging
 
 def profile(request):
     return HttpResponse("This is the profile page")
 
+@api_view(['POST'])
+def get_displaynames(request):
+    try:
+        user_ids = request.data.get("user_ids")
+        if not user_ids:
+            return Response({'error': 'No user_ids provided'}, status=status.HTTP_400_BAD_REQUEST)
+        users = CustomUser.objects.filter(user_id__in=user_ids)
+        displaynames = {
+            str(user.user_id): user.displayname for user in users
+        }
+        #logging.warning("displaynames: " + str(displaynames))
+        return Response(displaynames, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'get_displaynames': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CustomUserCreate(generics.CreateAPIView):
     queryset = CustomUser.objects.all()

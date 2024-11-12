@@ -14,6 +14,7 @@ class MatchRecord(models.Model):
     loser = models.UUIDField()
     winner_score = models.IntegerField()
     loser_score = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"winner: {self.winner} - loser: {self.loser}"

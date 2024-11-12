@@ -58,8 +58,8 @@ if SILK == True:
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
     INSTALLED_APPS.append('silk')
 
-if DEBUG == True:
-    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
 
 TEMPLATES = [
     {
@@ -121,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "core_app.RegistrationUser"
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
