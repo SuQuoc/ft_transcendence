@@ -23,13 +23,21 @@ def profile(request):
     return HttpResponse("This is the profile page")
 
 
-class CustomUserCreate(generics.CreateAPIView):
+class CustomUserCreate(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserCreateSerializer
 
-    def perform_create(self, serializer):
-        serializer.validated_data['user_id'] = self.request.user.user_id
+    def post(self, request):
+        data = request.data
+        data['user_id'] = request.user.user_id
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True) # will call the validate method in the serializer IF DEFINED
+        except Exception as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)        
 
 
 class CustomUserProfile(generics.GenericAPIView):
