@@ -216,10 +216,12 @@ CHANNEL_LAYERS = {
     },
 }
 
+# https://docs.djangoproject.com/en/5.1/topics/cache/
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/0",
+        "TIMEOUT": None,
     }
 }
 
