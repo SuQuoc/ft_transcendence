@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,12 +12,17 @@ from ..authenticate import CredentialsAuthentication
 from ..serializers import UserSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT
-from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password, create_user_send_otp
-from ..tasks import create_user_send_otp
-from django.conf import settings
-from .utils_silk import conditional_silk_profile
+from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from ..tasks import create_user_send_otp, generate_jwt_task, generate_backup_codes_task
+
 import logging
-from django.utils import timezone
+from datetime import timezone
+if settings.SILK:
+    from silk.profiling.profiler import silk_profile
+from django.core.cache import cache
+import os
+from datetime import datetime
+from django.conf import settings
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -28,22 +34,48 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         otp = request.data.get('otp')
         if not otp:
-            #created_otp = create_one_time_password(user.id, 'login')
-            #send_otp_email.delay(user.username, 'login', created_otp)
-            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'login')
+            create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': request.data.get('password')}, 'login')
             return Response(status=status.HTTP_202_ACCEPTED)
         if not check_one_time_password(user, 'login', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        cache_key = f'jwt_{user.id}'
+        backup_codes_key = f'backup_codes_{user.id}'
+
+        jwt_response = cache.get(cache_key)
+        backup_codes = cache.get(backup_codes_key)
+        if jwt_response:
+            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='access',
+                value=jwt_response['access'],
+                expires=access_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite='Strict')
+            refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='refresh',
+                value=jwt_response['refresh'],
+                expires=refresh_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite='Strict')
+            user.actualise_last_login()
+            return response
+        logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         user.actualise_last_login()
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-login = conditional_silk_profile(login, name=login)
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+#@silk_profile(name='forgot_password')
 def forgot_password(request):
     try:
         username = request.data.get('username')
@@ -92,22 +124,49 @@ def signup(request):
         if not user.check_password(password):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not otp:
-            create_user_send_otp.delay({'id': user.id, 'username': user.username}, 'otp')
+            create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': password}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_codes = user.generate_backup_codes()
         user.set_verified()
-        token_s = TokenObtainPairSerializer(data=request.data)
+        user.change_password_is_set()
+        cache_key = f'jwt_{user.id}'
+        backup_codes_key = f'backup_codes_{user.id}'
+
+        jwt_response = cache.get(cache_key)
+        backup_codes = cache.get(backup_codes_key)
+        if jwt_response:
+            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+            response.set_cookie(
+				key='access',
+				value=jwt_response['access'],
+				expires=access_token_expiration,
+				domain=os.environ.get('DOMAIN'),
+				httponly=True,
+				secure=True,
+				samesite = 'Strict')
+            refresh_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
+            response.set_cookie(
+                key='refresh',
+                value=jwt_response['refresh'],
+                expires=refresh_token_expiration,
+                domain=os.environ.get('DOMAIN'),
+                httponly=True,
+                secure=True,
+                samesite = 'Strict')
+            return response
+        logging.warning(f"no cached token for user {user.id}")
+        token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
-        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-signup = conditional_silk_profile(signup, name=signup)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+#@silk_profile(name='signup_change_password')
 def signup_change_password(request):
     try:
         username = request.data.get('username')
@@ -126,19 +185,20 @@ def signup_change_password(request):
         send_otp_email(username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
     except ValidationError as e:
-        return Response({'signup error': (e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+#@silk_profile(name='signup_change_username')
 def signup_change_username(request):
     try:
         current_username = request.data.get('current_username')
         new_username = request.data.get('new_username')
         if not current_username or not new_username:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if (RegistrationUser.objects.filter(username=new_username).exists()):
+        if RegistrationUser.objects.filter(username=new_username).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=current_username).first()
         if not user:

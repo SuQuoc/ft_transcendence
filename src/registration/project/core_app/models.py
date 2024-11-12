@@ -19,6 +19,8 @@ class RegistrationUser(AbstractUser):
     password = models.CharField(max_length=128, blank=True)
     backup_codes = models.JSONField(default=list, blank=True)
     email_verified = models.BooleanField(default=False)
+    twofa_enabled = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=False)
 
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
@@ -31,10 +33,7 @@ class RegistrationUser(AbstractUser):
     def save(self, *args, **kwargs):
         self.username = self.username.lower()
         if self.password:
-            try:
-                validate_password(self.password, user=self)
-            except ValidationError as e:
-                raise ValueError(f"Password validation error: {', '.join(e.messages)}")
+            self.validate_password(self.password)
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
@@ -49,11 +48,18 @@ class RegistrationUser(AbstractUser):
     def set_verified(self):
         self.email_verified = True
         self.save()
-        logging.warning(self.email_verified)
         return self
 
     def is_verified(self):
         return self.email_verified
+
+    def password_is_set(self):
+        return self.password_set
+
+    def change_password_is_set(self):
+        self.password_set = True
+        self.save()
+        return self
 
     def generate_backup_codes(self):
         self.backup_codes.clear()
@@ -63,9 +69,9 @@ class RegistrationUser(AbstractUser):
             hashed_code = make_password(backup_code)
             self.backup_codes.append(hashed_code)
             backup_codes.append(backup_code)
-        self.save(update_fields=['backup_codes'])   
+        self.save(update_fields=['backup_codes'])
         return backup_codes
-    
+
     def actualise_last_login(self):
         self.last_login = timezone.now()
         self.save(update_fields=['last_login'])
@@ -83,7 +89,6 @@ class RegistrationUser(AbstractUser):
                 self.save(update_fields=['backup_codes'])
                 return True
         return False
-
 
 def get_expiration_time():
     return timezone.now() + timedelta(minutes=5)

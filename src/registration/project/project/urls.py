@@ -49,5 +49,5 @@ urlpatterns = [
     path('registration/admin', admin.site.urls),
 ]
 
-if settings.SILK == True:
+if settings.SILK:
     urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

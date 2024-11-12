@@ -151,7 +151,7 @@ def login(page: Page, email: str, password: str):
     page.goto(BASE_URL)
     page.locator("#loginEmail").fill(email)
     page.locator("#loginPassword").fill(password)
-    page.locator("#requestOTP").click()
+    page.locator("#loginSubmitButton").click()
     otp = get_otp()
     page.locator("#otpCode").fill(otp)
     page.locator("#loginSubmitButton").click()
@@ -165,7 +165,7 @@ def set_display_name(page: Page, display_name: str):
 
 
 def delete_user(page: Page, password: str):
-    page.locator("#userDropdown").click()
+    page.locator("#userProfileButton").click()
     page.locator("#deleteUserButton").click()
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#requestDeleteUserButton").click()
