@@ -126,7 +126,7 @@ test: down
 	@make re > /dev/null 2>&1 &
 	@PID=$$!
 	@wait $$PID
-	@while ! nc -z localhost 8000; do \
+	@while ! nc -z localhost 8443; do \
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done
@@ -137,7 +137,7 @@ test_tournament: down
 	@make re > /dev/null 2>&1 &
 	@PID=$$!
 	@wait $$PID
-	@while ! nc -z localhost 8000; do \
+	@while ! nc -z localhost 8443; do \
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done
