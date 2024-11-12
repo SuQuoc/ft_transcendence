@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from pong import views
 
 urlpatterns = [
-    #path("pong/", include("pong.urls")),
-    path('admin/', admin.site.urls),
+    # path("pong/", include("pong.urls")),
+    path('daphne/admin/', admin.site.urls),
+	path('daphne/delete_user_stats', views.delete_user_stats),
+    path('daphne/get_game_stats', views.get_game_stats),
 ]

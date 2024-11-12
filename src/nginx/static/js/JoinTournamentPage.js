@@ -65,6 +65,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation_var);
 		this.tournament_name_input.removeEventListener("input", this.handleHideTournamentNameError_var);
 		this.input_range.removeEventListener("input", this.handleRangeDisplay_var);
+		console.log("JoinTournamentPage: disconnectedCallback");
 	};
 	
 

@@ -1,5 +1,5 @@
-# @name signup
-POST {{base_url}}/registration/signup
+@otp = 0000000000000000 
+POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
 
 {
@@ -7,15 +7,28 @@ Content-Type: application/json
     "password": "{{current_password5}}"
 }
 
+
 ###
 
-@ACCESS_COOKIE = {{signup.response.headers.Set-Cookie}};
+# @name signup
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+    "username": "{{username5}}",
+    "password": "{{current_password5}}",
+    "otp": "{{otp}}"
+}
+
+###
+
+@ACCESS_COOKIE1 = {{signup.response.headers.Set-Cookie}};
 
 ###
 
 POST {{base_url}}/um/user-creation
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+Cookie: {{ACCESS_COOKIE1}}
 
 {
     "displayname": "{{displayname5}}"
@@ -25,39 +38,57 @@ Cookie: {{ACCESS_COOKIE}}
 
 POST {{base_url}}/registration/delete_user
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}} 
+Cookie: {{ACCESS_COOKIE1}} 
 
 {"password": "{{current_password5}}"}
 
 ###
 
-# @name login
-POST {{base_url}}/registration/login
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
     "username": "{{username5}}",
     "password": "{{current_password5}}"
 }
+###
+
+# @name login
+POST {{base_url}}/registration/basic_login
+Content-Type: application/json
+
+{
+    "username": "{{username5}}",
+    "password": "{{current_password5}}",
+	"otp": "{{otp}}"
+}
 
 ###
 
-@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+@ACCESS_COOKIE2 = {{login.response.headers.Set-Cookie}};
 
 ###
 
 POST {{base_url}}/registration/delete_user
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}} 
+Cookie: {{ACCESS_COOKIE2}} 
+
+{"password": "{{current_password5}}"}
+
+###
+
+POST {{base_url}}/registration/delete_user
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE2}} 
 
 {
     "password": "{{current_password5}}",
-    "otp": "WL6LIQJENPYP5L31"
+    "otp": "{{otp}}"
 }
 
 ###
 
-POST {{base_url}}/registration/login
+POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {

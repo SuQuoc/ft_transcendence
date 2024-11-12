@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "rest_framework",
+    "rest_framework_simplejwt",
     'sslserver'
 ]
 
@@ -53,6 +55,31 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'pong.middleware.LogRequestMiddleware')
+
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+        },
+    }
+
 
 ROOT_URLCONF = 'game.urls'
 
@@ -114,7 +141,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
+
 
 USE_I18N = True
 
@@ -135,17 +163,45 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ASGI_APPLICATION = "game.asgi.application"
 
 
-# REDIS ---------------------------------------------------------
+# SECURITY --------------------------------
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
+
+
+# REST framework -------------------------
+REST_FRAMEWORK = {
+    # "DEFAULT_PARSER_CLASSES": [
+    #   "rest_framework.parsers.JSONParser",
+    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'game.authenticate.CookieJWTAuthentication',
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+# JWT ------------------------------------
+with open('/run/secrets/public_key.pem', 'r') as f:
+    PUBLIC_KEY = f.read()
+
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html?highlight=USER_ID_FIELD#user-id-field
+SIMPLE_JWT = {
+    'ALGORITHM': 'RS256',
+    'VERIFYING_KEY': PUBLIC_KEY,
+
+    # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
+    # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
+}
+
+# REDIS -----------------------------------
 REDIS_USER = os.environ.get('REDIS_USER')
 REDIS_PASS = os.environ.get('REDIS_PASSWORD')
-
 
 # redis://:password@hostname:port/db_number
 # db_number
 # /0 - default for caching
 # /1 - for session data, in our case channels
 # /2 - for storing message queues
-
 
 CHANNEL_LAYERS = {
     #'default': {

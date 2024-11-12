@@ -145,4 +145,5 @@ test_tournament: down
 	@make down
 
 test_running:
-	pytest ./tests/playwright_tests
+	pytest ./tests/playwright_tests/
+# pytest ./tests/playwright_tests/test_tournament_multiple.py::TestTournamentMultiple::test_tournament_bracket

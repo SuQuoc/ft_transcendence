@@ -58,6 +58,31 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'api.middleware.LogRequestMiddleware')
+
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+        },
+    }
+
 ROOT_URLCONF = "user_management.urls"
 
 TEMPLATES = [
@@ -118,7 +143,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
@@ -143,7 +168,7 @@ MEDIA_ROOT = BASE_DIR / "uploads"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ADDED BY US--------------------------------------------- #
+# SECURITY --------------------------------
 CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
 
@@ -169,9 +194,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# TODO !!! delete this line
-with open('/run/secrets/private_key.pem', 'r') as f:
-    PRIVATE_KEY = f.read()
+
 
 with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
@@ -180,12 +203,13 @@ with open('/run/secrets/public_key.pem', 'r') as f:
 SIMPLE_JWT = {
     'ALGORITHM': 'RS256', # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
     'VERIFYING_KEY': PUBLIC_KEY, # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
-    'SIGNING_KEY': PRIVATE_KEY, # todo !!! delete this line
-
-    # "USER_ID_FIELD": "SPAGHETTI",  # only for the service creating the token, telling django to use the user_id field, from the user model, to use to identify users, could also be the normal id, or a username which is BAD cuz, the name could be changed
     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }
 
+if DEBUG:
+    with open('/run/secrets/private_key.pem', 'r') as f:
+        PRIVATE_KEY = f.read()
+        SIMPLE_JWT['SIGNING_KEY'] = PRIVATE_KEY # ONLY required for django api tests
 
 CORS_ALLOWED_ORIGINS = [
     os.environ.get('SERVER_URL'),
