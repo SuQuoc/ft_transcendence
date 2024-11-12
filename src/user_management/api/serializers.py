@@ -2,13 +2,25 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import APIException
 from .models import CustomUser
+from .validators import displayname_validator
+from rest_framework.validators import UniqueValidator
 
 MEGABYTE_LIMIT = 1
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):
+    # NOTE: only needed because of write_only=True, 
+    # if UUIDField is left out then the id is send with the response
+    user_id = serializers.UUIDField(write_only=True, 
+                                    validators=[
+                                        UniqueValidator(
+                                            queryset=CustomUser.objects.all()
+                                        )
+                                    ]
+    ) 
+
     class Meta:
         model = CustomUser
-        fields = ["displayname"]
+        fields = ["displayname", "user_id"]
 
 # ONLY FOR /profile GET --> fields online and relationship not needed
 class CustomUserProfileSerializer(serializers.ModelSerializer):

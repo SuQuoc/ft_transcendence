@@ -212,7 +212,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "create_room",
 											"room_name": tournament_name,
-											"creator_name": window.app.userData.username,
+											"creator_name": window.app.userData.username, // NOTE: this is not used by backend
 											"points_to_win": points_to_win,
 											"max_player_num": number_of_players}));
 		
