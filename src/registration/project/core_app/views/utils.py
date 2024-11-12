@@ -1,10 +1,11 @@
+from django.conf import settings
 from datetime import datetime, timezone
 from rest_framework.response import Response
 from rest_framework import status
-from django.conf import settings
-from django.http import HttpResponseRedirect
-from .utils_silk import conditional_silk_profile
 
+from django.http import HttpResponseRedirect
+if settings.SILK:
+    from .utils_silk import conditional_silk_profile
 from django.core.mail import send_mail
 
 import os, requests, logging
@@ -45,7 +46,7 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_codes=None, re
         secure=True,
         samesite = 'Strict')
     return response
-generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
+#generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
 
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):

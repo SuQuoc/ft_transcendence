@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -16,7 +17,8 @@ from ..tasks import create_user_send_otp, generate_jwt_task, generate_backup_cod
 
 import logging
 from datetime import timezone
-from silk.profiling.profiler import silk_profile
+if settings.SILK:
+    from silk.profiling.profiler import silk_profile
 from django.core.cache import cache
 import os
 from datetime import datetime
@@ -73,7 +75,7 @@ def login(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='forgot_password')
+#@silk_profile(name='forgot_password')
 def forgot_password(request):
     try:
         username = request.data.get('username')
@@ -164,7 +166,7 @@ def signup(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='signup_change_password')
+#@silk_profile(name='signup_change_password')
 def signup_change_password(request):
     try:
         username = request.data.get('username')
@@ -189,7 +191,7 @@ def signup_change_password(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@silk_profile(name='signup_change_username')
+#@silk_profile(name='signup_change_username')
 def signup_change_username(request):
     try:
         current_username = request.data.get('current_username')

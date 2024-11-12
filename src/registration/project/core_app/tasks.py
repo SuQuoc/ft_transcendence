@@ -1,6 +1,8 @@
 from celery import shared_task
 from django.shortcuts import render
-from silk.profiling.profiler import silk_profile
+from django.conf import settings
+if settings.SILK:
+    from silk.profiling.profiler import silk_profile
 
 from .models import OneTimePassword
 import logging
