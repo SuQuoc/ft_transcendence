@@ -58,8 +58,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEBUG == True:
-    MIDDLEWARE.insert(0, 'api.middleware.LogRequestMiddleware')
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'api.middleware.LogRequestMiddleware')
 
 if DEBUG == True:
     LOGGING = {

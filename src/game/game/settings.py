@@ -55,8 +55,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-if DEBUG == True:
-    MIDDLEWARE.insert(0, 'pong.middleware.LogRequestMiddleware')
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'pong.middleware.LogRequestMiddleware')
 
 if DEBUG == True:
     LOGGING = {
