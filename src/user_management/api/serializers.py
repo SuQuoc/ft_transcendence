@@ -2,10 +2,16 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import APIException
 from .models import CustomUser
+from .validators import displayname_validator
 
 MEGABYTE_LIMIT = 1
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):
+    displayname = serializers.CharField(
+        min_length=3,
+        max_length=30,
+        validators=[displayname_validator]  # Apply the RegexValidator
+    )
     class Meta:
         model = CustomUser
         fields = ["displayname"]
