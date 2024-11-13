@@ -47,7 +47,7 @@ services:
       DJ_SUDO_USERNAME: "${DJ_SUDO_USERNAME_MANAGEMENT:-admin}"
       DJ_SUDO_EMAIL: "${DJ_SUDO_EMAIL_MANAGEMENT:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${DJ_SUDO_PASSWORD_MANAGEMENT:-transcendence}"
-      SERVER_URL: ${SERVER_URL:-https://localhost:8000}
+      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
     depends_on:
       db_usermanagement:
         condition: service_healthy

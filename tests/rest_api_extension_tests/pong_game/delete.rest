@@ -1,0 +1,32 @@
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}"
+}
+
+###
+
+# @name signup
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+	"username": "{{username3}}",
+	"password": "{{current_password3}}",
+	"otp": "0000000000000000"
+}
+
+###
+
+@ACCESS_COOKIE = {{signup.response.headers.Set-Cookie}};
+
+###
+
+POST {{base_url}}/daphne/delete_user_stats
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE}}
+
+{
+}

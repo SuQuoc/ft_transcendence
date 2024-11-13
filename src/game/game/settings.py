@@ -55,6 +55,31 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'pong.middleware.LogRequestMiddleware')
+
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+        },
+    }
+
 
 ROOT_URLCONF = 'game.urls'
 
@@ -116,7 +141,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
+
 
 USE_I18N = True
 
@@ -190,10 +216,12 @@ CHANNEL_LAYERS = {
     },
 }
 
+# https://docs.djangoproject.com/en/5.1/topics/cache/
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/0",
+        "TIMEOUT": None,
     }
 }
 

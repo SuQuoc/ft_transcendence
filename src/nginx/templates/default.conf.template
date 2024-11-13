@@ -54,46 +54,38 @@ map $status $status_text {
   default 'Something is wrong';
 }
 
+server {
+        listen 80;
+        server_name ${DOMAIN};
 
-# https://ssl-config.mozilla.org/#server=nginx&version=1.27.0&config=modern&openssl=3.0.2w&ocsp=false&guideline=5.7
+		return 301 https://$host:${SSL_PORT}$request_uri;
+    }
 
 server {
 
-    # since we dont restrict the ip to listen on nginx uses this server block for all ip's of the machine
-    # eg. 127.0.0.1:443 ssl, would tell nginx to only listen on 127.0.0.1
-    # server_name localhost 10.3.2.3 example.com, define which requests this server block should handle
     listen 443 ssl;
-    listen [::]:443 ssl; #[aguilmea] we should check if ipv6 works
     http2 on;
 
-    server_name ${NGINX_HOST};
+    server_name ${DOMAIN};
 
     server_tokens off; #[aguilmea] we can only hide the version and not nginx with the free version https://serverfault.com/questions/214242/can-i-hide-all-server-os-info
     
-    ssl_certificate     /run/secrets/localhost.crt;
-    ssl_certificate_key /run/secrets/localhost.key;
+    ssl_certificate     /run/secrets/${DOMAIN}.crt;
+    ssl_certificate_key /run/secrets/${DOMAIN}.key;
     ssl_session_timeout 1d;
     ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
 
     ssl_protocols TLSv1.3;
     ssl_prefer_server_ciphers off;
 
-    # HSTS (ngx_http_headers_module is required) (63072000 seconds) # [aguilme] need to check what it is
     add_header Strict-Transport-Security "max-age=63072000" always;
 
-    # https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html#nginx
-
-    #add_header X-XSS-Protection "1; mode=block";
-
-    #################################### ADD SPA Pong content
     root /usr/share/nginx/html;
     index index.html;
-
     error_page 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 421 422 423 424 425 426 428 429 431 451 500 501 502 503 504 505 506 507 508 510 511 /custom_error.html;
-
+    error_page 497  =301 https://$host:${SSL_PORT}$request_uri;
     location = /custom_error.html {
     ssi on; # server side includes
-    ssi_types text/html;
     internal;
     root /usr/share/nginx/html;
     }
@@ -110,7 +102,7 @@ server {
 
         try_files $uri $uri/ =404;
     }
-    ###################################
+
     location /daphne/ {
         proxy_pass http://game_container;
         proxy_http_version 1.1;
@@ -125,7 +117,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location /um/ { #any URI starting with /um/ will be handled by proxy_pass http://user_management_group which is the name defined by #servername above
+    location /um/ {
         proxy_pass http://user_management_container;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
@@ -143,22 +135,22 @@ server {
 
     # redirect all routes from js router to homepage on reload (not sure if final yet!!) (the response should maybe be changed!!)
     location /match {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
     location /tournament {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
     location /login {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
     location /signup {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
     location /displayname {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
     location /friends {
-        return 301 https://$host:8000/;
+        return 301 https://$host:${SSL_PORT}/;
     }
 
     location /silk/ {
@@ -187,8 +179,8 @@ server {
 
     location /callback {
         if ($args) {
-            rewrite ^/callback$ https://$host:8000?$args last;
+            rewrite ^/callback$ https://$host:${SSL_PORT}?$args last;
         }
-        rewrite ^/callback$ https://$host:8000 last;
+        rewrite ^/callback$ https://$host:${SSL_PORT} last;
     }
 }

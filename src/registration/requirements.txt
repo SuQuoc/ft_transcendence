@@ -5,6 +5,12 @@ psycopg2-binary==2.9.9
 djangorestframework_simplejwt[crypto]==5.3.1
 django-cors-headers # for cookies
 requests # for oauth2
+argon2-cffi==23.1.0
+django-silk==5.2.0
+redis==5.1.1
+celery==5.4.0
+django-celery-beat
+django-redis==5.4.0
 
 ########## dependencies
 
@@ -15,7 +21,3 @@ PyJWT==2.8.0
 setuptools==71.1.0
 sqlparse==0.5.1
 wheel==0.43.0
-argon2-cffi==23.1.0
-django-silk==5.2.0
-redis==5.1.1
-celery==5.4.0

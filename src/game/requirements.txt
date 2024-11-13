@@ -1,6 +1,7 @@
 asgiref==3.8.1
 channels[daphne]==4.1.0
 django-sslserver
+
 # For daphne
 channels-redis==4.2.0
 redis==5.1.1
@@ -19,3 +20,5 @@ djangorestframework_simplejwt[crypto]==5.3.1
 httpcore==1.0.6
 httpx==0.27.2
 h2==4.1.0
+
+requests # for sending requests to other services

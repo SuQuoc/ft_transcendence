@@ -21,7 +21,7 @@ class TestCrud(MyTestSetUp):
     def setUp(self):
         self.user_id = str(uuid.uuid4())
         self.user_id2 = str(uuid.uuid4())
-        self.displayname = "Test API"
+        self.displayname = "TestAPI"
         self.data = {
             "displayname": self.displayname,
         }
@@ -57,7 +57,7 @@ class TestCrud(MyTestSetUp):
         # print(response.data)
 
     def test_displayname_too_long(self):
-        self.data["displayname"] = "displayname too long ggggggggggggggggggggggggggg"
+        self.data["displayname"] = "displayname_too_long_ggggggggggggggggggggggggggg"
         response = self.post()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # print(response.data)
@@ -125,7 +125,7 @@ class TestCrud(MyTestSetUp):
         self.test_success()
         
         # creating 2nd user
-        data = {"displayname": "Test API 2"}
+        data = {"displayname": "TestAPI2"}
         self.setup_jwt_with_cookie(self.user_id2)
         self.client.post(self.url, data, format="json", secure=True, **self.headers)
 

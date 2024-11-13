@@ -1,5 +1,5 @@
 
-@baseUrl = https://localhost:8000
+@baseUrl = https://localhost:8443
 
 POST {{baseUrl}}/registration/basic_signup
 Content-Type: application/json

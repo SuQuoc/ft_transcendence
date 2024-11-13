@@ -9,16 +9,18 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .common_utils import generate_random_string
-import base64
+import base64, logging
 
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     username = models.EmailField(max_length=254, unique=True)
+    setup_date = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(default=timezone.now)
     password = models.CharField(max_length=128, blank=True)
-    backup_code = models.CharField(max_length=128, blank=True)
+    backup_codes = models.JSONField(default=list, blank=True)
     email_verified = models.BooleanField(default=False)
     twofa_enabled = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=False)
 
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
@@ -31,10 +33,7 @@ class RegistrationUser(AbstractUser):
     def save(self, *args, **kwargs):
         self.username = self.username.lower()
         if self.password:
-            try:
-                validate_password(self.password, user=self)
-            except ValidationError as e:
-                raise ValueError(f"Password validation error: {', '.join(e.messages)}")
+            self.validate_password(self.password)
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
@@ -54,6 +53,29 @@ class RegistrationUser(AbstractUser):
     def is_verified(self):
         return self.email_verified
 
+    def password_is_set(self):
+        return self.password_set
+
+    def change_password_is_set(self):
+        self.password_set = True
+        self.save()
+        return self
+
+    def generate_backup_codes(self):
+        self.backup_codes.clear()
+        backup_codes = []
+        for _ in range (10):
+            backup_code = generate_random_string(32)
+            hashed_code = make_password(backup_code)
+            self.backup_codes.append(hashed_code)
+            backup_codes.append(backup_code)
+        self.save(update_fields=['backup_codes'])
+        return backup_codes
+
+    def actualise_last_login(self):
+        self.last_login = timezone.now()
+        self.save(update_fields=['last_login'])
+
     def generate_backup_code(self):
         backup_code = generate_random_string(32)
         self.backup_code = make_password(backup_code)
@@ -61,8 +83,15 @@ class RegistrationUser(AbstractUser):
         return backup_code
 
     def check_backup_code(self, backup_code):
-        return check_password(backup_code, self.backup_code)
+        for hashed_code in self.backup_codes:
+            if check_password(backup_code, hashed_code):
+                self.backup_codes.remove(hashed_code)
+                self.save(update_fields=['backup_codes'])
+                return True
+        return False
 
+def get_expiration_time():
+    return timezone.now() + timedelta(minutes=5)
 
 class OneTimePassword(models.Model):
 
@@ -79,7 +108,7 @@ class OneTimePassword(models.Model):
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, related_name='OneTimePassword_related_user')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     password = models.CharField(max_length=128)
-    expire = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
+    expire = models.DateTimeField(default=get_expiration_time)
 
     def delete(self):
         self.expire = timezone.now()
@@ -110,6 +139,7 @@ class OauthTwo(models.Model):
     state = models.CharField(max_length=128)
     next_step = models.CharField(max_length=16, choices=NEXT_STEP_CHOICES)
     related_user = models.ForeignKey(RegistrationUser, on_delete=models.CASCADE, null=True, related_name='OauthTwo_related_user')
+    expire = models.DateTimeField(default=get_expiration_time)
 
     def delete(self):
         self.expire = timezone.now()

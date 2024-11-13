@@ -12,7 +12,7 @@ from pathlib import Path
 # the .env file will not be found (e.g. you are in the tests folder and run pytest from there)
  
 load_dotenv("./docker_compose_files/.env")
-BASE_URL = os.getenv("SERVER_URL", "https://localhost:8000") # Using the defined SERVER_URL from the env, if not defined, use localhost
+BASE_URL = os.getenv("SERVER_URL", "https://localhost:8443") # Using the defined SERVER_URL from the env, if not defined, use localhost
 print(f"Using BASE_URL !!!!!!!!!!!!: {BASE_URL}")
 
 # Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36
@@ -151,7 +151,7 @@ def login(page: Page, email: str, password: str):
     page.goto(BASE_URL)
     page.locator("#loginEmail").fill(email)
     page.locator("#loginPassword").fill(password)
-    page.locator("#requestOTP").click()
+    page.locator("#loginSubmitButton").click()
     otp = get_otp()
     page.locator("#otpCode").fill(otp)
     page.locator("#loginSubmitButton").click()
@@ -165,7 +165,7 @@ def set_display_name(page: Page, display_name: str):
 
 
 def delete_user(page: Page, password: str):
-    page.locator("#userDropdown").click()
+    page.locator("#userProfileButton").click()
     page.locator("#deleteUserButton").click()
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#requestDeleteUserButton").click()

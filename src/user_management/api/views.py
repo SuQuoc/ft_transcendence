@@ -17,19 +17,42 @@ from .serializers import CustomUserEditSerializer
 from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
-
+from rest_framework.decorators import api_view
+import logging
 
 def profile(request):
     return HttpResponse("This is the profile page")
 
+@api_view(['POST'])
+def get_displaynames(request):
+    try:
+        user_ids = request.data.get("user_ids")
+        if not user_ids:
+            return Response({'error': 'No user_ids provided'}, status=status.HTTP_400_BAD_REQUEST)
+        users = CustomUser.objects.filter(user_id__in=user_ids)
+        displaynames = {
+            str(user.user_id): user.displayname for user in users
+        }
+        #logging.warning("displaynames: " + str(displaynames))
+        return Response(displaynames, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'get_displaynames': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CustomUserCreate(generics.CreateAPIView):
+class CustomUserCreate(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserCreateSerializer
 
-    def perform_create(self, serializer):
-        serializer.validated_data['user_id'] = self.request.user.user_id
+    def post(self, request):
+        data = request.data
+        data['user_id'] = request.user.user_id
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True) # will call the validate method in the serializer IF DEFINED
+        except Exception as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)        
 
 
 class CustomUserProfile(generics.GenericAPIView):
@@ -37,9 +60,6 @@ class CustomUserProfile(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
 
     def get(self, request):
-        print("sdasdasddasds")
-        for header, value in request.headers.items():
-            print(f"{header}: {value}")
         user = get_user_from_jwt(request)
         serializer = CustomUserProfileSerializer(user)
         return Response(serializer.data)
@@ -58,6 +78,10 @@ class CustomUserProfile(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
+        
+        delete_claim  = request.auth.get('delete')
+        if not delete_claim or delete_claim != True:
+            return Response({'error': 'No delete parameter'}, status=status.HTTP_403_FORBIDDEN)
         user = get_user_from_jwt(request)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

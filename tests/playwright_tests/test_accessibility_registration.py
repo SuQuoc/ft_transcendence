@@ -92,7 +92,7 @@ class TestAccessibility:
                 page.goto(BASE_URL)
                 page.locator("#loginEmail").fill(USERMAIL)
                 page.locator("#loginPassword").fill(NEWUSERPW)
-                page.locator("#requestOTP").press("Enter")
+                page.locator("#loginSubmitButton").press("Enter")
                 otp = get_otp()
                 page.wait_for_selector("#otpCode", state="visible")
                 page.locator("#otpCode").fill(otp)

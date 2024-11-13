@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core_app',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,9 @@ if SILK == True:
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
     INSTALLED_APPS.append('silk')
 
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -72,6 +76,16 @@ TEMPLATES = [
         },
     },
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis_registration:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
@@ -90,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
   {
     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     'OPTIONS': {
-      'user_attributes': ('username', 'ft_userid', 'backup_code'),
+      'user_attributes': ('username', 'ft_userid', 'backup_codes'),
       'max_similarity': 0.9,
     }
   },
@@ -117,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "core_app.RegistrationUser"
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -203,3 +217,23 @@ if DEBUG == True:
         },
     }
 
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")] # [aguilmea] added for admin login
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "non_verified_users_after_one_day": {
+        "task": "project.celery.non_verified_users_after_one_day",
+        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        "schedule": crontab(minute=0, hour=0),
+    },
+    "users_without_login_within_one_year": {
+        "task": "project.celery.users_without_login_within_one_year",
+        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        "schedule": crontab(minute=0, hour=0),
+    },
+}
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+CELERY_IMPORTS = ("core_app.tasks",)
