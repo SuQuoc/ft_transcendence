@@ -143,6 +143,6 @@ def refresh_token(request):
         if not refresh_token:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        return generate_response_with_valid_JWT(request.user, status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

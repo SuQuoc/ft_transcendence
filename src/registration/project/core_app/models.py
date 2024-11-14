@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
@@ -7,6 +8,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework_simplejwt.backends import jwt
 
 from .common_utils import generate_random_string
 import base64, logging
@@ -16,10 +18,10 @@ class RegistrationUser(AbstractUser):
     username = models.EmailField(max_length=254, unique=True)
     setup_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(default=timezone.now)
+    refresh_token_id = models.CharField(max_length = 32, blank=True)
     password = models.CharField(max_length=128, blank=True)
     backup_codes = models.JSONField(default=list, blank=True)
     email_verified = models.BooleanField(default=False)
-    twofa_enabled = models.BooleanField(default=False)
     password_set = models.BooleanField(default=False)
 
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
@@ -72,9 +74,12 @@ class RegistrationUser(AbstractUser):
         self.save(update_fields=['backup_codes'])
         return backup_codes
 
-    def actualise_last_login(self):
+    def actualise_last_login(self, refresh_token):
         self.last_login = timezone.now()
-        self.save(update_fields=['last_login'])
+        decoded_token = jwt.decode(refresh_token, settings.PUBLIC_KEY,algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+        jti_claim  = decoded_token.get('jti')
+        self.refresh_token_id = jti_claim
+        self.save(update_fields=['last_login', 'refresh_token_id'])
 
     def generate_backup_code(self):
         backup_code = generate_random_string(32)

@@ -64,16 +64,16 @@ def login(request):
                 httponly=True,
                 secure=True,
                 samesite='Strict')
-            user.actualise_last_login()
+            user.actualise_last_login(jwt_response['refresh'])
             return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        user.actualise_last_login()
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 #@silk_profile(name='forgot_password')
 def forgot_password(request):
@@ -101,6 +101,7 @@ def forgot_password(request):
 
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 def signup(request):
     try:
@@ -155,16 +156,18 @@ def signup(request):
                 httponly=True,
                 secure=True,
                 samesite = 'Strict')
+            user.actualise_last_login(jwt_response['refresh'])
             return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, backup_codes)
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
         return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 #@silk_profile(name='signup_change_password')
 def signup_change_password(request):
@@ -190,6 +193,7 @@ def signup_change_password(request):
         return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 #@silk_profile(name='signup_change_username')
 def signup_change_username(request):

@@ -16,7 +16,7 @@ def send_200_with_expired_cookies():
     response.delete_cookie('refresh')
     return response
 
-def generate_response_with_valid_JWT(status_code, token_s, backup_codes=None, response_body=None):
+def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=None, response_body=None):
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
     response = Response(status=status_code)
@@ -45,6 +45,7 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_codes=None, re
         httponly=True,
         secure=True,
         samesite = 'Strict')
+    user.actualise_last_login()
     return response
 #generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
 
