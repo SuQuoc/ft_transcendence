@@ -7,7 +7,7 @@ DOCKER_COMPOSE = docker compose -f ./docker_compose_files/docker-compose.yml
 
 all: up
 
-up:
+up: keys
 	${DOCKER_COMPOSE} --profile all up
 
 build_up:

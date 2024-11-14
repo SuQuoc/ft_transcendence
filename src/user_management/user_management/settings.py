@@ -114,7 +114,7 @@ DATABASES = {
         "USER": os.environ.get("POSTGRES_USER") if DEBUG else os.environ.get("POSTGRES_ACCESS_USER"), # i need the postgres root user to run tests, since they are done in a separate database
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD") if DEBUG else os.environ.get("POSTGRES_ACCESS_PASSWORD"),
         "HOST": os.environ.get("DB_HOST"),  # docker-compose service name
-        "PORT": os.environ.get("DB_PORT"),
+        "PORT": "5432",
     }
 }
 

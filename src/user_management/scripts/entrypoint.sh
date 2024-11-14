@@ -17,7 +17,10 @@ if not User.objects.filter(username='$DJ_SUDO_USERNAME').exists():
     User.objects.create_superuser('$DJ_SUDO_USERNAME', '$DJ_SUDO_EMAIL', '$DJ_SUDO_PASSWORD')
 EOF
 
-# Run custom command
-python manage.py create_testusers # TODO: delete this line when deploying
+if [ "$DEBUG" = "True" ]; then # TODO: ok like this?
+    # Run custom command
+    echo "Creating test users..."
+    python manage.py create_testusers 
+fi
 
 exec "$@"
