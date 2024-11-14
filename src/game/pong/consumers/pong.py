@@ -295,7 +295,7 @@ class Pong:
             await asyncio.sleep(tick_duration - (time.time() - start_time))
         
         print("end of game loop")
-        self.set_result()
+        self.set_result() # NOTE: must do this before saving to db and sending game end
         await self.save_game_to_db()
         await self.send_game_end()
 
@@ -359,6 +359,5 @@ class Pong:
             self.channel_group,
             {
                 'type': Type.GAME_END.value,
-                "winner": "winner", # TODO:
-                "loser": "loser" # TODO:
+                **self.result
             })

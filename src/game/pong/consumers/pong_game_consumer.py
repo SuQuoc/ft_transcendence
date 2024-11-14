@@ -54,11 +54,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         
     async def disconnect(self, close_code):
-        """ if not self.in_game: 
-            game = PongGameConsumer.all_games.get(self.match_id)
-            if game:
-                game.rem_player(self.user_id) """
-            
         if self.game_group:
             await self.channel_layer.group_discard(
                 self.game_group,
@@ -112,7 +107,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             if game.is_full():
                 game_task = asyncio.create_task(game.start_game_loop())
                 callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
-                game_task.add_done_callback(lambda t: self.cleanup(callback_match_id))
+                # game_task.add_done_callback(lambda t: self.cleanup(callback_match_id)) cool but cant use an async function as callback
             # NOTE: in our case with only 2 players, this is almost always true,
             # maybe except if 1 client joins and disconnects before the 2nd even joins
 
@@ -175,9 +170,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     async def game_end(self, event):
-        game = self.game
-        if (game.player_l.id == self.user_id and game.player_l.score == game.points_to_win) \
-            or (game.player_r.id == self.user_id and game.player_r.score == game.points_to_win):
+        loser_id = event['loser']
+        if (self.user_id == loser_id):
             await self.send(text_data=json.dumps(
                 {
                     'type': Type.GAME_END.value,
@@ -191,7 +185,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                     'status': "won"
                 }
             ))
-        # self.cleanup(event)
+        self.cleanup(event)
     
 
     async def cleanup(self, data):
@@ -211,16 +205,16 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     ### EVENTS - Communication with other consumer
-    async def forward_match_result(self, event):
+    async def forward_match_result(self, data):
         print("forward_match_result")
         client_group = f"client_{self.user_id}"
         await self.channel_layer.group_send(
             client_group,
             {
                 'type': 'match_result',
-                'winner': event['winner'],
-                'loser': event['loser'],
-                'winner_score': event['winner_score'],
-                'loser_score': event['loser_score']
+                'winner': data['winner'],
+                'loser': data['loser'],
+                'winner_score': data['winner_score'],
+                'loser_score': data['loser_score']
             }
         )
