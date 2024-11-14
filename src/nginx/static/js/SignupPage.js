@@ -4,7 +4,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class SignupPage extends ComponentBaseClass {
 	constructor() {
 		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
-		this.otpRequestCooldown = 10;
+		this.otpRequestCooldown = 60;
 		this.otpRequestTimer = null;
 	}
 

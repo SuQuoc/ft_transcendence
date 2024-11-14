@@ -4,6 +4,8 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class LoginPage extends ComponentBaseClass {
 	constructor() {
 		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /login to the history
+		this.otpRequestTimer = null;
+		this.otpRequestCooldown = 10;
 	}
 
 	connectedCallback() {
@@ -12,8 +14,10 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('requestOtpButton').addEventListener('input', this.requestNewOtp.bind(this));
 	}
 
+	//TODO: check why the event handler for new otp button isn't working
 	getElementHTML(){
 		const template = document.createElement('template');
 		template.innerHTML = `
@@ -33,7 +37,10 @@ export class LoginPage extends ComponentBaseClass {
                     <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    	<div class="input-group mb-3">
+                    		<input name="otp" id="otpCode" type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    		<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
+                    	</div>
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <span id="errorMessage" class="text-danger"></span>
@@ -115,6 +122,7 @@ export class LoginPage extends ComponentBaseClass {
 					throw new Error('Requesting OTP failed');
 				}
 				this.shadowRoot.getElementById('otpSection').style.display = 'block';
+				this.startOtpRequestCooldown();
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
@@ -172,6 +180,45 @@ export class LoginPage extends ComponentBaseClass {
 			}
 		}
 	}
+
+	async requestNewOtp() {
+		const email = this.shadowRoot.getElementById('loginEmail').value;
+		const password = this.shadowRoot.getElementById('loginPassword').value;
+
+		try {
+		  const response = await fetch('/registration/basic_login', {
+			  method: 'POST',
+			  headers: {
+				'Content-Type': 'application/json'
+			  },
+			  body: JSON.stringify({ username: email, password })
+		  });
+
+		  if (!response.ok) {
+			throw new Error('Requesting OTP failed');
+		  }
+		  this.startOtpRequestCooldown();
+		} catch (error) {
+		  this.shadowRoot.getElementById('otpErrorMessage').textContent = error;
+		}
+	}
+
+  startOtpRequestCooldown() {
+    const requestOtpButton = this.shadowRoot.getElementById('requestOtpButton');
+    requestOtpButton.setAttribute('disabled', '');
+    let remainingTime = this.otpRequestCooldown;
+
+    this.otpRequestTimer = setInterval(() => {
+      if (remainingTime > 0) {
+        requestOtpButton.textContent = `${remainingTime}s`;
+        remainingTime--;
+      } else {
+        clearInterval(this.otpRequestTimer);
+        requestOtpButton.removeAttribute('disabled');
+        requestOtpButton.textContent = 'New OTP';
+      }
+    }, 1000);
+  }
 }
 
 customElements.define('login-page', LoginPage);
