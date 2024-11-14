@@ -4,6 +4,8 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class SignupPage extends ComponentBaseClass {
 	constructor() {
 		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
+		this.otpRequestCooldown = 60;
+		this.otpRequestTimer = null;
 	}
 
 	connectedCallback() {
@@ -13,6 +15,7 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('signupPassword2').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
+		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
 	}
 
 	// !!!! id of button requestOTP should be signupRequestOTP
@@ -71,7 +74,10 @@ export class SignupPage extends ComponentBaseClass {
 					</div>
                     <div id="otpSection" style="display: none;">
                     	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    	<div class="input-group mb-3">
+                    		<input name="otp" id="otpCode" type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    		<button id="requestOtpButton" class="btn btn-custom" type="button" disabled>New OTP</button>
+                    	</div>
                     	<span id="otpErrorMessage" class="text-danger"></span>
                     </div>
                     <p class="text-white-50 small m-0">Already signed up?
@@ -197,6 +203,7 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById('signupEmail').setAttribute('disabled', '');
 				this.shadowRoot.getElementById('signupPassword1').setAttribute('disabled', '');
 				this.shadowRoot.getElementById('signupPassword2').setAttribute('disabled', '');
+				this.startOtpRequestCooldown();
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
@@ -225,6 +232,46 @@ export class SignupPage extends ComponentBaseClass {
 				signupButton.removeAttribute('disabled');
 			}
 		}
+	}
+
+	async requestNewOtp() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		const password = this.shadowRoot.getElementById('signupPassword1').value;
+
+		try {
+			const response = await fetch('/registration/change_password', {
+				method: 'POST',
+				headers: {
+				'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ username: email, password })
+			});
+
+			if (!response.ok) {
+				throw new Error('Requesting new OTP failed');
+			}
+			this.startOtpRequestCooldown();
+		} catch (error) {
+			console.error('Error during new OTP request:', error);
+			this.shadowRoot.getElementById('otpErrorMessage').textContent = 'Could not send new OTP';
+		}
+	}
+
+	startOtpRequestCooldown() {
+		const requestOtpButton = this.shadowRoot.getElementById('requestOtpButton');
+		requestOtpButton.setAttribute('disabled', '');
+		let remainingTime = this.otpRequestCooldown;
+
+		this.otpRequestTimer = setInterval(() => {
+			if (remainingTime > 0) {
+				requestOtpButton.textContent = `${remainingTime}s`;
+				remainingTime--;
+			} else {
+				clearInterval(this.otpRequestTimer);
+				requestOtpButton.removeAttribute('disabled');
+				requestOtpButton.textContent = 'New OTP';
+			}
+		}, 1000);
 	}
 }
 
