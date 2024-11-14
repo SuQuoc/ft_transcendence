@@ -1,6 +1,7 @@
 import random # for old version of pong # maybe needed for ball in the new version (but i don't think so)!!
 import json
 import time # temporary !!
+import math
 
 class Vector:
     def __init__(self, x, y):
@@ -43,15 +44,63 @@ class Player:
 
 class Ball:
     def __init__(self, pos_x, pos_y, vel_y, vel_x, size):
-        self.base_pos = Vector(pos_x, pos_y)
-        self.pos = Vector(pos_x, pos_y)
-        self.vel = Vector(vel_x, vel_y)
-        self.size = size
-        self.collision = 0 # used to calculate the ball movement (not really)
+        self.base_pos = Vector(pos_x, pos_y)    # first position the ball is in, currently used to reset the ball
+        self.pos = Vector(pos_x, pos_y)     # position of the ball relative to the canvas
+        self.vel = Vector(vel_x, vel_y)     # velocity (direction the ball moves | (0, 0) is ball.pos)
+        self.size = size                    # width and height of the ball
+        self.collision = 0      # used to keep track of how often the ball can move before it hits something
+        self.speed = 11         # speed the ball moves at (is used to calculate vel)
     
     def move(self):
         self.pos.x += self.vel.x
         self.pos.y += self.vel.y
+
+    def in_range(self, angle) -> bool:
+        """ Helper function for calc_vel.
+            \n Returns True if the angle is too sharp or too flat, else False. """
+        if self.vel.x > 0:
+            if self.vel.y > 0:
+                if angle < 30:
+                    return True
+                elif angle > 60:
+                    return True
+            else:
+                if angle < 120:
+                    return True
+                elif angle > 150:
+                    return True
+        else:
+            if self.vel.y < 0:
+                if angle < 210:
+                    return True
+                elif angle > 240:
+                    return True
+            else:
+                if angle < 300:
+                    return True
+                elif angle > 330:
+                    return True
+        return False
+
+    def calc_vel(self, player: Player):
+        """ Calculates new vel based on where the ball hits a player. """
+        player_half = (player.height + self.size) / 2   # adding the ballsize because it bounces off even when only a pixel touches the player
+        offset = (self.pos.y + (self.size / 2)) - player.pos.y - (self.size / 2)
+        normalized_offset = (offset - player_half) / player_half
+
+        # changing wether it adds or subtracts to the angle depending on which direction the ball comes from
+        if self.vel.y < 0:
+            normalized_offset *= -1
+
+        # getting the current angle
+        angle = math.atan2(self.vel.y, self.vel.x)
+        # checking if the angle would be too sharp or too flat
+        if self.in_range(math.degrees(abs(angle + (normalized_offset / 8)))):   # the 8 is an arbitrarily chosen number. it feels good when playing
+            angle += (normalized_offset / 8)    # the 8 is an arbitrarily chosen number. it feels good when playing
+
+        self.vel.x = self.speed * math.cos(angle)
+        self.vel.y = self.speed * math.sin(angle)
+        self.vel.x *= -1
 
     def reset(self):
         """ Resets the ball to it's base position. (The position passed when initializing it.) """
@@ -77,7 +126,6 @@ class Pong:
         self.player_height = 60
 
         self.ball = Ball(self.canvas_width/2 - 5, self.canvas_height/2 - 5, 8, 8, 10)
-        
         self.player_l: Player = Player(id = player_l,
                                         pos_x = 10,
                                         pos_y = self.canvas_height/2 - self.player_height/2,
@@ -103,6 +151,7 @@ class Pong:
         elif player == self.player_r.id:
             self.player_r = None
         self.size -= 1
+
 
     def is_full(self):
         return self.size == 2
@@ -139,22 +188,38 @@ class Pong:
             return True
 
 
-    def collision_with_player(self, ball_pos: Vector, x_vel: int) -> bool:
+    def get_player(self) -> Player:
+        if self.ball.vel.x < 0:
+            return self.player_l
+        else:
+            return self.player_r
+
+
+    def collision_with_player(self, player: Player, ball_pos: Vector, x_vel: int) -> bool:
         """ Checks if the ball would hit (is on the same y as) a player. (Be careful, this doesn't check x).
             \n Returns 'True' if it does and 'False' if it doesn't. """
-        if x_vel < 0:
-            #collision player_l
-            if ball_pos.y + self.ball.size > self.player_l.pos.y and ball_pos.y < self.player_l.pos.y + self.player_l.height:
-                return True
-            return False
-        else:
-            #collision player_r
-            if ball_pos.y + self.ball.size > self.player_r.pos.y and ball_pos.y < self.player_r.pos.y + self.player_r.height:
-                return True
-            return False
+        if ball_pos.y + self.ball.size > player.pos.y and ball_pos.y < player.pos.y + player.height:
+            return True
+        return False
 
 
-    def go_to_wall(self, pos: Vector, vel: Vector, wall: Vector) -> int:
+    def move_out_of_player(self, player: Player) -> Vector:
+        """ Checks if the ball is in the player (only on the y axis) and if it is, it moves it out (again, only the y axis). 
+            \n Returns the next_pos of the ball. """
+        ball_top = self.ball.pos.y
+        ball_bot = self.ball.pos.y + self.ball.size
+        player_top = player.pos.y
+        player_middle = player.pos.y + player.height / 2
+        player_bot = player.pos.y + player.height
+
+        if ball_bot > player_top and ball_bot < player_middle:
+            self.ball.pos.y = player.pos.y - self.ball.size
+        elif ball_top > player_middle and ball_top < player_bot:
+            self.ball.pos.y = player_bot
+        return Vector(self.ball.pos.x + self.ball.vel.x, self.ball.pos.y + self.ball.vel.y)
+
+
+    def go_to_wall(self, pos: Vector, vel: Vector, wall: Vector) -> Vector:
         """ Calculates the position of the ball if it collides with a wall.
             \n wall.x should be the next wall on the x axis the ball could hit, the same with wall.y respectfully. 
             \n If this function calculates the collision on wall.x or wall.y depends on 'self.wall_to_be_hit. (self.wall_to_be_hit should be either set to 'x' or 'y'.)
@@ -162,27 +227,36 @@ class Pong:
         B = Vector(pos.x + vel.x, pos.y + vel.y)
 
         if self.wall_to_be_hit == "x":
-            return Vector(wall.x, Vector.calc_y(pos, B, wall.x))
+            next_pos = Vector(wall.x, Vector.calc_y(pos, B, wall.x))
+            if next_pos.y < 0:
+                next_pos.y = 0
+            elif next_pos.y > self.canvas_height:
+                next_pos.y = self.canvas_height
+            return next_pos
         else:
-            return Vector(Vector.calc_x(pos, B, wall.y), wall.y)
+            next_pos = Vector(Vector.calc_x(pos, B, wall.y), wall.y)
+            if next_pos.x < 0:
+                next_pos.x = 0
+            elif next_pos.x > self.canvas_width:
+                next_pos.x = self.canvas_width
+            return next_pos
         
 
-    def go_to_player_top_bottom(self, pos: Vector, vel: Vector) -> int:
-        """ Does the same thing as 'go_to_wall()' but with the top and bottom edge of the players.
-            \n Returns the position the ball should collide with the player. """
+    def go_to_player_top_bottom(self, player: Player, pos: Vector, vel: Vector) -> Vector:
+        """ Checks which edge of the player the ball is closer to.
+            \n Returns the position where the ball should collide with the player. """
         B = Vector(pos.x + vel.x, pos.y + vel.y)
 
-        if vel.x < 0:
-            player = self.player_l
+        top_edge_distance = player.pos.y - self.ball.size - self.ball.pos.y
+        bot_edge_distance = player.pos.y + player.height - self.ball.pos.y
+        if abs(top_edge_distance) < abs(bot_edge_distance):
+            x = Vector.calc_x(pos, B, player.pos.y - self.ball.size)
+            return Vector(x, player.pos.y - self.ball.size)
         else:
-            player = self.player_r
+            x = Vector.calc_x(pos, B, player.pos.y + player.height)
+            return Vector(x, player.pos.y + player.height)
 
-        if vel.y < 0:
-            return Vector(Vector.calc_x(pos, B, player.pos.y + player.height), player.pos.y + player.height)
-        else:
-            return Vector(Vector.calc_x(pos, B, player.pos.y - self.ball.size), player.pos.y - self.ball.size)
-        
-        
+
     def calc_next_collision(self, pos: Vector, vel: Vector, wall) -> int:
         """ Calculates the next collision with wall.x and wall.y. Also sets self.wall_to_be_hit to either 'x' or 'y', depending on which wall will be hit first.
             \n Returns the amount of times the ball can move without hitting anything. """
@@ -191,10 +265,10 @@ class Pong:
 
         if (collision_x < collision_y):
             self.wall_to_be_hit = "x"
-            return int(collision_x)
+            return int(collision_x + 1) # the +1 is needed to compensate for the -1 at the beginning of the update_game_state() function
         else:
             self.wall_to_be_hit = "y"
-            return int(collision_y)
+            return int(collision_y + 1) # the +1 is needed to compensate for the -1 at the beginning of the update_game_state() function
 
 
     def get_wall(self, vel: Vector) -> Vector:
@@ -213,7 +287,6 @@ class Pong:
         #start_time = time.time()
         next_pos = Vector(self.ball.pos.x + self.ball.vel.x, self.ball.pos.y + self.ball.vel.y)
 
-        # check if players are moving into the ball and or shoving the ball !!!
         # move players
         self.player_l.move(self.canvas_height)
         self.player_r.move(self.canvas_height)
@@ -228,9 +301,9 @@ class Pong:
                 self.collision = self.calc_next_collision(next_pos, self.ball.vel, wall)
 
             else: # if going into player lane
-                if self.collision_with_player(next_pos, self.ball.vel.x):
+                if self.collision_with_player(self.get_player(), next_pos, self.ball.vel.x):
                     next_pos = self.go_to_wall(self.ball.pos, self.ball.vel, wall)
-                    self.ball.vel.x *= -1   #calculate new ball vel !!
+                    self.ball.calc_vel(self.get_player()) # calculate new vel
                     wall = self.get_wall(self.ball.vel)
                     self.collision = self.calc_next_collision(next_pos, self.ball.vel, wall)
                 else: # moving in the player lane without hitting player
@@ -238,8 +311,10 @@ class Pong:
 
         if self.collision < 0:
             # checking player top and bottom collision
-            if self.collision_with_player(next_pos, self.ball.vel.x):   #if you move into the ball with a player the ball jumps very noticeably !!!!!
-                next_pos = self.go_to_player_top_bottom(self.ball.pos, self.ball.vel)
+            player = self.get_player()
+            next_pos = self.move_out_of_player(player) # checks if the player moved into the ball and if it did, it moves the ball out
+            if self.collision_with_player(player, next_pos, self.ball.vel.x):
+                next_pos = self.go_to_player_top_bottom(player, self.ball.pos, self.ball.vel)
                 self.ball.vel.y *= -1
 
             if self.player_scored():
@@ -258,8 +333,8 @@ class Pong:
 
 
     async def start_game_loop(self):
-        import time
-        import asyncio
+        import time     #!!
+        import asyncio  #!!
         
         if not self.is_full():
             raise Exception("Not enough players to start game")
