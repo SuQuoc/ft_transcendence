@@ -22,7 +22,6 @@ def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=No
     response = Response(status=status_code)
     if response_body:
         response.data = response_body
-    #TODO: [aguilmea] check if backup_code is needed
     if backup_codes:
         response.data = {'backup_code': backup_codes}
     access_token = token_s.validated_data['access']
@@ -62,34 +61,6 @@ def generate_redirect_with_state_cookie(hashed_state, authorize_url):
         secure=True,
         samesite = 'Strict')
     return response
-
-
-def send_reset_email(recipient, token):
-    try:
-        link = os.environ.get('SERVER_URL') + '/registration/forgot_password_reset?token=' + token
-        message = f"""
-        Hello,
-
-        Please go to the following link to reset your password for Transcendence:
-
-        {link}
-
-        Best regards,
-        Your Transcendence team
-        """
-        send_mail(
-            "Reset your password for Transcendence",
-            message,
-            "Your Transcendence team",
-            [recipient],
-            fail_silently=False,
-            auth_user=None, # will use EMAIL_HOST_USER
-            auth_password=None, # will use EMAIL_HOST_PASSWORD
-            connection=None, # optional email backend
-            html_message=None, # will only be sent as plain text and not html
-        )
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def send_delete_request_to_um(request, token_s):
