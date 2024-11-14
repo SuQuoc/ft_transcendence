@@ -4,7 +4,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class SignupPage extends ComponentBaseClass {
 	constructor() {
 		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
-		this.otpRequestCooldown = 60;
+		this.otpRequestCooldown = 10;
 		this.otpRequestTimer = null;
 	}
 
@@ -16,6 +16,9 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('signupEmail').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOTPInput.bind(this));
 		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
+		this.shadowRoot.getElementById('changeUsernameButton').addEventListener('click', this.toggleUsername.bind(this));
+    	this.shadowRoot.getElementById('changePassword1Button').addEventListener('click', this.togglePassword.bind(this, 'signupPassword1'));
+		this.shadowRoot.getElementById('changePassword2Button').addEventListener('click', this.togglePassword.bind(this, 'signupPassword2'));
 	}
 
 	// !!!! id of button requestOTP should be signupRequestOTP
@@ -34,42 +37,51 @@ export class SignupPage extends ComponentBaseClass {
                 <form id="signupForm">
                     <div id="emailSection">
                     	<label for="signupEmail" class="form-label text-white-50">Email address</label>
-						<input name="email"
-							id="signupEmail"
-							type="email"
-							class="form-control"
-							placeholder="name@example.com"
-							aria-required="true"
-							aria-describedby="errorMessageEmail"
-							required
-						/>
+						<div class="input-group mb-3">
+							<input name="email"
+								id="signupEmail"
+								type="email"
+								class="form-control"
+								placeholder="name@example.com"
+								aria-required="true"
+								aria-describedby="errorMessageEmail"
+								required
+							/>
+							<button id="changeUsernameButton" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
 					</div>
                     <span id="errorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
                     <div id="passwordSection">
 						<label for="signupPassword1" class="form-label text-white-50">Password</label>
-						<input name="password"
-							id="signupPassword1"
-							type="password"
-							class="form-control mb-1"
-							aria-required="true"
-							aria-describedby="errorMessagePassword"
-							minlength="8"
-							maxlength="120"
-							pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
-							required
-						/>
-						<label for="signupPassword2" class="form-label text-white-50">Password again</label>
-						<input name="password2"
-							id="signupPassword2"
-							type="password"
-							class="form-control mb-3"
-							aria-required="true"
-							aria-describedby="errorMessagePassword"
-							minlength="8"
-							maxlength="120"
-							pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
-							required
-						/>
+                    	<div class="input-group">
+							<input name="password"
+								id="signupPassword1"
+								type="password"
+								class="form-control"
+								aria-required="true"
+								aria-describedby="errorMessagePassword"
+								minlength="8"
+								maxlength="120"
+								pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+								required
+							/>
+							<button id="changePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
+						<label for="signupPassword2" class="form-label text-white-50">Repeat password</label>
+						<div class="input-group mb-3">
+							<input name="password2"
+								id="signupPassword2"
+								type="password"
+								class="form-control"
+								aria-required="true"
+								aria-describedby="errorMessagePassword"
+								minlength="8"
+								maxlength="120"
+								pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+								required
+							/>
+							<button id="changePassword2Button" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
                     	<span id="errorMessagePassword" class="text-danger mb-3"></span>
 					</div>
                     <div id="otpSection" style="display: none;">
@@ -110,16 +122,16 @@ export class SignupPage extends ComponentBaseClass {
 		const passwordsMatch = password1 === password2;
 		const otpSection = this.shadowRoot.getElementById('otpSection');
 
+		console.log(emailValid, passwordValid, passwordsMatch, password1, password2, email);
 		if (emailValid && passwordsMatch && passwordValid) {
-			if (otpSection.style.display === 'block') {
+			emailWarning.textContent = '';
+			passwordWarning.textContent = '';
+			if (otpSection.style.display === 'block' && this.shadowRoot.getElementById('otpCode').value.length !== 0) {
 				this.handleOTPInput();
 			} else {
 				signupButton.removeAttribute("disabled");
-				emailWarning.textContent = '';
-				passwordWarning.textContent = '';
 			}
 		} else {
-			otpSection.style.display = 'none';
 			signupButton.setAttribute("disabled", "");
 			if (!emailValid) {
 				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
@@ -204,6 +216,9 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById('signupPassword1').setAttribute('disabled', '');
 				this.shadowRoot.getElementById('signupPassword2').setAttribute('disabled', '');
 				this.startOtpRequestCooldown();
+				this.shadowRoot.getElementById('changeUsernameButton').classList.remove('d-none');
+				this.shadowRoot.getElementById('changePassword1Button').classList.remove('d-none');
+				this.shadowRoot.getElementById('changePassword2Button').classList.remove('d-none');
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
@@ -239,21 +254,22 @@ export class SignupPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById('signupPassword1').value;
 
 		try {
-			const response = await fetch('/registration/change_password', {
+			const response = await fetch('/registration/basic_signup_change_password', {
 				method: 'POST',
 				headers: {
 				'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ username: email, password })
+				body: JSON.stringify({ username: email, new_password: password })
 			});
 
 			if (!response.ok) {
-				throw new Error('Requesting new OTP failed');
+				const responseData = await response.json();
+				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+				throw new Error(errorMessage);
 			}
 			this.startOtpRequestCooldown();
 		} catch (error) {
-			console.error('Error during new OTP request:', error);
-			this.shadowRoot.getElementById('otpErrorMessage').textContent = 'Could not send new OTP';
+			this.shadowRoot.getElementById('otpErrorMessage').textContent = error;
 		}
 	}
 
@@ -272,6 +288,89 @@ export class SignupPage extends ComponentBaseClass {
 				requestOtpButton.textContent = 'New OTP';
 			}
 		}, 1000);
+	}
+
+	togglePassword(inputId) {
+		const password1 = this.shadowRoot.getElementById('signupPassword1');
+		const password2 = this.shadowRoot.getElementById('signupPassword2');
+		const password1Button = this.shadowRoot.getElementById('changePassword1Button');
+		const password2Button = this.shadowRoot.getElementById('changePassword2Button');
+
+		if (password1.disabled && password2.disabled) {
+			password1.disabled = false;
+			password2.disabled = false;
+			password1Button.textContent = 'Save';
+			password2Button.textContent = 'Save';
+		} else {
+			if (inputId === 'signupPassword1') {
+				password2.value = password1.value;
+			} else {
+				password1.value = password2.value;
+			}
+			this.savePassword();
+			password1.disabled = true;
+			password2.disabled = true;
+			password1Button.textContent = 'Change';
+			password2Button.textContent = 'Change';
+			this.validateForm();
+		}
+	}
+
+	toggleUsername() {
+		const email = this.shadowRoot.getElementById('signupEmail');
+		const button = this.shadowRoot.getElementById('changeUsernameButton');
+		if (email.disabled) {
+			this.currentUsername = email.value;
+			email.disabled = false;
+			button.textContent = 'Save';
+		} else {
+			this.saveUsername();
+			email.disabled = true;
+			button.textContent = 'Change';
+			this.validateForm();
+		}
+	}
+
+	async savePassword() {
+		const password1 = this.shadowRoot.getElementById('signupPassword1').value;
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		try {
+		  const response = await fetch('/registration/basic_signup_change_password', {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username: email, new_password: password1 })
+		  });
+		  if (!response.ok) {
+			throw new Error('Failed to save password');
+		  }
+		} catch (error) {
+		  console.error('Error saving password:', error);
+		  this.shadowRoot.getElementById('signupError').textContent = 'Could not save password';
+		  this.shadowRoot.getElementById('signupError').style.display = 'block';
+		}
+	}
+
+	async saveUsername() {
+		const email = this.shadowRoot.getElementById('signupEmail').value;
+		try {
+		  const response = await fetch('/registration/basic_signup_change_username', {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ current_username: this.currentUsername, new_username: email })
+		  });
+		  if (!response.ok) {
+			throw new Error('Failed to save username');
+		  }
+		  this.currentUsername = email;
+		} catch (error) {
+		  console.error('Error saving username:', error);
+		  this.shadowRoot.getElementById('signupError').textContent = 'Could not save username';
+		  this.shadowRoot.getElementById('signupError').style.display = 'block';
+		}
 	}
 }
 
