@@ -236,7 +236,7 @@ const Router = {
 				response.then(data => data.json()).then(data => {
 					if (data.image) {
 						window.app.userData.profileImage = data.image;
-						document.getElementById('userDropdown').src = data.image;
+						document.getElementById('userProfileButton').src = data.image;
 					}
 				});
 			}
