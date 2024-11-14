@@ -51,7 +51,6 @@ export class PongCanvasElement extends canvasBaseClass {
 		super.init();
 
 		let player_x = 10;
-		let player_y = 0;
 		let player_width = 10;
 		let player_height = 60;
 		let player_speed = 10; // server is 10
@@ -63,14 +62,14 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.move_to = 	-1; // saves the y-coordinate the player should move to
 
 		this.player_left =	new Player(player_x,
-										player_y,
+										(this.height_unscaled - player_height) / 2,
 										player_width,
 										player_height,
 										player_speed,
 										player_color,
 										this.ctx);
 		this.player_right =	new Player(this.width_unscaled - player_x - player_width,
-										player_y,
+										(this.height_unscaled - player_height) / 2,
 										player_width,
 										player_height,
 										player_speed,
