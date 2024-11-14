@@ -3,7 +3,7 @@ import json
 import time # temporary !!
 from asgiref.sync import sync_to_async
 from pong.models import MatchRecord
-from .pong_game_consumer import Type
+from .utils import Type
 
 
 class Vector:
@@ -328,7 +328,7 @@ class Pong:
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
-                'type': Type.COUNTDOWN.value,
+                'type': Type.COUNT_DOWN.value,
                 'count': count
             }
         )

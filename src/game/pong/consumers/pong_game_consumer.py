@@ -8,22 +8,7 @@ from .utils import get_user_id_from_jwt
 from django.core.cache import cache 
 from .Room import Player
 from typing import Dict
-
-
-
-# INTERFACE TO FE
-class Type(Enum):
-    MOVE = 'move'
-    CONNECT_TO_MATCH = 'connect_to_match'
-    GAME_END = 'game_end'
-    ERROR = 'error'
-    
-    # Triggered by Pong background task
-    COUNTDOWN = 'countdown'
-    INITIAL_STATE = 'initial_state'
-    STATE_UPDATE = 'state_update'
-    GAME_END = 'game_end'
-    CLEANUP = 'cleanup'
+from .utils import Type
 
 class GameMode(Enum):
     NORMAL = 'normal'
