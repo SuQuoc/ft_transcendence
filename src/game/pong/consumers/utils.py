@@ -4,7 +4,6 @@ from django.core.cache import cache
 from enum import Enum
 import uuid
 
-
 # TYPES of messages
 T_ON_TOURNAMENT_PAGE = "on_tournament_page"
 T_CREATE_ROOM = "create_room"
@@ -50,6 +49,20 @@ class Errors(Enum):
     ROOM_FULL = "room_full"
     ROOM_NAME_INVALID = "room_name_invalid"
     ALREADY_IN_ROOM = "already_in_room"
+
+
+# INTERFACE TO FE - pong_game_consumer.py + pong.py
+class Type(Enum):
+    MOVE = 'move'
+    CONNECT_TO_MATCH = 'connect_to_match'
+    ERROR = 'error'
+    
+    # Triggered by Pong background task
+    COUNT_DOWN = 'count_down'
+    INITIAL_STATE = 'initial_state'
+    STATE_UPDATE = 'state_update'
+    GAME_END = 'game_end'
+    CLEANUP = 'cleanup'
 
 
 def get_user_id_from_jwt(jwt_token: str):
