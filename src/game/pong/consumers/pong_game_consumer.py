@@ -13,14 +13,17 @@ from typing import Dict
 
 # INTERFACE TO FE
 class Type(Enum):
-    
     MOVE = 'move'
     CONNECT_TO_MATCH = 'connect_to_match'
     GAME_END = 'game_end'
     ERROR = 'error'
-    # INITIAL_STATE = 'initial_state'
-    # STATE_UPDATE = 'state_update'
-    # CLEANUP = 'cleanup'
+    
+    # Triggered by Pong background task
+    COUNTDOWN = 'countdown'
+    INITIAL_STATE = 'initial_state'
+    STATE_UPDATE = 'state_update'
+    GAME_END = 'game_end'
+    CLEANUP = 'cleanup'
 
 class GameMode(Enum):
     NORMAL = 'normal'
@@ -86,7 +89,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             return
     
 
-   
     async def connect_to_match(self, data):
         self.match_id = data.get('match_id')
         
@@ -95,14 +97,9 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             return
         
         self.game_mode = self.match_config.get('game_mode')
-        """ if self.game_mode == GameMode.TOURNAMENT:
-            print("GameConsumer: GAME MODE=TOURNAMENT")
-            self.client_group = f"client_{self.user_id}"
-            await self.channel_layer.group_add(self.client_group, self.channel_name) """ 
     
         self.game_group = f'game_{self.match_id}'
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
-        
         
         game = PongGameConsumer.all_games.get(self.match_id)
         if game is None:
@@ -111,14 +108,13 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                     ptw = 4
             PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.user_id, ptw)
         else:
-            game.add_player(self.user_id)
-            
-            # NOTE: in our case with only 2 players, this is almost always true,
-            # maybe except what happens if a 1 client joins and disconnects before the 2nd even joins
-            if game.is_full():                 
+            game.add_player(self.user_id)            
+            if game.is_full():
                 game_task = asyncio.create_task(game.start_game_loop())
                 callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
                 game_task.add_done_callback(lambda t: self.cleanup(callback_match_id))
+            # NOTE: in our case with only 2 players, this is almost always true,
+            # maybe except if 1 client joins and disconnects before the 2nd even joins
 
 
     async def reconnect_to_match(self, data):
@@ -146,7 +142,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         allowed_user_ids = match_config.get('user_id_list')
         if allowed_user_ids is None:
             raise ValueError("SNH - cache must be set by matchmaking consumer or tournament consumer")
-            return False
         for id in allowed_user_ids:
             if id == self.user_id:
                 self.match_config = match_config
@@ -200,20 +195,24 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     
 
     async def cleanup(self, data):
-        PongGameConsumer.all_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
+        # NOTE: if caller is task callback, 
+        # no duplicate msg will be sent to tournament consumer,
+        # but sending msg async not  
+
+        PongGameConsumer.all_games.pop(self.match_id, None) 
+        # removes key if it exists, or nothing if not, 
+        # since N consumers try to do this
         async with self.update_lock:
             cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT:
-            # NOTE: if parent-method is called via task callback, 
-            # no duplicate messages will be sent to tournament consumer
             await self.forward_match_result(data)
         else:
             self.close()
 
+
     ### EVENTS - Communication with other consumer
     async def forward_match_result(self, event):
         print("forward_match_result")
-
         client_group = f"client_{self.user_id}"
         await self.channel_layer.group_send(
             client_group,

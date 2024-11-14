@@ -33,7 +33,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.current_room = None
         self.client_group = None
-
+        # Tournament vars
         self.queue = None
         self.in_game = False
 
@@ -42,7 +42,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
         self.user.name = await get_displayname(self.scope.get("cookies"))
-        
+        # Communication between consumers
         self.client_group = f"client_{self.user.id}"
         
     
@@ -67,13 +67,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
 
     async def disconnect(self, close_code): 
-        if self.current_room: # cache.get(f"current_room_{self.user.name}"):
+        if self.current_room:
             await self.leave_room()
         
         # tournament still running
             # user plays atm 
             # user finished game and dc while waiting
-        
         if self.queue: 
             if self.in_game: 
                 self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
@@ -94,7 +93,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             # print("\n")
 
             # handle websocket message from client
-            if type == T_ON_TOURNAMENT_PAGE: # NOTE: is this still needed?
+            if type == T_ON_TOURNAMENT_PAGE: # TODO: is this still needed? DONT THINK SO
                 self.user.name = dict_data.get("displayname")
 
             elif type == T_CREATE_ROOM:
@@ -113,8 +112,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.get_tournament_list()
 
             else:
-                print(f"Unknown message type: {type}")
-                # send an error to client
+                print(f"Unknown message type: {type}") # NOTE: what to do?
         except Exception as e:
             print(f"Exception: {e}")
 
@@ -124,7 +122,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         if self.current_room is not None:
             await self.send_error(Errors.ALREADY_IN_ROOM)
             return
-        
         
         form = CreateTournamentForm(dict_data)
         if form.is_valid():
@@ -136,9 +133,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             self.send_error(Errors.ROOM_NAME_INVALID)
             return 
 
-        
         async with self.update_lock: # to prevent race conditions on cache
-            # Initialize available_rooms in the cache
             available_rooms = cache.get(AVA_ROOMS, {})
             if room_name in available_rooms or room_name in cache.get(FULL_ROOMS, {}):
                 await self.send_error(Errors.ROOM_NAME_TAKEN)
@@ -156,12 +151,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             cache.set(AVA_ROOMS, available_rooms)
             self.current_room = room_name
 
-        # add user to the channel group
         await self.group_switch(AVA_ROOMS, get_room_group(room_name))
         await self.send_success(room_name)
-
-        # Notify others about the new lobby
-        # await self.group_send_new_room(available_rooms[room_name])
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
         # print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
 
@@ -171,8 +162,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         async with self.update_lock:
             available_rooms = cache.get(AVA_ROOMS, {})
-            #current_room_name = cache.get(f"current_room_{self.user.name}")
-
             if self.current_room is not None: # SHOULD NEVER HAPPEN
                 await self.send_error(Errors.ALREADY_IN_ROOM)
                 return
@@ -183,7 +172,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 return
             
             room = await self.add_player_to_room(room_name, available_rooms)
-        # print(f"ROOM_NAME: {json.dumps(room.to_dict())} - {self.user.name} joined")
 
        
     async def leave_room(self):
@@ -192,7 +180,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             available_rooms = cache.get(AVA_ROOMS, {})
             full_rooms = cache.get(FULL_ROOMS, {})
 
-        if self.current_room is None: # SHOULD NEVER with our Frontend
+        if self.current_room is None: # SHOULD NEVER HAPPEN with our Frontend
             await self.send_error(Errors.NO_CURRENT_ROOM)
             return
         
@@ -208,7 +196,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
         # CHANNELS: Remove user from the tournament room group
         await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
-        await self.group_send_Room(T_PLAYER_LEFT_ROOM, room) # if the group is empty no one receives the message, according to Ai the group is effectivly deleted ==> research !!
+        await self.group_send_Room(T_PLAYER_LEFT_ROOM, room)
         self.current_room = None
 
         async with self.update_lock:
@@ -355,13 +343,12 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         shared queue for tournament task
         """
         
-        print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}")
+        print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}") # TODO: delete
         await self.queue.put(event)
         self.in_game = False
-        
-        # await self.send(text_data=json.dumps(event))
 
-    ## Send to own websocket ##
+
+    ## Messages to client but not triggered like events ##
     async def send_success(self, room_name: str):
         await self.send(text_data=json.dumps({
             "type": T_SUCCESS,
@@ -401,8 +388,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             await self.group_send_AvailableTournaments(T_DELETE_ROOM, room)
             self.start_tournament(room)
         else:
-            # Notify ALL in the AVA_ROOMS group, including users who already are in a lobby-room
-            # SIMPLE, adding and removing the users of the AVA_ROOMS group frequently has also drawbacks
             update_or_add_room_to_cache(room.to_dict(), AVA_ROOMS, available_rooms)
             await self.group_send_AvailableTournaments(T_ROOM_SIZE_UPDATE, room)
             

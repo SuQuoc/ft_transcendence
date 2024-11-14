@@ -1,6 +1,10 @@
 import random # for old version of pong # maybe needed for ball in the new version (but i don't think so)!!
 import json
 import time # temporary !!
+from asgiref.sync import sync_to_async
+from pong.models import MatchRecord
+from .pong_game_consumer import Type
+
 
 class Vector:
     def __init__(self, x, y):
@@ -302,16 +306,6 @@ class Pong:
         return False
     
 
-    # Sending messages to the Game Consumer
-    async def send_count_down(self, count):
-        await Pong.CHANNEL_LAYER.group_send(
-            self.channel_group,
-            {
-                'type': 'count_down',
-                'count': count
-            }
-        )
-
     def set_result(self):
         if self.player_l.score == self.points_to_win:
             self.result['winner'] = self.player_l.id
@@ -324,35 +318,47 @@ class Pong:
             self.result['loser'] = self.player_l.id
             self.result['loser_score'] = self.player_l.score
 
-    async def save_game_to_db(self):
-        from asgiref.sync import sync_to_async
-        from pong.models import MatchRecord
 
+    async def save_game_to_db(self):
         await sync_to_async(MatchRecord.objects.create)(**self.result)
+
+
+    # Sending messages to the Game Consumer
+    async def send_count_down(self, count):
+        await Pong.CHANNEL_LAYER.group_send(
+            self.channel_group,
+            {
+                'type': Type.COUNTDOWN.value,
+                'count': count
+            }
+        )
+
 
     async def send_initial_state(self, game_state):
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
-                'type': 'initial_state',
+                'type': Type.INITIAL_STATE.value,
                 'game_state': game_state
             }
         )
     
+
     async def send_state_update(self, game_state):
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
-                'type': 'state_update',
+                'type': Type.STATE_UPDATE.value,
                 'game_state': game_state
             }
         )
+
 
     async def send_game_end(self):
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
-                'type': 'game_end',
-                "winner": "winner",
-                "loser": "loser"
+                'type': Type.GAME_END.value,
+                "winner": "winner", # TODO:
+                "loser": "loser" # TODO:
             })
