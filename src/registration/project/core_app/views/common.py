@@ -8,6 +8,8 @@ from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .token import DeleteTokenObtainPairSerializer
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um, send_delete_request_to_game
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from django.conf import settings
+import jwt
 import logging
 
 @api_view(['POST'])
@@ -142,6 +144,9 @@ def refresh_token(request):
         refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        decoded_token = jwt.decode(refresh_token, settings.PUBLIC_KEY,algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+        if decoded_token.get('jti') != request.user.refresh_token_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
         return generate_response_with_valid_JWT(request.user, status.HTTP_200_OK, token_s)
     except Exception as e:

@@ -20,8 +20,8 @@ Content-Type: application/json
 
 ###
 
-@CODE0 = {{signup.response.body.backup_code.0}}
-@CODE1 = {{signup.response.body.backup_code.1}}
+@CODE0 = {{signup.response.body.backup_codes.0}}
+@CODE1 = {{signup.response.body.backup_codes.1}}
 
 ###
 

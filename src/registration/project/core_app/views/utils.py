@@ -45,7 +45,7 @@ def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=No
         httponly=True,
         secure=True,
         samesite = 'Strict')
-    user.actualise_last_login()
+    user.actualise_last_login(refresh_token)
     return response
 #generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
 
