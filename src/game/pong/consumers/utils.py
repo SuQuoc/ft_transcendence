@@ -26,9 +26,17 @@ T_ROOM_INFO = "room_info"
 
 T_START_TOURNAMENT = "start_tournament"
 T_TOURNAMENT_BRACKET = "tournament_bracket"
+T_TOURNAMENT_END = "tournament_end"
+T_FREE_WIN = "free_win"
 
 T_SUCCESS = "success"
 T_ERROR = "error"
+
+T_MATCH_RESULT = "match_result"
+T_DC_IN_GAME = "dc_in_game"
+T_DC_OUT_GAME = "dc_out_game"
+
+
 
 # Cache keys
 FULL_ROOMS = "full_rooms"

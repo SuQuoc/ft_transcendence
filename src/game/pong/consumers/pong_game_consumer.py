@@ -9,19 +9,22 @@ from django.core.cache import cache
 from .Room import Player
 from typing import Dict
 
+
+
+# INTERFACE TO FE
+class Type(Enum):
+    
+    MOVE = 'move'
+    CONNECT_TO_MATCH = 'connect_to_match'
+    GAME_END = 'game_end'
+    ERROR = 'error'
+    # INITIAL_STATE = 'initial_state'
+    # STATE_UPDATE = 'state_update'
+    # CLEANUP = 'cleanup'
+
 class GameMode(Enum):
     NORMAL = 'normal'
     TOURNAMENT = 'tournament'
-
-
-class Type(Enum):
-    MOVE = 'move'
-    INITIAL_STATE = 'initial_state'
-    STATE_UPDATE = 'state_update'
-    GAME_END = 'game_end'
-    ERROR = 'error'
-    TEST = 'test'
-    CLEANUP = 'cleanup'
 
 
 class PongGameConsumer(AsyncWebsocketConsumer):
@@ -72,12 +75,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
 
-        if type == 'move':
+        if type == Type.MOVE.value:
             if self.game is None:
                 return
             # changing the direction of the player that sent the message
             self.game.change_player_direction(self.user_id, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
-        elif type == 'connect_to_match':
+        elif type == Type.CONNECT_TO_MATCH.value:
             await self.connect_to_match(text_data_json)
         else:
             return
@@ -154,7 +157,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     async def send_error(self):
         await self.send(json.dumps(
             {
-                'type': 'error',
+                'type': Type.ERROR.value,
                 'message': 'Invalid match_id'
             }
         ))
@@ -182,14 +185,14 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             or (game.player_r.id == self.user_id and game.player_r.score == game.points_to_win):
             await self.send(text_data=json.dumps(
                 {
-                    'type': 'game_end',
+                    'type': Type.GAME_END.value,
                     'status': "lost"
                 }
             ))
         else:
             await self.send(text_data=json.dumps(
                 {
-                    'type': 'game_end',
+                    'type': Type.GAME_END.value,
                     'status': "won"
                 }
             ))
