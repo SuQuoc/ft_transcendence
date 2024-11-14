@@ -71,7 +71,7 @@ services:
       - "8000/tcp"
     environment:
       <<: *redis_env
-      PYTHONUNBUFFERED: 1
+      PYTHONUNBUFFERED: 1 # TODO: check if this is needed
       DJ_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(} # NOTE: old value which was in settings
       DB_HOST: "${GAME_DB_HOST:-db_game}"
       DB_PORT: 5432
