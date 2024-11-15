@@ -2,7 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache  # Import Django"s cache
-from .Room import TournamentRoom, Player
+from .Room import TournamentRoom, Player, AlreadyInRoom
 from .utils import *
 from pong.forms import CreateTournamentForm
 import httpx
@@ -378,6 +378,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             room.add_player(self.user)
             self.current_room = room.name
             self.group_switch(AVA_ROOMS, get_room_group(room.name))
+        except AlreadyInRoom as e:
+            await self.send_error(Errors.ALREADY_IN_ROOM) # NOTE: u cant be in 2 rooms with 1 browser, but with 2 browsers possible
+            return
         except Exception as e:
             print(f"Exception: {e}") # IF CACHE FAILS
 
