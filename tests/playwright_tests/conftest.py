@@ -180,7 +180,7 @@ def get_otp():
     last_saved_file = max(files, key=os.path.getmtime)
     with open(last_saved_file, 'r') as f:
         content = f.read().strip()
-    match = re.search(r'The code is:\s*(\d{16})', content)
+    match = re.search(r'The code is:\s*([A-Za-z0-9]{16})', content)
     if match:
         otp = match.group(1)  # Extract the matched OTP
         return otp
