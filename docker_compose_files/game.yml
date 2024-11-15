@@ -24,9 +24,6 @@ services:
     restart: on-failure
     networks:
       - network_game
-    profiles:
-      - all
-      - game
 
   redis:
     container_name: pong_game_redis
@@ -54,9 +51,6 @@ services:
     # TODO: do we need a volume for redis ?!! only if we want to persist the data on server shutdown
     networks:
       - network_redis_game
-    profiles:
-      - all
-      - game
 
   # TODO change the environment variables with env variables and default values
   # also the django non admin user should be used - see the other .yml files
@@ -93,8 +87,5 @@ services:
       - network_game
       - network_redis_game
       - network_django
-    profiles:
-      - all
-      - game
     secrets:
       - public_key.pem

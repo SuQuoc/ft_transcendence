@@ -20,9 +20,6 @@ services:
       timeout: 5s
       retries: 4
     restart: on-failure
-    profiles:
-      - registration
-      - all
     networks:
       - network_registration
 
@@ -65,9 +62,6 @@ services:
       redis_registration:
         condition: service_started
     restart: on-failure
-    profiles:
-      - registration
-      - all
     networks:
       - network_registration
       - network_django
@@ -79,6 +73,6 @@ services:
     container_name: pong_reg_redis
     image: "redis:alpine"
     expose:
-      - "6379"
+      - 6379
     networks:
       - network_registration

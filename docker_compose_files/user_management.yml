@@ -20,9 +20,6 @@ services:
       timeout: 5s
       retries: 4
     restart: on-failure
-    profiles:
-      - user_management
-      - all
     networks:
       - network_user_management
 
@@ -56,9 +53,6 @@ services:
       db_usermanagement:
         condition: service_healthy
     restart: on-failure
-    profiles:
-      - user_management
-      - all
     networks:
       - network_user_management
       - network_django
