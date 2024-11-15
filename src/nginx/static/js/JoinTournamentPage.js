@@ -279,7 +279,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 												tournament.max_player_num);
 			}
 		}
-
+		else if (data.type === "tournament_bracket") {
+			window.app.socket_event_queue.add(event);
+		}
 		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
 			// ignoring these types for now !!!
 		}

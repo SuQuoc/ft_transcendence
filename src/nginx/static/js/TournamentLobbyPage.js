@@ -10,6 +10,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
+
+		// adding this here to avoid having a gap where the match bracket message can't be recieved
+		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 	}
 	
 	connectedCallback() {
@@ -26,10 +29,12 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		// adding event listeners
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
-		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
 
 		// sending a request to the server to get the room info
 		window.app.socket.send(JSON.stringify({type: "get_room_info", room_name: this.tournament_name}));
+
+		// work through events that are in the socket_event_queue
+		this.workThoughEventQueue();
 	}
 
 	disconnectedCallback() {
@@ -38,11 +43,16 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// removing event listeners
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
 		window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
-		window.app.router.closePongWebSocket(); // QTRAN
 	}
 
 
 	/// ----- Methods ----- ///
+
+	workThoughEventQueue() {
+		let event;
+		while ((event = window.app.socket_event_queue.get()) !== null)
+			this.handleReceivedMessage(event);
+	}
 
 	sendMatchId(match_id) {
 		if (!window.app.pong_socket) {

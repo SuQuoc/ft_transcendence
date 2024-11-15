@@ -33,7 +33,8 @@ export class PongCanvasElement extends canvasBaseClass {
 		super.disconnectedCallback();
 
 		// remove event listeners
-		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
+		if (window.app.pong_socket)
+		window.app.pong_socket.removeEventListener("message", this.handleReceivedMessage_var);
 
 		window.removeEventListener('keydown', this.handlePlayerMoveKey_var);
 		window.removeEventListener('keyup', this.handlePlayerMoveEnd_var);
