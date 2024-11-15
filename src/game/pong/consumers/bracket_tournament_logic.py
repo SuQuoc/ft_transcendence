@@ -22,6 +22,7 @@ async def tournament_loop(room: TournamentRoom, queue):
     """
     channel_group = get_room_group(room.name)
 
+    winners = []
     players = room.players
     while len(players) > 1:
         pairs, odd_one = make_random_pairs(players)

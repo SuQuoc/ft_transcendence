@@ -169,7 +169,6 @@ export class PongCanvasElement extends canvasBaseClass {
 	async handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
 
-		console.log("Received message: ", data);
 		if (data.type === "state_update") {
 			await this.updateGame(data.game_state);
 		}

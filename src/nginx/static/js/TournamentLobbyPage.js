@@ -44,6 +44,23 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	/// ----- Methods ----- ///
 
+	sendMatchId(match_id) {
+		if (!window.app.pong_socket) {
+			console.error("pong socket is not open");
+			window.app.router.go("/"); // goes to the home page !!??
+		}
+
+		if (window.app.pong_socket.readyState === WebSocket.OPEN) {
+			window.app.pong_socket.send(JSON.stringify({"type": "connect_to_match", "match_id": match_id}));
+			console.log('pong websocket is open');
+		} else {
+			window.app.pong_socket.addEventListener('open', () => {
+				window.app.pong_socket.send(JSON.stringify({"type": "connect_to_match", "match_id": match_id}));
+			}, { once: true });
+			console.log('pong websocket adding event listener on open')
+		}
+	}
+
 	initLobby(data) {
 		this.root.getElementById("lobbyTournamentName").innerText = this.tournament_name;
 		this.root.getElementById("lobbyPointsToWin").innerText = data.points_to_win;
@@ -105,21 +122,25 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 		else if (data.type === "tournament_bracket") {
 			// TODO: write clean
-			let id = null;
+			let match_id = null;
 			for (let match of data.matches) {
+				console.log("match: ", match);
+				console.log("match.player1: ", match.player1);
+				console.log("match.player2: ", match.player2);
 				if (match.player1 === window.app.userData.username) {
-					id = match.match_id;
+					match_id = match.match_id;
 					console.log("username: ", window.app.userData.username);
 					break;
 				}
 				else if (match.player2 === window.app.userData.username) {
-					id = match.match_id;
+					match_id = match.match_id;
 					console.log("username: ", window.app.userData.username);
 					break;
 				}
 			}
-			console.log("match_id: ", id);
-			// protection for pong_socket !!??
+			console.log("match_id: ", match_id);
+			this.sendMatchId(match_id);
+			
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);

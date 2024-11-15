@@ -130,7 +130,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             max_player_num = form.cleaned_data.get("max_player_num")
         else:
             print(f"FORM errors: {form.errors}") # TODO:
-            self.send_error(Errors.ROOM_NAME_INVALID)
+            await self.send_error(Errors.ROOM_NAME_INVALID)
             return 
 
         async with self.update_lock: # to prevent race conditions on cache
@@ -361,6 +361,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_ERROR,
             "error": error.value,
         }))
+        print({
+            "type": T_ERROR,
+            "error": error.value,
+        })
 
 
     # Helper----------------------------------------------------------------

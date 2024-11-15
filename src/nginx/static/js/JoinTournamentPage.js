@@ -96,7 +96,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			console.error("Error: tournamentNameError: error not handled yet: ", error); // TODO: handle these errors !!!
 		}
 		else
-			console.error("Error: tournamentNameError: unknown error: ", error);
+			console.error("Error: tournamentError: unknown error: ", error);
 	};
 
 	/** hides or shows a text that says "no tournaments to join" */
