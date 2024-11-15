@@ -41,7 +41,7 @@ export class SignupPage extends ComponentBaseClass {
 							<input name="email"
 								id="signupEmail"
 								type="email"
-								class="form-control"
+								class="form-control rounded-end"
 								placeholder="name@example.com"
 								aria-required="true"
 								aria-describedby="errorMessageEmail"
@@ -57,7 +57,7 @@ export class SignupPage extends ComponentBaseClass {
 							<input name="password"
 								id="signupPassword1"
 								type="password"
-								class="form-control"
+								class="form-control rounded-end"
 								aria-required="true"
 								aria-describedby="errorMessagePassword"
 								minlength="8"
@@ -72,7 +72,7 @@ export class SignupPage extends ComponentBaseClass {
 							<input name="password2"
 								id="signupPassword2"
 								type="password"
-								class="form-control"
+								class="form-control rounded-end"
 								aria-required="true"
 								aria-describedby="errorMessagePassword"
 								minlength="8"
@@ -217,8 +217,11 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById('signupPassword2').setAttribute('disabled', '');
 				this.startOtpRequestCooldown();
 				this.shadowRoot.getElementById('changeUsernameButton').classList.remove('d-none');
+				this.shadowRoot.getElementById("signupEmail").classList.remove('rounded-end');
 				this.shadowRoot.getElementById('changePassword1Button').classList.remove('d-none');
+				this.shadowRoot.getElementById("signupPassword1").classList.remove('rounded-end');
 				this.shadowRoot.getElementById('changePassword2Button').classList.remove('d-none');
+				this.shadowRoot.getElementById("signupPassword2").classList.remove('rounded-end');
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
