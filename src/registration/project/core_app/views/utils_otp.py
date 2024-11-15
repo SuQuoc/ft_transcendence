@@ -35,13 +35,12 @@ def create_user_send_otp(data, action):
 def send_otp_email(username, action, password):
     try:
         subject = 'Confirm your action for your Transcendence account'
-        link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'
+        link = os.environ.get('SERVER_URL')
 
         message = f"""
         Hello,
 
-        Please go to the following link to confirm your action: {action}
-        {link}
+        You  have tried to do following action: {action}
 
         The code is: {password} and is valid for 5 minutes.
 
