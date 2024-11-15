@@ -107,6 +107,7 @@ const Router = {
 			// event handler for navigation links
 		document.querySelectorAll("a.nav-link").forEach(a => {
 			a.addEventListener("click", Router.handleNavLinks);
+			a.addEventListener("keydown", Router.handleNavLinkKeydown);
 		});
 			// event handler for url changes (back/forward)
 		window.addEventListener("popstate", Router.handlePopstate);
@@ -354,6 +355,14 @@ const Router = {
 				
 		const url = event.target.getAttribute("href");
 		Router.go(url);
+	},
+
+	handleNavLinkKeydown(event) {
+		if (event.key === "Enter" || event.key === "Space") {
+			event.preventDefault();
+			const url = event.target.getAttribute("href");
+			Router.go(url);
+		}
 	},
 
 	handlePopstate(event) {

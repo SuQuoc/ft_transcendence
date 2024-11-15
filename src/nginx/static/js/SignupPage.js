@@ -343,11 +343,12 @@ export class SignupPage extends ComponentBaseClass {
 			body: JSON.stringify({ username: email, new_password: password1 })
 		  });
 		  if (!response.ok) {
-			throw new Error('Failed to save password');
+			  const responseData = await response.json();
+			  const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			  throw new Error(errorMessage);
 		  }
 		} catch (error) {
-		  console.error('Error saving password:', error);
-		  this.shadowRoot.getElementById('signupError').textContent = 'Could not save password';
+		  this.shadowRoot.getElementById('signupError').textContent = error;
 		  this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}
@@ -363,12 +364,13 @@ export class SignupPage extends ComponentBaseClass {
 			body: JSON.stringify({ current_username: this.currentUsername, new_username: email })
 		  });
 		  if (!response.ok) {
-			throw new Error('Failed to save username');
+			  const responseData = await response.json();
+			  const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			  throw new Error(errorMessage);
 		  }
 		  this.currentUsername = email;
 		} catch (error) {
-		  console.error('Error saving username:', error);
-		  this.shadowRoot.getElementById('signupError').textContent = 'Could not save username';
+		  this.shadowRoot.getElementById('signupError').textContent = error;
 		  this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}

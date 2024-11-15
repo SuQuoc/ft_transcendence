@@ -9,24 +9,28 @@ export class ForgotPassword extends ComponentBaseClass {
     connectedCallback() {
         super.connectedCallback();
 
+        const formElements = this.shadowRoot.querySelectorAll('#forgotPasswordForm input, #forgotPasswordForm button[type="submit"]');
+        formElements.forEach(element => {
+            element.addEventListener('keydown', this.handleKeyDown.bind(this));
+        });
         this.shadowRoot.getElementById('resetSubmitButton').addEventListener('click', this.resetPassword.bind(this));
         this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
         this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOtpInput.bind(this));
         this.shadowRoot.getElementById('newPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
         this.shadowRoot.getElementById('newPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
-        this.shadowRoot.getElementById('forgotPasswordForm').addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
     handleKeyDown(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
-            const passwordSectionVisible = this.shadowRoot.getElementById('passwordSection').style.display !== 'none';
+            const otpField = this.shadowRoot.getElementById('otpCode');
+            const password1 = this.shadowRoot.getElementById('newPassword1');
+            const password2 = this.shadowRoot.getElementById('newPassword2');
 
-            if (!otpSectionVisible) {
-                this.requestOTP(event);
-            } else if (otpSectionVisible && passwordSectionVisible) {
+            if (otpField.value && password1.value && password2.value) {
                 this.resetPassword(event);
+            } else {
+                this.requestOTP(event);
             }
         }
     }
@@ -87,13 +91,14 @@ export class ForgotPassword extends ComponentBaseClass {
                 body: JSON.stringify({ "username": email }),
             });
             if (!response.ok) {
-                throw new Error('Could not send OTP');
+                const responseData = await response.json();
+				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+				throw new Error(errorMessage);
             }
             this.startTimer(60, resetButton);
             this.handleEmailInput();
         } catch (error) {
-            console.error('Error during OTP request:', error);
-            resetError.textContent = 'Could not send OTP';
+            resetError.textContent = error;
             this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
             resetButton.disabled = false;
         } finally {
@@ -132,12 +137,13 @@ export class ForgotPassword extends ComponentBaseClass {
                 body: JSON.stringify({ "username": email, otp, "new_password": password1 }),
             });
             if (!response.ok) {
-                throw new Error('Could not change password');
+                const responseData = await response.json();
+				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+				throw new Error(errorMessage);
             }
             app.router.go('/login', false);
         } catch (error) {
-            console.error('Error during password reset:', error);
-            resetError.textContent = 'Could not reset password';
+            resetError.textContent = error;
             this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
             resetButton.disabled = false;
         } finally {

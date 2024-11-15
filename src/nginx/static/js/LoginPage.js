@@ -12,9 +12,8 @@ export class LoginPage extends ComponentBaseClass {
 		super.connectedCallback();
 		this.shadowRoot.getElementById('loginSubmitButton').addEventListener('click', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
-		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('requestOtpButton').addEventListener('input', this.requestNewOtp.bind(this));
+		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
 	}
 
 	//TODO: check why the event handler for new otp button isn't working
@@ -54,16 +53,6 @@ export class LoginPage extends ComponentBaseClass {
             </div>
         `;
 		return template;
-	}
-
-	async handleEmailEnter(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-
-			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
-			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-			await this.login(event);
-		}
 	}
 
 	validateEmail() {
@@ -119,14 +108,15 @@ export class LoginPage extends ComponentBaseClass {
 				});
 
 				if (!loginResponse.ok) {
-					throw new Error('Requesting OTP failed');
+					const responseData = await loginResponse.json();
+					const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+					throw new Error(errorMessage);
 				}
 				this.shadowRoot.getElementById('otpSection').style.display = 'block';
 				this.startOtpRequestCooldown();
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
-				console.error('Error during OTP request:', error);
-				loginError.textContent = 'Could not send OTP, check your credentials';
+				loginError.textContent = error;
 				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 				loginButton.style.display = 'block';
 			} finally {
@@ -144,7 +134,9 @@ export class LoginPage extends ComponentBaseClass {
 				});
 
 				if (!loginResponse.ok) {
-					throw new Error('Login failed');
+					const responseData = await loginResponse.json();
+					const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+					throw new Error(errorMessage);
 				}
 				window.app.userData = window.app.userData || {};
 				window.app.userData.email = email;
@@ -170,8 +162,7 @@ export class LoginPage extends ComponentBaseClass {
 					await app.router.go("/", false);
 				}
 			} catch (error) {
-				console.error('Error during login:', error);
-				loginError.textContent = 'Could not log in';
+				loginError.textContent = error;
 				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 				this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
 				loginButton.style.display = 'block';
@@ -195,7 +186,9 @@ export class LoginPage extends ComponentBaseClass {
 		  });
 
 		  if (!response.ok) {
-			throw new Error('Requesting OTP failed');
+			  const responseData = await response.json();
+			  const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			  throw new Error(errorMessage);
 		  }
 		  this.startOtpRequestCooldown();
 		} catch (error) {
