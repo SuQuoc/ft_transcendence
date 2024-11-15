@@ -122,6 +122,7 @@ export class LoginPage extends ComponentBaseClass {
 			} finally {
 				loginButton.style.display = 'block';
 				loginSpinner.style.display = 'none';
+				this.validateForm();
 			}
 		} else {
 			try {
