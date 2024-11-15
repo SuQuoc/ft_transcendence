@@ -381,7 +381,7 @@ export class UserProfile extends ComponentBaseClass {
             this.shadowRoot.getElementById('confirmPassword').value = '';
             console.log('Changed password');
         } catch (error) {
-            console.error('Error changing password: ', error);
+            changePasswordWarning.textContent = error;
             changePasswordWarning.style.display = 'block';
         }
 

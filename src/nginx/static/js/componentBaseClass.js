@@ -143,7 +143,9 @@ export class ComponentBaseClass extends HTMLElement {
 
 		// Handle response
 		if (!response.ok) {
-			throw new Error(`API call failed: ${response.statusText}`);
+			const responseData = await response.json();
+			const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			throw new Error(errorMessage);
 		}
 
 		const contentType = response.headers.get('content-type');
