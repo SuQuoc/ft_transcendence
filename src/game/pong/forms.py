@@ -4,7 +4,7 @@ from django import forms
 
 class CreateTournamentForm(forms.Form):
     room_name = forms.CharField(
-        min_length=3, 
+        min_length=1, 
         max_length=30, 
         validators=[
             RegexValidator(
