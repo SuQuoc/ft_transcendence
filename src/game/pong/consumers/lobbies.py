@@ -343,7 +343,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         shared queue for tournament task
         """
         
-        print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}") # TODO: delete
+        # print(f"match_result EVENT IN LOBBYCONSUMER: {json.dumps(event)}") # TODO: delete
         await self.queue.put(event)
         self.in_game = False
 

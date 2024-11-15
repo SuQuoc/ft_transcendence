@@ -1,5 +1,3 @@
-
-
 from django.core.cache import cache
 
 from .Room import TournamentRoom, Player
@@ -31,9 +29,8 @@ async def tournament_loop(room: TournamentRoom, queue):
             await send_free_win(channel_group, odd_one.id)
                     
         # await asyncio.sleep(20)
-        
         winners = []
-        losers = []
+        losers = [] #!!
         matches = [
             {
                 "match_id": create_match_config([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
@@ -48,11 +45,10 @@ async def tournament_loop(room: TournamentRoom, queue):
         match_results = []
         dc_in_game = 0
         dc_out_game = []
-        while len(match_results) + dc_in_game < len(pairs):
+        while len(match_results) + dc_in_game < len(pairs) * 2:
             message = await queue.get()
             if message.get("type") == T_MATCH_RESULT:
                 match_results.append(message)
-                print(f"match_result IN TOURNAMENT TASK: {message}")
             elif message.get("type") == T_DC_IN_GAME:
                 dc_in_game += 1
             elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
@@ -61,17 +57,15 @@ async def tournament_loop(room: TournamentRoom, queue):
             queue.task_done() # NOTE: necessary in our case?
 
         match_results = remove_duplicates(match_results)
-        print(f"match_results: {json.dumps(match_results, indent=4)}")
         winners = [result.get("winner") for result in match_results]    
         losers = [result.get("loser") for result in match_results]
         players = [player for player in players if player.id in winners]
-        
         if dc_out_game:
             players = [player for player in players if player.id not in dc_out_game]
-        
-    print("END OF TOURNAMENT ======\n")
-    winner_name = winners[0].name
+
+    winner_name = players[0].name
     await send_tournament_end(channel_group, winner_name)
+    print("END OF TOURNAMENT ======\n")
 
 
 def make_random_pairs(list) -> List[tuple]:
@@ -107,14 +101,11 @@ def remove_duplicates(match_results):
     for result in match_results:
         if not isinstance(result, dict):
             result = json.loads(result)
-
-        # Convert the dictionary to a frozenset of tuples to make it hashable
-        result_tuple = frozenset(result.items())
         
-        if result_tuple not in seen:
-            seen.add(result_tuple)
+        winner = result["winner"]
+        if winner not in seen:
+            seen.add(winner)
             unique_results.append(result)
-    
     return unique_results
 
 

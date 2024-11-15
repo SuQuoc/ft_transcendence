@@ -170,20 +170,19 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                     'status': "won"
                 }
             ))
-        self.cleanup(event)
+        await self.cleanup(event)
     
 
     async def cleanup(self, data):
         # NOTE: if caller is task callback, 
         # no duplicate msg will be sent to tournament consumer,
         # but sending msg async not  
-
         PongGameConsumer.all_games.pop(self.match_id, None) 
         # removes key if it exists, or nothing if not, 
         # since N consumers try to do this
         async with self.update_lock:
             cache.delete(self.match_id)
-        if self.game_mode == GameMode.TOURNAMENT:
+        if self.game_mode == GameMode.TOURNAMENT.value:
             await self.forward_match_result(data)
         else:
             self.close()
@@ -191,7 +190,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     ### EVENTS - Communication with other consumer
     async def forward_match_result(self, data):
-        print("forward_match_result")
         client_group = f"client_{self.user_id}"
         await self.channel_layer.group_send(
             client_group,
