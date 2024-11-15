@@ -45,8 +45,8 @@ services:
       SECRET_KEY: ${SECRET_KEY_REG:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
       DEBUG: ${DEBUG:-False}
       SILK: "${SILK:-False}"
-      MOCK_EMAIL: "${MOCK_EMAIL:-True}" #[aguilmea] to be changed once the variable is set in github for the workflows running automatically
-      MOCK_OTP: "${MOCK_OTP:-True}" #[aguilmea] to be changed once the front end check is changed
+      MOCK_EMAIL: "${MOCK_EMAIL:-False}"
+      MOCK_OTP: "${MOCK_OTP:-False}"
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
       DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
