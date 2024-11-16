@@ -3,8 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.password_validation import validate_password, password_changed
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -34,18 +33,14 @@ class RegistrationUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.username = self.username.lower()
-        if self.password:
-            self.validate_password(self.password)
+        if self.password: 
+            validate_password(self.password, user=self)
+            password_changed(self.password, user=self, password_validators=None) # [aguilmea] password validators?????
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
 
-    def validate_password(self, password):
-        try:
-            validate_password(password, user=self)
-        except ValidationError as e:
-            raise ValueError(f"Password validation error: {', '.join(e.messages)}")
 
     def set_verified(self):
         self.email_verified = True
@@ -54,6 +49,12 @@ class RegistrationUser(AbstractUser):
 
     def is_verified(self):
         return self.email_verified
+    
+    def set_password(self, password):
+        validate_password(password, user=self)
+        self.password = make_password(password)
+        self.save(update_fields=['password'])
+        return self
 
     def password_is_set(self):
         return self.password_set
