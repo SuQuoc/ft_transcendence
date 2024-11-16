@@ -9,7 +9,7 @@ services:
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
     expose:
-      - "${DB_PORT_GAME:-5432}"
+      - 5432
     volumes:
       - volume_game:/var/lib/postgresql/data
       - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
@@ -24,29 +24,22 @@ services:
     restart: on-failure
     networks:
       - network_game
-    profiles:
-      - all
-      - game
 
   redis:
     container_name: pong_game_redis
-    image: redis:alpine3.20
-    # TODO: add a fix version for redis (not latest)
-    environment: &redis_env
+    build: ../src/common_files/redis
+    environment:
       REDIS_ADMIN_USER: ${GAME_REDIS_ADMIN_USER:-redisadmin}
       REDIS_ADMIN_PASSWORD: ${GAME_REDIS_ADMIN_PASSWORD:-redisadminpass}
       REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
 
-
       # TODO: make an access user that can be used by the django container and the healthcheck:
       # to avoid attacks with malicious input on the redis server
     #command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"] # TODO: do not use sh -c but the command directly like in the offical description of the image
-    volumes:
-      - ./generate-redis-conf.sh:/usr/local/bin/generate-redis-conf.sh
     expose:
       - 6379
-    entrypoint: ["sh", "/usr/local/bin/generate-redis-conf.sh"]
+    #entrypoint: ["sh", "/usr/local/bin/generate-redis-conf.sh"]
     #command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     healthcheck:
       test: [ "CMD", "redis-cli", "ping"]
@@ -56,9 +49,6 @@ services:
     # TODO: do we need a volume for redis ?!! only if we want to persist the data on server shutdown
     networks:
       - network_redis_game
-    profiles:
-      - all
-      - game
 
   # TODO change the environment variables with env variables and default values
   # also the django non admin user should be used - see the other .yml files
@@ -70,20 +60,23 @@ services:
     expose:
       - "8000/tcp"
     environment:
-      <<: *redis_env
-      PYTHONUNBUFFERED: 1
+      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
+      
       DJ_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(} # NOTE: old value which was in settings
       DB_HOST: "${GAME_DB_HOST:-db_game}"
-      DB_PORT: 5432
+      
+      REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
+      
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
 
+      # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
+      PYTHONUNBUFFERED: 1
       DJ_SUDO_USERNAME: "${GAME_DJ_SUDO_USERNAME:-admin}"
       DJ_SUDO_EMAIL: "${GAME_DJ_SUDO_EMAIL:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${GAME_DJ_SUDO_PASSWORD:-transcendence}"
-
-      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
     depends_on:
       db_game:
         condition: service_healthy
@@ -94,8 +87,5 @@ services:
       - network_game
       - network_redis_game
       - network_django
-    profiles:
-      - all
-      - game
     secrets:
       - public_key.pem
