@@ -7,7 +7,8 @@ python project/manage.py makemigrations
 python project/manage.py migrate
 python project/manage.py collectstatic --noinput
 ###
-# Creating django admin user
+
+# Creating django admin user # TODO: maybe only if DEBUG is True
 cat << EOF | python project/manage.py shell
 from django.contrib.auth import get_user_model
 User = get_user_model()
