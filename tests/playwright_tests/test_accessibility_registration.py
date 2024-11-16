@@ -19,18 +19,16 @@ class TestAccessibility:
             try:
                 page.goto(BASE_URL) 
                 page.locator("#loginGoToSignup").press("Enter")
-            # [aguilmea] we cannot press enter and have to clikc on the link
-                page.locator("#loginGoToSignup").click()
                 page.locator("#loginWith42").press("Enter")
                 expect(page).to_have_url(re.compile("https://auth.42.fr/*"))
 
                 page.goto(BASE_URL)
-                page.locator("#loginGoToSignup").click()
+                page.locator("#loginGoToSignup").press("Enter")
                 page.locator("#signupGoToLogin").press("Enter")
                 expect(page.locator("#loginForm")).to_be_visible()
 
                 page.goto(BASE_URL)
-                page.locator("#loginGoToSignup").click()
+                page.locator("#loginGoToSignup").press("Enter")
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW)
