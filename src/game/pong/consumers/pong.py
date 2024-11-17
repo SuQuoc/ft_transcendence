@@ -1,7 +1,7 @@
-import random # for old version of pong # maybe needed for ball in the new version (but i don't think so)!!
 import json
 import time # temporary !!
 import math
+from random import choice
 from asgiref.sync import sync_to_async
 from pong.models import MatchRecord
 from .utils import Type
@@ -12,15 +12,18 @@ class Vector:
         self.x = x
         self.y = y
 
+
     @staticmethod
     def calc_x(A: 'Vector', B: 'Vector', y) -> float:
         m = (B.y - A.y) / (B.x - A.x)
         return ((y - A.y) / m) + A.x
     
+
     @staticmethod
     def calc_y(A: 'Vector', B: 'Vector', x) -> float:
         m = (B.x - A.x) / (B.y - A.y)
         return ((x - A.x) / m) + A.y
+
 
 
 class Player:
@@ -32,6 +35,7 @@ class Player:
         self.speed = speed
         self.score = 0
         self.move_to = -1
+
 
     def move(self, max_height):
         if self.move_to == -1 or self.move_to <= self.pos.y + self.speed / 2 and self.move_to >= self.pos.y - self.speed / 2:
@@ -46,45 +50,59 @@ class Player:
                 self.pos.y = max_height - self.height
 
 
+
 class Ball:
-    def __init__(self, pos_x, pos_y, vel_y, vel_x, size):
+    def __init__(self, pos_x, pos_y, size, speed):
         self.base_pos = Vector(pos_x, pos_y)    # first position the ball is in, currently used to reset the ball
         self.pos = Vector(pos_x, pos_y)     # position of the ball relative to the canvas
-        self.vel = Vector(vel_x, vel_y)     # velocity (direction the ball moves | (0, 0) is ball.pos)
-        self.size = size                    # width and height of the ball
-        self.collision = 0      # used to keep track of how often the ball can move before it hits something
-        self.speed = 11         # speed the ball moves at (is used to calculate vel)
+        self.vel = Vector(0, 0)         # velocity (direction the ball moves | (0, 0) is ball.pos)
+        self.size = size            # width and height of the ball
+        self.speed = speed          # speed the ball moves at (is used to calculate vel)
+        self.collision = 0          # used to keep track of how often the ball can move before it hits something
+        self.set_start_vel()
     
+
+    def set_start_vel(self):
+        """ Sets the ball.vel to a random direction at an 45 degree angle at half speed. """
+        half_speed = self.speed / 2
+        neg_half_speed = half_speed * -1
+
+        self.vel.x = choice([neg_half_speed, half_speed])
+        self.vel.y = choice([neg_half_speed, half_speed])
+
+
     def move(self):
         self.pos.x += self.vel.x
         self.pos.y += self.vel.y
 
-    def in_range(self, angle) -> bool:
+
+    def in_range(self, angle) -> float:
         """ Helper function for calc_vel.
-            \n Returns True if the angle is too sharp or too flat, else False. """
-        if self.vel.x > 0:
-            if self.vel.y > 0:
+            \n Returns the capped angle if the passed angle is too sharp or too flat, else the angle that was passed. """
+        if self.vel.x > 0:      # +x
+            if self.vel.y > 0:  # +y
                 if angle < 30:
-                    return True
+                    return 30
                 elif angle > 60:
-                    return True
-            else:
+                    return 60
+            else:               # -y
+                if angle > -30:
+                    return -30
+                elif angle < -60:
+                    return -60
+        else:                   # -x
+            if self.vel.y > 0:  # +y
                 if angle < 120:
-                    return True
+                    return 120
                 elif angle > 150:
-                    return True
-        else:
-            if self.vel.y < 0:
-                if angle < 210:
-                    return True
-                elif angle > 240:
-                    return True
-            else:
-                if angle < 300:
-                    return True
-                elif angle > 330:
-                    return True
-        return False
+                    return 150
+            else:               # -y
+                if angle > -120:
+                    return -120
+                elif angle < -150:
+                    return -150
+        return angle
+
 
     def calc_vel(self, player: Player):
         """ Calculates new vel based on where the ball hits a player. """
@@ -96,21 +114,20 @@ class Ball:
         if self.vel.y < 0:
             normalized_offset *= -1
 
-        # getting the current angle
-        angle = math.atan2(self.vel.y, self.vel.x)
-        # checking if the angle would be too sharp or too flat
-        if self.in_range(math.degrees(abs(angle + (normalized_offset / 8)))):   # the 8 is an arbitrarily chosen number. it feels good when playing
-            angle += (normalized_offset / 8)    # the 8 is an arbitrarily chosen number. it feels good when playing
+        angle = math.atan2(self.vel.y, self.vel.x) # getting the current angle in radians
+        degrees = self.in_range(math.degrees(angle + (normalized_offset / 5))) # changing the angle based on where the ball hits the player (the 5 is arbitrarily chosen, it feels good when playing)
+        angle = math.radians(degrees) # converting angle back to radians
 
         self.vel.x = self.speed * math.cos(angle)
         self.vel.y = self.speed * math.sin(angle)
         self.vel.x *= -1
 
+
     def reset(self):
-        """ Resets the ball to it's base position. (The position passed when initializing it.) """
+        """ Resets the ball to it's base position (The position passed when initializing it.) and sets vel with self.set_start_vel(). """
         self.pos.x = self.base_pos.x
         self.pos.y = self.base_pos.y
-        self.vel = Vector(8, 8) # randomize direction ?!!!
+        self.set_start_vel()
 
 
 class Pong:
@@ -123,13 +140,18 @@ class Pong:
         self.running = False
         self.result = {}
         self.points_to_win = points_to_win
+        self.wall_to_be_hit = "x"   # either "x" or "y", used to save which wall will be hit first (gets set in self.calc_next_collision())
 
+        # the values below are also set in frontend, so if you change them, change them everywhere or it will lead to problems
         self.canvas_width = 1000
         self.canvas_height = 600
         self.player_width = 10
         self.player_height = 60
 
-        self.ball = Ball(self.canvas_width/2 - 5, self.canvas_height/2 - 5, 8, 8, 10)
+        self.ball = Ball(pos_x = self.canvas_width/2 - 5,
+                            pos_y = self.canvas_height/2 - 5,
+                            size = 10,
+                            speed = 11) # yes, speed is 11 and not 10. 10 feels a bit too slow.
         self.player_l: Player = Player(id = player_l,
                                         pos_x = 10,
                                         pos_y = self.canvas_height/2 - self.player_height/2,
@@ -193,6 +215,7 @@ class Pong:
 
 
     def get_player(self) -> Player:
+        """ Returns the player from the side the ball is moving towards (x). """
         if self.ball.vel.x < 0:
             return self.player_l
         else:
@@ -324,7 +347,6 @@ class Pong:
             if self.player_scored():
                 self.ball.reset()
                 ### maybe put this in a function and or make it more variable ###
-                self.wall_to_be_hit = "y" # !!
                 wall = self.get_wall(self.ball.vel)
                 self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
                 ################
@@ -343,7 +365,6 @@ class Pong:
         if not self.is_full():
             raise Exception("Not enough players to start game")
         
-        self.wall_to_be_hit = "y" # !!
         wall = self.get_wall(self.ball.vel)
         self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
         
