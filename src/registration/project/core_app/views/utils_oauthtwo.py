@@ -89,9 +89,8 @@ def login(email):
         }
         token_s = CustomTokenObtainPairSerializer(data=data)
         if not user.password_is_set():
-            return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
-        user.actualise_last_login()
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+            return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -121,6 +120,6 @@ def signup(email):
         user = RegistrationUser.objects.filter(username=email).first()
         user.set_verified()
         token_s = CustomTokenObtainPairSerializer(data=data)
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, response_body={'user_status': 'password not set'})
     except Exception as e:
         return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -16,9 +16,9 @@ class MyMaximumLengthValidator:
         if len(password) > self.max_length:
             raise ValidationError(
                 ngettext(
-                    "This password is too short. It must contain at least "
+                    "This password is too long. It must contain at most "
                     "%(max_length)d character.",
-                    "This password is too short. It must contain at least "
+                    "This password is too long. It must contain at most "
                     "%(max_length)d characters.",
                     self.max_length,
                 ),

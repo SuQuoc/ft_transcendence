@@ -159,8 +159,7 @@ export class SignupPage extends ComponentBaseClass {
 		const password2 = this.shadowRoot.getElementById('signupPassword2').value;
 		const otp = this.shadowRoot.getElementById('otpCode').value;
 		const signupButton = this.shadowRoot.getElementById('signupSubmitButton');
-		const otpPattern = /^[A-Z0-9]{16}$/;
-
+		const otpPattern = /^[A-Za-z0-9]{16}$/;
 		if (email && password1 && password2 && otpPattern.test(otp)) {
 			signupButton.removeAttribute('disabled');
 		} else {
