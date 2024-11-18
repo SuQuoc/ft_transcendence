@@ -8,6 +8,10 @@ from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .token import DeleteTokenObtainPairSerializer
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um, send_delete_request_to_game
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.exceptions import ValidationError
+import jwt
 import logging
 
 @api_view(['POST'])
@@ -23,21 +27,22 @@ def change_password(request):
         if not user or (user.password_is_set() and not user.check_password(current_password)):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         otp = request.data.get('otp')
-        if user.validate_password(new_password) is False:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        if user.password_is_set() and not otp:
-            otp = create_one_time_password(user.id, 'change_password')
-            send_otp_email(user.username, 'change_password', otp)
-            return Response(status=status.HTTP_202_ACCEPTED)
-        if user.password_is_set() and not check_one_time_password(user, 'change_password', otp):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        user.validate_password(new_password)
+        if user.password_is_set():
+            validate_password(new_password, user=user)
+            if not otp:
+                otp = create_one_time_password(user.id, 'change_password')
+                send_otp_email(user.username, 'change_password', otp)
+                return Response(status=status.HTTP_202_ACCEPTED)
+            if not check_one_time_password(user, 'change_password', otp):
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.set_password(new_password)
         user.change_password_is_set()
         user.save()
         return Response(status=status.HTTP_200_OK)
+    except ValidationError as e:
+        return Response({'change_password error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'change_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'change_password': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -142,7 +147,10 @@ def refresh_token(request):
         refresh_token = request.COOKIES.get('refresh')
         if not refresh_token:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        decoded_token = jwt.decode(refresh_token, settings.PUBLIC_KEY,algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+        if decoded_token.get('jti') != request.user.refresh_token_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
-        return generate_response_with_valid_JWT(status.HTTP_200_OK, token_s)
+        return generate_response_with_valid_JWT(request.user, status.HTTP_200_OK, token_s)
     except Exception as e:
         return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
