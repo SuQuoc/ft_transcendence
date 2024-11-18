@@ -24,7 +24,7 @@ Content-Type: application/json
 
 ###
 
-GET {{base_url}}/daphne/get_game_stats
+GET {{base_url}}/game/get_game_stats
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 
