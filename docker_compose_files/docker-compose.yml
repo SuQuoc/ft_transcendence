@@ -27,11 +27,6 @@ services:
       - network_user_management
       - network_registration
       - network_django
-    secrets:
-      - source: ssl_webpage.crt
-        target: /run/secrets/${DOMAIN:-localhost}.crt
-      - source: ssl_webpage.key
-        target: /run/secrets/${DOMAIN:-localhost}.key
     restart: on-failure
 
 volumes:
@@ -56,7 +51,3 @@ secrets:
     file: ../src/common_files/jwt_keys/public_key.pem
   private_key.pem:
     file: ../src/common_files/jwt_keys/private_key.pem
-  ssl_webpage.crt:
-    file: ../src/common_files/ssl_certs/ssl_webpage.crt
-  ssl_webpage.key:
-    file: ../src/common_files/ssl_certs/ssl_webpage.key
