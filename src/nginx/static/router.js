@@ -306,6 +306,9 @@ const Router = {
 			case "/displayname":
 				pageElement = document.createElement("select-displayname-page");
 				break;
+			case "/stats":
+				pageElement = document.createElement("statistics-page");
+				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();
 				fragment.appendChild(document.createElement("friend-list"));

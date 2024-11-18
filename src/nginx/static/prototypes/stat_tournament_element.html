@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+	<link rel="manifest" href="/assets/site.webmanifest" />
+	<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+	crossorigin="anonymous"/>
+	<!-- Custom CSS -->
+	<link href="../css/template.css" rel="stylesheet"/>
+	<!-- Bootstrap Bundle with Popper --> <!-- are we allowed to use popper??!!-->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+		crossorigin="anonymous"
+		defer>
+	</script>
+
+	<!-- Bootstrap js -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+		integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+		crossorigin="anonymous"
+		defer>
+	</script> -->
+	<!-- Custom js -->
+	<!-- The 'type="module"' means that the file will be loaded as a module.
+	 	This means every variable we define within that file will not be a global variable for the whole page. Just for that file. And that file can export and import other things as well.-->
+	<script src="/app.js" defer type="module"></script>
+
+	<title>ft_transcendence</title>
+</head>
+
+<body class="d-flex flex-column vh-100">
+	<!-- Main Page -->
+	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-center flex-wrap">
+
+		<!-- V1 -->
+		<div class="d-flex flex-column align-items-center w-100 gap-4">
+			<!-- total games -->
+			<div class="d-flex flex-column align-items-center bg-dark rounded-3 gap-2 p-2">
+				<span class="text-white fs-1 lh-1 pe-1">10</span>
+				<span class="text-white-50">Total Games played</span>
+
+			</div>
+
+			<!-- lost/won percentage bar -->
+			<div class="d-flex align-items-center bg-dark w-75 rounded-3 gap-2 p-2">
+				<div class="d-flex flex-column align-items-center lh-1">
+					<span name="stats_date" class="text-white-50 mx-auto small">lost</span>
+					<span name="stats_loser_score" class="text-white fs-4">7</span>
+				</div>
+
+				<div class="bg-dark progress-stacked w-100">
+					<div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">
+						<div id="statsLostPercent" class="progress-bar bg-danger">70%</div>
+					</div>
+					<div class="progress" role="progressbar" aria-label="Segment two" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%">
+						<div id="statsWonPercent" class="progress-bar bg-success">30%</div>
+					</div>
+				</div>
+
+				<div class="d-flex flex-column align-items-center lh-1">
+					<span name="stats_date" class="text-white-50 mx-auto small">won</span>
+					<span name="stats_loser_score" class="text-white fs-4">3</span>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- V2 -->
+		<!-- total games -->
+		<div class="d-flex align-items-center bg-dark rounded-3 gap-2 p-2">
+			<span class="text-white fs-4">Total Games played:</span>
+			<span class="text-white fs-1 lh-1 pe-1">10</span>
+		</div>
+
+		<!-- lost/won percentage bar -->
+		<div class="d-flex align-items-center bg-dark w-75 rounded-3 gap-2 p-2">
+			<div class="d-flex flex-column align-items-center lh-1">
+				<span name="stats_date" class="text-white-50 mx-auto small">lost</span>
+				<span name="stats_loser_score" class="text-white fs-4">7</span>
+			</div>
+
+			<div class="bg-dark progress-stacked w-100">
+				<div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">
+					<div id="statsLostPercent" class="progress-bar bg-danger">70%</div>
+				</div>
+				<div class="progress" role="progressbar" aria-label="Segment two" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%">
+					<div id="statsWonPercent" class="progress-bar bg-success">30%</div>
+				</div>
+			</div>
+
+			<div class="d-flex flex-column align-items-center lh-1">
+				<span name="stats_date" class="text-white-50 mx-auto small">won</span>
+				<span name="stats_loser_score" class="text-white fs-4">3</span>
+			</div>
+		</div>
+
+
+
+
+		<!-- tournament elements-->
+		<div class="d-flex flex-column gap-2 w-75">
+			<!-- V1 -->
+			<div class="d-flex flex-column">
+				<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_loser_name" class="text-white">displayname</span>
+						<span class="text-white-50 small">loser</span>
+					</div>
+					
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+					
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+						<span class="text-white-50 ms-auto small">winner</span>
+					</div>
+				</div>
+				<span name="stats_date" class="text-white-50 ms-auto me-2 small">2024-11-17</span>
+			</div>
+
+
+			<!-- V2 -->
+			<div class="d-flex flex-column">
+				<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_loser_name" class="text-white">displayname</span>
+						<span class="text-white-50 small">loser</span>
+					</div>
+					
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+					
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+						<span class="text-white-50 ms-auto small">winner</span>
+					</div>
+				</div>
+				<span name="stats_date" class="text-white-50 mx-auto small">2024-11-17</span>
+			</div>
+
+
+			<!-- V3 -->
+			<div class="d-flex flex-column">
+				<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_loser_name" class="text-white">displayname</span>
+						<span class="text-white-50 small">loser</span>
+					</div>
+					
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+					
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+						<span class="text-white-50 ms-auto small">winner</span>
+					</div>
+				</div>
+				<span name="stats_date" class="text-white-50 ms-2 small">2024-11-17</span>
+			</div>
+
+			<!-- V3.2 -->
+			<div class="d-flex flex-column">
+				<span name="stats_date" class="text-white-50 ms-2 small">2024-11-17</span>
+				<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_loser_name" class="text-white">displayname</span>
+						<span class="text-white-50 small">loser</span>
+					</div>
+					
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+					
+					<div class="d-flex flex-column lh-1 text-break">
+						<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+						<span class="text-white-50 ms-auto small">winner</span>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- V4 -->
+			<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+				<div class="d-flex flex-column lh-1 text-break">
+					<span name="stats_loser_name" class="text-white">displayname</span>
+					<span class="text-white-50 small">loser</span>
+				</div>
+				
+				<div class="d-flex flex-column align-items-center lh-1">
+					<span name="stats_date" class="text-white-50 mx-auto small">2024-11-17</span>
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+				</div>
+				
+				<div class="d-flex flex-column lh-1 text-break">
+					<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+					<span class="text-white-50 ms-auto small">winner</span>
+				</div>
+			</div>
+
+
+
+
+			<!-- V5 -->
+			<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
+				<div class="d-flex flex-column lh-1 text-break">
+					<span name="stats_loser_name" class="text-white">displayname</span>
+					<span class="text-white-50 small">loser</span>
+				</div>
+				
+				<div class="d-flex flex-column align-items-center lh-1">
+					<div class="d-flex">
+						<span name="stats_loser_score" class="text-white fs-4">1</span>
+						<span class="text-white-50 fs-4">/</span>
+						<span name="stats_winner_score" class="text-white fs-4">5</span>
+					</div>
+					<span name="stats_date" class="text-white-50 mx-auto small">2024-11-17</span>
+				</div>
+				
+				<div class="d-flex flex-column lh-1 text-break">
+					<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
+					<span class="text-white-50 ms-auto small">winner</span>
+				</div>
+			</div>
+
+
+
+			<!-- join tournament element -->
+			<div class="bg-dark d-flex flex-row align-items-center rounded-3 gap-3 p-2">
+				<div class="d-flex flex-column lh-1 text-break">
+					<span name="join_name" class="text-white">tournament name</span>
+					<span name="join_creator" class="text-white-50 small">creator name</span>
+				</div>
+				<div class="d-flex flex-column align-items-center ms-auto lh-1">
+					<span class="text-white-50 extra-small">PTW</span>
+					<span name="join_points_to_win" class="text-white fs-5">5</span>
+				</div>
+				
+				<div class="d-flex">
+					<span name="join_current_player_num" class="text-white fs-4">1</span>
+					<span class="text-white-50 fs-4">/</span>
+					<span name="join_max_player_num" class="text-white fs-4">4</span>
+				</div>
+				<button type="button" name="join_tournament_button" class="btn btn-custom py-1 px-3">Join</button>
+			</div>
+
+
+
+			
+		</div>
+	</main>
+
+</body>
+
+</html>
