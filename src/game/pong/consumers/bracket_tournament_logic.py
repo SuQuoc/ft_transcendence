@@ -20,20 +20,20 @@ async def tournament_loop(room: TournamentRoom, queue):
     """
     channel_group = get_room_group(room.name)
 
-    winners = []
+    
     players = room.players
+    pairs, odd_one = make_random_pairs(players)
+    if odd_one: 
+        await send_free_win(channel_group, odd_one.id)
+    # someone left while waiting for other match to end
+    
     while len(players) > 1:
-        pairs, odd_one = make_random_pairs(players)
-        print(f"pairs: {pairs}")
-        if odd_one:
-            await send_free_win(channel_group, odd_one.id)
-                    
-        # await asyncio.sleep(20)
         winners = []
-        losers = [] #!!
         matches = [
             {
-                "match_id": create_match_config([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
+                "match_id": create_match_config([pair[0].id, pair[1].id],
+                                                GameMode.TOURNAMENT.value,
+                                                points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }
@@ -58,14 +58,16 @@ async def tournament_loop(room: TournamentRoom, queue):
 
         match_results = remove_duplicates(match_results)
         winners = [result.get("winner") for result in match_results]    
-        losers = [result.get("loser") for result in match_results]
         players = [player for player in players if player.id in winners]
         if dc_out_game:
             players = [player for player in players if player.id not in dc_out_game]
+        
+        pairs, odd_one = make_random_pairs(players)
+        if odd_one: 
+            await send_free_win(channel_group, odd_one.id)
 
     winner_name = players[0].name
     await send_tournament_end(channel_group, winner_name)
-    print("END OF TOURNAMENT ======\n")
 
 
 def make_random_pairs(list) -> List[tuple]:
@@ -128,9 +130,12 @@ async def send_tournament_end(group_name, winner):
 
 
 async def send_free_win(group_name, user_id):
+    """
+    Sends a free win message to a user if player count is odd due to disconnections
+    """
     await channel_layer.group_send(
         group_name,
         {
             "type": T_FREE_WIN,
-            "user_id": user_id
+            "winner_id": user_id
         })

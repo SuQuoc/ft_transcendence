@@ -76,6 +76,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await self.send_error()
             return
         
+        print(f"Match config: {self.match_config}")
         self.game_mode = self.match_config.get('game_mode')
     
         self.game_group = f'game_{self.match_id}'
@@ -85,7 +86,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         if game is None:
             ptw = self.match_config.get('points_to_win')
             if ptw is None:
-                    ptw = 5
+                ptw = 5
             PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.user_id, ptw)
         else:
             game.add_player(self.user_id)            

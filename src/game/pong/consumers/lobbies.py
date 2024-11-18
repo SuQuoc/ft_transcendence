@@ -332,7 +332,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def free_win(self, event):
         """Sends the winner of the tournament to the client."""
-        id = event.get("id")
+        id = event.get("winner_id")
         if id == self.user.id:
             await self.send(text_data=json.dumps(event))
 
