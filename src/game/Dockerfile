@@ -18,5 +18,5 @@ COPY ./entrypoint.sh ./entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:9000"]
+# TODO: RUN THIS IN PRODUCTION --> CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
