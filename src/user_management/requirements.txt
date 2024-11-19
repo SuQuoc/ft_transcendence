@@ -5,8 +5,9 @@ djangorestframework_simplejwt[crypto]==5.3.1
 pillow==10.4.0 # image lib
 django-cors-headers # for cookies
 
-# for websockets
-channels[daphne]==4.1.0
 django-sslserver
+# For daphne
 channels-redis==4.2.0
 redis==5.1.1
+asgiref==3.8.1
+channels[daphne]==4.1.0

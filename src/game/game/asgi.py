@@ -13,6 +13,8 @@ import os
 # https://channels.readthedocs.io/en/latest/tutorial/part_2.html
 import django
 from django.core.asgi import get_asgi_application
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong.settings')
+django.setup()
 django_asgi_app = get_asgi_application()
 
 from channels.auth import AuthMiddlewareStack
@@ -27,9 +29,6 @@ from rest_framework_simplejwt.authentication import JWTStatelessUserAuthenticati
 from .authenticate import ACCESS
 import json
 
-# NOTE: whats this for?
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong.settings')
-django.setup()
 
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
@@ -78,8 +77,9 @@ application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
-            JWTAuthMiddleware(AuthMiddlewareStack( # only used authMiddleware to get the cookies from scope inside the consumer
-                URLRouter(websocket_urlpatterns)))
+            JWTAuthMiddleware(
+                AuthMiddlewareStack( # only used authMiddleware to get the cookies from scope inside the consumer
+                    URLRouter(websocket_urlpatterns)))
         ),
     }
 )

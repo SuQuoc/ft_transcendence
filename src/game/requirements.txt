@@ -1,8 +1,8 @@
-asgiref==3.8.1
-channels[daphne]==4.1.0
-django-sslserver
+django-sslserver # TODO: just for development?
 
 # For daphne
+asgiref==3.8.1
+channels[daphne]==4.1.0
 channels-redis==4.2.0
 redis==5.1.1
 Django==5.0.6
