@@ -73,11 +73,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # tournament still running
             # user plays atm 
             # user finished game and dc while waiting
-        if self.queue: 
-            if self.in_game: 
-                self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
-            else: 
-                self.queue.put_nowait({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
+        
 
         await self.channel_layer.group_discard(self.client_group, self.channel_name)
         await self.channel_layer.group_discard(AVA_ROOMS, self.channel_name)
@@ -215,6 +211,18 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
             # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
+
+        if self.queue:
+            await self.leave_ongoing_tournament()
+            
+    async def leave_ongoing_tournament(self):
+        print("DC in disconnect")
+        if self.in_game:
+            await self.queue.put({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
+            # self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
+        else:
+            await self.queue.put({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
+            # self.queue.put_nowait({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
 
     async def get_tournament_list(self):
         """Sends the list of AVAILABLE tournament rooms to the client."""

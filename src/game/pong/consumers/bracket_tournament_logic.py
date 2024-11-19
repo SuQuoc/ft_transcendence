@@ -47,18 +47,23 @@ async def tournament_loop(room: TournamentRoom, queue):
         dc_out_game = []
         while len(match_results) + dc_in_game < len(pairs) * 2:
             message = await queue.get()
+            print("MESSAGE ARRIVED")
             if message.get("type") == T_MATCH_RESULT:
                 match_results.append(message)
             elif message.get("type") == T_DC_IN_GAME:
+                print("DC in game")
                 dc_in_game += 1
             elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
+                print("DC out game")
                 id = message.get("id")
                 dc_out_game.append(id)
             queue.task_done() # NOTE: necessary in our case?
 
         match_results = remove_duplicates(match_results)
-        winners = [result.get("winner") for result in match_results]    
-        players = [player for player in players if player.id in winners]
+        if match_results:
+            winners = [result.get("winner") for result in match_results]    
+            players = [player for player in players if player.id in winners]
+        
         if dc_out_game:
             players = [player for player in players if player.id not in dc_out_game]
         
@@ -66,8 +71,11 @@ async def tournament_loop(room: TournamentRoom, queue):
         if odd_one: 
             await send_free_win(channel_group, odd_one.id)
 
-    winner_name = players[0].name
-    await send_tournament_end(channel_group, winner_name)
+    if players:
+        winner_name = players[0].name
+        print("!!!!! Winner is: ", winner_name)
+        await send_tournament_end(channel_group, winner_name)
+    print("TOURNAMENT TASK FINISSHED ==============") 
 
 
 def make_random_pairs(list) -> List[tuple]:
@@ -97,6 +105,9 @@ def remove_duplicates(match_results):
     Returns:
         list: A list of dictionaries with duplicates removed.
     """
+    if not match_results:
+        return []
+    
     seen = set()
     unique_results = []
     
