@@ -25,15 +25,15 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 # ONLY FOR /profile GET --> fields online and relationship not needed
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
-    relationship = serializers.SerializerMethodField(required=False)
+    # relationship = serializers.SerializerMethodField(required=False)
     
     class Meta:
         model = CustomUser
         fields = ["displayname", "image"]
         # fields = ["displayname", "image", "online", "relationship"]
     
-    def get_relationship(self, obj):
-        return self.context.get('relationship', None)
+    # def get_relationship(self, obj):
+    #     return self.context.get('relationship', None)
 
     #def to_representation(self, instance):
     #    representation = super().to_representation(instance)
@@ -53,7 +53,7 @@ class UserRelationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["user_id", "displayname", "online", "image", "relationship", "friend_request_id"]
+        fields = ["user_id", "displayname", "image", "relationship", "friend_request_id"] # "online",
 
     def get_relationship(self, obj):
         relationships = self.context.get('relationships', {})
