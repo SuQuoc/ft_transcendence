@@ -19,7 +19,20 @@ export class StatisticTournamentElement extends HTMLElement {
 		this.appendChild(this.content);
 	}
 
+
+	/// ----- Methods ----- ///
 	
+	highlightUser() {
+		let loser_name = this.content.querySelector("[name='stats_loser_name']");
+		let winner_name = this.content.querySelector("[name='stats_winner_name']");
+
+		if (loser_name.innerText === window.app.userData.username)
+			loser_name.classList.add("fw-bold");
+		else
+			winner_name.classList.add("fw-bold");
+	}
+
+
 	// the element with the info of the tournament and a button to join it
 	getElementHTML() {
 		const template = document.createElement('template');
