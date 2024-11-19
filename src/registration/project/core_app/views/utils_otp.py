@@ -1,7 +1,5 @@
 import logging
 
-from django.contrib.auth.hashers import make_password
-from django.conf import settings
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
@@ -12,6 +10,9 @@ from ..common_utils import generate_random_string
 import os
 from celery import shared_task
 
+from django.conf import settings
+
+"""
 @shared_task
 def create_user_send_otp(data, action):
     try:
@@ -25,20 +26,21 @@ def create_user_send_otp(data, action):
             raise Exception("create_user_send_otp: wrong type")
         created_otp = create_one_time_password(user_s.id, 'signup')
         send_otp_email.delay(user_s.username, 'signup', created_otp)
+        generate_jwt_task.delay({'id': user_s.id, 'username': user_s.username}, {'username': user_s.username, 'password': data['password']})
     except Exception as e:
         logging.warning(f"create_user_send_otp: {str(e)}")
+"""
 
 @shared_task
 def send_otp_email(username, action, password):
     try:
         subject = 'Confirm your action for your Transcendence account'
-        link = os.environ.get('SERVER_URL') + f'/twofa_confirm?action={action}'
+        link = os.environ.get('SERVER_URL')
 
         message = f"""
         Hello,
 
-        Please go to the following link to confirm your action: {action}
-        {link}
+        You  have tried to do following action: {action}
 
         The code is: {password} and is valid for 5 minutes.
 

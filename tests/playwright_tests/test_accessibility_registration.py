@@ -19,10 +19,24 @@ class TestAccessibility:
             try:
                 page.goto(BASE_URL) 
                 page.locator("#loginGoToSignup").press("Enter")
-            # [aguilmea] we cannot press enter and have to clikc on the link
-                page.locator("#loginGoToSignup").click()
+                page.locator("#loginGoToSignup").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
                 page.locator("#loginWith42").press("Enter")
                 expect(page).to_have_url(re.compile("https://auth.42.fr/*"))
+
+                page.goto(BASE_URL) 
+                page.locator("#forgotPassword").press("Enter")
+                page.locator("#forgotPassword").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
+                expect(page.locator("#forgotPasswordForm")).to_be_visible()
+                #page.locator("some locator go to login").press("Enter")
+                #expect(page.locator("#loginForm")).to_be_visible()
+                
+                page.goto(BASE_URL) 
+                page.locator("#forgotPassword").press("Enter")
+                page.locator("#forgotPassword").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
+                expect(page.locator("#forgotPasswordForm")).to_be_visible()
+                #page.locator("some locator go to signup").press("Enter")
+                #expect(page.locator("#signupForm")).to_be_visible()
+
 
                 page.goto(BASE_URL)
                 page.locator("#loginGoToSignup").click()
@@ -92,7 +106,7 @@ class TestAccessibility:
                 page.goto(BASE_URL)
                 page.locator("#loginEmail").fill(USERMAIL)
                 page.locator("#loginPassword").fill(NEWUSERPW)
-                page.locator("#requestOTP").press("Enter")
+                page.locator("#loginSubmitButton").press("Enter")
                 otp = get_otp()
                 page.wait_for_selector("#otpCode", state="visible")
                 page.locator("#otpCode").fill(otp)

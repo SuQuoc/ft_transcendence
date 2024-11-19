@@ -59,6 +59,31 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'api.middleware.LogRequestMiddleware')
+
+if DEBUG == True:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'WARNING',  # Set the logging level for Django-specific messages
+                'propagate': True,
+            },
+        },
+    }
+
 ROOT_URLCONF = "user_management.urls"
 
 TEMPLATES = [
@@ -90,7 +115,7 @@ DATABASES = {
         "USER": os.environ.get("POSTGRES_USER") if DEBUG else os.environ.get("POSTGRES_ACCESS_USER"), # i need the postgres root user to run tests, since they are done in a separate database
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD") if DEBUG else os.environ.get("POSTGRES_ACCESS_PASSWORD"),
         "HOST": os.environ.get("DB_HOST"),  # docker-compose service name
-        "PORT": os.environ.get("DB_PORT"),
+        "PORT": "5432",
     }
 }
 
@@ -119,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 

@@ -1,20 +1,23 @@
+from django.conf import settings
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.decorators import authentication_classes , permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-
-from ..authenticate import AccessTokenAuthentication
+from ..authenticate import CredentialsAuthentication
 from .utils_oauthtwo import generate_authorization_request_data, get_ft_email, request_ft_token, request_ft_user, login, signup
 from .utils import generate_redirect_with_state_cookie
 from ..models import OauthTwo, RegistrationUser
 from ..common_utils import generate_random_string
 
 import os, requests, time, logging
-from .utils_silk import conditional_silk_profile
+if settings.SILK:
+    from .utils_silk import conditional_silk_profile
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
     try:
@@ -31,9 +34,11 @@ def send_authorization_request(request):
         return generate_redirect_with_state_cookie(hashed_state, authorize_url)
     except Exception as e:
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-send_authorization_request = conditional_silk_profile(send_authorization_request, name=send_authorization_request)
+#send_authorization_request = conditional_silk_profile(send_authorization_request, name=send_authorization_request)
 
+#TODO: look into making get_ft_email async to speed up signing up/logging in
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):
     try:
@@ -55,4 +60,4 @@ def exchange_code_against_access_token(request):
         raise Exception({'exchange_code_against_access_token: next_step not recognized' : oauthtwo.next_step})
     except Exception as e:
         return Response({'exchange_code_against_access_token': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-exchange_code_against_access_token = conditional_silk_profile(exchange_code_against_access_token, name=exchange_code_against_access_token)
+#exchange_code_against_access_token = conditional_silk_profile(exchange_code_against_access_token, name=exchange_code_against_access_token)

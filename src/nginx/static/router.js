@@ -224,18 +224,19 @@ const Router = {
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
+			document.getElementById("userProfileContainer").classList.remove('open');
 		}
 		else {
 			document.getElementById("navbar").style.display = "";
 			document.getElementById("footer").style.display = "";
 			if (window.app.userData.profileImage) {
-				document.getElementById('userDropdown').src = window.app.userData.profileImage;
+				document.getElementById('userProfileButton').src = window.app.userData.profileImage;
 			} else {
 				const response = fetch('/um/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
 				response.then(data => data.json()).then(data => {
 					if (data.image) {
 						window.app.userData.profileImage = data.image;
-						document.getElementById('userDropdown').src = data.image;
+						document.getElementById('userProfileButton').src = data.image;
 					}
 				});
 			}

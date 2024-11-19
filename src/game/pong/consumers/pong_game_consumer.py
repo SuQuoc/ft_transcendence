@@ -25,6 +25,7 @@ class Type(Enum):
 
 
 class PongGameConsumer(AsyncWebsocketConsumer):
+    update_lock = asyncio.Lock()
     all_games: Dict[str, Pong] = {}
 
     def __init__(self, *args, **kwargs):
@@ -86,7 +87,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
     async def connect_to_match(self, data):
         self.match_id = data.get('match_id')
         
-        if not self.valid_match_id():
+        if not await self.valid_match_id():
             await self.send_error()
             return
         
@@ -119,7 +120,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     async def reconnect_to_match(self, data):
         self.match_id = data.get('match_id')
-        if not self.valid_match_id():
+        if not await self.valid_match_id():
             await self.send_error()
             return
 
@@ -127,16 +128,17 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.game_group, self.channel_name)
 
 
-    def valid_match_id(self):
+    async def valid_match_id(self):
         """
         Checks provided match_id and sets self.match_config if valid
         """
         if self.match_id is None:
             return False
         
-        match_config = cache.get(self.match_id)
-        if match_config is None:
-            return False
+        async with self.update_lock:
+            match_config = cache.get(self.match_id)
+            if match_config is None:
+                return False
 
         allowed_user_ids = match_config.get('user_id_list')
         if allowed_user_ids is None:
@@ -196,7 +198,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
     async def cleanup(self, data):
         PongGameConsumer.all_games.pop(self.match_id, None) # removes the key if it exists, or do nothing if it does not, since N consumers try to do this
-        cache.delete(self.match_id)
+        async with self.update_lock:
+            cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT:
             # NOTE: if parent-method is called via task callback, 
             # no duplicate messages will be sent to tournament consumer

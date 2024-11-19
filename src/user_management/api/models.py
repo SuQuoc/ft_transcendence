@@ -1,6 +1,8 @@
 from django.db import models
 from friends.models import FriendRequest
 from PIL import Image
+from django.core.validators import MinLengthValidator
+from .validators import displayname_validator
 
 # Create your models here.
 
@@ -23,7 +25,7 @@ image.name: {image.name}
 
 class CustomUser(models.Model):
     user_id = models.UUIDField(primary_key=True, unique=True)
-    displayname = models.CharField(max_length=20, unique=True)  # by default fields are set to be blank=False, null=False
+    displayname = models.CharField(max_length=20, unique=True, validators=[MinLengthValidator(3), displayname_validator])  # by default fields are set to be blank=False, null=False
     online = models.BooleanField(default=False)  # maybe better in registration service, ONLY VISIBLE by FRIENDS
     image = models.ImageField(upload_to=UPLOAD_TO_PROFILE, default=UPLOAD_TO_PROFILE + DEFAULT_IMAGE_NAME, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

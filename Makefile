@@ -7,20 +7,20 @@ DOCKER_COMPOSE = docker compose -f ./docker_compose_files/docker-compose.yml
 
 all: up
 
-up:
-	${DOCKER_COMPOSE} --profile all up
+up: keys
+	${DOCKER_COMPOSE} up
 
 build_up:
-	${DOCKER_COMPOSE} --profile all up --build
+	${DOCKER_COMPOSE} up --build
 
 build_no_cache:
-	${DOCKER_COMPOSE} --profile all build --no-cache
+	${DOCKER_COMPOSE} build --no-cache
 
 down:
-	${DOCKER_COMPOSE} --profile all down
+	${DOCKER_COMPOSE} down
 
 build_only:
-	${DOCKER_COMPOSE} --profile all build
+	${DOCKER_COMPOSE} build
 
 rm_vol:
 	docker volume prune -af
@@ -73,16 +73,9 @@ game_cache_clean:
 ###################### User Management #####################
 .PHONY: um_up um_down um_mm um_migrate um_shell um_cache_clean
 
-um_up:
-	@${DOCKER_COMPOSE} --profile user_management build
-	@${DOCKER_COMPOSE} --profile user_management up
-
-um_down:
-	@${DOCKER_COMPOSE} --profile user_management down
 
 um_mm:
 	${DOCKER_COMPOSE} exec usermanagement python manage.py makemigrations
-
 
 um_migrate:
 	${DOCKER_COMPOSE} exec usermanagement python manage.py migrate
@@ -115,18 +108,12 @@ um_cache_clean:
 ###################### Game #####################
 .PHONY: registration_up registration_down test test_running
 
-game_up:
-	@${DOCKER_COMPOSE} --profile game build
-	@${DOCKER_COMPOSE} --profile game up
-
-game_down:
-	@${DOCKER_COMPOSE} --profile game down
 
 test: down
 	@make re > /dev/null 2>&1 &
 	@PID=$$!
 	@wait $$PID
-	@while ! nc -z localhost 8000; do \
+	@while ! nc -z localhost 8443; do \
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done
@@ -137,7 +124,7 @@ test_tournament: down
 	@make re > /dev/null 2>&1 &
 	@PID=$$!
 	@wait $$PID
-	@while ! nc -z localhost 8000; do \
+	@while ! nc -z localhost 8443; do \
 		echo "* Waiting for the server to start..."; \
 		sleep 2; \
 	done

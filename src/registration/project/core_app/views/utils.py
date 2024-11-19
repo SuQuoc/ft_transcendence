@@ -1,10 +1,11 @@
+from django.conf import settings
 from datetime import datetime, timezone
 from rest_framework.response import Response
 from rest_framework import status
-from django.conf import settings
-from django.http import HttpResponseRedirect
-from .utils_silk import conditional_silk_profile
 
+from django.http import HttpResponseRedirect
+if settings.SILK:
+    from .utils_silk import conditional_silk_profile
 from django.core.mail import send_mail
 
 import os, requests, logging
@@ -15,13 +16,12 @@ def send_200_with_expired_cookies():
     response.delete_cookie('refresh')
     return response
 
-def generate_response_with_valid_JWT(status_code, token_s, backup_codes=None, response_body=None):
+def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=None, response_body=None):
     if not token_s.is_valid():
         return Response(status=status.HTTP_400_BAD_REQUEST)
     response = Response(status=status_code)
     if response_body:
         response.data = response_body
-    #TODO: [aguilmea] check if backup_code is needed
     if backup_codes:
         response.data = {'backup_code': backup_codes}
     access_token = token_s.validated_data['access']
@@ -44,8 +44,9 @@ def generate_response_with_valid_JWT(status_code, token_s, backup_codes=None, re
         httponly=True,
         secure=True,
         samesite = 'Strict')
+    user.actualise_last_login(refresh_token)
     return response
-generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
+#generate_response_with_valid_JWT = conditional_silk_profile(generate_response_with_valid_JWT, name=generate_response_with_valid_JWT)
 
 
 def generate_redirect_with_state_cookie(hashed_state, authorize_url):
@@ -62,41 +63,24 @@ def generate_redirect_with_state_cookie(hashed_state, authorize_url):
     return response
 
 
-def send_reset_email(recipient, token):
-    try:
-        link = os.environ.get('SERVER_URL') + '/registration/forgot_password_reset?token=' + token
-        message = f"""
-        Hello,
-
-        Please go to the following link to reset your password for Transcendence:
-
-        {link}
-
-        Best regards,
-        Your Transcendence team
-        """
-        send_mail(
-            "Reset your password for Transcendence",
-            message,
-            "Your Transcendence team",
-            [recipient],
-            fail_silently=False,
-            auth_user=None, # will use EMAIL_HOST_USER
-            auth_password=None, # will use EMAIL_HOST_PASSWORD
-            connection=None, # optional email backend
-            html_message=None, # will only be sent as plain text and not html
-        )
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-def send_delete_request_to_um(request):
+def send_delete_request_to_um(request, token_s):
     request_uri = 'http://usermanagement:8000/um/profile'
-    headers = {
-        'Content-Type': 'application/json',
-        'Cookie': 'access=' + request.COOKIES.get('access')
+    headers = {'Content-Type': 'application/json',}
+    access_token = token_s.validated_data['access']
+    cookies = {
+        'access': access_token,
     }
-    response = requests.delete(request_uri, headers=headers)
+    response = requests.delete(request_uri, headers=headers, cookies=cookies)
     if response.status_code != 204:
         raise Exception('Error deleting user in UM')
-    return Response(status=status.HTTP_200_OK)
+
+def send_delete_request_to_game(request, token_s):
+    request_uri = 'http://game:8000/daphne/delete_user_stats'
+    headers = {'Content-Type': 'application/json',}
+    access_token = token_s.validated_data['access']
+    cookies = {
+        'access': access_token,
+    }
+    response = requests.post(request_uri, headers=headers, cookies=cookies)
+    if response.status_code != 204:
+        raise Exception('Error deleting user in game: ' + str(response.status_code) + ' ' + str(response.text))

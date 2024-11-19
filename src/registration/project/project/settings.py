@@ -58,8 +58,8 @@ if SILK == True:
     MIDDLEWARE.insert(2, 'silk.middleware.SilkyMiddleware')
     INSTALLED_APPS.append('silk')
 
-if DEBUG == True:
-    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
+#if DEBUG == True:
+#    MIDDLEWARE.insert(0, 'core_app.middleware.LogRequestMiddleware')
 
 TEMPLATES = [
     {
@@ -77,6 +77,16 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis_registration:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
@@ -86,7 +96,7 @@ DATABASES = {
         'USER': os.environ.get('POSTGRES_ACCESS_USER'),
         'PASSWORD': os.environ.get('POSTGRES_ACCESS_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+        'PORT': "5432",
     }
 }
 
@@ -121,12 +131,11 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "core_app.RegistrationUser"
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# added manually
 
 with open('/run/secrets/private_key.pem', 'r') as f:
     PRIVATE_KEY = f.read()
@@ -135,7 +144,7 @@ with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -214,12 +223,12 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "non_verified_users_after_one_day": {
         "task": "project.celery.non_verified_users_after_one_day",
-        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        #"schedule": crontab(minute="*/1"), # for testing purpose
         "schedule": crontab(minute=0, hour=0),
     },
     "users_without_login_within_one_year": {
         "task": "project.celery.users_without_login_within_one_year",
-        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        #"schedule": crontab(minute="*/1"), # for testing purpose
         "schedule": crontab(minute=0, hour=0),
     },
 }

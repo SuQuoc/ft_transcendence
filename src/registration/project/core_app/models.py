@@ -1,12 +1,13 @@
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.password_validation import validate_password, password_changed
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework_simplejwt.backends import jwt
 
 from .common_utils import generate_random_string
 import base64, logging
@@ -14,11 +15,13 @@ import base64, logging
 class RegistrationUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.EmailField(max_length=254, unique=True)
-    setup_date = models.DateTimeField(default=timezone.now)
+    setup_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(default=timezone.now)
+    refresh_token_id = models.CharField(max_length = 32, blank=True)
     password = models.CharField(max_length=128, blank=True)
     backup_codes = models.JSONField(default=list, blank=True)
     email_verified = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=False)
 
     ft_userid = models.PositiveIntegerField(unique=True, null=True)
 
@@ -30,30 +33,36 @@ class RegistrationUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.username = self.username.lower()
-        if self.password:
-            try:
-                validate_password(self.password, user=self)
-            except ValidationError as e:
-                raise ValueError(f"Password validation error: {', '.join(e.messages)}")
+        if self.password: 
+            validate_password(self.password, user=self)
+            password_changed(self.password, user=self, password_validators=None) # [aguilmea] password validators?????
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
 
-    def validate_password(self, password):
-        try:
-            validate_password(password, user=self)
-        except ValidationError as e:
-            raise ValueError(f"Password validation error: {', '.join(e.messages)}")
 
     def set_verified(self):
         self.email_verified = True
         self.save()
-        logging.warning(self.email_verified)
         return self
 
     def is_verified(self):
         return self.email_verified
+    
+    def set_password(self, password):
+        validate_password(password, user=self)
+        self.password = make_password(password)
+        self.save(update_fields=['password'])
+        return self
+
+    def password_is_set(self):
+        return self.password_set
+
+    def change_password_is_set(self):
+        self.password_set = True
+        self.save()
+        return self
 
     def generate_backup_codes(self):
         self.backup_codes.clear()
@@ -63,12 +72,15 @@ class RegistrationUser(AbstractUser):
             hashed_code = make_password(backup_code)
             self.backup_codes.append(hashed_code)
             backup_codes.append(backup_code)
-        self.save(update_fields=['backup_codes'])   
+        self.save(update_fields=['backup_codes'])
         return backup_codes
-    
-    def actualise_last_login(self):
+
+    def actualise_last_login(self, refresh_token):
         self.last_login = timezone.now()
-        self.save(update_fields=['last_login'])
+        decoded_token = jwt.decode(refresh_token, settings.PUBLIC_KEY,algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+        jti_claim  = decoded_token.get('jti')
+        self.refresh_token_id = jti_claim
+        self.save(update_fields=['last_login', 'refresh_token_id'])
 
     def generate_backup_code(self):
         backup_code = generate_random_string(32)
@@ -83,7 +95,6 @@ class RegistrationUser(AbstractUser):
                 self.save(update_fields=['backup_codes'])
                 return True
         return False
-
 
 def get_expiration_time():
     return timezone.now() + timedelta(minutes=5)

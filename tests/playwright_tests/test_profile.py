@@ -10,11 +10,11 @@ USER_NEWPW = "PEvv8uCbpA"
 
 class TestProfile:
     def test_user_profile_dropdown(self, page: Page):
-        page.locator("#userDropdown").click()
+        page.locator("#userProfileButton").click()
         expect(page.locator("#displayName")).to_be_visible()
     
     def test_userdata_present(self, page: Page):
-        page.locator("#userDropdown").click()
+        page.locator("#userProfileButton").click()
         
         profile_form_loc = page.locator("#profileForm")
         displayname_loc = page.locator("#displayName")
@@ -27,7 +27,7 @@ class TestProfile:
 
     def test_userdata_present_after_login(self, login_page: Page):
         login(login_page, USERMAIL, USERPW)
-        login_page.locator("#userDropdown").click()
+        login_page.locator("#userProfileButton").click()
 
         profile_form_loc = login_page.locator("#profileForm")
         displayname_loc = login_page.locator("#displayName")
@@ -71,7 +71,7 @@ class TestProfile:
 
 
     def test_password_change(self, page: Page):
-        page.locator("#userDropdown").click()
+        page.locator("#userProfileButton").click()
         page.locator("#oldPassword").fill(USERPW)
         page.locator("#newPassword").fill(USER_NEWPW)
         page.locator("#confirmPassword").fill(USER_NEWPW)

@@ -6,7 +6,6 @@ include:
     - game.yml
 
 services:
-
   nginx:
     container_name: pong_nginx
     build: ../src/nginx
@@ -33,8 +32,6 @@ services:
         target: /run/secrets/${DOMAIN:-localhost}.crt
       - source: ssl_webpage.key
         target: /run/secrets/${DOMAIN:-localhost}.key
-    profiles:
-      - all
     restart: on-failure
 
 volumes:

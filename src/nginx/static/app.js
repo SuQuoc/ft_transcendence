@@ -50,4 +50,17 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 	// adds event listeners for routing
 	await app.router.init();
+
+	// event handlers for opening and closing user profile
+	const userProfileButton = document.getElementById('userProfileButton');
+	const userProfileContainer = document.getElementById('userProfileContainer');
+    const closeUserProfile = document.getElementById('closeUserProfile');
+
+	userProfileButton.addEventListener('click', () => {
+		userProfileContainer.classList.add('open');
+	});
+
+	closeUserProfile.addEventListener('click', () => {
+		userProfileContainer.classList.remove('open');
+	});
 });
