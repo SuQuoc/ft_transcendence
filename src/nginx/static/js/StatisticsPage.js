@@ -36,7 +36,7 @@ export class StatisticsPage extends ComponentBaseClass {
 
 	async getStats() {
 		try {
-			const response = await fetch('/daphne/get_game_stats', {
+			const response = await fetch('game/get_game_stats', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json'
