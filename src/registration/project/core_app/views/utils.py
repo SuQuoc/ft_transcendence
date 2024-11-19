@@ -75,7 +75,7 @@ def send_delete_request_to_um(request, token_s):
         raise Exception('Error deleting user in UM')
 
 def send_delete_request_to_game(request, token_s):
-    request_uri = 'http://game:8000/daphne/delete_user_stats'
+    request_uri = 'http://game:8000/game/delete_user_stats'
     headers = {'Content-Type': 'application/json',}
     access_token = token_s.validated_data['access']
     cookies = {
