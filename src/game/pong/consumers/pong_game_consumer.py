@@ -92,7 +92,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             game.add_player(self.user_id)            
             if game.is_full():
                 game_task = asyncio.create_task(game.start_game_loop())
-                callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
+                # callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
                 # game_task.add_done_callback(lambda t: self.cleanup(callback_match_id)) cool but cant use an async function as callback
             # NOTE: in our case with only 2 players, this is almost always true,
             # maybe except if 1 client joins and disconnects before the 2nd even joins
@@ -178,11 +178,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         # NOTE: if caller is task callback, 
         # no duplicate msg will be sent to tournament consumer,
         # but sending msg async not  
-        PongGameConsumer.all_games.pop(self.match_id, None) 
+        
         # removes key if it exists, or nothing if not, 
         # since N consumers try to do this
-        async with self.update_lock:
-            cache.delete(self.match_id)
+        if PongGameConsumer.all_games.pop(self.match_id, None): 
+            async with self.update_lock:
+                cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT.value:
             await self.forward_match_result(data)
         else:
