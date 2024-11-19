@@ -23,7 +23,7 @@ services:
     networks:
       - network_user_management
 
-  redis:
+  redis_usermanagement:
     container_name: pong_um_redis
     image: redis:alpine3.20
     environment: &redis_env
