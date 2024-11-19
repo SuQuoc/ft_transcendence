@@ -343,6 +343,9 @@ const Router = {
 		if (route !== "/tournament-lobby" && route !== "/match") {
 			Router.closePongWebSocket();
 		}
+		if (route !== "/match") {
+			Router.closeMatchWebSocket();
+		}
 
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
