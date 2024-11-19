@@ -28,6 +28,11 @@ services:
       - network_registration
       - network_django
     restart: on-failure
+    secrets:
+      - source: ssl_webpage.crt
+        target: /etc/ssl/certs/ssl_webpage.crt
+      - source: ssl_webpage.key
+        target: /etc/ssl/certs/ssl_webpage.key
 
 volumes:
   volume_game:
@@ -51,3 +56,7 @@ secrets:
     file: ../src/common_files/jwt_keys/public_key.pem
   private_key.pem:
     file: ../src/common_files/jwt_keys/private_key.pem
+  ssl_webpage.crt:
+    file: ../src/common_files/ssl_certs/ssl_webpage.crt
+  ssl_webpage.key:
+    file: ../src/common_files/ssl_certs/ssl_webpage.key
