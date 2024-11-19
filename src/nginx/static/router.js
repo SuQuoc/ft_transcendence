@@ -135,7 +135,7 @@ const Router = {
 	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/tournament";
+			let ws_path = ws_scheme + '://' + window.location.host + "/game/tournament";
 			window.app.socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -165,7 +165,7 @@ const Router = {
 		
 		if (!window.app.pong_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/match";
+			let ws_path = ws_scheme + '://' + window.location.host + "/game/match";
 			window.app.pong_socket = new WebSocket(ws_path);
 
 			// add event listeners
@@ -195,7 +195,7 @@ const Router = {
 		
 		if (!window.app.match_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/daphne/matchmaking/";
+			let ws_path = ws_scheme + '://' + window.location.host + "/game/matchmaking/";
 			window.app.match_socket = new WebSocket(ws_path);
 
 			// add event listeners

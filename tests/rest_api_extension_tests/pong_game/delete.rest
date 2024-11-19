@@ -24,7 +24,7 @@ Content-Type: application/json
 
 ###
 
-POST {{base_url}}/daphne/delete_user_stats
+POST {{base_url}}/game/delete_user_stats
 Content-Type: application/json
 Cookie: {{ACCESS_COOKIE}}
 

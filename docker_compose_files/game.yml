@@ -56,7 +56,7 @@ services:
     container_name: pong_game
     build: ../src/game
     volumes:
-      - ../src/game:/daphne
+      - ../src/game:/game
     expose:
       - "8000/tcp"
     environment:

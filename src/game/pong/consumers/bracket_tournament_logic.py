@@ -1,10 +1,7 @@
-
-
 from django.core.cache import cache
-from channels.layers import get_channel_layer
 
 from .Room import TournamentRoom, Player
-from .utils import get_room_group, T_TOURNAMENT_BRACKET
+from .utils import get_room_group, T_TOURNAMENT_BRACKET, T_TOURNAMENT_END, T_FREE_WIN, T_MATCH_RESULT, T_DC_IN_GAME, T_DC_OUT_GAME
 import random
 import uuid
 import json
@@ -12,72 +9,82 @@ import asyncio
 from typing import List
 from .utils import create_match_config
 from .pong_game_consumer import GameMode
+from channels.layers import get_channel_layer
+
+channel_layer = get_channel_layer()
 
 #asyncio.create_task()
 async def tournament_loop(room: TournamentRoom, queue):
     """
     Starts the tournament logic in a bracket style
     """
+    channel_group = get_room_group(room.name)
+
+    
     players = room.players
+    pairs, odd_one = make_random_pairs(players)
+    if odd_one: 
+        await send_free_win(channel_group, odd_one.id)
+    # someone left while waiting for other match to end
+    
     while len(players) > 1:
-        random.shuffle(players)
-        pairs = make_pairs(players)
-        print(f"pairs: {pairs}")
-        # await asyncio.sleep(20)
         winners = []
-        losers = []
         matches = [
             {
-                "match_id": create_match_config([pair[0].id, pair[1].id], GameMode.TOURNAMENT.value), # NOTE: creates a match in cache and stores who can connect
+                "match_id": create_match_config([pair[0].id, pair[1].id],
+                                                GameMode.TOURNAMENT.value,
+                                                points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }
             for pair in pairs
         ]
         print(json.dumps(matches, indent=4))
-        await send_matches(get_room_group(room.name), matches)
+        await send_tournament_bracket(channel_group, matches)
         
         match_results = []
-        for player in players:
-            match_result = await queue.get()
-            print(f"match_result IN TOURNAMENT TASK: {match_result}")
-            match_results.append(match_result)
+        dc_in_game = 0
+        dc_out_game = []
+        while len(match_results) + dc_in_game < len(pairs) * 2:
+            message = await queue.get()
+            if message.get("type") == T_MATCH_RESULT:
+                match_results.append(message)
+            elif message.get("type") == T_DC_IN_GAME:
+                dc_in_game += 1
+            elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
+                id = message.get("id")
+                dc_out_game.append(id)
             queue.task_done() # NOTE: necessary in our case?
 
         match_results = remove_duplicates(match_results)
-        print(f"match_results: {json.dumps(match_results, indent=4)}")
         winners = [result.get("winner") for result in match_results]    
-        losers = [result.get("loser") for result in match_results]
         players = [player for player in players if player.id in winners]
+        if dc_out_game:
+            players = [player for player in players if player.id not in dc_out_game]
+        
+        pairs, odd_one = make_random_pairs(players)
+        if odd_one: 
+            await send_free_win(channel_group, odd_one.id)
 
+    winner_name = players[0].name
+    await send_tournament_end(channel_group, winner_name)
+
+
+def make_random_pairs(list) -> List[tuple]:
+    """
+    Shuffles the list and returns list of tuples with two elements. 
+    If list is odd, the last element is returned separately.
+    If list is empty or has only one element, returns an empty list and None.
+    """
+    length = len(list)
+    if length < 2:
+        return [], None
     
-    print("END OF TOURNAMENT ======\n")
-    await send_tournament_end(get_room_group(room.name), winners[0])
-
-
-
-async def send_tournament_end(group_name, winner):
-    await get_channel_layer().group_send(
-        group_name,
-        {
-            "type": "tournament_end",
-            "winner": winner 
-        })
-    
-
-
-
-async def send_matches(group_name, matches):
-    await get_channel_layer().group_send(
-        group_name,
-        {
-            "type": T_TOURNAMENT_BRACKET,
-            "matches": matches
-        })
-    
-
-def make_pairs(list) -> List[tuple]:
-    return [tuple(list[i:i+2]) for i in range(0, len(list), 2)]
+    random.shuffle(list)
+    if length % 2 != 0:
+        odd_one = list.pop()
+    odd_one = None
+    return [tuple(list[i:i+2]) for i in range(0, length, 2)], odd_one
 
 
 def remove_duplicates(match_results):
@@ -96,13 +103,39 @@ def remove_duplicates(match_results):
     for result in match_results:
         if not isinstance(result, dict):
             result = json.loads(result)
-
-        # Convert the dictionary to a frozenset of tuples to make it hashable
-        result_tuple = frozenset(result.items())
         
-        if result_tuple not in seen:
-            seen.add(result_tuple)
+        winner = result["winner"]
+        if winner not in seen:
+            seen.add(winner)
             unique_results.append(result)
-    
     return unique_results
 
+
+async def send_tournament_bracket(group_name, matches):
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": T_TOURNAMENT_BRACKET,
+            "matches": matches
+        })
+
+
+async def send_tournament_end(group_name, winner):
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": T_TOURNAMENT_END,
+            "winner": winner 
+        })
+
+
+async def send_free_win(group_name, user_id):
+    """
+    Sends a free win message to a user if player count is odd due to disconnections
+    """
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": T_FREE_WIN,
+            "winner_id": user_id
+        })

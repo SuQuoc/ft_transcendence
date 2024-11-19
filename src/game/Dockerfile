@@ -5,7 +5,7 @@ RUN apt-get update \
 		postgresql-client \
 	&& rm -rf /var/lib/apt/lists/*
 
-WORKDIR /daphne
+WORKDIR /game
 
 RUN pip install --upgrade pip
 COPY requirements.txt requirements.txt
@@ -19,4 +19,4 @@ COPY ./entrypoint.sh ./entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
+# TODO: RUN THIS IN PRODUCTION --> CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
