@@ -17,8 +17,9 @@ if not User.objects.filter(username='$ADMIN_USERNAME').exists():
 EOF
 ###
 
-
-python project/manage.py runserver 0.0.0.0:8000 &
 cd project
+python manage.py runserver 0.0.0.0:8000 &
+#daphne -b 0.0.0.0 -p 8000 project.asgi:application &
+
 exec celery -A project worker --loglevel=info -B
 exec "$@"
