@@ -109,13 +109,13 @@ class ListFriendRelationsView(generics.ListAPIView):
         #     raise PermissionDenied("My friendlist is private, keep your nose out")
 
         relationships = {}
-        online_status = {}
+        # online_status = {}
         friend_requests = {}
 
         friends = user.friend_list.friends.all()
         for friend in friends:
             relationships[friend.user_id] = "friend"
-            online_status[friend.user_id] = friend.get_online_status()
+            # online_status[friend.user_id] = friend.get_online_status()
             friend_requests[friend.user_id] = user.friend_list.get_friends_request_id(friend)
         all_people = list(friends)
 
@@ -135,7 +135,7 @@ class ListFriendRelationsView(generics.ListAPIView):
 
         context = {
             "relationships": relationships,
-            "online_status": online_status,
+            # "online_status": online_status,
             "friend_requests": friend_requests,
         }
         serializer = UserRelationSerializer(all_people, many=True, context=context)
