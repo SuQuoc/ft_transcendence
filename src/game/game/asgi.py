@@ -30,6 +30,8 @@ from .authenticate import ACCESS
 import json
 
 
+
+
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         # Extract JWT or other auth token

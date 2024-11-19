@@ -33,7 +33,8 @@ export class PongCanvasElement extends canvasBaseClass {
 		super.disconnectedCallback();
 
 		// remove event listeners
-		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);
+		if (window.app.pong_socket)
+		window.app.pong_socket.removeEventListener("message", this.handleReceivedMessage_var);
 
 		window.removeEventListener('keydown', this.handlePlayerMoveKey_var);
 		window.removeEventListener('keyup', this.handlePlayerMoveEnd_var);
@@ -51,7 +52,6 @@ export class PongCanvasElement extends canvasBaseClass {
 		super.init();
 
 		let player_x = 10;
-		let player_y = 0;
 		let player_width = 10;
 		let player_height = 60;
 		let player_speed = 10; // server is 10
@@ -63,14 +63,14 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.move_to = 	-1; // saves the y-coordinate the player should move to
 
 		this.player_left =	new Player(player_x,
-										player_y,
+										(this.height_unscaled - player_height) / 2,
 										player_width,
 										player_height,
 										player_speed,
 										player_color,
 										this.ctx);
 		this.player_right =	new Player(this.width_unscaled - player_x - player_width,
-										player_y,
+										(this.height_unscaled - player_height) / 2,
 										player_width,
 										player_height,
 										player_speed,
@@ -110,7 +110,7 @@ export class PongCanvasElement extends canvasBaseClass {
 			this.player_left.old_score = state.score_l;
 			this.player_right.old_score = state.score_r;
 			// requestAnimationFrame() for drawBackground() ???
-			this.background.drawBackground(this.curr_state.score_l, this.curr_state.score_r);
+			this.background.drawBackground(state.score_l, state.score_r);
 		}
 
 		// making a frame between the states sent by the server
@@ -170,7 +170,6 @@ export class PongCanvasElement extends canvasBaseClass {
 	async handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
 
-		console.log("Received message: ", data);
 		if (data.type === "state_update") {
 			await this.updateGame(data.game_state);
 		}

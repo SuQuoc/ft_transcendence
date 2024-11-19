@@ -5,7 +5,7 @@ RUN apt-get update \
 		postgresql-client \
 	&& rm -rf /var/lib/apt/lists/*
 
-WORKDIR /daphne
+WORKDIR /game
 
 RUN pip install --upgrade pip
 COPY requirements.txt requirements.txt

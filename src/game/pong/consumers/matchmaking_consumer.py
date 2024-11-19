@@ -13,7 +13,6 @@ from .pong_game_consumer import GameMode
 
 games = {}
 
-# TODO: Notion todo
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     lock = asyncio.Lock()
     players = {} # NOTE: cache in production? 
@@ -42,18 +41,9 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
 
     async def disconnect(self, close_code):
-        # NOTE: using a dict instead of a list would be more efficient i think
         MatchmakingConsumer.players.pop(self.user_id, None)
-        
-        """ if any(self.channel_name in player.values() for player in MatchmakingConsumer.players):
-            MatchmakingConsumer.players.remove(
-                {
-                    "channel_name": self.channel_name, 
-                    "user_id": self.user_id
-                }) """
-        print("DISCONNECTING GRACEFULLY?")
-        await super().disconnect(close_code) # NOTE: parent method only has a pass so not needed i guess
-        # self.close(close_code)
+        await super().disconnect(close_code)
+
     
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -74,6 +64,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                 "type": "match_found",
                 "match_id": match_id
             })
+
 
     async def trigger_disconnection(self, channel_name):
         await self.channel_layer.send(
