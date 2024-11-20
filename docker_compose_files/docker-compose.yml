@@ -27,12 +27,12 @@ services:
       - network_user_management
       - network_registration
       - network_django
+    restart: on-failure
     secrets:
       - source: ssl_webpage.crt
-        target: /run/secrets/${DOMAIN:-localhost}.crt
+        target: /etc/ssl/certs/ssl_webpage.crt
       - source: ssl_webpage.key
-        target: /run/secrets/${DOMAIN:-localhost}.key
-    restart: on-failure
+        target: /etc/ssl/certs/ssl_webpage.key
 
 volumes:
   volume_game:

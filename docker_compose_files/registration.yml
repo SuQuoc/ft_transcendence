@@ -2,7 +2,7 @@ services:
 
   db_registration:
     container_name: pong_reg_db
-    image: postgres:16
+    build: ../src/common_files/postgres
     environment:
       POSTGRES_DB: "${REG_POSTGRES_DB:-reg_postgress_db}"
       POSTGRES_USER: "${REG_POSTGRES_USER:-reg_postgress_user}"
@@ -13,7 +13,6 @@ services:
       - 5432
     volumes:
       - volume_registration:/var/lib/postgresql/data
-      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${REG_POSTGRES_USER:-reg_postgress_user} -d ${REG_POSTGRES_DB:-reg_postgress_db}"]
       interval: 10s
