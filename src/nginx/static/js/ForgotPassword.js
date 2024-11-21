@@ -16,6 +16,7 @@ export class ForgotPassword extends ComponentBaseClass {
         this.shadowRoot.getElementById('resetSubmitButton').addEventListener('click', this.resetPassword.bind(this));
         this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
         this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOtpInput.bind(this));
+        this.shadowRoot.getElementById('resetEmail').addEventListener('input', this.checkEmailInput.bind(this));
         this.shadowRoot.getElementById('newPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
         this.shadowRoot.getElementById('newPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
     }
@@ -45,7 +46,7 @@ export class ForgotPassword extends ComponentBaseClass {
                     <label for="resetEmail" class="form-label text-white-50">Email address</label>
                     <div class="input-group mb-3">
                         <input name="email" id="resetEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" autocomplete="email">
-                        <button class="btn btn-custom" type="submit" id="requestOTP" style="min-width: 100px;">Send OTP</button>
+                        <button class="btn btn-custom" type="submit" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
                     </div>
                     <span id="errorMessage" class="text-danger"></span>
                     <div id="otpSection" style="display: none;">
@@ -81,6 +82,7 @@ export class ForgotPassword extends ComponentBaseClass {
 
         resetButton.disabled = true;
         resetSpinner.style.display = 'inline-block';
+        this.shadowRoot.getElementById('errorMessage').textContent = '';
 
         try {
             const response = await fetch('/registration/basic_forgot_password', {
@@ -91,8 +93,8 @@ export class ForgotPassword extends ComponentBaseClass {
                 body: JSON.stringify({ "username": email }),
             });
             if (!response.ok) {
-                const responseData = await response.json();
-				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+                const responseData = await response.text();
+				const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 				throw new Error(errorMessage);
             }
             this.startTimer(60, resetButton);
@@ -137,8 +139,8 @@ export class ForgotPassword extends ComponentBaseClass {
                 body: JSON.stringify({ "username": email, otp, "new_password": password1 }),
             });
             if (!response.ok) {
-                const responseData = await response.json();
-				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+                const responseData = await response.text();
+				const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 				throw new Error(errorMessage);
             }
             app.router.go('/login', false);
@@ -148,6 +150,17 @@ export class ForgotPassword extends ComponentBaseClass {
             resetButton.disabled = false;
         } finally {
             resetSpinner.style.display = 'none';
+        }
+    }
+
+    checkEmailInput() {
+        const email = this.shadowRoot.getElementById('resetEmail').value;
+        const resetButton = this.shadowRoot.getElementById('requestOTP');
+        const emailPattern = /^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (email && emailPattern.test(email)) {
+            resetButton.disabled = false;
+        } else {
+            resetButton.disabled = true;
         }
     }
 
