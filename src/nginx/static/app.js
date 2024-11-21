@@ -63,7 +63,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	});
 
 	userProfileButton.addEventListener('keydown', (event) => {
-		if (event.key == 'Enter' || event.key == 'Space') {
+		if (event.key == 'Enter' || event.key == ' ') {
 			userProfileContainer.classList.add('open');
 		}
 	});
@@ -73,7 +73,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	});
 
 	closeUserProfile.addEventListener('keydown', (event) => {
-		if (event.key == 'Enter' || event.key == 'Space') {
+		if (event.key == 'Enter' || event.key == ' ') {
 			userProfileContainer.classList.remove('open');
 		}
 	});

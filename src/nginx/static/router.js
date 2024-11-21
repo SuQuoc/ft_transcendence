@@ -358,7 +358,7 @@ const Router = {
 	},
 
 	handleNavLinkKeydown(event) {
-		if (event.key === "Enter" || event.key === "Space") {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			const url = event.target.getAttribute("href");
 			Router.go(url);
