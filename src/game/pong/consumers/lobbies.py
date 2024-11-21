@@ -7,6 +7,7 @@ from .utils import *
 from pong.forms import CreateTournamentForm
 import httpx
 import asyncio
+from .bracket_tournament_logic import tournament_loop
 
 # Dependency to other Microservice
 async def get_displayname(cookie_dict):
@@ -216,12 +217,11 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             await self.leave_ongoing_tournament()
             
     async def leave_ongoing_tournament(self):
-        print("DC in disconnect")
         if self.in_game:
-            await self.queue.put({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
+            await self.queue.put({"type": T_DC_IN_GAME, "id": self.user.id})
             # self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
         else:
-            await self.queue.put({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
+            await self.queue.put({"type": T_DC_OUT_GAME, "id": self.user.id})
             # self.queue.put_nowait({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
 
     async def get_tournament_list(self):
@@ -412,10 +412,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         return room
 
     def start_tournament(self, room: TournamentRoom):
-        from .bracket_tournament_logic import tournament_loop
-        
-        # await self.group_send_Room(T_START_TOURNAMENT, room)
-        # for player in room.players:
         print("1) start tournament - creating queue")
         LobbiesConsumer.room_queues[room.name] = asyncio.Queue() # or a queue for each player?
         task = asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
@@ -423,10 +419,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     def cleanup_tournament_task(self, room_name):
         queue = LobbiesConsumer.room_queues.pop(room_name, None)
-        if queue: # TODO: justy a debug block, delete later
-            print("Queue still exists")
-        else:
-            print("Queue deleted")
+        # if queue: # TODO: justy a debug block, delete later
+        #     print("Queue still exists")
+        # else:
+        #     print("Queue deleted")
 
     async def group_remove(self, group_name: str):
         """
