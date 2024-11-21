@@ -143,8 +143,8 @@ export class ComponentBaseClass extends HTMLElement {
 
 		// Handle response
 		if (!response.ok) {
-			const responseData = await response.json();
-			const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			const responseData = await response.text();
+			const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 			throw new Error(errorMessage);
 		}
 

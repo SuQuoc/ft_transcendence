@@ -266,8 +266,8 @@ export class SignupPage extends ComponentBaseClass {
 			});
 
 			if (!response.ok) {
-				const responseData = await response.json();
-				const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+				const responseData = await response.text();
+				const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 				throw new Error(errorMessage);
 			}
 			this.startOtpRequestCooldown();
@@ -346,8 +346,8 @@ export class SignupPage extends ComponentBaseClass {
 			body: JSON.stringify({ username: email, new_password: password1 })
 		  });
 		  if (!response.ok) {
-			  const responseData = await response.json();
-			  const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			  const responseData = await response.text();
+			  const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 			  throw new Error(errorMessage);
 		  }
 		} catch (error) {
@@ -367,8 +367,8 @@ export class SignupPage extends ComponentBaseClass {
 			body: JSON.stringify({ current_username: this.currentUsername, new_username: email })
 		  });
 		  if (!response.ok) {
-			  const responseData = await response.json();
-			  const errorMessage = Object.values(responseData)[0] || 'An unknown error occurred';
+			  const responseData = await response.text();
+			  const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
 			  throw new Error(errorMessage);
 		  }
 		  this.currentUsername = email;
