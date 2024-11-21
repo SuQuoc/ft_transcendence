@@ -56,11 +56,25 @@ window.addEventListener("DOMContentLoaded", async () => {
 	const userProfileContainer = document.getElementById('userProfileContainer');
     const closeUserProfile = document.getElementById('closeUserProfile');
 
+
+	//TODO: maybe move this part to the router
 	userProfileButton.addEventListener('click', () => {
 		userProfileContainer.classList.add('open');
 	});
 
+	userProfileButton.addEventListener('keydown', (event) => {
+		if (event.key == 'Enter' || event.key == 'Space') {
+			userProfileContainer.classList.add('open');
+		}
+	});
+
 	closeUserProfile.addEventListener('click', () => {
 		userProfileContainer.classList.remove('open');
+	});
+
+	closeUserProfile.addEventListener('keydown', (event) => {
+		if (event.key == 'Enter' || event.key == 'Space') {
+			userProfileContainer.classList.remove('open');
+		}
 	});
 });
