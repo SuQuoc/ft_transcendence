@@ -22,56 +22,33 @@ async def tournament_loop(room: TournamentRoom, queue):
 
 
     players = room.players
-    pairs, odd_one = make_random_pairs(players)
-    if odd_one:
-        await send_free_win(channel_group, odd_one.id)
     # someone left while waiting for other match to end
 
     while len(players) > 1:
-        matches = [
-            {
-                "match_id": create_match_config([pair[0].id, pair[1].id],
-                                                GameMode.TOURNAMENT.value,
-                                                points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
-                "player1": pair[0].name,
-                "player2": pair[1].name
-            }
-            for pair in pairs
-        ]
-        print(json.dumps(matches, indent=4))
+        matches = await create_tournament_bracket(channel_group, players, room)
         await send_tournament_bracket(channel_group, matches)
 
-        match_results = []
-        dc_in_game = 0
-        dc_out_game = []
-        while len(match_results) + dc_in_game < len(pairs) * 2:
+        winners = set()
+        msg_count = 0
+        while msg_count != len(players):
             message = await queue.get()
             print("MESSAGE ARRIVED")
             if message.get("type") == T_MATCH_RESULT:
-                match_results.append(message)
+                msg_count += 1
+                winners = {player for player in players if player.id == message.get("winner")}
             elif message.get("type") == T_DC_IN_GAME:
                 print("DC in game")
-                dc_in_game += 1
+                msg_count += 1
             elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
                 print("DC out game")
                 id = message.get("id")
-                dc_out_game.append(id)
+                winners = {player for player in winners if player.id != id}
             queue.task_done() # NOTE: necessary in our case?
 
-        match_results = remove_duplicates(match_results)
-        if match_results:
-            winners = get_winners(match_results, players)
-
-        if dc_out_game:
-            winners = [winner for winner in winners if winner.id not in dc_out_game]
-
-        pairs, odd_one = make_random_pairs(winners)
-        if odd_one:
-            await send_free_win(channel_group, odd_one.id)
         players = winners
 
     if players:
-        winner_name = players[0].name
+        winner_name = players[0]
         print("!!!!! Winner is: ", winner_name)
         await send_tournament_end(channel_group, winner_name)
     print("TOURNAMENT TASK FINISSHED ==============")
@@ -123,6 +100,25 @@ def remove_duplicates(match_results):
             unique_results.append(result)
     return unique_results
 
+
+
+async def create_tournament_bracket(channel_group, players, room):
+    pairs, odd_one = make_random_pairs(players)
+    if odd_one:
+        await send_free_win(channel_group, odd_one.id)
+
+    matches = [
+            {
+                "match_id": create_match_config([pair[0].id, pair[1].id],
+                                                GameMode.TOURNAMENT.value,
+                                                points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
+                "player1": pair[0].name,
+                "player2": pair[1].name
+            }
+            for pair in pairs
+        ]
+    print(json.dumps(matches, indent=4))
+    return matches
 
 async def send_tournament_bracket(group_name, matches):
     await channel_layer.group_send(
