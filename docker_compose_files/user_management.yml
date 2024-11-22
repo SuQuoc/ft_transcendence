@@ -33,7 +33,7 @@ services:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
       DEBUG: ${DEBUG:-True} # TODO: change to False or set DEBUG in actions to True?
 
-      DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5fdsfdsfdsvcxvsEWvcxvzqca7(sm#(x9nnf*5(kjnk}
       DJ_ALLOWED_HOSTS: "${UM_DJ_ALLOWED_HOSTS:-localhost}" # TODO: needed?
       DB_HOST: "${UM_DB_HOST:-db_usermanagement}"
 
