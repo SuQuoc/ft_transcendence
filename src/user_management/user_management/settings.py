@@ -27,6 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
+TEST = os.getenv("TEST") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -111,8 +112,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB"),  # docker-compose environment POSTGRES_DB
-        "USER": os.environ.get("POSTGRES_USER") if DEBUG else os.environ.get("POSTGRES_ACCESS_USER"), # i need the postgres root user to run tests, since they are done in a separate database
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD") if DEBUG else os.environ.get("POSTGRES_ACCESS_PASSWORD"),
+        "USER": os.environ.get("POSTGRES_USER") if TEST else os.environ.get("POSTGRES_ACCESS_USER"), # i need the postgres root user to run tests, since they are done in a separate database
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD") if TEST else os.environ.get("POSTGRES_ACCESS_PASSWORD"),
         "HOST": os.environ.get("DB_HOST"),  # docker-compose service name
         "PORT": "5432",
     }
@@ -209,7 +210,7 @@ SIMPLE_JWT = {
     # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }
 
-if DEBUG:
+if TEST:
     with open('/run/secrets/private_key.pem', 'r') as f:
         PRIVATE_KEY = f.read()
         SIMPLE_JWT['SIGNING_KEY'] = PRIVATE_KEY # ONLY required for django api tests
