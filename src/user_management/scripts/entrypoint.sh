@@ -9,7 +9,7 @@ python manage.py migrate
 #TODO: uncomment when checking for deployment
 #python manage.py collectstatic --noinput
 
-if [ "$DEBUG" = "True" ]; then # TODO: ok like this?
+if [ "$DEBUG" = "True" ]; then
     echo "Creating django admin user..."
     cat << EOF | python manage.py shell
 from django.contrib.auth import get_user_model
@@ -17,7 +17,10 @@ User = get_user_model()
 if not User.objects.filter(username='$DJ_SUDO_USERNAME').exists():
     User.objects.create_superuser('$DJ_SUDO_USERNAME', '$DJ_SUDO_EMAIL', '$DJ_SUDO_PASSWORD')
 EOF
-    
+fi
+
+
+if [ "$TEST" = "True" ]; then 
     echo "Creating test users..."
     python manage.py create_testusers # Run custom command
 fi
