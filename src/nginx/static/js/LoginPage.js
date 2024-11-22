@@ -15,11 +15,17 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
 		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
-		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', (event) => {
-			if (event.key === 'Enter') {
-				this.login(event);
-			}
+		const formFields = this.root.querySelectorAll("#loginForm > input");
+		if (formFields.length === 0)
+			return;
+		formFields.forEach(inputfield => {
+			inputfield.addEventListener("keydown", (event) => {
+				if (event.key === 'Enter') {
+					this.login(event);
+				}
+			});
 		});
+
 	}
 
 	//TODO: check why the event handler for new otp button isn't working
