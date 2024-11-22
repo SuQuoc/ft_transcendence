@@ -10,9 +10,9 @@ from rest_framework.test import APITestCase
 from test_setup import MyTestSetUp
 from utils_jwt import generate_token
 
-UNDER_ONE_MB = "default/900kb.jpg"
-AROUND_ONE_MB = "default/1mb.jpg"
-OVER_ONE_MB = "default/1.8mb.jpg"
+UNDER_ONE_MB = "test/900kb.jpg"
+AROUND_ONE_MB = "test/1mb.jpg"
+OVER_ONE_MB = "test/1.8mb.jpg"
 
 NEW_NAME = "NewName"
 
@@ -91,8 +91,8 @@ class TestCrud(MyTestSetUp):
         response = self.client.get(self.url_profile, format="json", secure=True, **self.headers)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {"displayname": self.displayname, "image": '/um/media/images/profile/default/default_avatar.png'})
-
+        self.assertEqual(response.json(), {"displayname": self.displayname, "image": '/media_url/profile_images/default_avatar.png'})
+        
     def test_invalid_jwt_get(self):
         self.test_success()
         self.setup_jwt_with_cookie(self.user_id2)

@@ -11,6 +11,7 @@ services:
     build: ../src/nginx
     volumes: # [aguilmea]  this has to be deleted once dev is ready
       - ../src/nginx/static:/usr/share/nginx/html
+      - volume_images:/usr/share/nginx/html/media
     environment:
       - DOMAIN=${DOMAIN:-localhost}
       - SSL_PORT=${SSL_PORT:-8443}
@@ -38,6 +39,7 @@ volumes:
   volume_game:
   volume_registration:
   volume_user_management:
+  volume_images:
 
 networks:
   network_game:

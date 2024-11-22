@@ -40,11 +40,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api",
-    "friends",
     "rest_framework",
     "rest_framework_simplejwt",
     'corsheaders',  # [aguilmea] added manually for cookies
+    "api",
+    "friends",
 ]
 
 MIDDLEWARE = [
@@ -158,8 +158,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'uploads/')
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 #TODO: check how we use MEDIA_URL and if it works without debug flag
-MEDIA_URL = "um/media/"  # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
-MEDIA_ROOT = BASE_DIR / "uploads"
+MEDIA_URL = "media_url/"  # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root/')
 
 
 # Default primary key field type
@@ -169,6 +169,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # SECURITY --------------------------------
+
+
+
 CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
 
@@ -211,18 +214,14 @@ if DEBUG:
         PRIVATE_KEY = f.read()
         SIMPLE_JWT['SIGNING_KEY'] = PRIVATE_KEY # ONLY required for django api tests
 
-CORS_ALLOWED_ORIGINS = [
-    os.environ.get('SERVER_URL'),
-]
 
-CORS_ALLOW_CREDENTIALS = True
 
 APPEND_SLASH = False
 
 # [aguilmea] to check what
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = True
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = True
+# SECURE_SSL_REDIRECT = True
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True

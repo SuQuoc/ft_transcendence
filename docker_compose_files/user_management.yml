@@ -27,6 +27,7 @@ services:
     build: ../src/user_management
     volumes:
       - ../src/user_management:/user_management
+      - volume_images:/user_management/media_root
     expose:
       - "8000/tcp"
     environment:
