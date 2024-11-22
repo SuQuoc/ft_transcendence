@@ -116,6 +116,7 @@ async def create_tournament_bracket(channel_group, players, room):
     matches = [
             {
                 "match_id": create_match_config([pair[0].id, pair[1].id],
+                                                [pair[0].name, pair[1].name],
                                                 GameMode.TOURNAMENT.value,
                                                 points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
                 "player1": pair[0].name,
