@@ -92,10 +92,11 @@ class TestAccessibility:
                 page.locator("#loginPassword").fill(NEWUSERPW)
                 page.locator("#loginSubmitButton").press("Enter")
                 otp = get_otp()
-                page.wait_for_selector("#otpCode", state="visible")
-                page.locator("#otpCode").fill(otp)
+                page.wait_for_selector("#loginOtpCode", state="visible")
+                page.locator("#loginOtpCode").fill(otp)
                 page.locator("#loginSubmitButton").press("Enter")
                 expect(page.locator("#mainContent")).to_be_visible()
+                delete_user(page, USERPW)
             
             except:
                 expect(page.locator("#FAIL")).to_be_visible()
