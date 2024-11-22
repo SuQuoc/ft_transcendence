@@ -172,9 +172,9 @@ cython_debug/
 
 tests/playwright_tests/auth_state.json
 
-*.png
-*.jpeg
-*.jpg
+# *.png
+# *.jpeg
+# *.jpg
 !src/user_management/uploads/images/profile/default/*
 src/registration/project/staticfiles/
 src/registration/*.prof
