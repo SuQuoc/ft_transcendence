@@ -79,13 +79,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         
         print(f"Match config: {self.match_config}")
         self.game_mode = self.match_config.get('game_mode')
-        
-        if self.game_mode == GameMode.TOURNAMENT.value:
-            self.displayname = get_name_from_match_config(self.match_config, self.user_id)
-        else:
-            self.displayname = get_displayname(self.scope['cookie'])
-
-
+        self.displayname = get_name_from_match_config(self.match_config, self.user_id)
 
         self.game_group = f'game_{self.match_id}'
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers

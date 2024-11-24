@@ -433,6 +433,12 @@ class Pong:
 
 
     async def send_initial_state(self, game_state):
+        print({
+                'type': Type.INITIAL_STATE.value,
+                'game_state': game_state,
+                'left_player': self.player_l.name,
+                'right_player': self.player_r.name,
+            })
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
