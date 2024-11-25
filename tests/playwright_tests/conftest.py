@@ -153,7 +153,7 @@ def login(page: Page, email: str, password: str):
     page.locator("#loginPassword").fill(password)
     page.locator("#loginSubmitButton").click()
     otp = get_otp()
-    page.locator("#otpCode").fill(otp)
+    page.locator("#loginOtpCode").fill(otp)
     page.locator("#loginSubmitButton").click()
 
 
