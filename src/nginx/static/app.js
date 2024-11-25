@@ -1,4 +1,5 @@
 import Router from './router.js';
+import { EventQueue } from './js/eventQueueClass.js';
 
 // global
 const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
@@ -13,6 +14,7 @@ window.app = {
 	pong_socket: null,
 	match_socket: null,
 	userData: storedUserData,
+	socket_event_queue: new EventQueue()
 };
 
 // Save userData to localStorage whenever it changes

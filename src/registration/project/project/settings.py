@@ -96,7 +96,7 @@ DATABASES = {
         'USER': os.environ.get('POSTGRES_ACCESS_USER'),
         'PASSWORD': os.environ.get('POSTGRES_ACCESS_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+        'PORT': "5432",
     }
 }
 
@@ -136,7 +136,6 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# added manually
 
 with open('/run/secrets/private_key.pem', 'r') as f:
     PRIVATE_KEY = f.read()
@@ -145,7 +144,7 @@ with open('/run/secrets/public_key.pem', 'r') as f:
     PUBLIC_KEY = f.read()
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -224,12 +223,12 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "non_verified_users_after_one_day": {
         "task": "project.celery.non_verified_users_after_one_day",
-        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        #"schedule": crontab(minute="*/1"), # for testing purpose
         "schedule": crontab(minute=0, hour=0),
     },
     "users_without_login_within_one_year": {
         "task": "project.celery.users_without_login_within_one_year",
-        #"schedule": crontab(minute="*/1"), # [aguilmea] for testing purpose
+        #"schedule": crontab(minute="*/1"), # for testing purpose
         "schedule": crontab(minute=0, hour=0),
     },
 }

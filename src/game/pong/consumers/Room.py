@@ -139,12 +139,20 @@ class TournamentRoom:
     def is_empty(self):
         return self.cur_player_num == 0
     
+    def has_player(self, player_id):
+        for player in self.players:
+            if player.id == player_id:
+                return True
+        return False
+    
     def add_player(self, player: Player):
         if not isinstance(player, Player):
             raise ValueError("player must be an instance of Player")
         if self.is_full():
             raise ValueError(f"Lobby room '{self.name}' is max - SHOULD NEVER HAPPEN.")
-        
+        if self.has_player(player.id):
+            raise AlreadyInRoom()
+
         print(f"Adding player {player.name} to room {self.name}")
 
         self.players.append(player)
@@ -164,3 +172,9 @@ class TournamentRoom:
         self.players.remove(player)
         self.cur_player_num -= 1
     
+
+class AlreadyInRoom(Exception):
+    """Custom exception type for room-related errors."""
+    def __init__(self, message="User is already in the room."):
+        self.message = message
+        super().__init__(self.message)

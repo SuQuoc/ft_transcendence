@@ -22,8 +22,21 @@ class TestAccessibility:
                 page.locator("#loginWith42").press("Enter")
                 expect(page).to_have_url(re.compile("https://auth.42.fr/*"))
 
+                page.goto(BASE_URL) 
+                page.locator("#forgotPassword").press("Enter")
+                expect(page.locator("#forgotPasswordForm")).to_be_visible()
+                page.locator("#forgotPasswordGoToLogin").press("Enter")
+                expect(page.locator("#loginForm")).to_be_visible()
+                
+                page.goto(BASE_URL) 
+                page.locator("#forgotPassword").press("Enter")
+                expect(page.locator("#forgotPasswordForm")).to_be_visible()
+                page.locator("#forgotPasswordGoToSignup").press("Enter")
+                expect(page.locator("#signupForm")).to_be_visible()
+
+
                 page.goto(BASE_URL)
-                page.locator("#loginGoToSignup").press("Enter")
+                page.locator("#loginGoToSignup").click()
                 page.locator("#signupGoToLogin").press("Enter")
                 expect(page.locator("#loginForm")).to_be_visible()
 
@@ -39,10 +52,9 @@ class TestAccessibility:
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").press("Enter")
                 set_display_name(page, USERDISPLAYNAME)
-                delete_user(page, USERPW)
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
 
             finally:
                 context.close()
@@ -72,7 +84,7 @@ class TestAccessibility:
                 expect(page.locator("#loginForm")).to_be_visible()
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible()
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1)
 
             finally:
                 context.close()
@@ -96,10 +108,10 @@ class TestAccessibility:
                 page.locator("#loginOtpCode").fill(otp)
                 page.locator("#loginSubmitButton").press("Enter")
                 expect(page.locator("#mainContent")).to_be_visible()
-                delete_user(page, USERPW)
+                delete_user(page, NEWUSERPW)
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible()
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1)
 
             finally:
                 context.close()

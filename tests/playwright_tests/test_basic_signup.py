@@ -59,10 +59,10 @@ class TestBasicSignup:
                 
             # finishing the signup and deleting the user
                 set_display_name(page, USERDISPLAYNAME)
-                delete_user(page, USERPW) # [aguilmea] delete does not working right now because not implemented in the frontend
+                delete_user(page, USERPW)
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
             
             finally:
                 context.close()
@@ -97,7 +97,7 @@ class TestBasicSignup:
                 expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
             
             finally:
                 context.close()
@@ -125,7 +125,7 @@ class TestBasicSignup:
                 expect(page.locator("#errorMessagePassword")).to_have_text("Passwords don't match")
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible()
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1)
         
             finally:        
                 context.close()

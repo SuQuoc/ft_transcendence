@@ -6,8 +6,7 @@ from rest_framework.decorators import authentication_classes , permission_classe
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-
-from ..authenticate import AccessTokenAuthentication
+from ..authenticate import CredentialsAuthentication
 from .utils_oauthtwo import generate_authorization_request_data, get_ft_email, request_ft_token, request_ft_user, login, signup
 from .utils import generate_redirect_with_state_cookie
 from ..models import OauthTwo, RegistrationUser
@@ -18,6 +17,7 @@ if settings.SILK:
     from .utils_silk import conditional_silk_profile
 
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 def send_authorization_request(request):
     try:
@@ -38,6 +38,7 @@ def send_authorization_request(request):
 
 #TODO: look into making get_ft_email async to speed up signing up/logging in
 @api_view(['POST'])
+@authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])
 def exchange_code_against_access_token(request):
     try:

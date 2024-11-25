@@ -169,7 +169,10 @@ def delete_user(page: Page, password: str):
     page.locator("#deleteUserButton").click()
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#requestDeleteUserButton").click()
-    # [aguilmea] delete user has no otp in the front end but in the backend it has - so it is not working rigth now
+    otp = get_otp()
+    page.locator("#deleteUserOTP").fill(otp)
+    page.locator("#confirmDeleteUserButton").click()
+    expect(page.locator("#loginForm")).to_be_visible()
 
 
 def get_otp():
@@ -180,7 +183,7 @@ def get_otp():
     last_saved_file = max(files, key=os.path.getmtime)
     with open(last_saved_file, 'r') as f:
         content = f.read().strip()
-    match = re.search(r'The code is:\s*(\d{16})', content)
+    match = re.search(r'The code is:\s*([A-Za-z0-9]{16})', content)
     if match:
         otp = match.group(1)  # Extract the matched OTP
         return otp

@@ -16,10 +16,6 @@
 	--custom-btn-click-color: #0c0d52;
 }
 
-html {
-	min-height: 100%;
-}
-
 body {
 	background: var(--custom-bg-color);
 }

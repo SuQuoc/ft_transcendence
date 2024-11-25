@@ -96,7 +96,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			console.error("Error: tournamentNameError: error not handled yet: ", error); // TODO: handle these errors !!!
 		}
 		else
-			console.error("Error: tournamentNameError: unknown error: ", error);
+			console.error("Error: tournamentError: unknown error: ", error);
 	};
 
 	/** hides or shows a text that says "no tournaments to join" */
@@ -279,7 +279,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 												tournament.max_player_num);
 			}
 		}
-
+		else if (data.type === "tournament_bracket") {
+			window.app.socket_event_queue.add(event);
+		}
 		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
 			// ignoring these types for now !!!
 		}

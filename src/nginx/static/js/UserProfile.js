@@ -60,14 +60,14 @@ export class UserProfile extends ComponentBaseClass {
         <form id="profileForm">
           <div class="mb-3">
             <label for="displayName" class="form-label">Display Name</label>
-            <input type="text" class="form-control" id="displayName">
+            <input type="text" class="form-control" id="displayName" maxlength="20">
             <div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
           </div>
           <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
             <input type="email" class="form-control" id="email" disabled readonly>
           </div>
-          <button type="button" class="btn btn-primary" id="saveProfile">Save</button>
+          <button type="submit" class="btn btn-primary" id="saveProfile">Save</button>
           <div class="spinner-border text-light" role="status" id="saveProfileSpinner">
             <span class="visually-hidden">Loading...</span>
           </div>
@@ -97,7 +97,7 @@ export class UserProfile extends ComponentBaseClass {
             <div class="warning-message" id="passwordWarning">Passwords do not match</div>
             <div class="warning-message" id="changePasswordWarning">Error changing password</div>
           </div>
-          <button type="button" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
+          <button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
           <div class="spinner-border text-light" role="status" id="changePasswordSpinner">
             <span class="visually-hidden">Loading...</span>
           </div>

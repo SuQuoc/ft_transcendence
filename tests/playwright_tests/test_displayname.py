@@ -1,7 +1,7 @@
 
 from playwright.sync_api import expect
 from playwright.sync_api import Page, sync_playwright, Browser, BrowserContext
-from conftest import signup, login, set_display_name
+from conftest import signup, login, set_display_name, delete_user
 
 PASSWORD = "CVciCdUbOu"
 
@@ -26,9 +26,10 @@ class TestInputtingDisplayName:
                 page.wait_for_selector("#displayNameForm", timeout=5000)
                 set_display_name(page, "displayname")
                 expect(page.locator("#navbar")).to_be_visible()
+                # deleting user in next test, because it is needed there
             except:
                 print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
-                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
             
             finally:
                 page.close()
@@ -69,9 +70,15 @@ class TestInputtingDisplayName:
             expect(login_page.locator("#displayNameWarning")).to_be_hidden()
             login_page.locator("#displayNameSubmitButton").click()
             expect(login_page.locator("#navbar")).to_be_visible()
+            delete_user(login_page, PASSWORD)
+
+            # deleting user from previous test here, because it was needed in this one to check if you can choose a taken displayname
+            login(login_page, "transcendence42vienna+displayname@gmail.com", PASSWORD)
+            delete_user(login_page, PASSWORD)
+
         except:
             print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
-            expect(login_page.locator("#FAIL")).to_be_visible() # causing an intended failure
+            expect(login_page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
 
 
     
