@@ -32,6 +32,7 @@ export class StatisticsPage extends ComponentBaseClass {
 		// remove event listeners
 	}
 
+
 	/// ----- Methods ----- ///
 
 	async getStats() {
@@ -96,13 +97,32 @@ export class StatisticsPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles style="display: none"></scripts-and-styles>
-
 			<!-- Toasts -->
 			<div class="toast-container d-flex flex-column gap-1 position-fixed bottom-0 end-0 p-3">
 				<!-- Error toasts will be added here -->
 			</div>
 
 			<div class="d-flex flex-column align-items-center w-100 m-4 gap-4">
+				<!-- profile picture and displayname -->
+				<div class="d-flex">
+					<img src="https://i.pravatar.cc/150?img=52"
+					class="stats-profile-image"
+					id="statsProfileImage"
+					alt="Profile Image"
+					onerror='this.src = "https://i.pravatar.cc/150?img=52"'
+					>
+					<div class="d-flex flex-column w-100 h-100 bg-dark">
+						<span class="text-white fs-4">displayname</span>
+						<hr class="w-75 text-white-50 m-0">
+						<!-- total games -->
+						<div class="d-flex flex-column align-items-center">
+							<span class="text-white fs-1 lh-1">10</span>
+							<span class="text-white-50">Total Games played</span>
+						</div>
+					</div>
+				</div>
+
+
 				<!-- total games -->
 				<div class="d-flex flex-column align-items-center bg-dark rounded-3 gap-2 p-2">
 					<span id="statTotalGamesPlayed" class="text-white fs-1 lh-1 ">0</span>

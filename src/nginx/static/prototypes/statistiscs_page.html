@@ -43,12 +43,33 @@
 
 		<!-- V1 -->
 		<div class="d-flex flex-column align-items-center w-100 gap-4">
-			<!-- total games -->
-			<div class="d-flex flex-column align-items-center bg-dark rounded-3 gap-2 p-2">
-				<span class="text-white fs-1 lh-1 pe-1">10</span>
-				<span class="text-white-50">Total Games played</span>
-
+		<!-- profile picture and displayname -->
+		<div class="d-flex bg-dark rounded-4 p-2">
+			<img src="https://i.pravatar.cc/150?img=52"
+			class="stats-profile-image"
+			id="statsProfileImage"
+			alt="Profile Image"
+			onerror='this.src = "https://i.pravatar.cc/150?img=52"'
+			>
+			<div class="d-flex flex-column align-items-center h-auto">
+				<div class="d-flex align-items-center h-50">
+					<span class="text-white fs-4">displayname</span>
+				</div>
+					<hr class="w-75 text-white-50 m-0">
+				<!-- total games -->
+				<div class="d-flex flex-column align-items-center justify-content-around h-50">
+					<div class="d-flex flex-column align-items-center">
+						<span class="text-white fs-1 lh-1">10</span>
+						<span class="text-white-50">Total Games played</span>
+					</div>
+				</div>
 			</div>
+		</div>
+
+
+
+
+
 
 			<!-- lost/won percentage bar -->
 			<div class="d-flex align-items-center bg-dark w-75 rounded-3 gap-2 p-2">
