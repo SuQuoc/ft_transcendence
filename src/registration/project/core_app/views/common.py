@@ -74,7 +74,7 @@ def change_username(request):
         elif not backup_code:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         elif not user.check_backup_code(backup_code):
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.username = new_username
         user.ft_userid = None
         user.save()

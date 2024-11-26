@@ -2,7 +2,7 @@ services:
   # TODO: change _MANAGEMENT ending to _UM
   db_usermanagement:
     container_name: pong_um_db
-    image: postgres:16
+    build: ../src/common_files/postgres
     environment:
       POSTGRES_DB: "${UM_POSTGRES_DB:-default_db}"
       POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
@@ -13,7 +13,6 @@ services:
       - 5432
     volumes:
       - volume_user_management:/var/lib/postgresql/data
-      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${UM_POSTGRES_USER:-posty} -d ${UM_POSTGRES_DB:-default_db}"]
       interval: 10s
@@ -28,13 +27,14 @@ services:
     build: ../src/user_management
     volumes:
       - ../src/user_management:/user_management
+      - volume_images:/user_management/media_root
     expose:
       - "8000/tcp"
     environment:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
-      DEBUG: ${DEBUG:-True} # TODO: change to False or set DEBUG in actions to True?
+      DEBUG: ${DEBUG:-False}
 
-      DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5fdsfdsfdsvcxvsEWvcxvzqca7(sm#(x9nnf*5(kjnk}
       DJ_ALLOWED_HOSTS: "${UM_DJ_ALLOWED_HOSTS:-localhost}" # TODO: needed?
       DB_HOST: "${UM_DB_HOST:-db_usermanagement}"
 
@@ -49,6 +49,8 @@ services:
       DJ_SUDO_USERNAME: "${UM_DJ_SUDO_USERNAME:-admin}"
       DJ_SUDO_EMAIL: "${UM_DJ_SUDO_EMAIL:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${UM_DJ_SUDO_PASSWORD:-transcendence}"
+
+      TEST: "${UM_TEST:-False}"
     depends_on:
       db_usermanagement:
         condition: service_healthy

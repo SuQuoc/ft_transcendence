@@ -1,7 +1,7 @@
 services:
   db_game:
     container_name: pong_game_db
-    image: postgres:16
+    build: ../src/common_files/postgres
     environment: 
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_USER: "${GAME_POSTGRES_USER:-admin}"
@@ -12,7 +12,6 @@ services:
       - 5432
     volumes:
       - volume_game:/var/lib/postgresql/data
-      - ../src/common_files/db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     # RUN postgres on different port
     # command: ["postgres", "-p", "5433"]
     # Now we need add -p "db_port"to the healthckeck

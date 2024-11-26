@@ -11,6 +11,7 @@ services:
     build: ../src/nginx
     volumes: # [aguilmea]  this has to be deleted once dev is ready
       - ../src/nginx/static:/usr/share/nginx/html
+      - volume_images:/usr/share/nginx/html/media
     environment:
       - DOMAIN=${DOMAIN:-localhost}
       - SSL_PORT=${SSL_PORT:-8443}
@@ -27,17 +28,18 @@ services:
       - network_user_management
       - network_registration
       - network_django
+    restart: on-failure
     secrets:
       - source: ssl_webpage.crt
-        target: /run/secrets/${DOMAIN:-localhost}.crt
+        target: /etc/ssl/certs/ssl_webpage.crt
       - source: ssl_webpage.key
-        target: /run/secrets/${DOMAIN:-localhost}.key
-    restart: on-failure
+        target: /etc/ssl/certs/ssl_webpage.key
 
 volumes:
   volume_game:
   volume_registration:
   volume_user_management:
+  volume_images:
 
 networks:
   network_game:

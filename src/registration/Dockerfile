@@ -5,7 +5,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./project .
+COPY ./project /app/project
 
-#ENTRYPOINT ["./project/entrypoint.sh"]
-ENTRYPOINT ["./project/entrypoint_admin.sh"]
+ENTRYPOINT ["./project/entrypoint.sh"]
