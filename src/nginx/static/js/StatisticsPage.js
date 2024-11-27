@@ -32,6 +32,7 @@ export class StatisticsPage extends ComponentBaseClass {
 		// remove event listeners
 	}
 
+
 	/// ----- Methods ----- ///
 
 	async getStats() {
@@ -62,6 +63,10 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	setStats(stats) {
+		// this should always be set
+		this.root.getElementById("statsProfileImage").src = window.app.userData.profileImage;
+		this.root.getElementById("statsDisplayname").innerText = window.app.userData.username;
+
 		if (stats === null) // user hasn't played any matches yet or there is an error (error gets handled in getStats())
 			return;
 		const lost_percent = stats.losses / stats.total_matches * 100;
@@ -69,7 +74,7 @@ export class StatisticsPage extends ComponentBaseClass {
 		const lost_bar = this.root.getElementById("statsLostBar");
 		const won_bar = this.root.getElementById('statsWonBar');
 
-		this.root.getElementById("statTotalGamesPlayed").innerText = stats.total_matches;
+		this.root.getElementById("statsTotalGamesPlayed").innerText = stats.total_matches;
 		this.root.getElementById("statsTotalGamesLost").innerText = stats.losses;
 		this.root.getElementById("statsTotalGamesWon").innerText = stats.wins;
 		this.root.getElementById("statsLostPercent").innerText = parseInt(lost_percent) + "%";
@@ -96,18 +101,35 @@ export class StatisticsPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles style="display: none"></scripts-and-styles>
-
 			<!-- Toasts -->
 			<div class="toast-container d-flex flex-column gap-1 position-fixed bottom-0 end-0 p-3">
 				<!-- Error toasts will be added here -->
 			</div>
 
 			<div class="d-flex flex-column align-items-center w-100 m-4 gap-4">
-				<!-- total games -->
-				<div class="d-flex flex-column align-items-center bg-dark rounded-3 gap-2 p-2">
-					<span id="statTotalGamesPlayed" class="text-white fs-1 lh-1 ">0</span>
-					<span class="text-white-50">Total Games Played</span>
+				<!-- profile picture and displayname -->
+				<div class="d-flex bg-dark rounded-4 mx-4 p-2 gap-1">
+					<img src="https://i.pravatar.cc/150?img=52"
+					class="stats-profile-image"
+					id="statsProfileImage"
+					alt="Profile Image"
+					onerror='this.src = "https://i.pravatar.cc/150?img=52"'
+					>
+					<div class="d-flex flex-column align-items-center h-auto p-1">
+						<div class="d-flex align-items-center h-50">
+							<span id="statsDisplayname" class="text-break text-white fs-4 lh-1">displayname</span>
+						</div>
 
+						<hr class="w-75 text-white-50 m-0">
+
+						<!-- total games -->
+						<div class="d-flex flex-column align-items-center justify-content-around h-50">
+							<div class="d-flex flex-column align-items-center">
+								<span id="statsTotalGamesPlayed" class="text-white fs-1 lh-1">0</span>
+								<span class="text-nowrap text-white-50">Total Games played</span>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<!-- lost/won percentage bar -->
