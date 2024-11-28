@@ -16,7 +16,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 
-		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+		// getting elements
 		this.join_tournament_elements = this.root.getElementById("joinTournamentElements");
 		this.waiting_for_permission = this.root.getElementById("joinWaitingForPermission");
 		this.no_tournaments_to_join = this.root.getElementById("joinNoTournaments");

@@ -5,8 +5,10 @@ import { ErrorToastElement } from "./ErrorToastElement.js";
 export class StatisticsPage extends ComponentBaseClass {
 	constructor() {
 		super();
-		
-	}
+
+		this.root.getElementById("statsProfileImage").src = window.app.userData.profileImage;
+		this.root.getElementById("statsDisplayname").innerText = window.app.userData.username;
+}
 
 	async connectedCallback() {
 		super.connectedCallback();
@@ -63,10 +65,6 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	setStats(stats) {
-		// this should always be set
-		this.root.getElementById("statsProfileImage").src = window.app.userData.profileImage;
-		this.root.getElementById("statsDisplayname").innerText = window.app.userData.username;
-
 		if (stats === null) // user hasn't played any matches yet or there is an error (error gets handled in getStats())
 			return;
 		const lost_percent = stats.losses / stats.total_matches * 100;
