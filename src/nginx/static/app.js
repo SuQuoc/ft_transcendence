@@ -50,6 +50,22 @@ window.addEventListener("DOMContentLoaded", async () => {
 	if (!history.state)
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
+	// adding event handlers to add and remove the userprofile sidemenu
+	document.getElementById("userProfileButton").addEventListener('click', handleAddUserProfile);
+	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
+
 	// adds event listeners for routing
 	await app.router.init();
 });
+
+
+/** Adding the user profile when the user profile button in the navbar is clicked */
+function handleAddUserProfile() {
+	const userProfleContainer = document.getElementById("userProfileContainer");
+	userProfleContainer.appendChild(document.createElement("user-profile"));
+};
+/** Deleting the user profile when the user profile is closed */
+function handleDeleteUserProfile() {
+	const userProfleContainer = document.getElementById("userProfileContainer");
+	userProfleContainer.innerHTML = "";
+};

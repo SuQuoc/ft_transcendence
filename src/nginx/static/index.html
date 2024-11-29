@@ -53,13 +53,14 @@
 		<div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-labelledby="User Profile">
 			<div class="offcanvas-header" data-bs-theme="dark">
 				<h5 class="offcanvas-title text-white">User Profile</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				<button type="button" class="btn-close" id="userProfileClose" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 			</div>
-			<div class="offcanvas-body pt-0" tabindex="-1">
-				<user-profile></user-profile>
+			<div class="offcanvas-body pt-0" id="userProfileContainer" tabindex="-1">
+				<!-- user profile placeholder -->
 			</div>
 		</div>
-		<img src="https://i.pravatar.cc/150?img=52"
+		<img src="/media_url/profile_images/default_avatar.png"
+			onerror='this.src = src="/media_url/profile_images/default_avatar.png"''
 			alt="Profile image"
 			class="rounded-circle"
 			id="userProfileButton"
