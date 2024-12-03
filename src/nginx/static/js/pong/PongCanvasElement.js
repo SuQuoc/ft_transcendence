@@ -174,7 +174,6 @@ export class PongCanvasElement extends canvasBaseClass {
 			await this.updateGame(data.game_state);
 		}
 		else if (data.type === "count_down") {
-			console.log("count_down: ", data.count);
 			this.clearTextForeground(); // the ball is still visible the first time !!
 			this.writeTextForeground(data.count);
 		}
@@ -189,11 +188,11 @@ export class PongCanvasElement extends canvasBaseClass {
 			clearInterval(this.interval_id);
 			this.clearTextForeground();
 			this.writeTextForeground("You " + data.status + "!");
+			this.dispatchEvent(new CustomEvent("gameend", {bubbles: true})); // dispatching a custom event when the game is over so the page it's on can do something
 		}
 		else {
 			console.error("Unknown message type: ", data.type);
 		}
-			
 	}
 
 	// getElementHTML() is in the canvasBaseClass

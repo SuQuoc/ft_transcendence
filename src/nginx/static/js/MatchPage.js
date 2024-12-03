@@ -5,7 +5,10 @@ export class MatchPage extends ComponentBaseClass {
 	constructor(tournament_name) {
 		super();
 
+		this.timeout_id = -1;
+
 		// Binds the method to this class instance so it can be used in the event listener
+		this.handleGameEnd_var = this.handleGameEnd.bind(this);
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 	}
 
@@ -20,21 +23,31 @@ export class MatchPage extends ComponentBaseClass {
 		console.log("MatchPage connectedCallback");
 		
 		// add event listeners
-		this.canvas.addEventListener("dblclick", this.handlePongFullScreen_var);
+		this.canvas.addEventListener("gameend", this.handleGameEnd_var);
 		// protection if too fast ??!!
-		window.app.match_socket.addEventListener("message", this.handleReceivedMessage_var);
+		window.app.match_socket.addEventListener("message", this.handleReceivedMessage.bind(this));
 	}
 
 	disconnectedCallback() {
 		super.disconnectedCallback();
 
+		if (this.timeout_id > 0)
+			clearTimeout(this.timeout_id);
+
 		// remove event listeners
-		this.canvas.removeEventListener("dblclick", this.handlePongFullScreen_var);
+		this.canvas.removeEventListener("gameend", this.handleGameEnd_var);
 		window.app.match_socket.removeEventListener("message", this.handleReceivedMessage_var);
 	}
 
 
 	/// ----- Event Handlers ----- ///
+
+	handleGameEnd() {
+		this.timeout_id = setTimeout(() => {
+			this.timeout_id = -1;
+			window.app.router.go("/");
+		}, 20000);
+	}
 
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
@@ -57,7 +70,7 @@ export class MatchPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
-			<pong-canvas-element class="d-flex flex-grow-1 bg-custom w-100 h-100 p-lg-4 p-md-3 p-1"></pong-canvas-element>
+			<pong-canvas-element class="d-flex flex-column flex-grow-1 bg-custom w-100 h-100 p-lg-4 p-md-3 p-1"></pong-canvas-element>
 		`;
 		return template;
 	}

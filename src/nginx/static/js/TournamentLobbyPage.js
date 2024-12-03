@@ -7,8 +7,10 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super();
 
 		this.tournament_name = tournament_name;
+		this.timeout_id = -1;
 
 		// Binds the method to this class instance so it can be used in the event listener
+		this.handleGameEnd_var = this.handleGameEnd.bind(this);
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 
 		// adding this here to avoid having a gap where the match bracket message can't be recieved
@@ -29,6 +31,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		// adding event listeners
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
+		this.canvas.addEventListener("gameend", this.handleGameEnd_var);
 
 		// sending a request to the server to get the room info
 		window.app.socket.send(JSON.stringify({type: "get_room_info", room_name: this.tournament_name}));
@@ -40,8 +43,12 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	disconnectedCallback() {
 		super.disconnectedCallback();
 
+		if (this.timeout_id > 0)
+			clearTimeout(this.timeout_id);
+
 		// removing event listeners
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
+		this.canvas.removeEventListener("gameend", this.handleGameEnd_var);
 		window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
 	}
 
@@ -108,6 +115,15 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 
 	/// ----- Event Handlers ----- ///
+
+	handleGameEnd(event) {
+		console.log("event: ", event);
+		console.log("detail: ", event.detail);
+		this.timeout_id = setTimeout(() => {
+			this.timeout_id = -1;
+			window.app.router.go("/");
+		}, 20000);
+	}
 
 	handleLeaveLobby(event) {
 		window.app.socket.send(JSON.stringify({type: "leave_room"}));
