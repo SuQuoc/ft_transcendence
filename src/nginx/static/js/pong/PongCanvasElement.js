@@ -178,13 +178,13 @@ export class PongCanvasElement extends canvasBaseClass {
 			this.writeTextForeground(data.count);
 		}
 		else if (data.type === "initial_state") {
+			this.background.setNames(data.left_player, data.right_player);
 			this.clearTextForeground();
 			this.curr_state = data.game_state;
 			this.next_state = data.game_state;
 			await this.renderForeground(data.game_state);
 		}
 		else if (data.type === "game_end") {
-			console.log("game_end");
 			clearInterval(this.interval_id);
 			this.clearTextForeground();
 			this.writeTextForeground("You " + data.status + "!");

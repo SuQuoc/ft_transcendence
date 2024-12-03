@@ -6,8 +6,7 @@ export class canvasBaseClass extends HTMLElement {
 
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleCanvasResize_var = this.handleCanvasResize.bind(this);
-		this.handleBackgroundCanvasResize_var =
-		this.handleBackgroundCanvasResize.bind(this);
+		this.handleBackgroundCanvasResize_var = this.handleBackgroundCanvasResize.bind(this);
 	}
 
 	connectedCallback() {
@@ -38,7 +37,6 @@ export class canvasBaseClass extends HTMLElement {
 	/// ----- Methods ----- ///
 	/** Initializes the canvases and other objects */
 	init() {
-		this.player_names =		this.querySelector("#pongPlayerNames");
 		this.container =		this.querySelector("#pongCanvasContainer");
 
 		this.bg_canvas =		this.querySelector("#pongBackgroundCanvas");
@@ -83,13 +81,6 @@ export class canvasBaseClass extends HTMLElement {
 		this.ctx.clearRect(30, 0, this.width_unscaled - 60, this.height_unscaled);
 	}
 
-	setNamesPosition() {
-		console.log("names: ", this.player_names);
-		this.player_names.style.bottom = `${this.bg_canvas.style.top}`;
-		console.log("names: ", this.player_names.style.bottom);
-		console.log("bg canvas: ", this.bg_canvas.style.top);
-		console.log("bg canvas: ", this.bg_canvas);
-	}
 
 	/// ----- Event Handlers ----- ///
 
@@ -125,20 +116,13 @@ export class canvasBaseClass extends HTMLElement {
 
 		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
 		this.background.drawBackground(this.player_left.score, this.player_right.score);
-		this.setNamesPosition();
 	}
 
 	getElementHTML() {
 		const template = document.createElement("template");
-		template.classList.add("d-flex", "flex-column", "w-100", "h-100"); // needed ??!! does this even do anything or is the match page and tournamentLobbyPage overwriting it??
+		template.classList.add("w-100", "h-100"); // needed ??!! does this even do anything or is the match page and tournamentLobbyPage overwriting it??
 		template.innerHTML = `
-				<scripts-and-styles></scripts-and-styles>
-				
 				<div id="pongCanvasContainer" class="canvas-container d-flex justify-content-center align-items-center w-100 h-100">
-					<div id="pongPlayerNames" class="d-flex w-100 bg-danger">
-						<span id="pongPlayerLeft" class="text-white lh-1 bg-warning">displayname left</span>
-						<span id="pongPlayerRight" class="text-white lh-1 ms-auto bg-dark">displayname right</span>
-					</div>
 					<canvas id="pongBackgroundCanvas" class="position-absolute bg-dark shadow" width="1000" height="600"></canvas>
 					<canvas id="pongGameCanvas" class="position-absolute" width="1000" height="600"></canvas>
 				</div>

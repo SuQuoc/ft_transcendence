@@ -70,7 +70,7 @@ export class MatchPage extends ComponentBaseClass {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
-			<pong-canvas-element class="d-flex flex-column flex-grow-1 bg-custom w-100 h-100 p-lg-4 p-md-3 p-1"></pong-canvas-element>
+			<pong-canvas-element class="d-flex flex-grow-1 bg-custom w-100 h-100 p-lg-4 p-md-3 p-1"></pong-canvas-element>
 		`;
 		return template;
 	}

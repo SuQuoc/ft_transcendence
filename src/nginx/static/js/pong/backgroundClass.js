@@ -103,11 +103,11 @@ class Background {
 	 * @param {string} right_score - The new score no the right.
 	 */
 	drawBackground(left_score, right_score) {
-		this.drawMiddleLine();
 		this.drawLeftScore(left_score);
 		this.drawRightScore(right_score);
 		this.drawLeftName("");
 		this.drawRightName("");
+		this.drawMiddleLine();
 	}
 }
 
