@@ -2,7 +2,7 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 import { PongCanvasElement } from "./pong/PongCanvasElement.js";
 
 export class MatchPage extends ComponentBaseClass {
-	constructor(tournament_name) {
+	constructor() {
 		super();
 
 		this.timeout_id = -1;

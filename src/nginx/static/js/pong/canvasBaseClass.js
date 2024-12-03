@@ -55,7 +55,6 @@ export class canvasBaseClass extends HTMLElement {
 										this.height_unscaled,
 										50,
 										"grey",
-										"50px Arial",
 										this.bg_ctx);
 	}
 
