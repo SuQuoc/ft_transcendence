@@ -5,22 +5,10 @@ from django.core.cache import cache  # Import Django"s cache
 from .Room import TournamentRoom, Player, AlreadyInRoom
 from .utils import *
 from pong.forms import CreateTournamentForm
-import httpx
 import asyncio
+from .bracket_tournament_logic import tournament_loop
+from pong.um_request import get_displayname
 
-# Dependency to other Microservice
-async def get_displayname(cookie_dict):
-    if not cookie_dict:
-        raise Exception('No cookie provided')
-    cookie = httpx.Cookies(cookie_dict)
-    headers = {
-        'Content-Type': 'application/json',
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get("http://usermanagement:8000/um/profile", headers=headers, cookies=cookie_dict) # NOTE: fetches more then just the name
-        if response.status_code != 200:
-            raise Exception('Error getting displayname from UM')
-        return response.json().get("displayname")
 
 # PROVING: global_connection_list = []
 
@@ -73,11 +61,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         # tournament still running
             # user plays atm 
             # user finished game and dc while waiting
-        if self.queue: 
-            if self.in_game: 
-                self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
-            else: 
-                self.queue.put_nowait({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
+        
 
         await self.channel_layer.group_discard(self.client_group, self.channel_name)
         await self.channel_layer.group_discard(AVA_ROOMS, self.channel_name)
@@ -215,6 +199,17 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
             # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
+
+        if self.queue:
+            await self.leave_ongoing_tournament()
+            
+    async def leave_ongoing_tournament(self):
+        if self.in_game:
+            await self.queue.put({"type": T_DC_IN_GAME, "id": self.user.id})
+            # self.queue.put_nowait({"type": T_DC_IN_GAME, "id": "{self.user.id}"})
+        else:
+            await self.queue.put({"type": T_DC_OUT_GAME, "id": self.user.id})
+            # self.queue.put_nowait({"type": T_DC_OUT_GAME, "id": "{self.user.id}"})
 
     async def get_tournament_list(self):
         """Sends the list of AVAILABLE tournament rooms to the client."""
@@ -404,10 +399,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         return room
 
     def start_tournament(self, room: TournamentRoom):
-        from .bracket_tournament_logic import tournament_loop
-        
-        # await self.group_send_Room(T_START_TOURNAMENT, room)
-        # for player in room.players:
         print("1) start tournament - creating queue")
         LobbiesConsumer.room_queues[room.name] = asyncio.Queue() # or a queue for each player?
         task = asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
@@ -415,10 +406,10 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     def cleanup_tournament_task(self, room_name):
         queue = LobbiesConsumer.room_queues.pop(room_name, None)
-        if queue: # TODO: justy a debug block, delete later
-            print("Queue still exists")
-        else:
-            print("Queue deleted")
+        # if queue: # TODO: justy a debug block, delete later
+        #     print("Queue still exists")
+        # else:
+        #     print("Queue deleted")
 
     async def group_remove(self, group_name: str):
         """

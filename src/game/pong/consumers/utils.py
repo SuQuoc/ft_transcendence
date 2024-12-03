@@ -119,12 +119,13 @@ def del_room_from_cache(room_name, cache_name, cached_data: dict=None):
     cache.set(cache_name, cached_data)
 
 
-def create_match_config(user_id_list, game_mode, points_to_win=None):
+def create_match_config(user_id_list, user_name_list, game_mode, points_to_win=None):
     """
     Creates an entry in cache to check which client is allowed to connect to which game
     """
     match_data = {
         "user_id_list": user_id_list,
+        "user_name_list": user_name_list,
         "game_mode": game_mode
     }
 
