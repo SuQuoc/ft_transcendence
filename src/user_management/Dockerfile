@@ -23,6 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["./scripts/entrypoint.sh"]
 
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# TODO: RUN THIS IN PRODUCTION --> 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "user_management.asgi:application"]
+# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "user_management.asgi:application"] # NOTE: FE might not update the small profile pic
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# [aguilmea] for deployment testing
+#CMD ["python", "manage.py", "check", "--deploy"]
