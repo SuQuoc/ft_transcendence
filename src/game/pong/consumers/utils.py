@@ -32,6 +32,7 @@ T_SUCCESS = "success"
 T_ERROR = "error"
 
 T_MATCH_RESULT = "match_result"
+T_DISPLAY_MATCH_RESULT = "display_match_result"
 T_DC_IN_GAME = "dc_in_game"
 T_DC_OUT_GAME = "dc_out_game"
 

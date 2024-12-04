@@ -1,7 +1,7 @@
 from django.core.cache import cache
 
 from .Room import TournamentRoom, Player
-from .utils import get_room_group, T_TOURNAMENT_BRACKET, T_TOURNAMENT_END, T_FREE_WIN, T_MATCH_RESULT, T_DC_IN_GAME, T_DC_OUT_GAME
+from .utils import get_room_group, T_TOURNAMENT_BRACKET, T_TOURNAMENT_END, T_FREE_WIN, T_MATCH_RESULT, T_DC_IN_GAME, T_DC_OUT_GAME, T_DISPLAY_MATCH_RESULT
 import random
 import uuid
 import json
@@ -32,7 +32,14 @@ async def tournament_loop(room: TournamentRoom, queue):
             message = await queue.get()
             if message.get("type") == T_MATCH_RESULT:
                 msg_count += 1
-                winners.add(get_winner(players, message.get("winner")))
+                loser = get_loser(players, message.get("loser"))
+                winner = get_winner(players, message.get("winner"))
+                winners.add(winner)
+                match_result = {
+                    "winner": winner.name,
+                    "loser": loser.name
+                }
+                await send_display_match_result(channel_group, match_result)
             elif message.get("type") == T_DC_IN_GAME:
                 print("DC in game")
                 msg_count += 1 
@@ -55,6 +62,11 @@ async def tournament_loop(room: TournamentRoom, queue):
 def get_winner(players, winner_id) -> Player:
     for player in players:
         if player.id == winner_id:
+            return player
+
+def get_loser(players, loser_id) -> Player:
+    for player in players:
+        if player.id == loser_id:
             return player
 
 
@@ -154,4 +166,13 @@ async def send_free_win(group_name, user_id):
         {
             "type": T_FREE_WIN,
             "winner_id": user_id
+        })
+
+
+async def send_display_match_result(group_name, match_result):
+    await channel_layer.group_send(
+        group_name,
+        {
+            "type": T_DISPLAY_MATCH_RESULT,
+            "match_result": match_result
         })

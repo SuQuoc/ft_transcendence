@@ -342,6 +342,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.queue.put(event)
         self.in_game = False
 
+    async def display_match_result(self, event):
+        await self.send(text_data=json.dumps(event))
 
     ## Messages to client but not triggered like events ##
     async def send_success(self, room_name: str):
