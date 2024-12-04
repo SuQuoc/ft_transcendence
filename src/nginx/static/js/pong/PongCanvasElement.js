@@ -188,10 +188,12 @@ export class PongCanvasElement extends canvasBaseClass {
 			clearInterval(this.interval_id);
 			this.clearTextForeground();
 			this.writeTextForeground("You " + data.status + "!");
+			console.log("dispatching custom event gameend");
 			this.dispatchEvent(new CustomEvent("gameend", {bubbles: true})); // dispatching a custom event when the game is over so the page it's on can do something
 		}
 		else {
-			console.error("Unknown message type: ", data.type);
+			console.error("Unknown message type: ", data.type, ": ", data);
+
 		}
 	}
 
