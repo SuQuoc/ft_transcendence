@@ -49,7 +49,7 @@ class UserRelationSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
     relationship = serializers.SerializerMethodField()
     friend_request_id = serializers.SerializerMethodField()
-    online = serializers.SerializerMethodField()
+    # online = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
