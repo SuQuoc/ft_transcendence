@@ -55,7 +55,6 @@ class JWTAuthMiddleware(BaseMiddleware):
             data = jwt_decode(raw_token, settings.PUBLIC_KEY, algorithms=["RS256"])
             scope["user_id"] = data["user_id"] # add user_id to the scope
         except Exception as e:
-            print("JWT_DECODE")
             print(e)
             await send({
                 'type': 'websocket.close',
