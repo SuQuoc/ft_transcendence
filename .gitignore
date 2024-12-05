@@ -169,6 +169,7 @@ cython_debug/
 *.csr
 *.key
 *.srl
+*.prof
 
 tests/playwright_tests/auth_state.json
 
