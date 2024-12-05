@@ -107,12 +107,10 @@ export class LoginPage extends ComponentBaseClass {
     	if (!password.value) {
         	password.classList.add('is-invalid');
         	password.nextElementSibling.textContent = 'Password is required';
-			email.nextElementSibling.classList.add('invalid-feedback');
         	isValid = false;
     	} else {
         	password.classList.remove('is-invalid');
         	password.nextElementSibling.textContent = '';
-			email.nextElementSibling.classList.remove('invalid-feedback');
     	}
 
     	if (otpSection.style.display === 'block' && !otpPattern.test(otpCode.value)) {

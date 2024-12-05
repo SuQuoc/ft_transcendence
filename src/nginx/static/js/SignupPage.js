@@ -122,7 +122,6 @@ export class SignupPage extends ComponentBaseClass {
 		const passwordsMatch = password1 === password2;
 		const otpSection = this.shadowRoot.getElementById('otpSection');
 
-		console.log(emailValid, passwordValid, passwordsMatch, password1, password2, email);
 		if (emailValid && passwordsMatch && passwordValid) {
 			emailWarning.textContent = '';
 			passwordWarning.textContent = '';
@@ -208,7 +207,9 @@ export class SignupPage extends ComponentBaseClass {
 				});
 
 				if (!response.ok) {
-					throw new Error('Requesting OTP failed');
+					const responseData = await response.text();
+					const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+					throw new Error(errorMessage);
 				}
 				otpSection.style.display = 'block';
 				this.shadowRoot.getElementById('signupEmail').setAttribute('disabled', '');
@@ -224,7 +225,7 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById('otpCode').focus();
 			} catch (error) {
 				console.error('Error during OTP request:', error);
-				this.shadowRoot.getElementById('errorMessageEmail').textContent = 'Could not send OTP';
+				this.shadowRoot.getElementById('errorMessageEmail').textContent = error;
 				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
 			}
 		} else {
@@ -298,6 +299,7 @@ export class SignupPage extends ComponentBaseClass {
 		const password1Button = this.shadowRoot.getElementById('changePassword1Button');
 		const password2Button = this.shadowRoot.getElementById('changePassword2Button');
 
+		//TODO: add check for length, at least 8 characters
 		if (password1.disabled && password2.disabled) {
 			password1.disabled = false;
 			password2.disabled = false;
@@ -350,8 +352,8 @@ export class SignupPage extends ComponentBaseClass {
 			  throw new Error(errorMessage);
 		  }
 		} catch (error) {
-		  this.shadowRoot.getElementById('signupError').textContent = error;
-		  this.shadowRoot.getElementById('signupError').style.display = 'block';
+		  //this.shadowRoot.getElementById('signupError').textContent = error;
+		  //this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}
 
@@ -372,8 +374,8 @@ export class SignupPage extends ComponentBaseClass {
 		  }
 		  this.currentUsername = email;
 		} catch (error) {
-		  this.shadowRoot.getElementById('signupError').textContent = error;
-		  this.shadowRoot.getElementById('signupError').style.display = 'block';
+		  //this.shadowRoot.getElementById('signupError').textContent = error;
+		  //this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}
 }

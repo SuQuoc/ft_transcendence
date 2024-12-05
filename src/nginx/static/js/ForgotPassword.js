@@ -44,16 +44,14 @@ export class ForgotPassword extends ComponentBaseClass {
                 <form id="forgotPasswordForm">
                     <h3 class="text-center text-white">Forgot Password</h3>
                     <label for="resetEmail" class="form-label text-white-50">Email address</label>
-                    <div class="input-group mb-3">
-                        <input name="email" id="resetEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" autocomplete="email">
+                    <input name="email" id="resetEmail" type="email" class="form-control mb-3" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" autocomplete="email">
+                    <span id="errorMessage" class="text-danger"></span>
+                    <div class="input-group mb-3" id="otpSection" style="display: none;">
+                        <label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+                        <input name="otp" id="otpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
                         <button class="btn btn-custom" type="submit" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
                     </div>
-                    <span id="errorMessage" class="text-danger"></span>
-                    <div id="otpSection" style="display: none;">
-                        <label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                        <input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
-                        <span id="otpErrorMessage" class="text-danger"></span>
-                    </div>
+                    <span id="otpErrorMessage" class="text-danger"></span>
                     <div id="passwordSection" style="display: none;">
                         <label for="newPassword1" class="form-label text-white-50">New Password</label>
                         <input name="password1" id="newPassword1" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
@@ -88,18 +86,7 @@ export class ForgotPassword extends ComponentBaseClass {
         this.shadowRoot.getElementById('errorMessage').textContent = '';
 
         try {
-            const response = await fetch('/registration/basic_forgot_password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ "username": email }),
-            });
-            if (!response.ok) {
-                const responseData = await response.text();
-				const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
-				throw new Error(errorMessage);
-            }
+            this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email })}, 'application/json', false);
             this.startTimer(60, resetButton);
             this.handleEmailInput();
         } catch (error) {
@@ -134,18 +121,7 @@ export class ForgotPassword extends ComponentBaseClass {
         }
 
         try {
-            const response = await fetch('/registration/basic_forgot_password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ "username": email, otp, "new_password": password1 }),
-            });
-            if (!response.ok) {
-                const responseData = await response.text();
-				const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
-				throw new Error(errorMessage);
-            }
+            this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email, otp, "new_password": password1 })}, 'application/json', false);
             app.router.go('/login', false);
         } catch (error) {
             resetError.textContent = error;
@@ -158,7 +134,7 @@ export class ForgotPassword extends ComponentBaseClass {
 
     checkEmailInput() {
         const email = this.shadowRoot.getElementById('resetEmail').value;
-        const resetButton = this.shadowRoot.getElementById('requestOTP');
+        const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
         const emailPattern = /^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
         if (email && emailPattern.test(email)) {
             resetButton.disabled = false;
