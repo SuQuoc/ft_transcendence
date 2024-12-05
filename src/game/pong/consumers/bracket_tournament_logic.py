@@ -34,12 +34,14 @@ async def tournament_loop(room: TournamentRoom, queue):
                 msg_count += 1
                 loser = get_loser(players, message.get("loser"))
                 winner = get_winner(players, message.get("winner"))
+                size = len(winners)
                 winners.add(winner)
-                match_result = {
-                    "winner": winner.name,
-                    "loser": loser.name
-                }
-                await send_display_match_result(channel_group, match_result)
+                if size == len(winners):
+                    match_result = {
+                        "winner": winner.name,
+                        "loser": loser.name
+                    }
+                    await send_display_match_result(channel_group, match_result)
             elif message.get("type") == T_DC_IN_GAME:
                 print("DC in game")
                 msg_count += 1 

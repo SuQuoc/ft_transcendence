@@ -86,13 +86,25 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 	}
 
+	displayMatchResult(winner, loser) {
+		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
+		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
+		if (winner_element) {
+			winner_element.incrementWins();	
+		} else {console.error("Error: displayMatchResult: winner element not found");}
+		if (loser_element) {
+			loser_element.greyOutPlayer();
+		} else {console.error("Error: displayMatchResult: loser element not found");}
+	}
+
 	addPlayerElement(player_name) { // needs the avatar too !!!
 		let element = new TournamentLobbyPlayerElement();
 
 		element.setAttribute('name', player_name);
 		this.player_list.appendChild(element);
 		element.querySelector("[name='lobby_player_name']").innerText = player_name;
-
+		if (player_name === window.app.userData.username)
+			element.makeNameBold();
 		//TODO: change avatar
 	}
 
@@ -113,7 +125,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	setGoBackTimeout() {
 		this.timeout_id = setTimeout(() => {
 			this.timeout_id = -1;
-			window.app.router.go("/tournament");
+			window.app.router.go("/tournament", false);
 		}, 50000);
 	}
 
@@ -156,6 +168,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			}
 			if (match_id)
 				this.sendMatchId(match_id);
+		}
+		else if (data.type === "display_match_result") {
+			this.displayMatchResult(data.match_result.winner, data.match_result.loser);
 		}
 		else if (data.type === "tournament_end") {
 			console.log("tournament end");
@@ -213,7 +228,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 					class="d-flex flex-column
 							align-self-start
 							overflow-auto
-							gap-3 row-gap-2
+							w-100 h-100 gap-3 row-gap-2
 						"
 				>
 					<!-- tournament-lobby-player-elements: -->
