@@ -11,11 +11,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.handleRangeDisplay_var = this.handleRangeDisplay.bind(this);
 		this.handleTournamentCreation_var = this.handleTournamentCreation.bind(this);
 		this.handleHideTournamentNameError_var = this.handleHideTournamentNameError.bind(this);
-	};
-
-	connectedCallback() {
-		super.connectedCallback();
-
+		
 		// getting elements
 		this.join_tournament_elements = this.root.getElementById("joinTournamentElements");
 		this.waiting_for_permission = this.root.getElementById("joinWaitingForPermission");
@@ -47,12 +43,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation_var);
 		this.tournament_name_input.addEventListener("input", this.handleHideTournamentNameError_var);
 		this.input_range.addEventListener("input", this.handleRangeDisplay_var);
-		
-		// calling the method to set the initial position of the display
-		this.handleRangeDisplay({target: this.input_range});
 
 		// getting the list of tournaments
 		this.getTournamentList();
+	};
+
+	connectedCallback() {
+		super.connectedCallback();
+
+		// calling the method to set the initial position of the display
+		setTimeout(() => { // needs to happen in setTimeout, to give the browser enough time to render everything before we can calculate the correct position
+			this.handleRangeDisplay({target: this.input_range});
+		}, 0);
 	};
 
 	disconnectedCallback() {
@@ -204,7 +206,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** get's called when someone creates a tournament */
 	handleTournamentCreation(event) {
 		event.preventDefault();
-		
+
 		const	tournament_name = event.target.create_name.value;
 		const	number_of_players = event.target.number_of_players.value;
 		const	points_to_win = event.target.points_to_win.value;
@@ -221,7 +223,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	handleJoinTournament(event) {
-		console.log('join tournament handler in JoinTournamentElement');
 		if (event.target.tagName !== "BUTTON")
 			return;
 
