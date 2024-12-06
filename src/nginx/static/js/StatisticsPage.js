@@ -17,14 +17,14 @@ export class StatisticsPage extends ComponentBaseClass {
 		this.classList.add("d-flex", "flex-column", "align-items-center", "w-100");
 		
 		// getting elements
-		this.tournament_elements = this.root.getElementById("statTournamentElements");
+		this.tournament_elements = this.root.getElementById("statsTournamentElements");
 		this.toast_container = this.root.querySelector(".toast-container");
 
 		// making error toasts
 		this.couldnt_fetch_data_toast = new ErrorToastElement("Something went wrong, couldn't fetch data");
 		this.toast_container.append(this.couldnt_fetch_data_toast);
 
-		const stats = await this.getStats();
+		const stats = await this.fetchStats();
 		this.setStats(stats);
 	}
 
@@ -37,50 +37,37 @@ export class StatisticsPage extends ComponentBaseClass {
 
 	/// ----- Methods ----- ///
 
-	async getStats() {
+	async fetchStats() {
 		try {
-			const response = await fetch('game/get_game_stats', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				throw new Error(`${errorText}`);
-			}
-			if (response.status === 200) { // ok
-				const stats = await response.json();
-				return (stats);
-			}
-			if (response.status === 204) { // no content
-				return (null);
-			}
-			this.couldnt_fetch_data_toast.show();
+			const stats = await this.apiFetch('game/get_game_stats', { method: 'GET' });
+			return (stats);
 		} catch (error) {
+			console.error('Error fetching stats:', error.message);
 			this.couldnt_fetch_data_toast.show();
 		}
 		return (null);
 	}
 
+
 	setStats(stats) {
-		if (stats === null) // user hasn't played any matches yet or there is an error (error gets handled in getStats())
+		if (stats === null || stats === undefined) // user hasn't played any matches yet or there is an error
 			return;
 		const lost_percent = stats.losses / stats.total_matches * 100;
 		const won_percent = stats.wins / stats.total_matches * 100;
 		const lost_bar = this.root.getElementById("statsLostBar");
 		const won_bar = this.root.getElementById('statsWonBar');
 
+		this.root.getElementById("statsNoGamesPlayed").classList.add("d-none");
+		this.root.getElementById("statsLastGames").classList.remove("d-none");
 		this.root.getElementById("statsTotalGamesPlayed").innerText = stats.total_matches;
 		this.root.getElementById("statsTotalGamesLost").innerText = stats.losses;
 		this.root.getElementById("statsTotalGamesWon").innerText = stats.wins;
-		this.root.getElementById("statsLostPercent").innerText = parseInt(lost_percent) + "%";
-		this.root.getElementById("statsWonPercent").innerText = parseInt(won_percent) + "%"
+		this.root.getElementById("statsLostPercent").innerText = parseFloat(lost_percent.toFixed(2)) + "%";
+		this.root.getElementById("statsWonPercent").innerText = parseFloat(won_percent.toFixed(2)) + "%"
 		lost_bar.style.width = lost_percent + "%";
-		lost_bar.setAttribute('aria-valuenow', parseInt(lost_percent));
+		lost_bar.setAttribute('aria-valuenow', parseFloat(lost_percent.toFixed(2)));
 		won_bar.style.width = won_percent + "%";
-		won_bar.setAttribute('aria-valuenow', parseInt(won_percent));
+		won_bar.setAttribute('aria-valuenow', parseFloat(won_percent.toFixed(2)));
 
 		for (let key in stats.last_matches) {
 			const tournament = stats.last_matches[key];
@@ -107,11 +94,11 @@ export class StatisticsPage extends ComponentBaseClass {
 			<div class="d-flex flex-column align-items-center w-100 m-4 gap-4">
 				<!-- profile picture and displayname -->
 				<div class="d-flex bg-dark rounded-4 mx-4 p-2 gap-1">
-					<img src="https://i.pravatar.cc/150?img=52"
+					<img src="/media_url/profile_images/default_avatar.png"
 					class="stats-profile-image"
 					id="statsProfileImage"
 					alt="Profile Image"
-					onerror='this.src = "https://i.pravatar.cc/150?img=52"'
+					onerror='this.src = "/media_url/profile_images/default_avatar.png"'
 					>
 					<div class="d-flex flex-column align-items-center h-auto p-1">
 						<div class="d-flex align-items-center h-50">
@@ -171,8 +158,9 @@ export class StatisticsPage extends ComponentBaseClass {
 
 			<hr class="w-75 text-white-50 m-0">
 			
-			<div id="statTournamentElements" class="d-flex flex-column m-4 gap-2 w-75">
-				<span class="text-white">Last Games:</span>
+			<div id="statsTournamentElements" class="d-flex flex-column m-4 gap-2 w-75">
+				<div id="statsNoGamesPlayed" class="text-center text-dark fw-bold fs-1 w-100">No games played yet</div>
+				<span id="statsLastGames" class="d-none text-white">Last Games:</span>
 				<!-- Stat Tournament elements will be added here -->
 			</div>
 		`;
