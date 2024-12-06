@@ -129,10 +129,10 @@ export class SignupPage extends ComponentBaseClass {
 			if (otpSection.style.display === 'block' && this.shadowRoot.getElementById('signupOtpCode').value.length !== 0) {
 				this.handleOTPInput();
 			} else {
-				signupButton.removeAttribute("disabled");
+				signupButton.disabled = false;
 			}
 		} else {
-			signupButton.setAttribute("disabled", "");
+			signupButton.disabled = true;
 			if (!emailValid) {
 				this.shadowRoot.getElementById('signupEmail').setAttribute('aria-invalid', 'true');
 				emailWarning.textContent = 'Invalid email address';
