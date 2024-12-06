@@ -160,30 +160,24 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
        
     async def leave_room(self):
         """Helper method to remove a user from a lobby."""
-        async with self.update_lock:
-            available_rooms = cache.get(AVA_ROOMS, {})
-            full_rooms = cache.get(FULL_ROOMS, {})
-
         if self.current_room is None: # SHOULD NEVER HAPPEN with our Frontend
             await self.send_error(Errors.NO_CURRENT_ROOM)
             return
         
-        room_dict = get_room_dict(self.current_room, available_rooms, full_rooms)
-        if room_dict is None:
-            raise ValueError(Errors.ROOM_DOES_NOT_EXIST) # SHOULD NEVER HAPPEN
-        
-        room = TournamentRoom.from_dict(room_dict)
-        if self.user not in room.players:
-            raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
-        
-        room.remove_player(self.user)
-        
-        # CHANNELS: Remove user from the tournament room group
-        await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
-        await self.group_send_Room(T_PLAYER_LEFT_ROOM, room)
-        self.current_room = None
-
         async with self.update_lock:
+            available_rooms = cache.get(AVA_ROOMS, {})
+            full_rooms = cache.get(FULL_ROOMS, {})
+
+            room_dict = get_room_dict(self.current_room, available_rooms, full_rooms)
+            if room_dict is None:
+                raise ValueError(Errors.ROOM_DOES_NOT_EXIST) # SHOULD NEVER HAPPEN
+            
+            room = TournamentRoom.from_dict(room_dict)
+            if self.user not in room.players:
+                raise ValueError(Errors.NOT_IN_ROOM) # SHOULD NEVER HAPPEN
+            
+            room.remove_player(self.user)
+
             if room.status == TournamentRoom.AVAILABLE:
                 if room.is_empty():
                     del_room_from_cache(room.name, AVA_ROOMS, available_rooms)
@@ -199,8 +193,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
             # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
+        
+        # CHANNELS: Remove user from the tournament room group
+        await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
+        await self.group_send_Room(T_PLAYER_LEFT_ROOM, room)
+        self.current_room = None
 
-        if self.queue:
+        if self.queue: # user is in ongoing tournament
             await self.leave_ongoing_tournament()
             
     async def leave_ongoing_tournament(self):

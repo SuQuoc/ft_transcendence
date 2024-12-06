@@ -125,8 +125,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	setGoBackTimeout() {
 		this.timeout_id = setTimeout(() => {
 			this.timeout_id = -1;
-			window.app.router.go("/tournament", false);
-		}, 50000);
+			this.handleLeaveLobby();
+		}, 30000);
 	}
 
 
