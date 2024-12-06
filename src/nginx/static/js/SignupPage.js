@@ -19,6 +19,7 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('changeUsernameButton').addEventListener('click', this.toggleUsername.bind(this));
     	this.shadowRoot.getElementById('changePassword1Button').addEventListener('click', this.togglePassword.bind(this, 'signupPassword1'));
 		this.shadowRoot.getElementById('changePassword2Button').addEventListener('click', this.togglePassword.bind(this, 'signupPassword2'));
+		this.shadowRoot.getElementById('signupEmail').focus();
 	}
 
 	// !!!! id of button requestOTP should be signupRequestOTP

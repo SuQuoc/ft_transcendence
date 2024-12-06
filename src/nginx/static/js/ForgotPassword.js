@@ -14,19 +14,20 @@ export class ForgotPassword extends ComponentBaseClass {
             element.addEventListener('keydown', this.handleKeyDown.bind(this));
         });
         this.shadowRoot.getElementById('resetSubmitButton').addEventListener('click', this.resetPassword.bind(this));
-        this.shadowRoot.getElementById('requestOTP').addEventListener('click', this.requestOTP.bind(this));
-        this.shadowRoot.getElementById('otpCode').addEventListener('input', this.handleOtpInput.bind(this));
+        this.shadowRoot.getElementById('resetRequestOTP').addEventListener('click', this.requestOTP.bind(this));
+        this.shadowRoot.getElementById('resetOtpCode').addEventListener('input', this.handleOtpInput.bind(this));
         this.shadowRoot.getElementById('resetEmail').addEventListener('input', this.checkEmailInput.bind(this));
-        this.shadowRoot.getElementById('newPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
-        this.shadowRoot.getElementById('newPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
+        this.shadowRoot.getElementById('resetNewPassword1').addEventListener('input', this.handlePasswordInput.bind(this));
+        this.shadowRoot.getElementById('resetNewPassword2').addEventListener('input', this.handlePasswordInput.bind(this));
+        this.shadowRoot.getElementById('resetEmail').focus();
     }
 
     handleKeyDown(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            const otpField = this.shadowRoot.getElementById('otpCode');
-            const password1 = this.shadowRoot.getElementById('newPassword1');
-            const password2 = this.shadowRoot.getElementById('newPassword2');
+            const otpField = this.shadowRoot.getElementById('resetOtpCode');
+            const password1 = this.shadowRoot.getElementById('resetNewPassword1');
+            const password2 = this.shadowRoot.getElementById('resetNewPassword2');
 
             if (otpField.value && password1.value && password2.value) {
                 this.resetPassword(event);
@@ -41,24 +42,27 @@ export class ForgotPassword extends ComponentBaseClass {
         template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
             <div class="p-3 rounded-3 bg-dark">
-                <form id="forgotPasswordForm">
+                <form id="forgotPasswordForm" class="needs-validation">
                     <h3 class="text-center text-white">Forgot Password</h3>
                     <label for="resetEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email" id="resetEmail" type="email" class="form-control mb-3" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" autocomplete="email">
-                    <span id="errorMessage" class="text-danger"></span>
-                    <div class="input-group mb-3" id="otpSection" style="display: none;">
-                        <label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                        <input name="otp" id="otpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
-                        <button class="btn btn-custom" type="submit" id="requestOTP" style="min-width: 100px;" disabled>Send OTP</button>
+                    <input name="email" id="resetEmail" type="email" class="form-control mb-3" placeholder="name@example.com" aria-describedby="resetErrorMessage" aria-required="true" autocomplete="email" required>
+                    <div class="invalid-feedback mb-1">Please enter your email</div>
+                    <div class="mb-3" id="resetOtpSection" style="display: none;">
+                        <label for="resetOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+                        <div class="input-group">
+                            <input name="otp" id="resetOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
+                            <button class="btn btn-custom" type="button" id="resetRequestOTP" style="min-width: 100px;" disabled>Send OTP</button>
+                        </div>
                     </div>
-                    <span id="otpErrorMessage" class="text-danger"></span>
-                    <div id="passwordSection" style="display: none;">
-                        <label for="newPassword1" class="form-label text-white-50">New Password</label>
-                        <input name="password1" id="newPassword1" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
-                        <label for="newPassword2" class="form-label text-white-50">Confirm New Password</label>
-                        <input name="password2" id="newPassword2" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
-                        <span id="passwordErrorMessage" class="text-danger"></span>
+                    <span id="resetOtpErrorMessage" class="text-danger"></span>
+                    <div id="resetPasswordSection" style="display: none;">
+                        <label for="resetNewPassword1" class="form-label text-white-50">New Password</label>
+                        <input name="password1" id="resetNewPassword1" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
+                        <label for="resetNewPassword2" class="form-label text-white-50">Confirm New Password</label>
+                        <input name="password2" id="resetNewPassword2" type="password" class="form-control mb-3" aria-required="true" autocomplete="new-password">
+                        <span id="resetPasswordErrorMessage" class="text-danger"></span>
                     </div>
+                    <span id="resetErrorMessage" class="text-danger mb-3"></span>
                     <p class="text-white-50 small m-0">
                         Back to <a href="/login" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
                         or <a href="/signup" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
@@ -76,14 +80,16 @@ export class ForgotPassword extends ComponentBaseClass {
     async requestOTP(event) {
         event.preventDefault();
         const email = this.shadowRoot.getElementById('resetEmail').value;
-        const resetButton = this.shadowRoot.getElementById('requestOTP');
+        const resetButton = this.shadowRoot.getElementById('resetRequestOTP');
         const resetSpinner = this.shadowRoot.getElementById('resetSpinner');
-        const resetError = this.shadowRoot.getElementById('errorMessage');
-        if (resetButton.disabled) return;
+        const resetError = this.shadowRoot.getElementById('resetErrorMessage');
+        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
+        const submitButton = this.shadowRoot.getElementById('resetSubmitButton');
+        if (otpSection.style.display !== 'none' && resetButton.disabled && submitButton.disabled) return;
 
         resetButton.disabled = true;
         resetSpinner.style.display = 'inline-block';
-        this.shadowRoot.getElementById('errorMessage').textContent = '';
+        this.shadowRoot.getElementById('resetErrorMessage').textContent = '';
 
         try {
             this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email })}, 'application/json', false);
@@ -102,33 +108,52 @@ export class ForgotPassword extends ComponentBaseClass {
         event.preventDefault();
         const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
         const resetSpinner = this.shadowRoot.getElementById('resetSpinner');
-        const resetError = this.shadowRoot.getElementById('errorMessage');
+        const resetError = this.shadowRoot.getElementById('resetErrorMessage');
+        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
+        const passwordSection = this.shadowRoot.getElementById('resetPasswordSection');
         if (resetButton.disabled) return;
 
         resetButton.disabled = true;
         resetSpinner.style.display = 'inline-block';
 
-        const email = this.shadowRoot.getElementById('resetEmail').value;
-        const otp = this.shadowRoot.getElementById('otpCode').value;
-        const password1 = this.shadowRoot.getElementById('newPassword1').value;
-        const password2 = this.shadowRoot.getElementById('newPassword2').value;
 
-        if (password1 !== password2) {
+        //TODO: check if passwords match in a different function, should be checked on input, not submit
+       /*if (otp && password1 && password2 && password1 !== password2) {
             resetError.textContent = 'Passwords do not match';
             resetButton.disabled = false;
             resetSpinner.style.display = 'none';
             return;
-        }
+        }*/
 
-        try {
-            this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email, otp, "new_password": password1 })}, 'application/json', false);
-            app.router.go('/login', false);
-        } catch (error) {
-            resetError.textContent = error;
-            this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
-            resetButton.disabled = false;
-        } finally {
-            resetSpinner.style.display = 'none';
+        if (otpSection.style.display === 'none') {
+            this.requestOTP(event);
+            return;
+        } else if (passwordSection.style.display === 'none') {
+            this.handleOtpInput();
+            return;
+        } else {
+            this.handlePasswordInput();
+            const password2 = this.shadowRoot.getElementById('resetNewPassword2').value;
+            const password1 = this.shadowRoot.getElementById('resetNewPassword1').value;
+            if (password1 !== password2) {
+                resetButton.disabled = false;
+                resetSpinner.style.display = 'none';
+                return;
+            }
+            const email = this.shadowRoot.getElementById('resetEmail').value;
+            const otp = this.shadowRoot.getElementById('resetOtpCode').value;
+            try {
+                await this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email, otp, "new_password": password1 })}, 'application/json', false);
+                //TODO: show a success message and redirect to login page after a few seconds
+                setTimeout(app.router.go, 3000, '/login', false);
+                //app.router.go('/login', false);
+            } catch (error) {
+                resetError.textContent = error;
+                this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
+                resetButton.disabled = false;
+            } finally {
+                resetSpinner.style.display = 'none';
+            }
         }
     }
 
@@ -145,10 +170,10 @@ export class ForgotPassword extends ComponentBaseClass {
 
     handleEmailInput() {
         const email = this.shadowRoot.getElementById('resetEmail').value;
-        const otpSection = this.shadowRoot.getElementById('otpSection');
+        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
         const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
         if (email) {
-            otpSection.style.display = 'block';
+            otpSection.style.display = '';
             resetButton.disabled = true;
         } else {
             otpSection.style.display = 'none';
@@ -157,13 +182,13 @@ export class ForgotPassword extends ComponentBaseClass {
     }
 
     handleOtpInput() {
-        const otp = this.shadowRoot.getElementById('otpCode').value;
-        const passwordSection = this.shadowRoot.getElementById('passwordSection');
-        const otpError = this.shadowRoot.getElementById('otpErrorMessage');
+        const otp = this.shadowRoot.getElementById('resetOtpCode').value;
+        const passwordSection = this.shadowRoot.getElementById('resetPasswordSection');
+        const otpError = this.shadowRoot.getElementById('resetOtpErrorMessage');
         const otpPattern = /^[A-Z0-9a-z]{16}/;
 
         if (otpPattern.test(otp)) {
-            passwordSection.style.display = 'block';
+            passwordSection.style.display = '';
             otpError.textContent = '';
         } else {
             passwordSection.style.display = 'none';
@@ -173,9 +198,9 @@ export class ForgotPassword extends ComponentBaseClass {
     }
 
     handlePasswordInput() {
-        const password1 = this.shadowRoot.getElementById('newPassword1').value;
-        const password2 = this.shadowRoot.getElementById('newPassword2').value;
-        const passwordError = this.shadowRoot.getElementById('passwordErrorMessage');
+        const password1 = this.shadowRoot.getElementById('resetNewPassword1').value;
+        const password2 = this.shadowRoot.getElementById('resetNewPassword2').value;
+        const passwordError = this.shadowRoot.getElementById('resetPasswordErrorMessage');
         if (password1 && password2) {
             if (password1 === password2) {
                 passwordError.textContent = '';
@@ -183,16 +208,16 @@ export class ForgotPassword extends ComponentBaseClass {
                 passwordError.textContent = 'Passwords do not match';
             }
         } else {
-            passwordError.textContent = '';
+            passwordError.textContent = 'New Passwords cannot be empty';
         }
         this.updateSubmitButtonState();
     }
 
     updateSubmitButtonState() {
         const email = this.shadowRoot.getElementById('resetEmail').value;
-        const otp = this.shadowRoot.getElementById('otpCode').value;
-        const password1 = this.shadowRoot.getElementById('newPassword1').value;
-        const password2 = this.shadowRoot.getElementById('newPassword2').value;
+        const otp = this.shadowRoot.getElementById('resetOtpCode').value;
+        const password1 = this.shadowRoot.getElementById('resetNewPassword1').value;
+        const password2 = this.shadowRoot.getElementById('resetNewPassword2').value;
         const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
         const otpPattern = /^[A-Z0-9a-z]{16}$/;
 

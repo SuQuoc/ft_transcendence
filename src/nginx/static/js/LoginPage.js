@@ -28,7 +28,6 @@ export class LoginPage extends ComponentBaseClass {
 
 	}
 
-	//TODO: check why the event handler for new otp button isn't working
 	getElementHTML(){
 		const template = document.createElement('template');
 		template.innerHTML = `
