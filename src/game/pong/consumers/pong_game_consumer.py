@@ -210,7 +210,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         )
 
 
-
 def get_name_from_match_config(match_config, user_id):
     for i in range(len(match_config['user_id_list'])):
         if match_config['user_id_list'][i] == user_id:

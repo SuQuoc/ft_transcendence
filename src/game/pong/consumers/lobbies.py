@@ -54,7 +54,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         #asyncio.sleep(10) # doesnt do anything
         
 
-    async def disconnect(self, close_code): 
+    async def disconnect(self, close_code):
         if self.current_room:
             await self.leave_room()
         
@@ -103,7 +103,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     ### Client MESSAGES ###
     async def create_room(self, dict_data):
-        if self.current_room is not None:
+        if self.current_room:
             await self.send_error(Errors.ALREADY_IN_ROOM)
             return
         

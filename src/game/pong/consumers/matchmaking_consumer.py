@@ -27,9 +27,10 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         
         user_id = self.scope["user_id"]
         displayname = await get_displayname(self.scope.get("cookies"))
-        self.user = Player(channel_name=self.channel_name,
-                            name=displayname,
-                            id=user_id
+        self.user = Player(
+                        channel_name=self.channel_name,
+                        name=displayname,
+                        id=user_id
         )
 
 
