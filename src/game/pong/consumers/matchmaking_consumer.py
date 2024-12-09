@@ -35,7 +35,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             
             await self.trigger_match_found(match_id, playerL_channel)
             await self.trigger_match_found(match_id, playerR_channel)
-            
             await self.trigger_disconnection(playerL_channel)
             await self.trigger_disconnection(playerR_channel)
 
@@ -78,4 +77,4 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     async def disconnect_from_matchmaking(self, event):
-        await self.close()
+        await self.disconnect(1000)

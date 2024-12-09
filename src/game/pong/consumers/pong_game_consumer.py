@@ -76,7 +76,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await self.send_error()
             return
         
-        print(f"Match config: {self.match_config}")
         self.game_mode = self.match_config.get('game_mode')
     
         self.game_group = f'game_{self.match_id}'
