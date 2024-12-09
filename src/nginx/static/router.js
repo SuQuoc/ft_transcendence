@@ -224,7 +224,6 @@ const Router = {
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
-			document.getElementById("userProfileContainer").classList.remove('open');
 		}
 		else {
 			document.getElementById("navbar").style.display = "";
