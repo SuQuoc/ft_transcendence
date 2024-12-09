@@ -35,8 +35,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         type = text_data_json['type']
 
         if type == 'get_friends_online_status': # TODO: might help? if not than just remove, problem if a friends get a added while im online
-            # await self.send_status_to_friends(Status.ONLINE)
-            pass
+            await self.send_status_to_friends(Status.ONLINE)
 
     
     async def send_status_to_friends(self, status):
@@ -49,7 +48,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             "sender_id": self.user_id
         }
         
-        if status != Status.OFFLINE: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
+        if status == Status.ONLINE: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
             message["sender_channel"] = self.channel_name
 
         for friend in friends:
@@ -68,7 +67,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     # EVENTS
     async def online_status(self, event: dict):
-        if event.get('status', None) != Status.OFFLINE:
+        if event.get('status', None) == Status.ONLINE:
             friends_channel = event.get('sender_channel', None)
             if friends_channel:
                 await self.send_friend_my_status(friends_channel)
