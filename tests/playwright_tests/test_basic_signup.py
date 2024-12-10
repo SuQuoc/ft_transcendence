@@ -52,8 +52,8 @@ class TestBasicSignup:
 
             # filling the otp should enable signup 
                 otp = get_otp()
-                page.wait_for_selector("#otpCode", state="visible")
-                page.locator("#otpCode").fill(otp)
+                page.wait_for_selector("#signupOtpCode", state="visible")
+                page.locator("#signupOtpCode").fill(otp)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").click()
                 
@@ -85,16 +85,16 @@ class TestBasicSignup:
                 page.locator("#signupPassword2").fill(USERPW)
             
                 page.locator("#signupEmail").fill("wrongemail")
-                expect(page.locator("#errorMessageEmail")).to_be_visible()
-                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+                expect(page.locator("#signupErrorMessageEmail")).to_be_visible()
+                expect(page.locator("#signupErrorMessageEmail")).to_have_text("Invalid email address")
                 
                 page.locator("#signupEmail").fill("wrong@email")
-                expect(page.locator("#errorMessageEmail")).to_be_visible()
-                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+                expect(page.locator("#signupErrorMessageEmail")).to_be_visible()
+                expect(page.locator("#signupErrorMessageEmail")).to_have_text("Invalid email address")
                 
                 page.locator("#signupEmail").fill("wrongemail.at")
-                expect(page.locator("#errorMessageEmail")).to_be_visible()
-                expect(page.locator("#errorMessageEmail")).to_have_text("Invalid email address")
+                expect(page.locator("#signupErrorMessageEmail")).to_be_visible()
+                expect(page.locator("#signupErrorMessageEmail")).to_have_text("Invalid email address")
             
             except:
                 expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
@@ -121,8 +121,8 @@ class TestBasicSignup:
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW + "1")
-                expect(page.locator("#errorMessagePassword")).to_be_visible()
-                expect(page.locator("#errorMessagePassword")).to_have_text("Passwords don't match")
+                expect(page.locator("#signupErrorMessagePassword")).to_be_visible()
+                expect(page.locator("#signupErrorMessagePassword")).to_have_text("Passwords don't match")
             
             except:
                 expect(page.locator("#FAIL")).to_be_visible(timeout=1)

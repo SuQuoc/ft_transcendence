@@ -143,7 +143,7 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupPassword2").fill(password2)
     page.locator("#signupSubmitButton").click()
     otp = get_otp()
-    page.locator("#otpCode").fill(otp)
+    page.locator("#signupOtpCode").fill(otp)
     page.locator("#signupSubmitButton").click()
 
 
