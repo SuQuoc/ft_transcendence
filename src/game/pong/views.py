@@ -47,23 +47,31 @@ def delete_user_stats(request):
 @api_view(['GET'])
 def get_game_stats(request):
     try:
-        userid = request.user.user_id
-
-        matches = MatchRecord.objects.filter(Q(winner=userid) | Q(loser=userid)).order_by('-timestamp')
-        if not matches:
-            return Response({'error': 'No matches found'}, status=status.HTTP_404_NOT_FOUND)
+        user_id = request.query_params.get("profile_id", None)
+        if user_id is None:
+            user_id = request.user.user_id
+			
+        last_matches = MatchRecord.objects.filter(
+		    Q(winner=user_id) | Q(loser=user_id)
+                ).order_by('-timestamp')[:10]
+        if not last_matches:
+            return Response('No matches found', status=status.HTTP_200_OK)
         
-        total_matches = matches.count()
-        wins = matches.filter(winner=userid).count()
-        losses = matches.filter(loser=userid).count()
+        wins = MatchRecord.objects.filter(winner=user_id).count()
+        losses = MatchRecord.objects.filter(loser=user_id).count()
+        total_matches = wins + losses
 
-        last_matches = matches.values('winner', 'loser', 'winner_score', 'loser_score', 'timestamp')[:10]
-        last_matches_data = list(last_matches)
+        last_matches_data = list(last_matches.values('winner', 
+													 'loser', 
+													 'winner_score', 
+													 'loser_score', 
+													 'timestamp'))
         
         ids = set()
         for match in last_matches_data:
             ids.add(str(match['winner']))
             ids.add(str(match['loser']))
+        
         
         displaynames = get_displaynames(request, ids)
         logging.warning("displaynames: " + str(displaynames))

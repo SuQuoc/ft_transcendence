@@ -50,33 +50,22 @@ window.addEventListener("DOMContentLoaded", async () => {
 	if (!history.state)
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
+	// adding event handlers to add and remove the userprofile sidemenu
+	document.getElementById("userProfileButton").addEventListener('click', handleAddUserProfile);
+	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
+
 	// adds event listeners for routing
 	await app.router.init();
-
-	// event handlers for opening and closing user profile
-	const userProfileButton = document.getElementById('userProfileButton');
-	const userProfileContainer = document.getElementById('userProfileContainer');
-    const closeUserProfile = document.getElementById('closeUserProfile');
-
-
-	//TODO: maybe move this part to the router
-	userProfileButton.addEventListener('click', () => {
-		userProfileContainer.classList.add('open');
-	});
-
-	userProfileButton.addEventListener('keydown', (event) => {
-		if (event.key == 'Enter' || event.key == ' ') {
-			userProfileContainer.classList.add('open');
-		}
-	});
-
-	closeUserProfile.addEventListener('click', () => {
-		userProfileContainer.classList.remove('open');
-	});
-
-	closeUserProfile.addEventListener('keydown', (event) => {
-		if (event.key == 'Enter' || event.key == ' ') {
-			userProfileContainer.classList.remove('open');
-		}
-	});
 });
+
+
+/** Adding the user profile when the user profile button in the navbar is clicked */
+function handleAddUserProfile() {
+	const userProfleContainer = document.getElementById("userProfileContainer");
+	userProfleContainer.appendChild(document.createElement("user-profile"));
+};
+/** Deleting the user profile when the user profile is closed */
+function handleDeleteUserProfile() {
+	const userProfleContainer = document.getElementById("userProfileContainer");
+	userProfleContainer.innerHTML = "";
+};

@@ -11,9 +11,24 @@ from django.core.mail import send_mail
 import os, requests, logging
 
 def send_200_with_expired_cookies():
+    access_token_expiration = datetime.now(timezone.utc)
     response = Response(status=status.HTTP_200_OK)
-    response.delete_cookie('access')
-    response.delete_cookie('refresh')
+    response.set_cookie(
+        key='access',
+        value= "",
+        expires = access_token_expiration ,
+        domain=os.environ.get('DOMAIN'),
+        httponly=True,
+        secure=True,
+        samesite = 'Strict')
+    response.set_cookie(
+        key='refresh',
+        value= "",
+        expires = access_token_expiration ,
+        domain=os.environ.get('DOMAIN'),
+        httponly=True,
+        secure=True,
+        samesite = 'Strict')
     return response
 
 def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=None, response_body=None):
@@ -75,7 +90,7 @@ def send_delete_request_to_um(request, token_s):
         raise Exception('Error deleting user in UM')
 
 def send_delete_request_to_game(request, token_s):
-    request_uri = 'http://game:8000/game/delete_user_stats'
+    request_uri = 'http://game:8000/game/delete_user_stats/'
     headers = {'Content-Type': 'application/json',}
     access_token = token_s.validated_data['access']
     cookies = {
