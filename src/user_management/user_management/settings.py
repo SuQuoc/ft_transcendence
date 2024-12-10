@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',  # [aguilmea] added manually for cookies
     "api",
     "friends",
+    "channels" # NOTE: maybe unnecessary
 ]
 
 MIDDLEWARE = [
@@ -103,7 +104,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = "user_management.wsgi.application"
+#WSGI_APPLICATION = "user_management.wsgi.application"
 ASGI_APPLICATION = 'user_management.asgi.application'
 
 # Database
@@ -240,7 +241,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/1")],
+            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis_usermanagement:6379/1")],
         },
     },
 }

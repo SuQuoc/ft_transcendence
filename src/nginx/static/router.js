@@ -1,4 +1,4 @@
-import { TournamentLobbyPage } from './js/TournamentLobbyPage.js';
+import { TournamentLobbyPage } from "./js/TournamentLobbyPage.js";
 
 const validateToken = async () => {
 	try {
@@ -6,9 +6,9 @@ const validateToken = async () => {
 		const response = await fetch("/registration/verify_token", {
 			method: "GET",
 			headers: {
-				"Content-Type": "application/json"
+				"Content-Type": "application/json",
 			},
-			credentials: "include"
+			credentials: "include",
 		});
 
 		if (response.status !== 200) {
@@ -28,9 +28,9 @@ const validateToken = async () => {
 			const refreshResponse = await fetch("/registration/refresh_token", {
 				method: "GET",
 				headers: {
-					"Content-Type": "application/json"
+					"Content-Type": "application/json",
 				},
-				credentials: "include"
+				credentials: "include",
 			});
 
 			if (refreshResponse.status !== 200) {
@@ -42,48 +42,52 @@ const validateToken = async () => {
 			return false;
 		}
 	}
-}
+};
 
 /** Checks if the displayname is already set. If not it asks the um server for it and if the user hasn't chosen one yet, they get reroutet to /display */
 const getUserData = async () => {
-	if (window.app.userData.username && window.app.userData.profileImage) // if the displayname is already set we don't need to fetch it
+	if (window.app.userData.username && window.app.userData.profileImage)
+		// if the displayname is already set we don't need to fetch it
 		return;
 
 	try {
 		// Check if the user already has a displayname
-		const response = await fetch ('/um/profile', {
-			method: 'GET',
+		const response = await fetch("/um/profile", {
+			method: "GET",
 			headers: {
-				'Content-Type': 'application/json'
-			}
+				"Content-Type": "application/json",
+			},
 		});
-		
+
 		// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 		if (!response.ok) {
-			window.app.router.go('/displayname', false);
+			window.app.router.go("/displayname", false);
 		} else {
 			const responseData = await response.json();
 			window.app.userData.username = responseData.displayname;
 			window.app.userData.profileImage = responseData.image;
-			app.router.go('/', false);
+			app.router.go("/", false);
 		}
 	} catch (error) {
-		console.error('Error getting userdata (router):', error);
+		console.error("Error getting userdata (router):", error);
 	}
-}
+};
 
 const checkQueryParams = async () => {
 	try {
 		const code = localStorage.getItem("oauthCode");
 		const state = localStorage.getItem("oauthState");
 		if (code && state) {
-			const response = await fetch("/registration/oauthtwo_exchange_code_against_access_token", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify({ code: code, state: state })
-			});
+			const response = await fetch(
+				"/registration/oauthtwo_exchange_code_against_access_token",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ code: code, state: state }),
+				}
+			);
 
 			if (response.status === 200) {
 				localStorage.removeItem("oauthCode");
@@ -99,24 +103,27 @@ const checkQueryParams = async () => {
 		console.error("Error checking query params: ", error.message);
 		return false;
 	}
-}
+};
 
 const Router = {
 	init: async () => {
 		// adding event listeners
-			// event handler for navigation links
-		document.querySelectorAll("a.nav-link").forEach(a => {
+		// event handler for navigation links
+		document.querySelectorAll("a.nav-link").forEach((a) => {
 			a.addEventListener("click", Router.handleNavLinks);
 		});
-			// event handler for url changes (back/forward)
+		// event handler for url changes (back/forward)
 		window.addEventListener("popstate", Router.handlePopstate);
-
 
 		// !!! everything in this function below this line needs to stay at the bottom of the init function
 		// !!! if not, the event listeners might not be added
 
 		// check if the user is logged in
-		if (location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/forgot-password") {
+		if (
+			location.pathname !== "/login" &&
+			location.pathname !== "/signup" &&
+			location.pathname !== "/forgot-password"
+		) {
 			const tokenValid = await validateToken();
 			const queryParamsValid = await checkQueryParams();
 			if (!tokenValid && !queryParamsValid) {
@@ -126,7 +133,7 @@ const Router = {
 		}
 		getUserData(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
 		// TODO: we need to get profile image as well
-		
+
 		// check initial URL
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
@@ -135,17 +142,23 @@ const Router = {
 	makeWebSocket: (type) => {
 		if (!window.app.socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/game/tournament";
+			let ws_path =
+				ws_scheme + "://" + window.location.host + "/game/tournament";
 			window.app.socket = new WebSocket(ws_path);
 
 			// add event listeners
 			//window.app.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("socket created");
-		};
+		}
 
 		window.app.socket.onopen = () => {
 			console.log("socket opened");
-			window.app.socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+			window.app.socket.send(
+				JSON.stringify({
+					type: type,
+					displayname: window.app.userData.username,
+				})
+			);
 		};
 	},
 
@@ -162,16 +175,15 @@ const Router = {
 	//opens the window.app.pong_socket if it is closed
 	/** creates a Websocket connection to backend using a match id */
 	makePongWebSocket: () => {
-		
 		if (!window.app.pong_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/game/match";
+			let ws_path = ws_scheme + "://" + window.location.host + "/game/match";
 			window.app.pong_socket = new WebSocket(ws_path);
 
 			// add event listeners
 			//window.app.pong_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("pong socket created");
-		};
+		}
 
 		window.app.pong_socket.onopen = () => {
 			console.log("pong socket opened");
@@ -192,16 +204,16 @@ const Router = {
 	//opens the window.app.match_socket if it is closed
 	/** creates a Websocket connection to backend using a match id */
 	makeMatchWebSocket: () => {
-		
 		if (!window.app.match_socket) {
 			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + '://' + window.location.host + "/game/matchmaking/";
+			let ws_path =
+				ws_scheme + "://" + window.location.host + "/game/matchmaking/";
 			window.app.match_socket = new WebSocket(ws_path);
 
 			// add event listeners
 			//window.app.match_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
 			console.log("match socket created");
-		};
+		}
 
 		window.app.match_socket.onopen = () => {
 			console.log("match socket opened");
@@ -219,42 +231,125 @@ const Router = {
 		}
 	},
 
+	//opens the window.app.match_socket if it is closed
+	/** creates a Websocket connection to backend using a match id */
+	makeOnlineWebSocket: () => {
+		if (!window.app.online_socket) {
+			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			let ws_path =
+				ws_scheme + "://" + window.location.host + "/um/online_status";
+			window.app.online_socket = new WebSocket(ws_path);
+
+			// add event listeners
+			//window.app.online_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
+			console.log("online socket created");
+		}
+
+		window.app.online_socket.onopen = () => {
+			console.log("online socket opened");
+			// NOTE: window.app.online_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
+		};
+	},
+
+	/** closes the window.app.online_socket if it is open */
+	closeOnlineWebSocket: () => {
+		if (window.app.online_socket) {
+			window.app.online_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
+			window.app.online_socket.close();
+			window.app.online_socket = null;
+			console.log("online socket closed");
+		}
+	},
+
+	/** Opens and returns a new websocket if the one passed is closed. If it isn't, it is returned instead. */
+	makeAllWebSocket: (socket, endpoint) => {
+		// function name should be changed
+		if (socket)
+			// needs to happen one level up ??!!!
+			return socket;
+		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+		let ws_path = ws_scheme + "://" + window.location.host + endpoint;
+		let new_socket = new WebSocket(ws_path);
+
+		// add event listeners
+		//this.new_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect); // do we need to make an extra function for unexpected disconnect ???!!!
+		console.log("socket created");
+
+		new_socket.onopen = () => {
+			console.log("socket opened");
+		};
+		return new_socket;
+	},
+
+	/** Closes the socket if it is open.
+	 *
+	 * Returns null. */
+	closeAllWebSocket: (socket) => {
+		// function name should be changed
+		if (socket) {
+			socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
+			socket.close();
+			console.log("socket closed");
+		}
+		return null;
+	},
+
 	//hides or shows the navbar and footer depending on the route
 	hideOrShowNavbarAndFooter: (route) => {
-		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
+		if (
+			route === "/login" ||
+			route === "/signup" ||
+			route === "/displayname" ||
+			route === "/forgot-password" ||
+			route === "/tournament-lobby"
+		) {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
-		}
-		else {
+		} else {
 			document.getElementById("navbar").style.display = "";
 			document.getElementById("footer").style.display = "";
 			if (window.app.userData.profileImage) {
-				document.getElementById('userProfileButton').src = window.app.userData.profileImage;
+				document.getElementById("userProfileButton").src =
+					window.app.userData.profileImage;
 			} else {
-				const response = fetch('/um/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-				response.then(data => data.json()).then(data => {
-					if (data.image) {
-						window.app.userData.profileImage = data.image;
-						document.getElementById('userProfileButton').src = data.image;
-					}
+				const response = fetch("/um/profile", {
+					method: "GET",
+					headers: { "Content-Type": "application/json" },
 				});
+				response
+					.then((data) => data.json())
+					.then((data) => {
+						if (data.image) {
+							window.app.userData.profileImage = data.image;
+							document.getElementById("userProfileButton").src = data.image;
+						}
+					});
 			}
 		}
 	},
 
-
 	// changes the page main content and update the URL
-	go: async (route, addToHistory = true, tournamentName = "") => { // the tournamentName is only needed for the tournamentLobbyPage
+	go: async (route, addToHistory = true, tournamentName = "") => {
+		// the tournamentName is only needed for the tournamentLobbyPage
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
-		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
+		if (
+			route !== "/login" &&
+			route !== "/signup" &&
+			route !== "/forgot-password"
+		) {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
+				//window.app.online_socket.close();
+				Router.closeOnlineWebSocket();
 				route = "/login";
 				addToHistory = false;
 			}
+			//window.app.online_socket.make("/um/online_status/");
+			Router.makeOnlineWebSocket();
 		} else {
+			//window.app.online_socket.close(); // needed here??!!!
 			app.userData = {};
 			localStorage.removeItem("userData");
 		}
@@ -333,7 +428,12 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) { // pong needed??!!!
+		if (
+			!route.startsWith("/tournament") &&
+			!route.startsWith("/match") &&
+			!route.startsWith("/pong")
+		) {
+			// pong needed??!!!
 			Router.closeWebSocket(); // checks if the socket is open before closing
 		}
 		if (route !== "/tournament-lobby" && route !== "/match") {
@@ -341,16 +441,14 @@ const Router = {
 		}
 
 		// adds the route to the history, so the back/forward buttons work
-		if (addToHistory)
-			history.pushState({route}, "", route);
+		if (addToHistory) history.pushState({ route }, "", route);
 	},
-
 
 	/// ----- Event Handlers ----- ///
 
 	handleNavLinks(event) {
 		event.preventDefault();
-				
+
 		const url = event.target.getAttribute("href");
 		Router.go(url);
 	},
@@ -366,6 +464,6 @@ const Router = {
 		console.log("socket unexpectdedly disconnected");
 		Router.go("/");
 	} */
-}
+};
 
 export default Router;
