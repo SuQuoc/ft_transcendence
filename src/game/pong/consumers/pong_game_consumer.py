@@ -76,7 +76,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await self.send_error()
             return
         
-        print(f"Match config: {self.match_config}")
         self.game_mode = self.match_config.get('game_mode')
     
         self.game_group = f'game_{self.match_id}'
@@ -186,7 +185,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         if self.game_mode == GameMode.TOURNAMENT.value:
             await self.forward_match_result(data)
         else:
-            self.close()
+            await self.disconnect(1000)
 
 
     ### EVENTS - Communication with other consumer
