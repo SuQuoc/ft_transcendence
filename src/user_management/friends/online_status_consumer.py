@@ -5,6 +5,7 @@ import json
 import base64
 from collections import defaultdict
 from .models import FriendList
+from asgiref.sync import sync_to_async
 
 connection_registry = defaultdict(str)
 
@@ -37,11 +38,20 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         if type == 'get_friends_online_status': # TODO: might help? if not than just remove, problem if a friends get a added while im online
             await self.send_status_to_friends(Status.ONLINE)
 
-    
-    async def send_status_to_friends(self, status):
+    @sync_to_async
+    def get_online_friends_channels(self):
         friend_list = FriendList.objects.get(user=self.user_id)
         friends = friend_list.friends.all()
 
+        channels = []
+        for friend in friends:
+            friend_channel = connection_registry.get(friend.user_id, None)
+            if friend_channel:
+                channels.append(friend_channel)
+        return channels
+        
+
+    async def send_status_to_friends(self, status):
         message = {
             'type': 'online_status',
             'status': status,
@@ -51,10 +61,9 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         if status == Status.ONLINE: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
             message["sender_channel"] = self.channel_name
 
-        for friend in friends:
-            friend_channel = connection_registry.get(friend.user_id, None)
-            if friend_channel:
-                await self.channel_layer.send(friend_channel, message)
+        channels = await self.get_online_friends_channels()
+        for friend_channel in channels:
+            await self.channel_layer.send(friend_channel, message)
 
 
     async def send_friend_my_status(self, friends_channel):
