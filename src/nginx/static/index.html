@@ -41,13 +41,13 @@
 	<!-- Navbar -->
 	<nav class="navbar navbar-dark bg-dark px-3" id="navbar" style="display:none;">
 		<ul class="navbar-nav d-flex flex-row gap-3">
-			<a class="nav-link active" href="/">Home</a>
-			<a class="nav-link" href="/match">Match</a>
-			<a class="nav-link" href="/tournament">Tournament</a>
+			<a class="nav-link active" href="/" tabindex="1">Home</a>
+			<a class="nav-link" href="/match" tabindex="2">Match</a>
+			<a class="nav-link" href="/tournament" tabindex="3">Tournament</a>
 		</ul>
 
 		<ul class="navbar-nav ms-auto me-3">
-			<a class="nav-link" href="/friends">Friends</a>
+			<a class="nav-link" href="/friends" tabindex="4">Friends</a>
 		</ul>
 		<!-- User Profile -->
 		<div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-labelledby="User Profile">
@@ -60,7 +60,7 @@
 			</div>
 		</div>
 		<img src="/media_url/profile_images/default_avatar.png"
-			onerror='this.src = src="/media_url/profile_images/default_avatar.png"''
+			onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
 			alt="Profile image"
 			class="rounded-circle"
 			id="userProfileButton"
@@ -69,6 +69,7 @@
 			role="button"
 			aria-controls="userProfileButton"
 			style="width: 40px; height: 40px; cursor: pointer; object-position: center; object-fit: cover;"
+			tabindex="5"
 		>
 	</nav>
 

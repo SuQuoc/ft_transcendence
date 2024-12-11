@@ -35,9 +35,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             
             await self.trigger_match_found(match_id, playerL_channel)
             await self.trigger_match_found(match_id, playerR_channel)
-            
-            # await self.trigger_disconnection(playerL_channel) # NOTE: i guess closing before accept causes the recv error
-            # await self.trigger_disconnection(playerR_channel)
+            await self.trigger_disconnection(playerL_channel)
+            await self.trigger_disconnection(playerR_channel)
 
 
     async def disconnect(self, close_code):
@@ -51,7 +50,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
         if message_type == 'cancel': # NOTE: not implemented yet, not a must
             await self.disconnect(1000)
-            
             
     
     async def trigger_match_found(self, match_id: str, channel_name):
@@ -79,6 +77,4 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     async def disconnect_from_matchmaking(self, event):
-        MatchmakingConsumer.players.pop(self.user_id, None)
-        await self.close(1000)
-        #await self.disconnect(1000)
+        await self.disconnect(1000)

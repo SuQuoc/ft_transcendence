@@ -119,11 +119,13 @@ export class ComponentBaseClass extends HTMLElement {
 	 * @param {string} type - The content type of the request.
 	 * @returns {object} - The response from the API call.
 	 */
-	async apiFetch(url, options = {}, type = "application/json") {
+	async apiFetch(url, options = {}, type = "application/json", auth = true) {
 		// Validate the token before making the API call
-		const tokenValid = await this.validateToken();
-		if (!tokenValid) {
-			throw new Error("Unable to refresh token");
+		if (auth) {
+			const tokenValid = await this.validateToken();
+			if (!tokenValid) {
+				throw new Error("Unable to refresh token");
+			}
 		}
 
 		// Set headers conditionally
@@ -143,7 +145,9 @@ export class ComponentBaseClass extends HTMLElement {
 
 		// Handle response
 		if (!response.ok) {
-			throw new Error(`API call failed: ${response.statusText}`);
+			const responseData = await response.text();
+			const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+			throw new Error(errorMessage);
 		}
 
 		const contentType = response.headers.get('content-type');
@@ -151,33 +155,5 @@ export class ComponentBaseClass extends HTMLElement {
 			return response.json();
 		}
 	};
-
-	/*
-	async apiFetch(url, options = {}, type = "application/json") {
-		// Validate the token before making the API call
-		const tokenValid = await this.validateToken();
-		if (!tokenValid) {
-			throw new Error("Unable to refresh token");
-		}
-
-		// Make the API call
-		const response = await fetch(url, {
-			...options,
-			credentials: "include", // Ensure cookies are sent with the request
-			headers: {
-				...options.headers,
-				"Content-Type": type
-			}
-		});
-
-		// Handle response
-		if (!response.ok) {
-			throw new Error(`API call failed: ${response.statusText}`);
-		}
-
-		return response.json();
-	};
-	 */
-
 
 }
