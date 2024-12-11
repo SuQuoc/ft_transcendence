@@ -107,6 +107,7 @@ const Router = {
 			// event handler for navigation links
 		document.querySelectorAll("a.nav-link").forEach(a => {
 			a.addEventListener("click", Router.handleNavLinks);
+			a.addEventListener("keydown", Router.handleNavLinkKeydown);
 		});
 			// event handler for url changes (back/forward)
 		window.addEventListener("popstate", Router.handlePopstate);
@@ -224,7 +225,6 @@ const Router = {
 		if (route === "/login" || route === "/signup" || route === "/displayname" || route === "/forgot-password" || route === "/tournament-lobby") {
 			document.getElementById("navbar").style.display = "none";
 			document.getElementById("footer").style.display = "none";
-			document.getElementById("userProfileContainer").classList.remove('open');
 		}
 		else {
 			document.getElementById("navbar").style.display = "";
@@ -360,6 +360,14 @@ const Router = {
 				
 		const url = event.target.getAttribute("href");
 		Router.go(url);
+	},
+
+	handleNavLinkKeydown(event) {
+		if (event.key === "Enter" || event.key === " ") {
+			event.preventDefault();
+			const url = event.target.getAttribute("href");
+			Router.go(url);
+		}
 	},
 
 	handlePopstate(event) {

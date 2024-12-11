@@ -18,10 +18,9 @@ from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 import logging
 
-def profile(request):
-    return HttpResponse("This is the profile page")
 
 @api_view(['POST'])
 def get_displaynames(request):
@@ -61,8 +60,15 @@ class CustomUserProfile(generics.GenericAPIView):
 
     def get(self, request):
         user = get_user_from_jwt(request)
-        serializer = CustomUserProfileSerializer(user)
+        other_id = request.query_params.get("profile_id", None)
+        if other_id:
+            other = get_object_or_404(CustomUser, user_id=other_id)
+            serializer = CustomUserProfileSerializer(other)
+        else:
+            serializer = CustomUserProfileSerializer(user)
+
         return Response(serializer.data)
+
 
     def patch(self, request):
         user = get_user_from_jwt(request)
