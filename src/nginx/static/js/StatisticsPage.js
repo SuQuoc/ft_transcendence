@@ -39,7 +39,7 @@ export class StatisticsPage extends ComponentBaseClass {
 
 	async fetchStats() {
 		try {
-			const stats = await this.apiFetch('game/get_game_stats', { method: 'GET' });
+			const stats = await this.apiFetch('game/get_game_stats/', { method: 'GET' });
 			return (stats);
 		} catch (error) {
 			console.error('Error fetching stats:', error.message);

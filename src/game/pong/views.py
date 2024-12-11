@@ -55,7 +55,7 @@ def get_game_stats(request):
 		    Q(winner=user_id) | Q(loser=user_id)
                 ).order_by('-timestamp')[:10]
         if not last_matches:
-            return Response('No matches found', status=status.HTTP_200_OK)
+            return Response('No matches found', status=status.HTTP_204_NO_CONTENT)
         
         wins = MatchRecord.objects.filter(winner=user_id).count()
         losses = MatchRecord.objects.filter(loser=user_id).count()
