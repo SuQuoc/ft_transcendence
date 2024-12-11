@@ -143,7 +143,7 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupPassword2").fill(password2)
     page.locator("#signupSubmitButton").click()
     otp = get_otp()
-    page.locator("#otpCode").fill(otp)
+    page.locator("#signupOtpCode").fill(otp)
     page.locator("#signupSubmitButton").click()
 
 
@@ -153,7 +153,7 @@ def login(page: Page, email: str, password: str):
     page.locator("#loginPassword").fill(password)
     page.locator("#loginSubmitButton").click()
     otp = get_otp()
-    page.locator("#otpCode").fill(otp)
+    page.locator("#loginOtpCode").fill(otp)
     page.locator("#loginSubmitButton").click()
 
 
@@ -169,7 +169,10 @@ def delete_user(page: Page, password: str):
     page.locator("#deleteUserButton").click()
     page.locator("#deleteUserPassword").fill(password)
     page.locator("#requestDeleteUserButton").click()
-    # [aguilmea] delete user has no otp in the front end but in the backend it has - so it is not working rigth now
+    otp = get_otp()
+    page.locator("#deleteUserOTP").fill(otp)
+    page.locator("#confirmDeleteUserButton").click()
+    expect(page.locator("#loginForm")).to_be_visible()
 
 
 def get_otp():

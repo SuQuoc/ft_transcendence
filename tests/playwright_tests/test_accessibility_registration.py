@@ -19,23 +19,20 @@ class TestAccessibility:
             try:
                 page.goto(BASE_URL) 
                 page.locator("#loginGoToSignup").press("Enter")
-                page.locator("#loginGoToSignup").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
                 page.locator("#loginWith42").press("Enter")
                 expect(page).to_have_url(re.compile("https://auth.42.fr/*"))
 
                 page.goto(BASE_URL) 
                 page.locator("#forgotPassword").press("Enter")
-                page.locator("#forgotPassword").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
                 expect(page.locator("#forgotPasswordForm")).to_be_visible()
-                #page.locator("some locator go to login").press("Enter")
-                #expect(page.locator("#loginForm")).to_be_visible()
+                page.locator("#forgotPasswordGoToLogin").press("Enter")
+                expect(page.locator("#loginForm")).to_be_visible()
                 
                 page.goto(BASE_URL) 
                 page.locator("#forgotPassword").press("Enter")
-                page.locator("#forgotPassword").click() # [aguilmea] to delete when fixed - we cannot press enter and have to click on the link
                 expect(page.locator("#forgotPasswordForm")).to_be_visible()
-                #page.locator("some locator go to signup").press("Enter")
-                #expect(page.locator("#signupForm")).to_be_visible()
+                page.locator("#forgotPasswordGoToSignup").press("Enter")
+                expect(page.locator("#signupForm")).to_be_visible()
 
 
                 page.goto(BASE_URL)
@@ -44,21 +41,20 @@ class TestAccessibility:
                 expect(page.locator("#loginForm")).to_be_visible()
 
                 page.goto(BASE_URL)
-                page.locator("#loginGoToSignup").click()
+                page.locator("#loginGoToSignup").press("Enter")
                 page.locator("#signupEmail").fill(USERMAIL)
                 page.locator("#signupPassword1").fill(USERPW)
                 page.locator("#signupPassword2").fill(USERPW)
                 page.locator("#signupSubmitButton").press("Enter")
                 otp = get_otp()
-                page.wait_for_selector("#otpCode", state="visible")
-                page.locator("#otpCode").fill(otp)
+                page.wait_for_selector("#signupOtpCode", state="visible")
+                page.locator("#signupOtpCode").fill(otp)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").press("Enter")
                 set_display_name(page, USERDISPLAYNAME)
-                delete_user(page, USERPW)
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible() # causing an intended failure
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
 
             finally:
                 context.close()
@@ -75,20 +71,20 @@ class TestAccessibility:
     
                 page.goto(BASE_URL)
                 page.locator("#loginGoToSignup").click()
-                page.locator("#forgotPassword").press("Enter")
+                page.locator("#signupForgotPassword").press("Enter")
                 expect(page.locator("#forgotPasswordForm")).to_be_visible()
                 page.locator("#resetEmail").fill(USERMAIL)
-                page.locator("#requestOTP").press("Enter")
+                page.locator("#resetEmail").press("Enter")
                 otp = get_otp()
-                page.wait_for_selector("#otpCode", state="visible")
-                page.locator("#otpCode").fill(otp)
-                page.locator("#newPassword1").fill(NEWUSERPW)
-                page.locator("#newPassword2").fill(NEWUSERPW)
+                page.wait_for_selector("#resetOtpCode", state="visible")
+                page.locator("#resetOtpCode").fill(otp)
+                page.locator("#resetNewPassword1").fill(NEWUSERPW)
+                page.locator("#resetNewPassword2").fill(NEWUSERPW)
                 page.locator("#resetSubmitButton").press("Enter")
                 expect(page.locator("#loginForm")).to_be_visible()
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible()
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1)
 
             finally:
                 context.close()
@@ -108,13 +104,14 @@ class TestAccessibility:
                 page.locator("#loginPassword").fill(NEWUSERPW)
                 page.locator("#loginSubmitButton").press("Enter")
                 otp = get_otp()
-                page.wait_for_selector("#otpCode", state="visible")
-                page.locator("#otpCode").fill(otp)
+                page.wait_for_selector("#loginOtpCode", state="visible")
+                page.locator("#loginOtpCode").fill(otp)
                 page.locator("#loginSubmitButton").press("Enter")
                 expect(page.locator("#mainContent")).to_be_visible()
+                delete_user(page, NEWUSERPW)
             
             except:
-                expect(page.locator("#FAIL")).to_be_visible()
+                expect(page.locator("#FAIL")).to_be_visible(timeout=1)
 
             finally:
                 context.close()
