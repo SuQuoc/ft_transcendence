@@ -111,24 +111,23 @@ def signup(request):
         user = RegistrationUser.objects.filter(username=username).first()
         if not user:
             if otp:
-                return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'signup error: no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
-                return Response({2}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'signup error: no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             validate_password(password, user=None)
             user_data = user_s.validated_data
             create_user_send_otp.delay(user_data, 'signup')
             return Response(status=status.HTTP_201_CREATED)
         if user.is_verified() is True:
-            return Response({3}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'signup error: no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(password):
-            return Response({4}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'signup error: no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         if not otp:
             create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': password}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
-            return Response({5}, status=status.HTTP_400_BAD_REQUEST)
-        logging.warning(f"signup user {user.id} verified")
+            return Response({'signup error: no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         user.set_verified()
         user.change_password_is_set()
         cache_key = f'jwt_{user.id}'
