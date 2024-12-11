@@ -129,8 +129,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			try {
 				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: "", new_password: password})});
 			} catch (error) {
-				console.error('Error changing password:', error);
-				this.password_warning.innerHTML = "Error setting password";
+				this.password_warning.innerHTML = error;
 				this.password_warning.setAttribute("aria-invalid", "true");
 				this.password_warning.style.display = "";
 				return;

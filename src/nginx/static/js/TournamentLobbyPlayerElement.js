@@ -33,7 +33,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
-			<img src="https://i.pravatar.cc/150?img=52"
+			<img src="/media_url/profile_images/default_avatar.png"
 				alt="Profile image"
 				class="rounded-circle lobby-player-avatar"
 				name="lobby_player_avatar"

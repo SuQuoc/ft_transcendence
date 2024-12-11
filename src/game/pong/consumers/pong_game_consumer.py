@@ -192,7 +192,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         if self.game_mode == GameMode.TOURNAMENT.value:
             await self.forward_match_result(data)
         else:
-            self.close()
+            await self.disconnect(1000)
+
 
 
     ### EVENTS - Communication with other consumer

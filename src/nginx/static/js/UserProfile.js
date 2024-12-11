@@ -1,15 +1,6 @@
 import { ComponentBaseClass } from './componentBaseClass.js';
 
 export class UserProfile extends ComponentBaseClass {
-    constructor() {
-        super();
-        //done to check on visibility of the element
-        this.observer = new IntersectionObserver(this.handleVisibilityChange.bind(this), {
-            root: null,
-            threshold: 0.1
-        });
-    }
-
     // Update the getElementHTML method to include a spinner
     getElementHTML() {
         const template = document.createElement('template');
@@ -54,7 +45,7 @@ export class UserProfile extends ComponentBaseClass {
     </style>
     <div class="form-container text-white" style="background-color: var(--custom-bg-color); border-radius: 6px;">
     <div id="userManagement">
-        <img src="https://i.pravatar.cc/150?img=52" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "https://i.pravatar.cc/150?img=52"'>
+        <img src="/media_url/profile_images/default_avatar.png" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "/media_url/profile_images/default_avatar.png"'>
         <div id="imageWarning" class="mt-2"></div>
         <input type="file" id="imageUpload" style="display: none;">
         <form id="profileForm">
@@ -125,6 +116,7 @@ export class UserProfile extends ComponentBaseClass {
 
     connectedCallback() {
         super.connectedCallback();
+        this.loadUserData();
         this.shadowRoot.getElementById('saveProfile').addEventListener('click', this.saveProfile.bind(this));
         this.shadowRoot.getElementById('changePassword').addEventListener('click', this.changePassword.bind(this));
         this.shadowRoot.getElementById('newPassword').addEventListener('input', this.validatePasswords.bind(this));
@@ -136,11 +128,6 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
         this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
         this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
-
-        this.shadowRoot.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
-        this.observer.observe(this);
     }
 
     /**
@@ -232,20 +219,7 @@ export class UserProfile extends ComponentBaseClass {
         }
     }
 
-    handleVisibilityChange(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                this.loadUserData();
-            }
-        });
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.observer.unobserve(this);
-    }
-
-     async loadUserData() {
+    async loadUserData() {
         try {
             // Fetch user data from global app object or API
             const response = await this.apiFetch('/um/profile', { method: 'GET', cache: 'no-store' });
@@ -381,7 +355,7 @@ export class UserProfile extends ComponentBaseClass {
             this.shadowRoot.getElementById('confirmPassword').value = '';
             console.log('Changed password');
         } catch (error) {
-            console.error('Error changing password: ', error);
+            changePasswordWarning.textContent = error;
             changePasswordWarning.style.display = 'block';
         }
 

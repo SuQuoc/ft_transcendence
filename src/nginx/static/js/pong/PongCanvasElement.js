@@ -12,6 +12,9 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.handlePlayerMoveKey_var = this.handlePlayerMoveKey.bind(this);
 		this.handlePlayerMoveTouch_var = this.handlePlayerMoveTouch.bind(this);
 		this.handlePlayerMoveEnd_var = this.handlePlayerMoveEnd.bind(this);
+
+		this.handleDoubleTap_var = this.handleDoubleTap.bind(this);
+		this.handleDoubleClick_var = this.handleDoubleClick.bind(this);
 	}
 
 	connectedCallback() {
@@ -27,6 +30,9 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.addEventListener('touchmove', this.handlePlayerMoveTouch_var);
 		this.addEventListener('touchstart', this.handlePlayerMoveTouch_var);
 		this.addEventListener('touchend', this.handlePlayerMoveEnd_var);
+
+		this.canvas.addEventListener("touchend", this.handleDoubleTap_var);
+		this.canvas.addEventListener("dblclick", this.handleDoubleClick_var);
 	}
 
 	disconnectedCallback() {
@@ -42,6 +48,9 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.removeEventListener('touchstart', this.handlePlayerMoveTouch_var);
 		this.removeEventListener('touchend', this.handlePlayerMoveEnd_var);
 
+		this.canvas.removeEventListener("touchend", this.handleDoubleTap_var);
+		this.canvas.removeEventListener("dblclick", this.handleDoubleClick_var);
+
 		clearInterval(this.interval_id);
 	}
 
@@ -50,6 +59,8 @@ export class PongCanvasElement extends canvasBaseClass {
 	/** Initializes the canvases and other objects */
 	init() {
 		super.init();
+
+		this.last_tap = new Date().getTime(); // used to mesure if the user double taps
 
 		let player_x = 10;
 		let player_width = 10;
@@ -87,6 +98,25 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.curr_state = {} // current state (the state that is currently displayed)
 		this.next_state = {} // the next state that will be displayed
 		this.sent_state = {} // the state that was sent by the server (is needed because setTimeout doesn't have the passed state)
+	}
+
+	makeFullScreen() {
+		if (document.fullscreenElement) {
+			return;
+		}
+	
+		const requestFullscreen = this.requestFullscreen;
+	
+		if (requestFullscreen) {
+			requestFullscreen.call(this).then(() => {
+				this.handleCanvasResize();
+				this.handleBackgroundCanvasResize();
+			}).catch((err) => {
+				console.error("Error: could not enter fullscreen: ", err);
+			});
+		} else {
+			console.error("Error: Fullscreen API is not supported in this browser.");
+		}
 	}
 
 	renderForeground(state) {
@@ -129,6 +159,20 @@ export class PongCanvasElement extends canvasBaseClass {
 
 
 	/// ----- Event Handlers ----- ///
+
+	handleDoubleTap() {
+		const current_time = new Date().getTime();
+        const tap_length = current_time - this.last_tap;
+        if (tap_length < 400 && tap_length > 0) {
+			this.makeFullScreen();
+        }
+        this.last_tap = current_time;
+
+	}
+	
+	handleDoubleClick() {
+		this.makeFullScreen();
+	}
 
 	/** Sets a new goal for the player to move to (this.move_to) */
 	handlePlayerMoveTouch(event) {
@@ -174,7 +218,8 @@ export class PongCanvasElement extends canvasBaseClass {
 			await this.updateGame(data.game_state);
 		}
 		else if (data.type === "count_down") {
-			this.clearTextForeground(); // the ball is still visible the first time !!
+			console.log("count_down: ", data.count);
+			this.clearTextForeground();
 			this.writeTextForeground(data.count);
 		}
 		else if (data.type === "initial_state") {

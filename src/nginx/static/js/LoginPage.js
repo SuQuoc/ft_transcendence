@@ -4,14 +4,28 @@ import { ComponentBaseClass } from "./componentBaseClass.js";
 export class LoginPage extends ComponentBaseClass {
 	constructor() {
 		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /login to the history
+		this.otpRequestTimer = null;
+		this.otpRequestCooldown = 60;
 	}
 
 	connectedCallback() {
 		super.connectedCallback();
+		this.shadowRoot.getElementById('loginEmail').focus();
 		this.shadowRoot.getElementById('loginSubmitButton').addEventListener('click', this.login.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
-		this.shadowRoot.getElementById('loginForm').addEventListener('keydown', this.handleEmailEnter.bind(this));
 		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
+		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
+		const formFields = this.root.querySelectorAll("#loginForm > input");
+		if (formFields.length === 0)
+			return;
+		formFields.forEach(inputfield => {
+			inputfield.addEventListener("keydown", (event) => {
+				if (event.key === 'Enter') {
+					this.login(event);
+				}
+			});
+		});
+
 	}
 
 	getElementHTML(){
@@ -26,17 +40,22 @@ export class LoginPage extends ComponentBaseClass {
 					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Login with 42</button>
 				</form>
             	<hr class="text-white-50">
-                <form id="loginForm">
+                <form id="loginForm" class="needs-validation">
                     <label for="loginEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true">
+                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
+                    <div class="invalid-feedback mb-1">Please enter your email</div>
                     <label for="loginPassword" class="form-label text-white-50">Password</label>
-                    <input name="password" id="loginPassword" type="password" class="form-control mb-3" aria-describedby="errorMessage" aria-required="true">
-                    <div id="otpSection" style="display: none;">
-                    	<label for="otpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<input name="otp" id="otpCode" type="text" class="form-control mb-3" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
-                    	<span id="otpErrorMessage" class="text-danger"></span>
+                    <input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
+                    <div class="invalid-feedback mb-1">Please enter your password</div>
+                    <div id="loginOtpSection" style="display: none;">
+                    	<label for='loginOtpCode' class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+                    	<div class="input-group">
+                    		<input name="otp" id='loginOtpCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+                    		<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
+                    	</div>
+                    	<span id="otpErrorMessage" class="text-danger mb-3"></span>
                     </div>
-                    <span id="errorMessage" class="text-danger"></span>
+                    <span id="errorMessage" class="text-danger mb-3"></span>
                     <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
                     <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
                     <button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
@@ -49,48 +68,66 @@ export class LoginPage extends ComponentBaseClass {
 		return template;
 	}
 
-	async handleEmailEnter(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-
-			const otpSectionVisible = this.shadowRoot.getElementById('otpSection').style.display !== 'none';
-			const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-			await this.login(event);
-		}
-	}
-
-	validateEmail() {
-		const email = this.shadowRoot.getElementById('loginEmail').value;
-		const emailWarning = this.shadowRoot.getElementById('errorMessage');
+	validateEmail(email) {
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-		if (!emailPattern.test(email)) {
-			emailWarning.textContent = 'Invalid email address';
-			this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
+		if (!emailPattern.test(email.value)) {
+			email.setAttribute('aria-invalid', 'true');
 			return false;
 		} else {
-			emailWarning.textContent = '';
-			this.shadowRoot.getElementById('loginEmail').removeAttribute('aria-invalid');
+			email.removeAttribute('aria-invalid');
 			return true;
 		}
 	}
 
 	validateForm() {
-		const password = this.shadowRoot.getElementById('loginPassword').value;
-		const otp = this.shadowRoot.getElementById('otpCode').value;
+		const email = this.shadowRoot.getElementById('loginEmail');
+		const password = this.shadowRoot.getElementById('loginPassword');
+		const otpCode = this.shadowRoot.getElementById('loginOtpCode');
+		const otpSection = this.shadowRoot.getElementById('loginOtpSection');
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-		const otpPattern = /^[A-Za-z0-9]{16}$/;
-		const emailValid = this.validateEmail();
 
-		if (this.shadowRoot.getElementById('otpSection').style.display === 'none') {
-			loginButton.disabled = !(emailValid && password.length > 0);
-			return;
-		}
-		loginButton.disabled = !(emailValid && password.length > 0 && otpPattern.test(otp));
+		const otpPattern = /^[A-Za-z0-9]{16}$/;
+		const emailValid = this.validateEmail(email);
+
+		let isValid = true;
+
+		if (!email.value || !emailValid) {
+        	email.classList.add('is-invalid');
+        	email.nextElementSibling.textContent = 'Email is required';
+			email.nextElementSibling.classList.add('invalid-feedback');
+        	isValid = false;
+    	} else {
+        	email.classList.remove('is-invalid');
+        	email.nextElementSibling.textContent = '';
+			email.nextElementSibling.classList.remove('invalid-feedback');
+    	}
+
+    	if (!password.value) {
+        	password.classList.add('is-invalid');
+        	password.nextElementSibling.textContent = 'Password is required';
+        	isValid = false;
+    	} else {
+        	password.classList.remove('is-invalid');
+        	password.nextElementSibling.textContent = '';
+    	}
+
+    	if (otpSection.style.display === 'block' && !otpPattern.test(otpCode.value)) {
+        	otpCode.classList.add('is-invalid');
+        	isValid = false;
+    	} else if (otpSection.style.display === 'block') {
+        	otpCode.classList.remove('is-invalid');
+    	}
+
+		loginButton.disabled = !isValid;
+		return isValid;
 	}
 
 	async login(event) {
 		event.preventDefault();
+		if (!this.validateForm()) {
+			return;
+		}
 		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
 		const loginSpinner = this.shadowRoot.getElementById('loginSpinner');
 		const loginError = this.shadowRoot.getElementById('errorMessage');
@@ -99,9 +136,8 @@ export class LoginPage extends ComponentBaseClass {
 
 		const email = this.shadowRoot.getElementById('loginEmail').value;
 		const password = this.shadowRoot.getElementById('loginPassword').value;
-		const otp = this.shadowRoot.getElementById('otpCode').value;
 
-		if (this.shadowRoot.getElementById('otpSection').style.display === 'none') {
+		if (this.shadowRoot.getElementById('loginOtpSection').style.display === 'none') {
 			try {
 				const loginResponse = await fetch('/registration/basic_login', {
 					method: 'POST',
@@ -112,13 +148,15 @@ export class LoginPage extends ComponentBaseClass {
 				});
 
 				if (!loginResponse.ok) {
-					throw new Error('Requesting OTP failed');
+					const responseData = await loginResponse.text();
+					const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+					throw new Error(errorMessage);
 				}
-				this.shadowRoot.getElementById('otpSection').style.display = 'block';
-				this.shadowRoot.getElementById('otpCode').focus();
+				this.shadowRoot.getElementById('loginOtpSection').style.display = 'block';
+				this.startOtpRequestCooldown();
+				this.shadowRoot.getElementById('loginOtpCode').focus();
 			} catch (error) {
-				console.error('Error during OTP request:', error);
-				loginError.textContent = 'Could not send OTP, check your credentials';
+				loginError.textContent = error;
 				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 				loginButton.style.display = 'block';
 			} finally {
@@ -127,6 +165,7 @@ export class LoginPage extends ComponentBaseClass {
 			}
 		} else {
 			try {
+				const otp = this.shadowRoot.getElementById('loginOtpCode').value;
 				const loginResponse = await fetch('/registration/basic_login', {
 					method: 'POST',
 					headers: {
@@ -136,7 +175,9 @@ export class LoginPage extends ComponentBaseClass {
 				});
 
 				if (!loginResponse.ok) {
-					throw new Error('Login failed');
+					const responseData = await loginResponse.text();
+					const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+					throw new Error(errorMessage);
 				}
 				window.app.userData = window.app.userData || {};
 				window.app.userData.email = email;
@@ -162,8 +203,7 @@ export class LoginPage extends ComponentBaseClass {
 					await app.router.go("/", false);
 				}
 			} catch (error) {
-				console.error('Error during login:', error);
-				loginError.textContent = 'Could not log in';
+				loginError.textContent = error;
 				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
 				this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
 				loginButton.style.display = 'block';
@@ -172,6 +212,47 @@ export class LoginPage extends ComponentBaseClass {
 			}
 		}
 	}
+
+	async requestNewOtp() {
+		const email = this.shadowRoot.getElementById('loginEmail').value;
+		const password = this.shadowRoot.getElementById('loginPassword').value;
+
+		try {
+		  const response = await fetch('/registration/basic_login', {
+			  method: 'POST',
+			  headers: {
+				'Content-Type': 'application/json'
+			  },
+			  body: JSON.stringify({ username: email, password })
+		  });
+
+		  if (!response.ok) {
+			  const responseData = await response.text();
+			  const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+			  throw new Error(errorMessage);
+		  }
+		  this.startOtpRequestCooldown();
+		} catch (error) {
+		  this.shadowRoot.getElementById('otpErrorMessage').textContent = error;
+		}
+	}
+
+  startOtpRequestCooldown() {
+    const requestOtpButton = this.shadowRoot.getElementById('requestOtpButton');
+    requestOtpButton.setAttribute('disabled', '');
+    let remainingTime = this.otpRequestCooldown;
+
+    this.otpRequestTimer = setInterval(() => {
+      if (remainingTime > 0) {
+        requestOtpButton.textContent = `${remainingTime}s`;
+        remainingTime--;
+      } else {
+        clearInterval(this.otpRequestTimer);
+        requestOtpButton.removeAttribute('disabled');
+        requestOtpButton.textContent = 'New OTP';
+      }
+    }, 1000);
+  }
 }
 
 customElements.define('login-page', LoginPage);

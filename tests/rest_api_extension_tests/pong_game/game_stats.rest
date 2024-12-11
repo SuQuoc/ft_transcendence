@@ -2,8 +2,8 @@ POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
-	"username": "a@a.at",
-	"password": "a"
+	"username": "a2@a.at",
+	"password": "ecole4242"
 }
 
 ###
@@ -13,20 +13,52 @@ POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
 {
-	"username": "a@a.at",
-	"password": "a",
+	"username": "a2@a.at",
+	"password": "ecole4242",
 	"otp": "0000000000000000"
 }
 
 ###
 
-@ACCESS_COOKIE = {{login.response.headers.Set-Cookie}};
+@ACCESS_COOKIE_1 = {{login.response.headers.Set-Cookie}};
+
+###
+POST {{base_url}}/registration/basic_signup
+Content-Type: application/json
+
+{
+	"username": "b1@b.at",
+	"password": "ecole4242"
+}
 
 ###
 
-GET {{base_url}}/game/get_game_stats
+# @name login
+POST {{base_url}}/registration/basic_signup
 Content-Type: application/json
-Cookie: {{ACCESS_COOKIE}}
+
+{
+	"username": "b1@b.at",
+	"password": "ecole4242",
+	"otp": "0000000000000000"
+}
+
+###
+
+@ACCESS_COOKIE_2 = {{login.response.headers.Set-Cookie}};
+
+###
+
+GET {{base_url}}/game/get_game_stats/?profile_id=c1573238-a1a7-4fe1-a381-c030d09e7577
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE_1}}
+
+
+###
+
+POST {{base_url}}/game/delete_user_stats/
+Content-Type: application/json
+Cookie: {{ACCESS_COOKIE_1}}
 
 {
 }

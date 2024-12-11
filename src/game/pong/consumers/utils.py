@@ -134,6 +134,5 @@ def create_match_config(user_id_list, user_name_list, game_mode, points_to_win=N
         match_data["points_to_win"] = points_to_win
 
     match_id = str(uuid.uuid4())
-    print(f"create_match_config() -> match_id: {match_id}, match_data: {match_data}")
     cache.set(match_id, match_data) # used to confirm client to connecting to game
     return match_id

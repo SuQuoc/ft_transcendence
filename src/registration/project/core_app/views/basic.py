@@ -70,7 +70,7 @@ def login(request):
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s)
     except Exception as e:
-        return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -95,7 +95,7 @@ def forgot_password(request):
         user.set_password(new_password)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'forgot_password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -111,24 +111,23 @@ def signup(request):
         user = RegistrationUser.objects.filter(username=username).first()
         if not user:
             if otp:
-                return Response({1}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
-                return Response({2}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             validate_password(password, user=None)
             user_data = user_s.validated_data
             create_user_send_otp.delay(user_data, 'signup')
             return Response(status=status.HTTP_201_CREATED)
         if user.is_verified() is True:
-            return Response({3}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(password):
-            return Response({4}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         if not otp:
             create_user_send_otp.delay({'id': user.id, 'username': user.username, 'password': password}, 'otp')
             return Response(status=status.HTTP_200_OK)
         if not check_one_time_password(user, 'signup', otp):
-            return Response({5}, status=status.HTTP_400_BAD_REQUEST)
-        logging.warning(f"signup user {user.id} verified")
+            return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         user.set_verified()
         user.change_password_is_set()
         cache_key = f'jwt_{user.id}'
@@ -162,9 +161,9 @@ def signup(request):
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
-        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -186,9 +185,9 @@ def signup_change_password(request):
         send_otp_email(username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
     except ValidationError as e:
-        return Response({'signup error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({e.messages}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'signup change password error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -214,5 +213,5 @@ def signup_change_username(request):
         send_otp_email(new_username, 'signup', created_otp)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'signup error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
