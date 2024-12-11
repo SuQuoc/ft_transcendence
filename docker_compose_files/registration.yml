@@ -41,7 +41,7 @@ services:
       POSTGRES_ACCESS_PASSWORD: "${REG_POSTGRES_ACCESS_PASSWORD:-reg_postgress_access_password}"
       
       SILK: "${SILK:-False}"
-      MOCK_EMAIL: "${MOCK_EMAIL:-True}" # TODO [aguilmea] change to False with QuocSu
+      MOCK_EMAIL: "${MOCK_EMAIL:-False}"
       MOCK_OTP: "${MOCK_OTP:-False}"
       DOMAIN: ${DOMAIN:-localhost}
       FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
