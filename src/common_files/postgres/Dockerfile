@@ -6,5 +6,5 @@ RUN ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime && echo "Europe/Berl
 RUN echo "log_timezone = 'Europe/Berlin'" >> /usr/share/postgresql/postgresql.conf.sample
 
 COPY ./db_init.sh /docker-entrypoint-initdb.d/init.sh
-
+# [aguilmea] change the chmod
 RUN chmod 777 /docker-entrypoint-initdb.d
