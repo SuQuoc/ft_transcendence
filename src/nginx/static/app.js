@@ -56,7 +56,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
 	document.getElementById("userProfile").addEventListener('hidden.bs.offcanvas', handleDeleteUserProfile);
 	document.getElementById("userProfileButton").addEventListener('keydown', (e) => {
-		console.log(e.key);
 		if (e.key === "Enter" || e.key === " ") {
 			let userProfile = document.getElementById("userProfile");
 			let bsOffcanvas = bootstrap.Offcanvas.getInstance(userProfile);

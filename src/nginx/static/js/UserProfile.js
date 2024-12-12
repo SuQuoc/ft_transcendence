@@ -108,7 +108,11 @@ export class UserProfile extends ComponentBaseClass {
                 <input type="text" class="form-control" id="deleteUserOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16">
             </div>
             <button type="button" class="btn btn-danger" id="confirmDeleteUserButton" style="display: none;">Really? Action can't be undone</button>
-        </div>
+			<div class="alert alert-danger d-none mt-3" role="alert" id="deleteError" aria-live="polite">
+  				<i class="bi bi-exclamation-triangle-fill me-2"></i>
+  				<span class="error-message"></span>
+			</div>
+		</div>
       </div>
     `;
         return template;
@@ -128,6 +132,51 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
         this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
         this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
+    }
+
+	showDeleteError(message) {
+		const errorDiv = this.shadowRoot.querySelector('#deleteError');
+		const messageSpan = errorDiv.querySelector('.error-message');
+		messageSpan.textContent = message;
+		errorDiv.classList.remove('d-none');
+	}
+	
+	hideDeleteError() {
+		const errorDiv = this.shadowRoot.querySelector('#deleteError');
+		errorDiv.classList.add('d-none');
+	}
+
+    async deleteUserAPIHandler() {
+        const deleteUserPassword = this.shadowRoot.getElementById('deleteUserPassword');
+        const otpSection = this.shadowRoot.getElementById('otpSection');
+        const password = deleteUserPassword.value;
+        const otp = this.shadowRoot.getElementById('deleteUserOTP').value;
+        if (otpSection.style.display !== 'none') {
+			otp ? this.shadowRoot.getElementById('deleteUserOTP').classList.remove('warning') : this.shadowRoot.getElementById('deleteUserOTP').classList.add('warning');
+            if (!password || !otp) return;
+        } else if (!password) {
+			return;
+        }
+		this.hideDeleteError();
+
+        try {
+            if (otpSection.style.display === 'none') {
+                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password }) });
+                otpSection.style.display = 'block';
+                this.shadowRoot.getElementById('passwordSection').style.display = 'none';
+                this.shadowRoot.getElementById('requestDeleteUserButton').style.display = 'none';
+                this.shadowRoot.getElementById('confirmDeleteUserButton').style.display = 'block';
+                this.shadowRoot.getElementById('deleteUserOTP').focus();
+            } else {
+                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password, otp: otp }) });
+                console.log('User deleted');
+                await window.app.router.go('/login', true);
+            }
+        } catch (error) {
+			this.showDeleteError(error);
+            //TODO: add error message to the page
+            console.error('Error: ', error);
+        }
     }
 
     async handleDeleteUser() {
@@ -159,44 +208,22 @@ export class UserProfile extends ComponentBaseClass {
             deleteUserButton.focus();
         }
 
+        //setting aria labels for accessibility
         requestOTPButton.setAttribute('aria-label', 'Request OTP for deleting user');
         confirmDeleteUserButton.setAttribute('aria-label', 'Confirm deleting user');
         deleteUserPassword.setAttribute('aria-label', 'Enter current password');
         this.shadowRoot.getElementById('deleteUserOTP').setAttribute('aria-label', 'Enter OTP to confirm user deletion');
 
-        //TODO: take event handlers out of the function
-        requestOTPButton.addEventListener('click', async () => {
-            const password = deleteUserPassword.value;
-            password ? deleteUserPassword.classList.remove('warning') : deleteUserPassword.classList.add('warning');
-
-            try {
-                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password }) });
-                otpSection.style.display = 'block';
-                passwordSection.style.display = 'none';
-                requestOTPButton.style.display = 'none';
-                confirmDeleteUserButton.style.display = 'block';
-                this.shadowRoot.getElementById('deleteUserOTP').focus();
-            } catch (error) {
-                //TODO: add error message to the page
-                console.error('Error requesting OTP:', error);
+        requestOTPButton.addEventListener('click', this.deleteUserAPIHandler.bind(this));
+        confirmDeleteUserButton.addEventListener('click', this.deleteUserAPIHandler.bind(this));
+        this.shadowRoot.getElementById('deleteUserPassword').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.deleteUserAPIHandler();
             }
         });
-
-        confirmDeleteUserButton.addEventListener('click', async () => {
-            const password = deleteUserPassword.value;
-            const otp = this.shadowRoot.getElementById('deleteUserOTP').value;
-
-            password ? deleteUserPassword.classList.remove('warning') : deleteUserPassword.classList.add('warning');
-            otp ? this.shadowRoot.getElementById('deleteUserOTP').classList.remove('warning') : this.shadowRoot.getElementById('deleteUserOTP').classList.add('warning');
-            if (!password || !otp) return;
-
-            try {
-                await this.apiFetch('/registration/delete_user', { method: 'POST', body: JSON.stringify({ password: password, otp: otp }) });
-                console.log('User deleted');
-                await window.app.router.go('/login', true);
-            } catch (error) {
-                //TODO: add error message to the page
-                console.error('Error deleting user:', error);
+        this.shadowRoot.getElementById('deleteUserOTP').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.deleteUserAPIHandler();
             }
         });
     }
