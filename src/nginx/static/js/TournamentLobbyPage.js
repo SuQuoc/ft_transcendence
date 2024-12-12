@@ -22,7 +22,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		// adding classes
 		this.classList.add("d-flex", "flex-row", "w-100", "h-100");
 
-		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+		// getting elements
 		this.canvas = this.root.querySelector("pong-canvas-element");
 		this.player_list = this.root.getElementById("lobbyPlayerList");
 		this.leave_button = this.root.getElementById("lobbyLeaveButton");

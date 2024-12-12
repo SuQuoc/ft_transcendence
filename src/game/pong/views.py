@@ -55,7 +55,7 @@ def get_game_stats(request):
 		    Q(winner=user_id) | Q(loser=user_id)
                 ).order_by('-timestamp')[:10]
         if not last_matches:
-            return Response('No matches found', status=status.HTTP_200_OK)
+            return Response('No matches found', status=status.HTTP_204_NO_CONTENT)
         
         wins = MatchRecord.objects.filter(winner=user_id).count()
         losses = MatchRecord.objects.filter(loser=user_id).count()
@@ -76,9 +76,9 @@ def get_game_stats(request):
         displaynames = get_displaynames(request, ids)
         logging.warning("displaynames: " + str(displaynames))
         for match in last_matches_data:
-            match["winner"] = str(displaynames.get(str(match['winner']), "Unknown"))
-            match["loser"] = str(displaynames.get(str(match['loser']), "Unknown"))
-            
+            match["winner"] = str(displaynames.get(str(match['winner']), "[Unknown]"))
+            match["loser"] = str(displaynames.get(str(match['loser']), "[Unknown]"))
+        
         statistics = {
             'total_matches': total_matches,
             'wins': wins,

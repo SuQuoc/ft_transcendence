@@ -3,7 +3,7 @@
  * You can pass a boolean to the constructor to determine if the component should add the URL to the history.
  * The default is true.
  * 
- * Makes a shadow DOM and appends the content of the template from getElementHTML() to it.
+ * Makes a shadow DOM and appends the content of the template from getElementHTML() to it (in the constructor).
  * 
  * getElementHTML() must be overridden.
  * 
@@ -18,15 +18,15 @@ export class ComponentBaseClass extends HTMLElement {
 
 		// create a shadow DOM
 		this.root = this.attachShadow({mode: "open"}); // open mode allows us to access the shadow DOM from outside
+		const template = this.getElementHTML();
+		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
+		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
+		
 		this.handleLinkClick_var = this.handleLinkClick.bind(this); // bind the event handler to this instance of the class
 	};
 
 	// get's called when the component is attached to the DOM
 	connectedCallback() { // HTMLElement doesn't have connectedCallback
-		const template = this.getElementHTML();
-		const content = template.content.cloneNode(true); // true so it makes a deep copy/clone (clones other templates inside this one)
-		this.root.appendChild(content); // this.root ensures that the content is appended to shadow DOM
-		
 		// Add event listeners to links within the shadow DOM, if there are any
 		const links = this.root.querySelectorAll("a");
 		if (links.length === 0)

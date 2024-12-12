@@ -156,6 +156,9 @@ server {
     location /friends {
         return 301 https://$host:${SSL_PORT}/;
     }
+    location /stats {
+        return 301 https://$host:${SSL_PORT}/;
+    }
 
     location /silk/ {
         proxy_pass http://registration_container/silk/;

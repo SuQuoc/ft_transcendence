@@ -39,38 +39,40 @@
 
 <body class="d-flex flex-column h-100">
 	<!-- Navbar -->
-	<nav class="navbar navbar-dark bg-dark px-3" id="navbar" style="display:none;">
-		<ul class="navbar-nav d-flex flex-row gap-3">
+	<nav class="navbar navbar-dark bg-dark px-sm-3 px-2" id="navbar" style="display:none;">
+		<ul class="navbar-nav d-flex flex-row gap-sm-3 gap-2">
 			<a class="nav-link active" href="/" tabindex="1">Home</a>
 			<a class="nav-link" href="/match" tabindex="2">Match</a>
 			<a class="nav-link" href="/tournament" tabindex="3">Tournament</a>
 		</ul>
 
-		<ul class="navbar-nav ms-auto me-3">
+		<ul class="navbar-nav d-flex flex-row gap-sm-3 gap-2 ms-auto">
 			<a class="nav-link" href="/friends" tabindex="4">Friends</a>
+			<a class="nav-link" href="/stats" tabindex="5">Stats</a>
+			
+			<!-- User Profile -->
+			<div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-labelledby="User Profile">
+				<div class="offcanvas-header" data-bs-theme="dark">
+					<h5 class="offcanvas-title text-white">User Profile</h5>
+					<button type="button" class="btn-close" id="userProfileClose" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				</div>
+				<div class="offcanvas-body pt-0" id="userProfileContainer" tabindex="-1">
+					<!-- user profile placeholder -->
+				</div>
+			</div>
+			<img src="/media_url/profile_images/default_avatar.png"
+				onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
+				alt="Profile image"
+				class="rounded-circle"
+				id="userProfileButton"
+				data-bs-toggle="offcanvas"
+				href="#userProfile"
+				role="button"
+				aria-controls="userProfileButton"
+				style="width: 40px; height: 40px; cursor: pointer; object-position: center; object-fit: cover;"
+				tabindex="6"
+			>
 		</ul>
-		<!-- User Profile -->
-		<div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-labelledby="User Profile">
-			<div class="offcanvas-header" data-bs-theme="dark">
-				<h5 class="offcanvas-title text-white">User Profile</h5>
-				<button type="button" class="btn-close" id="userProfileClose" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-			</div>
-			<div class="offcanvas-body pt-0" id="userProfileContainer" tabindex="-1">
-				<!-- user profile placeholder -->
-			</div>
-		</div>
-		<img src="/media_url/profile_images/default_avatar.png"
-			onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
-			alt="Profile image"
-			class="rounded-circle"
-			id="userProfileButton"
-			data-bs-toggle="offcanvas"
-			href="#userProfile"
-			role="button"
-			aria-controls="userProfileButton"
-			style="width: 40px; height: 40px; cursor: pointer; object-position: center; object-fit: cover;"
-			tabindex="5"
-		>
 	</nav>
 
 	<!-- Maybe we should put the game rules somewhere!!!!!!!!!?????? -->
