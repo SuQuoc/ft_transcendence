@@ -40,9 +40,9 @@ def change_password(request):
         user.save()
         return Response(status=status.HTTP_200_OK)
     except ValidationError as e:
-        return Response({'change_password error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({str(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'change_password': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -80,7 +80,7 @@ def change_username(request):
         user.save()
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'change_username error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -108,7 +108,7 @@ def delete_user(request):
         user.delete()
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'delete_user error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -119,7 +119,7 @@ def get_email(request):
         password_set = user.password_is_set()
         return Response({'email': user.username, 'password_set': password_set}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'get_email error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -128,7 +128,7 @@ def logout(request):
     try:
         return send_200_with_expired_cookies()
     except Exception as e:
-        return Response({'logout error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([AccessTokenAuthentication])
@@ -137,7 +137,7 @@ def verify_token(request):
     try:
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'verify_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([RefreshTokenAuthentication])
@@ -153,4 +153,4 @@ def refresh_token(request):
         token_s = TokenRefreshSerializer(data={'refresh': refresh_token})
         return generate_response_with_valid_JWT(request.user, status.HTTP_200_OK, token_s)
     except Exception as e:
-        return Response({'refresh_token error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
