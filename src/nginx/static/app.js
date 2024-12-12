@@ -55,6 +55,23 @@ window.addEventListener("DOMContentLoaded", async () => {
 	document.getElementById("userProfileButton").addEventListener('click', handleAddUserProfile);
 	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
 	document.getElementById("userProfile").addEventListener('hidden.bs.offcanvas', handleDeleteUserProfile);
+	document.getElementById("userProfileButton").addEventListener('keydown', (e) => {
+		console.log(e.key);
+		if (e.key === "Enter" || e.key === " ") {
+			let userProfile = document.getElementById("userProfile");
+			let bsOffcanvas = bootstrap.Offcanvas.getInstance(userProfile);
+			if (!bsOffcanvas) {
+				bsOffcanvas = new bootstrap.Offcanvas(userProfile);
+			}
+			if (userProfile.classList.contains('show')) {
+				bsOffcanvas.hide();
+				handleDeleteUserProfile();
+			} else {
+				handleAddUserProfile();
+				bsOffcanvas.show();
+			}
+		}
+	});
 
 	// adds event listeners for routing
 	await app.router.init();
