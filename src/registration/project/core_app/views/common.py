@@ -13,6 +13,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 import jwt
 import logging
+import re
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])
@@ -42,7 +43,7 @@ def change_password(request):
     except ValidationError as e:
         return Response({str(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({re.sub(r'(\[+)|(\]+)|(\'+)|(\.+)', "", str(e))}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([AccessTokenAuthentication])

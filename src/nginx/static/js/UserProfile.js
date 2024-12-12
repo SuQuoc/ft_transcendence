@@ -130,10 +130,6 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
     }
 
-    /**
-     * Temporary function for deleting a user, should be replaced with a single API call to /registration/delete_user
-     * @returns {Promise<void>}
-     */
     async handleDeleteUser() {
         const userManagement = this.shadowRoot.getElementById('userManagement');
         const deleteUserConfirmation = this.shadowRoot.getElementById('deleteUserConfirmation');
@@ -152,6 +148,7 @@ export class UserProfile extends ComponentBaseClass {
             deleteUserButton.textContent = 'Cancel';
             otpSection.style.display = 'none';
             passwordSection.style.display = 'block';
+            deleteUserPassword.focus();
         } else {
             deleteUserConfirmation.style.display = 'none';
             userManagement.style.display = 'block';
@@ -159,7 +156,13 @@ export class UserProfile extends ComponentBaseClass {
             otpSection.style.display = 'none';
             requestOTPButton.style.display = 'block';
             confirmDeleteUserButton.style.display = 'none';
+            deleteUserButton.focus();
         }
+
+        requestOTPButton.setAttribute('aria-label', 'Request OTP for deleting user');
+        confirmDeleteUserButton.setAttribute('aria-label', 'Confirm deleting user');
+        deleteUserPassword.setAttribute('aria-label', 'Enter current password');
+        this.shadowRoot.getElementById('deleteUserOTP').setAttribute('aria-label', 'Enter OTP to confirm user deletion');
 
         //TODO: take event handlers out of the function
         requestOTPButton.addEventListener('click', async () => {
@@ -172,7 +175,9 @@ export class UserProfile extends ComponentBaseClass {
                 passwordSection.style.display = 'none';
                 requestOTPButton.style.display = 'none';
                 confirmDeleteUserButton.style.display = 'block';
+                this.shadowRoot.getElementById('deleteUserOTP').focus();
             } catch (error) {
+                //TODO: add error message to the page
                 console.error('Error requesting OTP:', error);
             }
         });
@@ -190,6 +195,7 @@ export class UserProfile extends ComponentBaseClass {
                 console.log('User deleted');
                 await window.app.router.go('/login', true);
             } catch (error) {
+                //TODO: add error message to the page
                 console.error('Error deleting user:', error);
             }
         });

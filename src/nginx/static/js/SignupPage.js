@@ -119,7 +119,7 @@ export class SignupPage extends ComponentBaseClass {
 		const passwordWarning = this.shadowRoot.getElementById('signupErrorMessagePassword');
 
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-		const passwordValid = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$/.test(password1);
+		const passwordValid = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]{8,120}$/.test(password1);
 		const passwordsMatch = password1 === password2;
 		const otpSection = this.shadowRoot.getElementById('signupOtpSection');
 
