@@ -169,12 +169,13 @@ cython_debug/
 *.csr
 *.key
 *.srl
+*.prof
 
 tests/playwright_tests/auth_state.json
 
 *.png
 *.jpeg
 *.jpg
-!src/user_management/uploads/images/profile/default/*
+!src/nginx/static/media/profile_images/default_avatar.png
 src/registration/project/staticfiles/
 src/registration/*.prof

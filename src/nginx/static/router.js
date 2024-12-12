@@ -107,6 +107,7 @@ const Router = {
 			// event handler for navigation links
 		document.querySelectorAll("a.nav-link").forEach(a => {
 			a.addEventListener("click", Router.handleNavLinks);
+			a.addEventListener("keydown", Router.handleNavLinkKeydown);
 		});
 			// event handler for url changes (back/forward)
 		window.addEventListener("popstate", Router.handlePopstate);
@@ -305,6 +306,9 @@ const Router = {
 			case "/displayname":
 				pageElement = document.createElement("select-displayname-page");
 				break;
+			case "/stats":
+				pageElement = document.createElement("statistics-page");
+				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();
 				fragment.appendChild(document.createElement("friend-list"));
@@ -339,6 +343,9 @@ const Router = {
 		if (route !== "/tournament-lobby" && route !== "/match") {
 			Router.closePongWebSocket();
 		}
+		if (route !== "/match") {
+			Router.closeMatchWebSocket();
+		}
 
 		// adds the route to the history, so the back/forward buttons work
 		if (addToHistory)
@@ -353,6 +360,14 @@ const Router = {
 				
 		const url = event.target.getAttribute("href");
 		Router.go(url);
+	},
+
+	handleNavLinkKeydown(event) {
+		if (event.key === "Enter" || event.key === " ") {
+			event.preventDefault();
+			const url = event.target.getAttribute("href");
+			Router.go(url);
+		}
 	},
 
 	handlePopstate(event) {

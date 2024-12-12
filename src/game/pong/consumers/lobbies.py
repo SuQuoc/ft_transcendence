@@ -58,7 +58,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             await self.set_instance_values()
         except Exception as e:
             print(f"Exception: {e}")
-            await self.close()
+            await self.disconnect(1008)
             return
         
         await self.accept()
