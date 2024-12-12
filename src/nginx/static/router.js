@@ -306,6 +306,9 @@ const Router = {
 			case "/displayname":
 				pageElement = document.createElement("select-displayname-page");
 				break;
+			case "/stats":
+				pageElement = document.createElement("statistics-page");
+				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();
 				fragment.appendChild(document.createElement("friend-list"));
@@ -339,6 +342,9 @@ const Router = {
 		}
 		if (route !== "/tournament-lobby" && route !== "/match") {
 			Router.closePongWebSocket();
+		}
+		if (route !== "/match") {
+			Router.closeMatchWebSocket();
 		}
 
 		// adds the route to the history, so the back/forward buttons work

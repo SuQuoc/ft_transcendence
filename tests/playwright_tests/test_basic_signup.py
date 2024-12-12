@@ -102,10 +102,7 @@ class TestBasicSignup:
             finally:
                 context.close()
                 browser.close()
-
-    
-    # def test_signup_wrong_password(playwright: Playwright) -> None:
-    # [aguilmea] to be written when the password rules are implemented
+                  
 
     def test_signup_password_mismatch(playwright: Playwright) -> None:
        
