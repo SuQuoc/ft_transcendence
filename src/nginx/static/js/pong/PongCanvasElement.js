@@ -20,7 +20,7 @@ export class PongCanvasElement extends canvasBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 
-		this.init(); // needs to happen after we got the html elements (which is why it is here and not in the constructor)
+		this.init();
 
 		// add event listeners
 		window.app.pong_socket.addEventListener("message", this.handleReceivedMessage_var);

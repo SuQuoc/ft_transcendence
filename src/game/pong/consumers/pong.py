@@ -373,7 +373,7 @@ class Pong:
         start_time = time.time()
     
         # count down
-        for count in [5, 4, 3, 2, 1, 0]:
+        for count in [3, 2, 1, 0]:
             await self.send_count_down(count)
             await asyncio.sleep(1)
         # send initial state again, so the ball is in the right position
