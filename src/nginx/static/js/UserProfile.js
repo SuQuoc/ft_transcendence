@@ -197,6 +197,8 @@ export class UserProfile extends ComponentBaseClass {
             deleteUserButton.textContent = 'Cancel';
             otpSection.style.display = 'none';
             passwordSection.style.display = 'block';
+            this.hideDeleteError();
+            deleteUserPassword.value = '';
             deleteUserPassword.focus();
         } else {
             deleteUserConfirmation.style.display = 'none';

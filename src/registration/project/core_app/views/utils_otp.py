@@ -63,6 +63,10 @@ def send_otp_email(username, action, password):
 
 def create_one_time_password(related_user, action):
     try:
+        existing_otp = OneTimePassword.objects.filter(related_user=related_user, action=action)
+        if existing_otp.exists():
+            existing_otp.delete()
+
         if settings.MOCK_OTP == True:
             password = '0000000000000000'
         else:
@@ -75,7 +79,7 @@ def create_one_time_password(related_user, action):
         }
         otp_s = OneTimePasswordSerializer(data=otp_data)
         if not otp_s.is_valid():
-            raise Exception({'create_one_time_password serialiazer' : otp_s.errors})
+            raise Exception({'create_one_time_password serializer' : otp_s.errors})
         otp_s.save()
         return password
     except Exception as e:
