@@ -1,5 +1,7 @@
 FROM python:3.13.1-slim-bookworm
 
+RUN groupadd -r celeryuser && useradd -r -g celeryuser celeryuser
+
 WORKDIR /app
 
 COPY requirements.txt .
