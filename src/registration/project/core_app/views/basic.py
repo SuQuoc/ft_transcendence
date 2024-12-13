@@ -115,7 +115,7 @@ def signup(request):
             user_s = UserSerializer(data=request.data)
             if not user_s.is_valid():
                 return Response({'no valid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-            validate_password(password, user=None)
+            validate_password(password)
             user_data = user_s.validated_data
             create_user_send_otp.delay(user_data, 'signup')
             return Response(status=status.HTTP_201_CREATED)
@@ -161,7 +161,7 @@ def signup(request):
         token_s = CustomTokenObtainPairSerializer(data=request.data)
         return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes)
     except ValidationError as e:
-        return Response({e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

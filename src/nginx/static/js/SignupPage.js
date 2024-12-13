@@ -46,7 +46,7 @@ export class SignupPage extends ComponentBaseClass {
 								placeholder="name@example.com"
 								aria-required="true"
 								aria-describedby="signupErrorMessageEmail"
-								pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+								pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
 								required
 							/>
 							<button id="signupChangeUsernameButton" class="btn btn-custom d-none" type="button">Change</button>
