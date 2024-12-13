@@ -117,6 +117,7 @@ export class FriendList extends ComponentBaseClass {
 		try {
 			this.result = await this.apiFetch('/um/friends/', { method: 'GET', cache: 'no-store' });
 			//this.processFriendData(response);
+			console.log("this.result: ", this.result);
 			this.updateList();
 		} catch (e) {
 			console.error('Error fetching friend list:', e.message);
@@ -154,7 +155,9 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	createFriendListItem(itemData) {
+		console.log("############itemData: ", itemData);
 		const item = document.createElement('li');
+		item.name = itemData.user_id;
 		item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
 		item.innerHTML = `
       <button class="btn btn-danger btn-sm">X</button>

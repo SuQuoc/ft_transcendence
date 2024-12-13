@@ -14,7 +14,7 @@ window.app = {
 	socket: null,
 	pong_socket: null,
 	match_socket: null,
-	online_socket: null,
+	online_socket: new OnlineWebSocketClass(),
 	userData: storedUserData,
 	socket_event_queue: new EventQueue()
 };

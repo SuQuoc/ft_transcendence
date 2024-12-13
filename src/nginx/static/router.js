@@ -335,20 +335,16 @@ const Router = {
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
-		if (
-			route !== "/login" &&
-			route !== "/signup" &&
-			route !== "/forgot-password"
-		) {
+		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
-				//window.app.online_socket.close();
-				Router.closeOnlineWebSocket();
+				window.app.online_socket.close();
+				//Router.closeOnlineWebSocket();
 				route = "/login";
 				addToHistory = false;
 			}
-			//window.app.online_socket.make("/um/online_status/");
-			Router.makeOnlineWebSocket();
+			window.app.online_socket.make("/um/online_status/");
+			//Router.makeOnlineWebSocket();
 		} else {
 			//window.app.online_socket.close(); // needed here??!!!
 			app.userData = {};
@@ -370,7 +366,7 @@ const Router = {
 					Router.makeWebSocket("on_tournament_page");
 				}
 				pageElement = document.createElement("join-tournament-page");
-				break;
+				break; 
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
 				Router.closePongWebSocket(); //only closes the socket if it is open
