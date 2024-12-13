@@ -46,6 +46,7 @@ export class SignupPage extends ComponentBaseClass {
 								placeholder="name@example.com"
 								aria-required="true"
 								aria-describedby="signupErrorMessageEmail"
+								pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
 								required
 							/>
 							<button id="signupChangeUsernameButton" class="btn btn-custom d-none" type="button">Change</button>
@@ -63,7 +64,7 @@ export class SignupPage extends ComponentBaseClass {
 								aria-describedby="signupErrorMessagePassword"
 								minlength="8"
 								maxlength="120"
-								pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+								pattern='^(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};:",.<>\\/?\\\\|\`~\\s]{8,120}$'
 								required
 							/>
 							<button id="signupChangePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
@@ -78,7 +79,7 @@ export class SignupPage extends ComponentBaseClass {
 								aria-describedby="signupErrorMessagePassword"
 								minlength="8"
 								maxlength="120"
-								pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9]{8,120}$"
+								pattern='^(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};:",.<>\\/?\\\\|\`~\\s]{8,120}$'
 								required
 							/>
 							<button id="signupChangePassword2Button" class="btn btn-custom d-none" type="button">Change</button>
@@ -119,7 +120,7 @@ export class SignupPage extends ComponentBaseClass {
 		const passwordWarning = this.shadowRoot.getElementById('signupErrorMessagePassword');
 
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-		const passwordValid = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]{8,120}$/.test(password1);
+		const passwordValid = /^(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};:'",.<>\/?\\|`~\s]{8,120}$/.test(password1);
 		const passwordsMatch = password1 === password2;
 		const otpSection = this.shadowRoot.getElementById('signupOtpSection');
 

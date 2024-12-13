@@ -199,6 +199,7 @@ export class UserProfile extends ComponentBaseClass {
             passwordSection.style.display = 'block';
             this.hideDeleteError();
             deleteUserPassword.value = '';
+            this.shadowRoot.getElementById('deleteUserOTP').value = '';
             deleteUserPassword.focus();
         } else {
             deleteUserConfirmation.style.display = 'none';
