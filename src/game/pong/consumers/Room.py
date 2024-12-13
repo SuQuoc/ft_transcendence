@@ -8,18 +8,18 @@ class Player:
         for key in Player.creation_keys:
             if key not in kwargs:
                 raise ValueError(f"Missing required key for instantiating: {key}")
-        
+
         self.channel_name   = kwargs.get("channel_name") # TODO: when is this used?
         self.name           = kwargs.get("name")
         self.id             = kwargs.get("id")
-    
+
     @staticmethod
     def from_dict(data: dict):
         for key in Player.converting_keys:
             if key not in data:
                 raise ValueError(f"Missing required key for converting from dict: {key}")
         return Player(**data)
-    
+
     def to_dict(self):
         return {
             "channel_name": self.channel_name,
@@ -34,12 +34,15 @@ class Player:
         raise ValueError("other must be an instance of Player")
         return False
 
+    def __hash__(self):
+        return hash(self.channel_name)
+
     def __str__(self) -> str:
         return f"Player: {self.name}, user_id: {self.id}"
-    
+
     def __repr__(self) -> str:
         return f"Player: {self.name}, user_id: {self.id}"
-    
+
 
 # Potential Room class for tournaments
 class TournamentRoom:
@@ -63,7 +66,7 @@ class TournamentRoom:
         for key in TournamentRoom.creation_keys:
             if key not in kwargs:
                 raise ValueError(f"Missing required key for instantiating: {key}")
-        
+
         # creation keys
         self.name = kwargs.get("name")
         self.creator = Player(**kwargs.get("creator"))
@@ -77,7 +80,7 @@ class TournamentRoom:
         else: # if instance newly created
             self.players = [self.creator]
         self.player_names = [player.name for player in self.players]
-        
+
         self.cur_player_num = int(kwargs.get("cur_player_num", 1))
         self.status = kwargs.get("status", TournamentRoom.AVAILABLE)
 
@@ -94,16 +97,16 @@ class TournamentRoom:
             room: dict
             room.pop("creator", None)
             room.pop("players_backend", None)
-        return 
+        return
 
     @staticmethod
     def from_dict(data: dict):
         for key in TournamentRoom.converting_keys:
             if key not in data:
                 raise ValueError(f"Missing required key for converting from dict: {key}")
-    
+
         return TournamentRoom(**data)
-    
+
     def to_dict(self):
         # json.dumps(
         return {
@@ -117,7 +120,7 @@ class TournamentRoom:
             "cur_player_num": self.cur_player_num,
             "status": self.status
         }
-    
+
     def to_data_for_client(self):
         """
         does the same as to_dict but without sensitive data, only leaves out the channel_name
@@ -135,16 +138,16 @@ class TournamentRoom:
 
     def is_full(self):
         return self.cur_player_num == self.max_player_num
-    
+
     def is_empty(self):
         return self.cur_player_num == 0
-    
+
     def has_player(self, player_id):
         for player in self.players:
             if player.id == player_id:
                 return True
         return False
-    
+
     def add_player(self, player: Player):
         if not isinstance(player, Player):
             raise ValueError("player must be an instance of Player")
@@ -160,18 +163,18 @@ class TournamentRoom:
         if self.is_full():
             self.status = TournamentRoom.FULL
         return True
-    
+
     def remove_player(self, player: Player):
         if not isinstance(player, Player):
             raise ValueError("player must be an instance of Player")
-        
+
         # Logic is written so this can NEVER HAPPEN
         # elif player not in self.players:
-            # return False 
+            # return False
             #raise ValueError(f"Player {player.name} is not in the room - SHOULD NEVER HAPPEN.")
         self.players.remove(player)
         self.cur_player_num -= 1
-    
+
 
 class AlreadyInRoom(Exception):
     """Custom exception type for room-related errors."""
