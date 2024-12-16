@@ -24,14 +24,13 @@ export class OnlineWebSocketClass {
 			this.socket = new WebSocket(ws_path);
 
 			// add event listeners
-			console.log("this: add event listener: ", this);
 			this.addEventListeners();
 			//this.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect); // do we need to make an extra function for unexpected disconnect ???!!!
-			console.log("socket created");
+			console.log("ONLINE socket created");
 		};
 
 		this.socket.onopen = () => {
-			console.log("socket opened");
+			console.log("ONLINE socket opened");
 		};
 	}
 
@@ -42,7 +41,7 @@ export class OnlineWebSocketClass {
 			this.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
 			this.socket.close();
 			this.socket = null;
-			console.log("socket closed");
+			console.log("ONLINE socket closed");
 		}
 	}
 

@@ -339,14 +339,12 @@ const Router = {
 			const tokenValid = await validateToken();
 			if (!tokenValid) {
 				window.app.online_socket.close();
-				//Router.closeOnlineWebSocket();
 				route = "/login";
 				addToHistory = false;
 			}
 			window.app.online_socket.make("/um/online_status/");
-			//Router.makeOnlineWebSocket();
 		} else {
-			//window.app.online_socket.close(); // needed here??!!!
+			window.app.online_socket.close();
 			app.userData = {};
 			localStorage.removeItem("userData");
 		}

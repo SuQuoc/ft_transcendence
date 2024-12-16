@@ -19,14 +19,14 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         token = self.scope['cookies']['access']
-        self.user_id = str(get_user_id_from_jwt(token))
+        self.user_id = self.scope["user_id"]
         connection_registry[self.user_id] = self.channel_name # NOTE: use cache in prod?
         await self.accept()
         await self.send_status_to_friends(Status.ONLINE)
 
     async def disconnect(self, close_code):
         await self.send_status_to_friends(Status.OFFLINE)
-        connection_registry[self.user_id] = self.channel_name
+        del connection_registry[self.user_id]
         await super().disconnect(close_code)
         
     async def receive(self, text_data):
@@ -37,7 +37,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             await self.send_status_to_friends(Status.ONLINE)
         if type == 'send_online_status':
             friend_id = text_data_json.get(id)
-            await self.send_status_to_friend(friend_id, Status.ONLINE)
+            await self.send_status_to_single_friend(friend_id, Status.ONLINE)
 
     @sync_to_async
     def get_online_friends_channels(self):
@@ -76,9 +76,9 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         
         channels = await self.get_online_friends_channels()
         for friend_channel in channels:
-            print("SEND for loop")
+            # print("SEND for loop")
             await self.channel_layer.send(friend_channel, message)
-
+        # print("SENDING FINISHED")
 
     async def send_status_back(self, friends_channel):
         await self.channel_layer.send(friends_channel, {
@@ -89,7 +89,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
                 })
 
 
-    async def send_status_to_friend(self, friend_id, status: Status):
+    async def send_status_to_single_friend(self, friend_id, status: Status):
         message = {
             'type': 'online_status',
             'status': status.value,
@@ -105,24 +105,16 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     # EVENTS
     async def online_status(self, event):
+        print("\n-----------------\nONLINE STATUS EVENT")
         print(json.dumps(event))
         if event.get('status') == Status.ONLINE.value:
             friends_channel = event.get('sender_channel')
             if friends_channel:
+                print("send friend im on")
                 await self.send_status_back(friends_channel)
                 event.pop('sender_channel') # NOTE: remove sensitive data before sending to client
+            else:
+                print("Some friend is online")
         await self.send(text_data=json.dumps(event))
+        print("----------------- ")
 
-
-def get_user_id_from_jwt(jwt_token):
-    try:
-        # Split the token to get the payload part (YY)
-        payload_part = jwt_token.split('.')[1]
-        
-        # Decode the payload from Base64
-        payload_decoded = base64.urlsafe_b64decode(payload_part + '==').decode('utf-8')
-        user_id = json.loads(payload_decoded)['user_id']
-        # Return the last 30 characters of the decoded payload
-        return user_id
-    except (IndexError, ValueError, base64.binascii.Error) as e:
-        print(f"Error decoding JWT payload: {e}")

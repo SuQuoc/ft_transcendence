@@ -72,7 +72,8 @@ services:
             # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
             POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
             POSTGRES_PASSWORD: "${UM_POSTGRES_PASSWORD:-insecurepass}"
-
+            
+            PYTHONUNBUFFERED: 1
             DJ_SUDO_USERNAME: "${UM_DJ_SUDO_USERNAME:-admin}"
             DJ_SUDO_EMAIL: "${UM_DJ_SUDO_EMAIL:-admin@example.com}"
             DJ_SUDO_PASSWORD: "${UM_DJ_SUDO_PASSWORD:-transcendence}"
