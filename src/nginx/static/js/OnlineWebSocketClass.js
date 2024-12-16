@@ -2,17 +2,18 @@ export class OnlineWebSocketClass {
 	constructor () {
 		this.socket = null;
 		this.online_friends = [];
+		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 	}
 
 	addEventListeners () {
 		console.log("this: add event listener: ", this);
-		this.socket.addEventListener("message", this.handleReceivedMessage.bind(this)); // probably need to bind this !!
+		this.socket.addEventListener("message", this.handleReceivedMessage_var); // probably need to bind this !!
 
 	}
 
 	removeEventListeners () {
 		console.log("this: remove event listener: ", this);
-		this.socket.removeEventListener("message", this.handleReceivedMessage.bind(this)); // probably need to bind this !!
+		this.socket.removeEventListener("message", this.handleReceivedMessage_var); // probably need to bind this !!
 	}
 
 	/** opens the window.app.socket if it is closed */

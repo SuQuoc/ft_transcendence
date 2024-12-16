@@ -117,7 +117,6 @@ export class FriendList extends ComponentBaseClass {
 		try {
 			this.result = await this.apiFetch('/um/friends/', { method: 'GET', cache: 'no-store' });
 			//this.processFriendData(response);
-			console.log("this.result: ", this.result);
 			this.updateList();
 		} catch (e) {
 			console.error('Error fetching friend list:', e.message);
@@ -155,7 +154,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	createFriendListItem(itemData) {
-		console.log("############itemData: ", itemData);
 		const item = document.createElement('li');
 		item.name = itemData.user_id;
 		item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
@@ -163,7 +161,7 @@ export class FriendList extends ComponentBaseClass {
       <button class="btn btn-danger btn-sm">X</button>
       <div class="friend-img-container">
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
-        <span class="friend-status ${itemData.online ? 'online' : 'offline'}"></span>
+        <span class="friend-status ${window.app.online_socket.online_friends.includes(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
       <span class="text-white">${itemData.displayname}</span>
     `;
