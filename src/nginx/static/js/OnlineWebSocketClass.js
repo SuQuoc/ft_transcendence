@@ -61,7 +61,7 @@ export class OnlineWebSocketClass {
 	/// ----- Event Handlers ----- ///
 
 	/** gets called when the websocket receives a message */
-	handleReceivedMessage(event) {
+	handleReceivedMessage (event) {
 		//console.log("OnlineWebSocket: handleReceivedMessage: ", event);
 		const data = JSON.parse(event.data);
 		console.log("OnlineWebSocket: handleReceivedMessage: ", data);
