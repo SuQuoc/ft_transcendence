@@ -11,12 +11,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.handleRangeDisplay_var = this.handleRangeDisplay.bind(this);
 		this.handleTournamentCreation_var = this.handleTournamentCreation.bind(this);
 		this.handleHideTournamentNameError_var = this.handleHideTournamentNameError.bind(this);
-	};
-
-	connectedCallback() {
-		super.connectedCallback();
-
-		// getting elements (can't do this in constructor because the shadow DOM isn't created yet)
+		
+		// getting elements
 		this.join_tournament_elements = this.root.getElementById("joinTournamentElements");
 		this.waiting_for_permission = this.root.getElementById("joinWaitingForPermission");
 		this.no_tournaments_to_join = this.root.getElementById("joinNoTournaments");
@@ -36,7 +32,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// making error toasts
 		this.room_full_toast = new ErrorToastElement("This room is already full, you were too slow...");
-		this.already_in_room_toast = new ErrorToastElement("You are already in this room");
+		this.already_in_room_toast = new ErrorToastElement("You are already in a room");
 		this.room_does_not_exist_toast = new ErrorToastElement("This room does not exist, if you see this message something went wrong");
 		this.toast_container.append(this.room_full_toast, this.already_in_room_toast, this.room_does_not_exist_toast);
 
@@ -47,12 +43,18 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.create_tournament_form.addEventListener("submit", this.handleTournamentCreation_var);
 		this.tournament_name_input.addEventListener("input", this.handleHideTournamentNameError_var);
 		this.input_range.addEventListener("input", this.handleRangeDisplay_var);
-		
-		// calling the method to set the initial position of the display
-		this.handleRangeDisplay({target: this.input_range});
 
 		// getting the list of tournaments
 		this.getTournamentList();
+	};
+
+	connectedCallback() {
+		super.connectedCallback();
+
+		// calling the method to set the initial position of the display
+		setTimeout(() => { // needs to happen in setTimeout, to give the browser enough time to render everything before we can calculate the correct position
+			this.handleRangeDisplay({target: this.input_range});
+		}, 0);
 	};
 
 	disconnectedCallback() {
@@ -74,8 +76,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** handles all known errors recieved from the message event handler */
 	tournamentErrors(error) {
 		console.log("tournamentErrors: error: ", error);
+		this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 		if (error === "room_name_taken") {
-			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			this.tournament_name_error.innerText = "Tournament name already taken";
 			this.tournament_name_error.style.display = "";
 		}
@@ -89,11 +91,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			this.room_does_not_exist_toast.show();
 		}
 		else if (error === "room_name_invalid") {
-			// not sure if waiting for permission is needed here. I think we need it??!!
-			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			this.tournament_name_error.innerText = "Tournament name not valid";
 			this.tournament_name_error.style.display = "";
-			console.error("Error: tournamentNameError: error not handled yet: ", error); // TODO: handle these errors !!!
 		}
 		else
 			console.error("Error: tournamentError: unknown error: ", error);
@@ -123,9 +122,11 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			this.waiting_for_permission.style.display = "";	
 			return;
 		}
-		this.join_tournament_page.style.display = "";
-		this.join_tournament_page.classList.add("d-flex");
-		this.waiting_for_permission.style.display = "none";
+		if (!this.join_tournament_page.classList.contains("d-flex")) {
+			this.join_tournament_page.style.display = "";
+			this.join_tournament_page.classList.add("d-flex");
+			this.waiting_for_permission.style.display = "none";
+		}
 	}
 
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
@@ -204,7 +205,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** get's called when someone creates a tournament */
 	handleTournamentCreation(event) {
 		event.preventDefault();
-		
+
 		const	tournament_name = event.target.create_name.value;
 		const	number_of_players = event.target.number_of_players.value;
 		const	points_to_win = event.target.points_to_win.value;
@@ -221,7 +222,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	handleJoinTournament(event) {
-		console.log('join tournament handler in JoinTournamentElement');
 		if (event.target.tagName !== "BUTTON")
 			return;
 

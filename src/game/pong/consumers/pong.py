@@ -27,8 +27,9 @@ class Vector:
 
 
 class Player:
-    def __init__ (self, id, pos_x, pos_y, width, height, speed):
+    def __init__ (self, id, name, pos_x, pos_y, width, height, speed):
         self.id = id
+        self.name = name
         self.pos = Vector(pos_x, pos_y)
         self.width = width
         self.height = height
@@ -134,7 +135,7 @@ class Pong:
     from channels.layers import get_channel_layer
     CHANNEL_LAYER = get_channel_layer()
 
-    def __init__(self, channel_group, player_l, points_to_win=1):
+    def __init__(self, channel_group, player_l_id, player_l_name, points_to_win=1):
         self.channel_group = channel_group # Messaging to Game Consumer
         self.size = 1
         self.running = False
@@ -152,7 +153,8 @@ class Pong:
                             pos_y = self.canvas_height/2 - 5,
                             size = 10,
                             speed = 11) # yes, speed is 11 and not 10. 10 feels a bit too slow.
-        self.player_l: Player = Player(id = player_l,
+        self.player_l: Player = Player(id = player_l_id,
+                                       name = player_l_name,
                                         pos_x = 10,
                                         pos_y = self.canvas_height/2 - self.player_height/2,
                                         width = self.player_width,
@@ -161,8 +163,9 @@ class Pong:
         self.player_r: Player  =  None
         
 
-    def add_player(self, player_r):
-        self.player_r = Player(id = player_r,
+    def add_player(self, player_r_id, player_r_name):
+        self.player_r = Player(id = player_r_id,
+                                name = player_r_name,
                                 pos_x = self.canvas_width - self.player_width - 10,
                                 pos_y = self.canvas_height/2 - self.player_height/2,
                                 width = self.player_width,
@@ -373,7 +376,7 @@ class Pong:
         start_time = time.time()
     
         # count down
-        for count in [5, 4, 3, 2, 1, 0]:
+        for count in [3, 2, 1, 0]:
             await self.send_count_down(count)
             await asyncio.sleep(1)
         # send initial state again, so the ball is in the right position
@@ -430,11 +433,19 @@ class Pong:
 
 
     async def send_initial_state(self, game_state):
+        print({
+                'type': Type.INITIAL_STATE.value,
+                'game_state': game_state,
+                'left_player': self.player_l.name,
+                'right_player': self.player_r.name,
+            })
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {
                 'type': Type.INITIAL_STATE.value,
-                'game_state': game_state
+                'game_state': game_state,
+                'left_player': self.player_l.name,
+                'right_player': self.player_r.name,
             }
         )
     

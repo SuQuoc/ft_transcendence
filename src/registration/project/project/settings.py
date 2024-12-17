@@ -1,5 +1,5 @@
 from datetime import timedelta
-import os
+import grp, os, pwd, shutil, stat
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -167,11 +167,18 @@ REST_FRAMEWORK = {
     ],
 }
 
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'emails/')
+if os.path.exists(EMAIL_FILE_PATH):
+    shutil.rmtree(EMAIL_FILE_PATH)
 if MOCK_EMAIL == True:
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'emails/')
-    if not os.path.exists(EMAIL_FILE_PATH):
-        os.makedirs(EMAIL_FILE_PATH)
+    os.makedirs(EMAIL_FILE_PATH)
+#    celery_user = 'celeryuser'
+#    uid = pwd.getpwnam(celery_user).pw_uid
+#    gid = grp.getgrnam(celery_user).gr_gid
+#    os.chown(EMAIL_FILE_PATH, uid, gid)
+#    os.chmod(EMAIL_FILE_PATH, stat.S_IRWXU | stat.S_IRWXG)
+    os.chmod(EMAIL_FILE_PATH, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')

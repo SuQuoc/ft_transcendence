@@ -1,24 +1,17 @@
-django-sslserver # TODO: just for development?
+
+channels[daphne]==4.2.0
+django-sslserver==0.22
 
 # For daphne
-asgiref==3.8.1
-channels[daphne]==4.1.0
-channels-redis==4.2.0
-redis==5.1.1
-Django==5.0.6
-psycopg==3.1.19
-sqlparse==0.5.0
-typing_extensions==4.12.2
-wheel==0.43.0
-setuptools==70.0.0
-pip==24.0
+channels-redis==4.2.1
+redis==5.2.1
+psycopg==3.2.3
 
 djangorestframework==3.15.2
 djangorestframework_simplejwt[crypto]==5.3.1
 
 # sending async http requests - pip install httpx[http2] instead if HTTP/2 support is needed
-httpcore==1.0.6
-httpx==0.27.2
-h2==4.1.0
+httpx==0.28.1
 
-requests # for sending requests to other services
+
+requests==2.32.3 # for sending requests to other services
