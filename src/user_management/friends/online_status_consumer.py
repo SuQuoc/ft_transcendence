@@ -12,6 +12,7 @@ class Status(Enum):
     ONLINE = 'online'
     OFFLINE = 'offline'
 
+
 class OnlineStatusConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,7 +21,13 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         token = self.scope['cookies']['access']
         self.user_id = self.scope["user_id"]
+        self.group_name = get_online_consumer_group(self.user_id)
         connection_registry[self.user_id] = self.channel_name # NOTE: use cache in prod?
+        
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
         await self.accept()
         await self.send_status_to_friends(Status.ONLINE)
 
@@ -35,11 +42,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
         if type == 'get_friends_online_status': # TODO: might help? if not than just remove, problem if a friends get a added while im online
             await self.send_status_to_friends(Status.ONLINE)
-        if type == 'send_online_status':
-            friend_id = text_data_json.get(id)
-            await self.send_status_to_single_friend(friend_id, Status.ONLINE)
-
-
+        
     async def send_status_to_friends(self, status: Status):
         message = {
             'type': 'online_status',
@@ -55,36 +58,40 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.send(friend_channel, message)
 
 
-    async def send_status_to_single_friend(self, friend_id, status: Status):
+    # EVENTS
+    async def send_status_to_single_friend(self, event):
+        status = event.get('status')
+        friend_id = event.get('friend_id')
+
         message = {
             'type': 'online_status',
-            'status': status.value,
-            "sender_id": self.user_id
+            'status': status,
+            'sender_id': self.user_id
         }
         
-        if status.value == Status.ONLINE.value: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
+        if status == Status.ONLINE.value: # NOTE: needed so friend can send back his status, if i go off he doesnt need to send me back
             message["sender_channel"] = self.channel_name
-        
-        friend_channel = await self.get_friend_channel(friend_id)
-        await self.channel_layer.send(friend_channel, message)
+    
+        # NOTE: api endpoint using this method MUST provide correct id of friend
+        # ELSE: online status of strangers will be sent 
+        friend_channel = self.get_friend_channel(friend_id) 
+        if friend_channel:
+            await self.channel_layer.send(friend_channel, message)
 
 
-    # EVENTS
     async def online_status(self, event):
-        print("\n-----------------\nONLINE STATUS EVENT")
-        print(json.dumps(event))
+        #print("\n-----------------\nONLINE STATUS EVENT")
+        #print(json.dumps(event))
         if event.get('status') == Status.ONLINE.value:
             friends_channel = event.get('sender_channel')
             if friends_channel:
-                print("send friend im on")
                 await self.send_status_back(friends_channel)
-                event.pop('sender_channel') # NOTE: remove sensitive data before sending to client
-            else:
-                print("Some friend is online")
+                event.pop('sender_channel') # NOTE: removing channel name before sending data to client
         await self.send(text_data=json.dumps(event))
-        print("----------------- ")
+        #print("----------------- ")
 
 
+    # HELPERS
     async def send_status_back(self, friends_channel):
         await self.channel_layer.send(friends_channel, {
                     'type': 'online_status',
@@ -92,10 +99,8 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
                     "sender_id": self.user_id 
                     # NOTE: dont include sender_channel, 
                     # else: endless message loop
-                })
+        })
         
-
-    # HELPERS
     @sync_to_async
     def get_online_friends_channels(self):
         try:
@@ -113,9 +118,16 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         return channels
     
     @sync_to_async
-    def get_friend_channel(self, friend_id):
+    def get_friend(self, friend_id):
         friend_list = FriendList.objects.get(user=self.user_id)
-        friend = friend_list.friends.filter(user_id=friend_id)
-        id = str(friend.user_id)
+        friend = friend_list.friends.filter(user_id=friend_id).first()
+        return friend
+    
+    def get_friend_channel(self, friend_id):
+        id = str(friend_id)
         friend_channel = connection_registry.get(id)
         return friend_channel
+
+
+def get_online_consumer_group(user_id):
+    return f"online_{user_id}"

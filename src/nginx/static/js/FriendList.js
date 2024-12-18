@@ -260,9 +260,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	handleOnlineSocketMessage(event) {
-		console.log("event", event);
-		if (!event)
-			return;
 		const data = JSON.parse(event.data);
 		console.log("OnlineWebSocket: handleOnlineSocketMessage: ", data);
 				

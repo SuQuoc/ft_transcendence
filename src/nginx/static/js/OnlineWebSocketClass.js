@@ -48,6 +48,7 @@ export class OnlineWebSocketClass {
 
 	friendWentOnline (friend_id) {
 		this.online_friends.push(friend_id);
+		console.log("friend went online socket class: friends: ", this.online_friends);
 	}
 
 	friendWentOffline (friend_id) {
@@ -55,6 +56,7 @@ export class OnlineWebSocketClass {
 		if (index > -1) {
 			this.online_friends.splice(index, 1);
 		}
+		console.log("friend went offline socket class: friends: ", this.online_friends);
 	}
 
 

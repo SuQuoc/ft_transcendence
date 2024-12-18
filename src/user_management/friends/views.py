@@ -15,6 +15,12 @@ from .serializers import FriendRequestSendSerializer
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 from rest_framework import serializers
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+from .online_status_consumer import Status, get_online_consumer_group
+
+
 
 class SendFriendRequestView(generics.GenericAPIView):
     serializer_class = FriendRequestSendSerializer
@@ -57,7 +63,7 @@ class AnswerFriendRequestView(generics.GenericAPIView):
 
     def post(self, request):
         try:
-            user = get_user_from_jwt(request)
+            self.user = get_user_from_jwt(request)
             #raise AuthenticationFailed
         
             serializer = self.get_serializer(data=request.data)
@@ -67,7 +73,7 @@ class AnswerFriendRequestView(generics.GenericAPIView):
             action = serializer.validated_data.get("action")
             
             friend_request = get_object_or_404(FriendRequest, id=friend_request_id)
-            if friend_request.receiver != user and action != self.serializer_class.UNFRIEND:
+            if friend_request.receiver != self.user and action != self.serializer_class.UNFRIEND:
                 return Response({"error": "Friend request not for u (should never happen)"}, status=status.HTTP_404_NOT_FOUND)
             response = self.act_on_friend_request(friend_request, action)
             return response
@@ -79,9 +85,13 @@ class AnswerFriendRequestView(generics.GenericAPIView):
 
     def act_on_friend_request(self, friend_request: FriendRequest, action: str):
         # return Response({"test": "TEST"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        channel_layer = get_channel_layer()
+
         if friend_request.status == FriendRequest.PENDING:
             if action == self.serializer_class.ACCEPT:
                 friend_request.accept()
+                self.update_online_status(friend_request.sender.user_id, Status.ONLINE)
                 return Response({"message": "Friend request accepted"}, status=status.HTTP_200_OK)
             elif action == self.serializer_class.DECLINE:
                 friend_request.decline()
@@ -91,6 +101,13 @@ class AnswerFriendRequestView(generics.GenericAPIView):
 
         elif friend_request.status == FriendRequest.ACCEPTED:
             if action == self.serializer_class.UNFRIEND:
+                if self.user == friend_request.sender:
+                    friend_id = str(friend_request.receiver.user_id)
+                else:
+                    friend_id = str(friend_request.sender.user_id)
+                self.update_online_status(friend_id, Status.OFFLINE)
+                # import time
+                # time.sleep(1)
                 friend_request.unfriend()
                 return Response({"message": "Unfriended user"}, status=status.HTTP_200_OK)
             else:
@@ -99,6 +116,16 @@ class AnswerFriendRequestView(generics.GenericAPIView):
         else:
             return Response({"error": "No pending friend requests"}, status=status.HTTP_404_NOT_FOUND)
 
+    def update_online_status(self, friend_id, status: Status):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+                    get_online_consumer_group(self.user.user_id),  
+                    {
+                        'type': 'send_status_to_single_friend',
+                        'friend_id': str(friend_id),
+                        'status': status.value
+                    }
+                )
 
 class ListFriendRelationsView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
