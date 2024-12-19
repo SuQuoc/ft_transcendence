@@ -98,7 +98,6 @@ class SearchUserView(generics.ListAPIView):
 
     def get(self, request):
         user = get_user_from_jwt(request)
-
         searchterm = request.query_params.get("term", None)
         if searchterm is None:
             return Response({"error": "Please provide valid query key"}, status=status.HTTP_400_BAD_REQUEST)
@@ -110,12 +109,13 @@ class SearchUserView(generics.ListAPIView):
             return Response({}, status=status.HTTP_200_OK)
 
         relationships = {}
-        online_status = {}
+        # online_status = {}
         friend_requests = {}
+        
         for found_u in results:
             if user.friend_list.contains(found_u):
                 relationships[found_u.user_id] = "friend"
-                online_status[found_u.user_id] = found_u.get_online_status()
+                # online_status[found_u.user_id] = found_u.get_online_status()
                 friend_requests[found_u.user_id] = user.friend_list.get_friends_request_id(found_u)
             else:
                 friend_request_relation, friend_request_id = get_pending_friend_request(me=user, other=found_u)
@@ -127,11 +127,14 @@ class SearchUserView(generics.ListAPIView):
 
         context = {
             "relationships": relationships,
-            "online_status": online_status,
+            # "online_status": online_status,
             "friend_requests": friend_requests,
         }
         # print(friend_requests)
+        
         serializer = UserRelationSerializer(results, many=True, context=context)
+        
+        # raise PermissionDenied("You do not have permission to delete this user's profile. U sus")
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 # HELPER functions

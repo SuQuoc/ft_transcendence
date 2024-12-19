@@ -12,6 +12,7 @@ export class FriendList extends ComponentBaseClass {
 		this.received = new Map();
 		this.result = [];
 		this.debouncedFetchFriendList = this.debounce(this.fetchFriendList.bind(this), 10);
+		this.handleOnlineSocketMessage_var = this.handleOnlineSocketMessage.bind(this);
 	}
 
 	getElementHTML() {
@@ -86,7 +87,7 @@ export class FriendList extends ComponentBaseClass {
 			}
 			button.addEventListener('click', (event) => {
 				const clickedButton = event.target;
-				buttons.forEach(btn => btn.classList.remove('active'));
+				buttons.forEach(btn => btn.classList.remove('active')); // if you press enter when you type a user that doesn't exist in the search bar, you get the error: "Error fetching search results: this.results.forEach is not a function" !!!!
 				clickedButton.classList.add('active');
 				clickedButton.setAttribute('aria-current', 'page');
 
@@ -103,8 +104,21 @@ export class FriendList extends ComponentBaseClass {
 
 	connectedCallback() {
 		super.connectedCallback();
+
+		// adding event listener
+		if (window.app.online_socket.socket)
+			window.app.online_socket.socket.addEventListener('message', this.handleOnlineSocketMessage_var);
+
 		this.setupEventListeners();
 		this.debouncedFetchFriendList();
+	}
+
+	disconnectedCallback() {
+		super.disconnectedCallback();
+
+		// removing event listener
+		if (window.app.online_socket.socket)
+			window.app.online_socket.socket.removeEventListener('message', this.handleOnlineSocketMessage_var);
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
@@ -155,12 +169,13 @@ export class FriendList extends ComponentBaseClass {
 
 	createFriendListItem(itemData) {
 		const item = document.createElement('li');
+		item.setAttribute('data-user-id', itemData.user_id);
 		item.className = 'list-group-item d-flex justify-content-start w-100 bg-dark';
 		item.innerHTML = `
       <button class="btn btn-danger btn-sm">X</button>
       <div class="friend-img-container">
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
-        <span class="friend-status ${itemData.online ? 'online' : 'offline'}"></span>
+        <span class="friend-status ${window.app.online_socket.online_friends.includes(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
       <span class="text-white">${itemData.displayname}</span>
     `;
@@ -217,6 +232,51 @@ export class FriendList extends ComponentBaseClass {
 			clearTimeout(timeout);
 			timeout = setTimeout(() => func.apply(this, args), wait);
 		};
+	}
+
+
+	friendWentOnline(friend_id) {
+		const friend_element = this.root.querySelector(`[data-user-id="${friend_id}"]`);
+		if (!friend_element)
+			return;
+		const status_element = friend_element.querySelector("span.friend-status");
+		if (!status_element)
+			return;
+
+		status_element.classList.remove('offline');
+		status_element.classList.add('online');
+	}
+
+	friendWentOffline(friend_id) {
+		const friend_element = this.root.querySelector(`[data-user-id="${friend_id}"]`);
+		if (!friend_element)
+			return;
+		const status_element = friend_element.querySelector("span.friend-status");
+		if (!status_element)
+			return;
+
+		status_element.classList.remove('online');
+		status_element.classList.add('offline');
+	}
+
+	handleOnlineSocketMessage(event) {
+		const data = JSON.parse(event.data);
+		console.log("OnlineWebSocket: handleOnlineSocketMessage: ", data);
+				
+		if (data.type === "online_status") {
+			if (data.status === "online") {
+				this.friendWentOnline(data.sender_id);
+			}
+			else if (data.status === "offline") {
+				this.friendWentOffline(data.sender_id);
+			}
+		}
+		else if (data.type === "error") {
+			console.error("Error: handleOnlineSocketMessage: ", data.error);
+		}
+		else {
+			console.error("Error: handleOnlineSocketMessage: unknown type: ", data.type);
+		}
 	}
 }
 
