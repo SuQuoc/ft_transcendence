@@ -59,7 +59,7 @@ export class FriendSearch extends ComponentBaseClass {
       </style>
       <div class="search-container p-3 rounded-3 bg-dark">
         <div class="input-group mb-3" role="search">
-            <input type="text" class="form-control search-input" placeholder="Search for friends..." aria-label="Search">
+            <input type="text" class="form-control search-input" placeholder="Search for users..." aria-label="Search">
             <button class="btn btn-primary search-button">🔍</button>
         </div>
         <ul class="search-results list-group bg-dark"></ul>
