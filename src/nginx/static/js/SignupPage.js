@@ -64,7 +64,7 @@ export class SignupPage extends ComponentBaseClass {
 								aria-describedby="signupErrorMessagePassword"
 								minlength="8"
 								maxlength="120"
-								pattern='^(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};:",.<>\\/?\\\\|\`~\\s]{8,120}$'
+								pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
 								required
 							/>
 							<button id="signupChangePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
@@ -79,7 +79,7 @@ export class SignupPage extends ComponentBaseClass {
 								aria-describedby="signupErrorMessagePassword"
 								minlength="8"
 								maxlength="120"
-								pattern='^(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};:",.<>\\/?\\\\|\`~\\s]{8,120}$'
+								pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
 								required
 							/>
 							<button id="signupChangePassword2Button" class="btn btn-custom d-none" type="button">Change</button>
