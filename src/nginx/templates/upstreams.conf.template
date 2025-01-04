@@ -1,0 +1,11 @@
+upstream game_container {
+   server game:8000;
+}
+
+upstream user_management_container {
+    server usermanagement:8000;
+}
+
+upstream registration_container {
+    server registration:8000;
+}
