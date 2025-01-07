@@ -32,7 +32,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 		// making error toasts
 		this.room_full_toast = new ErrorToastElement("This room is already full, you were too slow...");
-		this.already_in_room_toast = new ErrorToastElement("You are already in this room");
+		this.already_in_room_toast = new ErrorToastElement("You are already in a room");
 		this.room_does_not_exist_toast = new ErrorToastElement("This room does not exist, if you see this message something went wrong");
 		this.toast_container.append(this.room_full_toast, this.already_in_room_toast, this.room_does_not_exist_toast);
 
@@ -76,8 +76,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** handles all known errors recieved from the message event handler */
 	tournamentErrors(error) {
 		console.log("tournamentErrors: error: ", error);
+		this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 		if (error === "room_name_taken") {
-			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			this.tournament_name_error.innerText = "Tournament name already taken";
 			this.tournament_name_error.style.display = "";
 		}
@@ -91,11 +91,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			this.room_does_not_exist_toast.show();
 		}
 		else if (error === "room_name_invalid") {
-			// not sure if waiting for permission is needed here. I think we need it??!!
-			this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 			this.tournament_name_error.innerText = "Tournament name not valid";
 			this.tournament_name_error.style.display = "";
-			console.error("Error: tournamentNameError: error not handled yet: ", error); // TODO: handle these errors !!!
 		}
 		else
 			console.error("Error: tournamentError: unknown error: ", error);
@@ -125,9 +122,11 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			this.waiting_for_permission.style.display = "";	
 			return;
 		}
-		this.join_tournament_page.style.display = "";
-		this.join_tournament_page.classList.add("d-flex");
-		this.waiting_for_permission.style.display = "none";
+		if (!this.join_tournament_page.classList.contains("d-flex")) {
+			this.join_tournament_page.style.display = "";
+			this.join_tournament_page.classList.add("d-flex");
+			this.waiting_for_permission.style.display = "none";
+		}
 	}
 
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */

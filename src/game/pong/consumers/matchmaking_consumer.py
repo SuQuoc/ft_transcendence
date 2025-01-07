@@ -2,36 +2,47 @@
 
 import json
 import uuid
-import random
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
-from .utils import get_user_id_from_jwt
 from django.core.cache import cache
 from .utils import create_match_config
 from .pong_game_consumer import GameMode
+from pong.um_request import get_displayname
+from collections import OrderedDict
+from .Room import Player
 
 games = {}
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     lock = asyncio.Lock()
-    players = {} # NOTE: cache in production? 
+    players = OrderedDict() # using a dict to disconnect correct user
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_id = None 
-
+        self.user = None
+    
     async def connect(self):
         await self.accept()
         
-        self.user_id = self.scope["user_id"]
-        MatchmakingConsumer.players[self.user_id] = self.channel_name
+        user_id = self.scope["user_id"]
+        displayname = await get_displayname(self.scope.get("cookies"))
+        self.user = Player(
+                        channel_name=self.channel_name,
+                        name=displayname,
+                        id=user_id
+        )
+
+
+        MatchmakingConsumer.players[self.channel_name] = self.user
         
         if len(MatchmakingConsumer.players) == 2:
-            playerL_id, playerL_channel = MatchmakingConsumer.players.popitem()
-            playerR_id, playerR_channel = MatchmakingConsumer.players.popitem()
-                        
-            match_id = create_match_config([playerL_id, playerR_id], GameMode.NORMAL.value)
+            playerL_channel, playerL = MatchmakingConsumer.players.popitem()
+            playerR_channel, playerR = MatchmakingConsumer.players.popitem()
+
+            match_id = create_match_config([playerL.id, playerR.id],
+                                           [playerL.name, playerR.name],
+                                           GameMode.NORMAL.value)
             
             await self.trigger_match_found(match_id, playerL_channel)
             await self.trigger_match_found(match_id, playerR_channel)
@@ -40,7 +51,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
 
     async def disconnect(self, close_code):
-        MatchmakingConsumer.players.pop(self.user_id, None)
+        MatchmakingConsumer.players.pop(self.channel_name, None)
+        print(f"Player {self.user.name} disconnected")
         await super().disconnect(close_code)
 
     
