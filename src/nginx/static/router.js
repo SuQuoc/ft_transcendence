@@ -246,7 +246,7 @@ const Router = {
 
 	// changes the page main content and update the URL
 	go: async (route, addToHistory = true, tournamentName = "") => { // the tournamentName is only needed for the tournamentLobbyPage
-		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
+		//console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
 		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
