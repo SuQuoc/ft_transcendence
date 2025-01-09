@@ -27,7 +27,7 @@ server {
 
     server_name ${DOMAIN};
 
-    server_tokens off; #[aguilmea] we can only hide the version and not nginx with the free version https://serverfault.com/questions/214242/can-i-hide-all-server-os-info
+    server_tokens off; #we can only hide the version and not nginx with the free version https://serverfault.com/questions/214242/can-i-hide-all-server-os-info
     
     ssl_certificate     /etc/ssl/certs/ssl_webpage.crt;
     ssl_certificate_key /etc/ssl/certs/ssl_webpage.key;
@@ -82,18 +82,12 @@ server {
 
     location /um/ {
         proxy_pass http://user_management_container;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
+        include /etc/nginx/conf.d/proxysetheader.conf;
     }
 
     location /registration/ {
         proxy_pass http://registration_container;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
+        include /etc/nginx/conf.d/proxysetheader.conf;
     }
 
     # redirect all routes from js router to homepage on reload (not sure if final yet!!) (the response should maybe be changed!!)
@@ -121,18 +115,12 @@ server {
 
     location /silk/ {
         proxy_pass http://registration_container/silk/;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
+        include /etc/nginx/conf.d/proxysetheader.conf;
     }
 
     location /static/silk/ {
         proxy_pass http://registration_container/static/silk/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        include /etc/nginx/conf.d/proxysetheader.conf;
     }
 
     location /um/img/ {
