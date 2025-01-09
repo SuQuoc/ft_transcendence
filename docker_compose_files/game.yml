@@ -2,7 +2,7 @@ services:
   db_game:
     container_name: pong_game_db
     build: ../src/common_files/postgres
-    environment: 
+    environment:
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_USER: "${GAME_POSTGRES_USER:-admin}"
       POSTGRES_PASSWORD:  "${GAME_POSTGRES_PASSWORD:-adminpass}"
@@ -60,13 +60,13 @@ services:
       - "8000/tcp"
     environment:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
-      
+
       DJ_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(} # NOTE: old value which was in settings
       DB_HOST: "${GAME_DB_HOST:-db_game}"
-      
+
       REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
-      
+
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
@@ -76,6 +76,7 @@ services:
       DJ_SUDO_USERNAME: "${GAME_DJ_SUDO_USERNAME:-admin}"
       DJ_SUDO_EMAIL: "${GAME_DJ_SUDO_EMAIL:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${GAME_DJ_SUDO_PASSWORD:-transcendence}"
+      DEBUG: "${DEBUG:-True}"
     depends_on:
       db_game:
         condition: service_healthy

@@ -22,15 +22,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.test_users = [
-            {'displayname': ME, 'online': True},
-            {'displayname': I_FRIEND_U, 'online': True},
-            {'displayname': U_FRIEND_ME, 'online': True},
-            {'displayname': I_PEND_U, 'online': True},
-            {'displayname': U_PEND_ME, 'online': True},
-            {'displayname': I_DECLINE_U, 'online': True},
-            {'displayname': U_DECLINE_ME, 'online': True},
-            {'displayname': STRANGER, 'online': True},
-            {'displayname': 'Deleted account', 'online': False},
+            {'displayname': ME}, #, 'online': True},
+            {'displayname': I_FRIEND_U}, #, 'online': True},
+            {'displayname': U_FRIEND_ME}, #, 'online': True},
+            {'displayname': I_PEND_U}, #, 'online': True},
+            {'displayname': U_PEND_ME}, #, 'online': True},
+            {'displayname': I_DECLINE_U}, #, 'online': True},
+            {'displayname': U_DECLINE_ME}, #, 'online': True},
+            {'displayname': STRANGER}, #, 'online': True},
+            {'displayname': 'Deleted account'}, #, 'online': False},
         ]
 
         # i created a monster

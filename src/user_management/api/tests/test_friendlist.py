@@ -18,15 +18,15 @@ STRANGER = 'Stranger'
 class ViewingFriendPageTest(MyTestSetUp):
     def setUp(self):
         self.test_users = [
-            {'displayname': ME, 'online': True},
-            {'displayname': I_FRIEND_U, 'online': True},
-            {'displayname': U_FRIEND_ME, 'online': False},
-            {'displayname': I_PEND_U, 'online': True},
-            {'displayname': U_PEND_ME, 'online': False},
-            {'displayname': I_DECLINE_U, 'online': True},
-            {'displayname': U_DECLINE_ME, 'online': False},
-            {'displayname': STRANGER, 'online': True},
-            {'displayname': 'Deleted account', 'online': False},
+            {'displayname': ME},
+            {'displayname': I_FRIEND_U},
+            {'displayname': U_FRIEND_ME},
+            {'displayname': I_PEND_U},
+            {'displayname': U_PEND_ME},
+            {'displayname': I_DECLINE_U},
+            {'displayname': U_DECLINE_ME},
+            {'displayname': STRANGER},
+            {'displayname': 'Deleted account'},
         ]
 
         # i created a monster
@@ -59,12 +59,10 @@ class ViewingFriendPageTest(MyTestSetUp):
         expected = [
             {
                 "displayname": I_FRIEND_U,
-                "online": "True",
                 "relationship": "friend",
             },
             {
                 "displayname": U_FRIEND_ME,
-                "online": "False",
                 "relationship": "friend",
             },
             {

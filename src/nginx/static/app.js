@@ -1,5 +1,6 @@
 import Router from './router.js';
 import { EventQueue } from './js/eventQueueClass.js';
+import { OnlineWebSocketClass } from './js/OnlineWebSocketClass.js';
 
 // global
 const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
@@ -13,6 +14,7 @@ window.app = {
 	socket: null,
 	pong_socket: null,
 	match_socket: null,
+	online_socket: new OnlineWebSocketClass(),
 	userData: storedUserData,
 	socket_event_queue: new EventQueue()
 };
