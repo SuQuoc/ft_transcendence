@@ -12,7 +12,6 @@ upstream registration_container {
 
 include /etc/nginx/conf.d/errormap.conf;
 
-
 server {
         listen 80;
         server_name ${DOMAIN};
@@ -55,8 +54,13 @@ server {
 
     ############## OTHER LOCATIONS #####
 
+    # Fallback to redirect everything to the homepage
+    location @redirect_to_website {
+        return 301 https://$host:${SSL_PORT};
+    }
+
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ @redirect_to_website;
     }
 
     location /js/ {
@@ -64,37 +68,8 @@ server {
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
         add_header 'Access-Control-Max-Age' 1728000;
-
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ @redirect_to_website;
     }
-
-  ############## ROUTES REDIRECT #####
-
-    # redirect all routes from js router to homepage 
-    # on reload (not sure if final yet!!)
-    # (the response should maybe be changed!!)
-    location /match {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /tournament {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /login {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /signup {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /displayname {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /friends {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-    location /stats {
-        return 301 https://$host:${SSL_PORT}/;
-    }
-
 
     ############## GAME #####
 
@@ -103,6 +78,7 @@ server {
         include /etc/nginx/conf.d/proxysetheader.conf;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+        try_files $uri $uri/ @redirect_to_website;
     }
 
     ############## USER MANAGEMENT #####
@@ -110,10 +86,12 @@ server {
     location /um/ {
         proxy_pass http://user_management_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
+        try_files $uri $uri/ @redirect_to_website;
     }
 
     location /media_url/ {
         alias /usr/share/nginx/html/media/;
+        try_files $uri $uri/ @redirect_to_website;
     }
 
     ############## REGISTRATION #####
@@ -121,16 +99,19 @@ server {
     location /registration/ {
         proxy_pass http://registration_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
+        try_files $uri $uri/ @redirect_to_website;
     }
 
         location /silk/ {
         proxy_pass http://registration_container/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
+        try_files $uri $uri/ @redirect_to_website;
     }
 
     location /static/silk/ {
         proxy_pass http://registration_container/static/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
+        try_files $uri $uri/ @redirect_to_website;
     } 
 
     location /callback {
