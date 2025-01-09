@@ -258,6 +258,11 @@ const Router = {
 		} else {
 			app.userData = {};
 			localStorage.removeItem("userData");
+			
+			// closing the user profile so it's gone when you get to the home page again
+			const closeButton = document.getElementById("userProfileClose");
+			if (closeButton)
+				closeButton.click();
 		}
 
 		Router.hideOrShowNavbarAndFooter(route);
