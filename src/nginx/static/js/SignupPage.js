@@ -26,89 +26,89 @@ export class SignupPage extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
-			<scripts-and-styles></scripts-and-styles>
-			<div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
-			<h3 class="text-center text-white">Signup</h3>
-			<form id="42SignupForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
-				<input type="hidden" name="next_step" value="signup">
-				<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
-				<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Sign up with 42</button>
-			</form>
-			<hr class="text-white-50">
-			<form id="signupForm" class="d-flex flex-column gap-3">
-				<div id="signupEmailSection">
-					<label for="signupEmail" class="form-label text-white-50">Email address</label>
-					<div class="input-group">
-						<input name="email"
-							id="signupEmail"
-							type="email"
-							class="form-control rounded-end"
-							placeholder="name@example.com"
-							aria-required="true"
-							aria-describedby="signupErrorMessageEmail"
-							pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
-							required
-						/>
-						<button id="signupChangeUsernameButton" class="btn btn-custom d-none" type="button">Change</button>
+				<scripts-and-styles></scripts-and-styles>
+				<div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
+				<h3 class="text-center text-white">Signup</h3>
+				<form id="42SignupForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
+					<input type="hidden" name="next_step" value="signup">
+					<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
+					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Sign up with 42</button>
+				</form>
+				<hr class="text-white-50">
+				<form id="signupForm" class="d-flex flex-column gap-3">
+					<div id="signupEmailSection">
+						<label for="signupEmail" class="form-label text-white-50">Email address</label>
+						<div class="input-group">
+							<input name="email"
+								id="signupEmail"
+								type="email"
+								class="form-control rounded-end"
+								placeholder="name@example.com"
+								aria-required="true"
+								aria-describedby="signupErrorMessageEmail"
+								pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+								required
+							/>
+							<button id="signupChangeUsernameButton" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
+						<span id="signupErrorMessageEmail" class="text-danger mt-2" style="display:block;"></span>
 					</div>
-					<span id="signupErrorMessageEmail" class="text-danger mt-2" style="display:block;"></span>
-				</div>
-				<div id="signupPasswordSection">
-					<label for="signupPassword1" class="form-label text-white-50">Password</label>
-					<div class="input-group">
-						<input name="password"
-							id="signupPassword1"
-							type="password"
-							class="form-control rounded-end"
-							aria-required="true"
-							aria-describedby="signupErrorMessagePassword"
-							minlength="8"
-							maxlength="120"
-							pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
-							required
-						/>
-						<button id="signupChangePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
+					<div id="signupPasswordSection">
+						<label for="signupPassword1" class="form-label text-white-50">Password</label>
+						<div class="input-group">
+							<input name="password"
+								id="signupPassword1"
+								type="password"
+								class="form-control rounded-end"
+								aria-required="true"
+								aria-describedby="signupErrorMessagePassword"
+								minlength="8"
+								maxlength="120"
+								pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
+								required
+							/>
+							<button id="signupChangePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
+						<label for="signupPassword2" class="form-label text-white-50">Repeat password</label>
+						<div class="input-group">
+							<input name="password2"
+								id="signupPassword2"
+								type="password"
+								class="form-control rounded-end"
+								aria-required="true"
+								aria-describedby="signupErrorMessagePassword"
+								minlength="8"
+								maxlength="120"
+								pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
+								required
+							/>
+							<button id="signupChangePassword2Button" class="btn btn-custom d-none" type="button">Change</button>
+						</div>
+						<span id="signupErrorMessagePassword" class="text-danger d-block mt-2"></span>
 					</div>
-					<label for="signupPassword2" class="form-label text-white-50">Repeat password</label>
-					<div class="input-group">
-						<input name="password2"
-							id="signupPassword2"
-							type="password"
-							class="form-control rounded-end"
-							aria-required="true"
-							aria-describedby="signupErrorMessagePassword"
-							minlength="8"
-							maxlength="120"
-							pattern="^(?=.*[a-zA-Z])[\\S]{8,120}$"
-							required
-						/>
-						<button id="signupChangePassword2Button" class="btn btn-custom d-none" type="button">Change</button>
+					<div id="signupOtpSection" style="display: none;">
+						<label for="signupOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<div class="input-group">
+							<input name="otp" id="signupOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+							<button id="signupRequestOtpButton" class="btn btn-custom" type="button" disabled>New OTP</button>
+						</div>
+						<span id="signupOtpErrorMessage" class="text-danger d-block mt-2"></span>
 					</div>
-					<span id="signupErrorMessagePassword" class="text-danger d-block mt-2"></span>
-				</div>
-				<div id="signupOtpSection" style="display: none;">
-					<label for="signupOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-					<div class="input-group">
-						<input name="otp" id="signupOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
-						<button id="signupRequestOtpButton" class="btn btn-custom" type="button" disabled>New OTP</button>
+					<div>
+						<p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
+						<p class="text-white-50 small mb-1">Already signed up?
+							<a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
+								Log in
+							</a>
+							here!
+						</p>
+						<button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
 					</div>
-					<span id="signupOtpErrorMessage" class="text-danger d-block mt-2"></span>
-				</div>
-				<div>
-					<p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
-					<p class="text-white-50 small mb-1">Already signed up?
-						<a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
-							Log in
-						</a>
-						here!
-					</p>
-					<button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
-				</div>
-				<div id="signupPasswordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
-				<div id="signupEmailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
-				<div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
-			</form>
-		</div>
+					<div id="signupPasswordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
+					<div id="signupEmailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
+					<div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
+				</form>
+			</div>
         `;
 		// what are the three error divs at the bottom for? are they still in use??!!
 		return template;
