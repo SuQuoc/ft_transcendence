@@ -56,8 +56,11 @@ export class UserProfile extends ComponentBaseClass {
           </div>
           <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" disabled readonly>
-          </div>
+            <div class="input-group">
+                <input type="email" class="form-control" id="email" disabled>
+                <span id="changeEmailButton" class="input-group-text">Change</span>
+            </div>
+        </div>
           <button type="submit" class="btn btn-primary" id="saveProfile">Save</button>
           <div class="spinner-border text-light" role="status" id="saveProfileSpinner">
             <span class="visually-hidden">Loading...</span>
@@ -132,6 +135,29 @@ export class UserProfile extends ComponentBaseClass {
         this.shadowRoot.getElementById('confirmPasswordToggle').addEventListener('click', () => this.togglePasswordVisibility('confirmPassword', 'confirmPasswordToggle'));
         this.shadowRoot.getElementById('logoutButton').addEventListener('click', this.handleLogout.bind(this));
         this.shadowRoot.getElementById('deleteUserButton').addEventListener('click', this.handleDeleteUser.bind(this));
+        this.shadowRoot.getElementById('changeEmailButton').addEventListener('click', this.toggleEmail.bind(this));
+    }
+
+    toggleEmail() {
+        const email = this.shadowRoot.getElementById('email');
+        const button = this.shadowRoot.getElementById('changeEmailButton');
+        const emailPattern =  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (email.disabled) {
+            this.currentEmail = email.value;
+            email.disabled = false;
+            button.textContent = 'Save';
+        } else {
+            if (!emailPattern.test(email.value)) {
+                email.classList.add('warning');
+                return;
+            }
+            email.classList.remove('warning');
+            if (email.value !== this.currentEmail) {
+                this.apiFetch('/registration/change_email', { method: 'POST', body: JSON.stringify({ new_email: email.value }) })
+            }
+            email.disabled = true;
+            button.textContent = 'Change';
+        }
     }
 
 	showDeleteError(message) {
@@ -153,7 +179,9 @@ export class UserProfile extends ComponentBaseClass {
         const otp = this.shadowRoot.getElementById('deleteUserOTP').value;
         if (otpSection.style.display !== 'none') {
 			otp ? this.shadowRoot.getElementById('deleteUserOTP').classList.remove('warning') : this.shadowRoot.getElementById('deleteUserOTP').classList.add('warning');
-            if (!password || !otp) return;
+            if (!password || !otp) {
+                return;
+            }
         } else if (!password) {
 			return;
         }
