@@ -41,13 +41,19 @@ server {
 
     root /usr/share/nginx/html;
     index index.html;
+    
+    ############## ERRORS #####
+    
     error_page 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 421 422 423 424 425 426 428 429 431 451 500 501 502 503 504 505 506 507 508 510 511 /custom_error.html;
     error_page 497  =301 https://$host:${SSL_PORT}$request_uri;
+    
     location = /custom_error.html {
     ssi on; # server side includes
     internal;
     root /usr/share/nginx/html;
     }
+
+    ############## OTHER LOCATIONS #####
 
     location / {
         try_files $uri $uri/ =404;
@@ -62,35 +68,11 @@ server {
         try_files $uri $uri/ =404;
     }
 
-    location /media_url/ {
-        alias /usr/share/nginx/html/media/;
-    }
+  ############## ROUTES REDIRECT #####
 
-    location /game/ {
-        proxy_pass http://game_container;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-
-        proxy_redirect off;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Host $server_name;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /um/ {
-        proxy_pass http://user_management_container;
-        include /etc/nginx/conf.d/proxysetheader.conf;
-    }
-
-    location /registration/ {
-        proxy_pass http://registration_container;
-        include /etc/nginx/conf.d/proxysetheader.conf;
-    }
-
-    # redirect all routes from js router to homepage on reload (not sure if final yet!!) (the response should maybe be changed!!)
+    # redirect all routes from js router to homepage 
+    # on reload (not sure if final yet!!)
+    # (the response should maybe be changed!!)
     location /match {
         return 301 https://$host:${SSL_PORT}/;
     }
@@ -113,7 +95,35 @@ server {
         return 301 https://$host:${SSL_PORT}/;
     }
 
-    location /silk/ {
+
+    ############## GAME #####
+
+    location /game/ {
+        proxy_pass http://game_container;
+        include /etc/nginx/conf.d/proxysetheader.conf;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    ############## USER MANAGEMENT #####
+
+    location /um/ {
+        proxy_pass http://user_management_container;
+        include /etc/nginx/conf.d/proxysetheader.conf;
+    }
+
+    location /media_url/ {
+        alias /usr/share/nginx/html/media/;
+    }
+
+    ############## REGISTRATION #####
+
+    location /registration/ {
+        proxy_pass http://registration_container;
+        include /etc/nginx/conf.d/proxysetheader.conf;
+    }
+
+        location /silk/ {
         proxy_pass http://registration_container/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
     }
@@ -121,15 +131,7 @@ server {
     location /static/silk/ {
         proxy_pass http://registration_container/static/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
-    }
-
-    location /um/img/ {
-        proxy_pass http://user_management_container/uploads/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+    } 
 
     location /callback {
         if ($args) {
