@@ -87,5 +87,6 @@ function handleAddUserProfile() {
 /** Deleting the user profile when the user profile is closed */
 function handleDeleteUserProfile() {
 	const userProfileContainer = document.getElementById("userProfileContainer");
-	userProfileContainer.innerHTML = "";
+	if (userProfileContainer.innerHTML != "")
+		userProfileContainer.innerHTML = "";
 };
