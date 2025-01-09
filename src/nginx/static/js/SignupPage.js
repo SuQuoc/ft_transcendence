@@ -2,8 +2,8 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class SignupPage extends ComponentBaseClass {
-	constructor() {
-		super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
+    constructor() {
+        super(false); // false because the componentBaseClass makes event listeners for a tags (links) and we don't want to add /signup to the history
 		this.otpRequestCooldown = 60;
 		this.otpRequestTimer = null;
 	}
@@ -102,9 +102,6 @@ export class SignupPage extends ComponentBaseClass {
                     </p>
                     <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
                     <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
-                    <div id="signupPasswordWarning" class="alert alert-danger mt-3" style="display: none;">Passwords do not match</div>
-                    <div id="signupEmailWarning" class="alert alert-danger mt-3" style="display: none;">Invalid email address</div>
-                    <div id="signupError" class="alert alert-danger mt-3" style="display: none;">Couldn't signup with provided data</div>
                 </form>
             </div>
         `;
