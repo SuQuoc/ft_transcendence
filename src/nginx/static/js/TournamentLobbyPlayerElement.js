@@ -11,7 +11,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
         this.wins = this.querySelector("[name='lobby_wins']");
 	}
 
-	/// ----- EMethods ----- ///
+	/// ----- Methods ----- ///
 
 	makeNameBold() {
 		this.name.classList.add("fw-bold");
