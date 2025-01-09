@@ -13,8 +13,8 @@ ANS = FriendRequestAnswerSerializer
 
 class FriendRequestTest(MyTestSetUp):
     def setUp(self):
-        self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="TestUser1", online=False)
-        self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="Stranger", online=True)
+        self.user1 = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="TestUser1")
+        self.stranger = CustomUser.objects.create(user_id=uuid.uuid4(), displayname="Stranger")
 
         self.user_tokens = {  # old JWT WITHOUT COOKIE:
             f"{self.user1.displayname}": f"{generate_token(self.user1.user_id)}",
