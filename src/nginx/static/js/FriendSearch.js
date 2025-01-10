@@ -59,7 +59,7 @@ export class FriendSearch extends ComponentBaseClass {
       </style>
       <div class="search-container p-3 rounded-3 bg-dark">
         <div class="input-group mb-3" role="search">
-            <input type="text" class="form-control search-input" placeholder="Search for friends..." aria-label="Search">
+            <input type="text" class="form-control search-input" placeholder="Search for users..." aria-label="Search">
             <button class="btn btn-primary search-button">🔍</button>
         </div>
         <ul class="search-results list-group bg-dark"></ul>
@@ -83,18 +83,28 @@ export class FriendSearch extends ComponentBaseClass {
         if (!query) return;
 
         try {
-            this.results = [];
             this.results = await this.apiFetch(`/um/search?term=${query}`, { method: "GET", cache: "no-store" });
-            this.updateResults();
         } catch (e) {
             console.error('Error fetching search results:', e.message);
+            this.results = [];
         }
+        this.updateResults()
     }
 
     updateResults() {
         const resultsElement = this.shadowRoot.querySelector('.search-results');
         resultsElement.innerHTML = '';
 
+        console.log(Array.isArray(this.results));
+        console.log(this.results.length);
+        console.log(typeof(this.results));
+        if (!Array.isArray(this.results) || this.results.length === 0) {
+            const item = document.createElement('li');
+            item.innerHTML = '<span class="text-white">No results found</span>';
+            item.classList.add('list-group-item', 'd-flex', 'justify-content-start', 'w-100', 'bg-dark');
+            resultsElement.appendChild(item);
+            return;
+        }
         this.results.forEach(user => {
             const item = document.createElement('li');
             item.innerHTML = `

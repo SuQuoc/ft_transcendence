@@ -13,9 +13,9 @@ import os
 # https://channels.readthedocs.io/en/latest/tutorial/part_2.html
 import django
 from django.core.asgi import get_asgi_application
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong.settings')
 django.setup()
-
+django_asgi_app = get_asgi_application()
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -55,40 +55,12 @@ class JWTAuthMiddleware(BaseMiddleware):
             data = jwt_decode(raw_token, settings.PUBLIC_KEY, algorithms=["RS256"])
             scope["user_id"] = data["user_id"] # add user_id to the scope
         except Exception as e:
-            print("JWT_DECODE")
             print(e)
             await send({
                 'type': 'websocket.close',
                 'code': 4001  # Unauthorized access code, no cookies provided at all, no access cookie provided
             })
             return
-        # print(f" uuid: {data}\n")
-        
-        # NOTE: FOR SOME REASON THIS BLOCK OF CODE DOESN'T WORK, DOES IT WORK IN UM?
-        """ auth = JWTStatelessUserAuthentication()
-        from django.conf import settings
-        print(f"raw_token {raw_token}, public key {settings.PUBLIC_KEY}\n")
-        # If token exists, validate it (this part stays the same)
-        try:
-            #raw_token = auth.get_raw_token(scope['headers'])
-            validated_token = auth.get_validated_token(raw_token)
-            print(validated_token)
-            # Optionally attach user to scope here if needed
-
-        except TokenError:
-            # Token invalid, close connection
-            await send({
-                'type': 'websocket.close',
-                'code': 4001  # Unauthorized access code
-            })
-            return  # Stop further processing
-        
-        except Exception as e:
-            print("EMERGENCY EMERGENCY")
-            print(e)
-            return """
-
-        # Proceed to the next layer (e.g., the consumer)
         return await super().__call__(scope, receive, send)
 
 
@@ -102,15 +74,13 @@ class JWTAuthMiddleware(BaseMiddleware):
         return cookies
         
 
-
-
-django_asgi_app = get_asgi_application()
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
-            JWTAuthMiddleware(AuthMiddlewareStack( # only used authMiddleware to get the cookies from scope inside the consumer
-                URLRouter(websocket_urlpatterns)))
+            JWTAuthMiddleware(
+                AuthMiddlewareStack( # only used authMiddleware to get the cookies from scope inside the consumer
+                    URLRouter(websocket_urlpatterns)))
         ),
     }
 )

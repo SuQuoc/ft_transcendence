@@ -1,5 +1,6 @@
 import Router from './router.js';
 import { EventQueue } from './js/eventQueueClass.js';
+import { OnlineWebSocketClass } from './js/OnlineWebSocketClass.js';
 
 // global
 const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
@@ -13,6 +14,7 @@ window.app = {
 	socket: null,
 	pong_socket: null,
 	match_socket: null,
+	online_socket: new OnlineWebSocketClass(),
 	userData: storedUserData,
 	socket_event_queue: new EventQueue()
 };
@@ -85,5 +87,6 @@ function handleAddUserProfile() {
 /** Deleting the user profile when the user profile is closed */
 function handleDeleteUserProfile() {
 	const userProfileContainer = document.getElementById("userProfileContainer");
-	userProfileContainer.innerHTML = "";
+	if (userProfileContainer.innerHTML != "")
+		userProfileContainer.innerHTML = "";
 };

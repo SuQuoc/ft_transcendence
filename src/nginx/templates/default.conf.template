@@ -80,6 +80,8 @@ server {
     location /um/ {
         proxy_pass http://user_management_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
     }
     location /media_url/ {
         alias /usr/share/nginx/html/media/;

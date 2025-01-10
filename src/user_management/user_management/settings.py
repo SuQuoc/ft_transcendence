@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "api",
     "friends",
+    "channels" # NOTE: maybe unnecessary
 ]
 
 MIDDLEWARE = [
@@ -101,8 +103,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "user_management.wsgi.application"
-
+#WSGI_APPLICATION = "user_management.wsgi.application"
+ASGI_APPLICATION = 'user_management.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -225,3 +227,20 @@ APPEND_SLASH = False
 # SECURE_SSL_REDIRECT = True
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
+
+# REDIS ---------------------------------------------------------
+REDIS_USER = os.environ.get('REDIS_USER')
+REDIS_PASS = os.environ.get('REDIS_PASSWORD')
+
+CHANNEL_LAYERS = {
+    #'default': {
+    #    'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use appropriate layer backend
+    #},
+
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis_usermanagement:6379/1")],
+        },
+    },
+}
