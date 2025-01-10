@@ -53,7 +53,6 @@ async def tournament_loop(room: TournamentRoom, queue):
 
             elif message.get("type") == T_DC_OUT_GAME: # finished their game and dc while waiting
                 disconnectors.append(message.get("id"))
-            queue.task_done() # NOTE: necessary in our case?
         
         
         for disconnector_id in disconnectors:
@@ -62,15 +61,12 @@ async def tournament_loop(room: TournamentRoom, queue):
                     winners.remove(winner)
                     break
             
-        print(f"winners: {winners}")
         players = winners
         player_num = len(players)
 
     if players:
         winner = players.pop()
-        print("!!!!! Winner is: ", winner.name)
         await send_tournament_end(channel_group, winner.name)
-    print("TOURNAMENT TASK FINISHED ==============")
 
 
 def get_winner(players, winner_id) -> Player:

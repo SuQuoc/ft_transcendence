@@ -181,7 +181,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		else if (data.type === "free_win") {
 			console.log("free win");
 			if (data.displayname === window.app.userData.username) {
-				console.log("#######################################################################################################################################");
 				this.canvas.clearTextForeground();
 				this.canvas.writeTextForeground("Free win!");
 			}
