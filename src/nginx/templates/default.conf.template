@@ -26,8 +26,8 @@ server {
 
     server_name ${DOMAIN};
 
-    server_tokens off; #we can only hide the version and not nginx with the free version https://serverfault.com/questions/214242/can-i-hide-all-server-os-info
-    
+    server_tokens off; #we can only hide the version and not nginx with the free version
+
     ssl_certificate     /etc/ssl/certs/ssl_webpage.crt;
     ssl_certificate_key /etc/ssl/certs/ssl_webpage.key;
     ssl_session_timeout 1d;
@@ -54,21 +54,39 @@ server {
 
     ############## OTHER LOCATIONS #####
 
-    # Fallback to redirect everything to the homepage
-    location @redirect_to_website {
-        return 301 https://$host:${SSL_PORT};
-    }
-
     location / {
-        try_files $uri $uri/ @redirect_to_website;
+        try_files $uri $uri/ =404;
     }
-
     location /js/ {
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
         add_header 'Access-Control-Max-Age' 1728000;
-        try_files $uri $uri/ @redirect_to_website;
+        try_files $uri $uri/ =404;
+    }
+
+    ############## INTERNAL ROUTES #####
+
+    location /match {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /tournament {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /login {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /signup {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /displayname {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /friends {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
+    }
+    location /stats {
+        rewrite ^/ https://$host:${SSL_PORT}/ last;
     }
 
     ############## GAME #####
@@ -78,7 +96,6 @@ server {
         include /etc/nginx/conf.d/proxysetheader.conf;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        try_files $uri $uri/ @redirect_to_website;
     }
 
     ############## USER MANAGEMENT #####
@@ -86,12 +103,9 @@ server {
     location /um/ {
         proxy_pass http://user_management_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
-        try_files $uri $uri/ @redirect_to_website;
     }
-
     location /media_url/ {
         alias /usr/share/nginx/html/media/;
-        try_files $uri $uri/ @redirect_to_website;
     }
 
     ############## REGISTRATION #####
@@ -99,21 +113,15 @@ server {
     location /registration/ {
         proxy_pass http://registration_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
-        try_files $uri $uri/ @redirect_to_website;
     }
-
         location /silk/ {
         proxy_pass http://registration_container/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
-        try_files $uri $uri/ @redirect_to_website;
     }
-
     location /static/silk/ {
         proxy_pass http://registration_container/static/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
-        try_files $uri $uri/ @redirect_to_website;
     } 
-
     location /callback {
         if ($args) {
             rewrite ^/callback$ https://$host:${SSL_PORT}?$args last;
