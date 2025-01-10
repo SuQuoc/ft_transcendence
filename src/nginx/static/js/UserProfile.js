@@ -57,7 +57,10 @@ export class UserProfile extends ComponentBaseClass {
 				<form id="profileForm">
 					<div class="mb-3">
 						<label for="displayName" class="form-label">Display Name</label>
-						<input type="text" class="form-control" id="displayName" maxlength="20">
+						<div class="input-group">
+							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" disabled>
+							<span class="input-group-text" id="changeDisplayNameButton">Change</span>
+						</div>
 						<div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
 					</div>
 					<div class="mb-3">
@@ -66,10 +69,6 @@ export class UserProfile extends ComponentBaseClass {
 							<input type="email" class="form-control" id="email" disabled>
 							<span id="changeEmailButton" class="input-group-text">Change</span>
 						</div>
-					</div>
-					<button type="submit" class="btn btn-primary" id="saveProfile">Save</button>
-					<div class="spinner-border text-light" role="status" id="saveProfileSpinner">
-						<span class="visually-hidden">Loading...</span>
 					</div>
 				</form>
 				<hr>
@@ -131,8 +130,8 @@ export class UserProfile extends ComponentBaseClass {
 		super.connectedCallback();
 		this.loadUserData();
 		this.shadowRoot
-			.getElementById("saveProfile")
-			.addEventListener("click", this.saveProfile.bind(this));
+			.getElementById("changeDisplayNameButton")
+			.addEventListener("click", this.toggleDisplayname.bind(this));
 		this.shadowRoot
 			.getElementById("changePassword")
 			.addEventListener("click", this.changePassword.bind(this));
@@ -194,14 +193,77 @@ export class UserProfile extends ComponentBaseClass {
 			}
 			email.classList.remove("warning");
 			if (email.value !== this.currentEmail) {
-				this.apiFetch("/registration/change_email", {
+				this.apiFetch("/registration/change_username", {
 					method: "POST",
-					body: JSON.stringify({ new_email: email.value }),
+					body: JSON.stringify({ new_username: email.value }),
 				});
+				window.app.userData.email = email.value;
 			}
 			email.disabled = true;
 			button.textContent = "Change";
 		}
+	}
+
+	//TODO: check if we need error handling here on the FE
+	toggleDisplayname() {
+		const displayName = this.shadowRoot.getElementById("displayName");
+		const button = this.shadowRoot.getElementById("changeDisplayNameButton");
+		if (displayName.disabled) {
+			this.currentDisplayName = displayName.value;
+			displayName.disabled = false;
+			button.textContent = "Save";
+		} else {
+			if (displayName.value !== this.currentDisplayName) {
+				const formData = new FormData();
+				formData.append("displayname", displayName.value);
+				this.apiFetch("/um/profile",{
+					method: "PATCH",
+					body: formData },
+				"multipart/form-data",
+				);
+				window.app.userData.username = displayName.value;
+			}
+			displayName.disabled = true;
+			button.textContent = "Change";
+		}
+	}
+
+	async saveProfile() {
+		const saveButton = this.shadowRoot.getElementById("saveProfile");
+		const saveSpinner = this.shadowRoot.getElementById("saveProfileSpinner");
+		const profileDisplayNameWarning = this.shadowRoot.getElementById(
+			"profileDisplayNameWarning",
+		);
+		saveButton.disabled = true;
+		saveSpinner.style.display = "inline-block";
+		profileDisplayNameWarning.style.display = "none";
+
+		const displayName = this.shadowRoot.getElementById("displayName").value;
+		const imageUpload = this.shadowRoot.getElementById("imageUpload");
+		const formData = new FormData();
+		formData.append("displayname", displayName);
+
+		if (imageUpload.files.length > 0) {
+			const imageFile = imageUpload.files[0];
+			formData.append("image", imageFile);
+		}
+
+		try {
+			const response = await this.apiFetch(
+				"/um/profile",
+				{ method: "PATCH", body: formData },
+				"multipart/form-data",
+			);
+			window.app.userData.username = response.displayname;
+			window.app.userData.profileImage = response.image;
+			console.log("Profile saved");
+		} catch (error) {
+			console.error("Error saving profile:", error);
+			profileDisplayNameWarning.style.display = "block";
+		}
+
+		saveButton.disabled = false;
+		saveSpinner.style.display = "none";
 	}
 
 	showDeleteError(message) {
@@ -439,44 +501,6 @@ export class UserProfile extends ComponentBaseClass {
 				warningMessage.classList.add("alert", "alert-danger");
 			}
 		}
-	}
-
-	async saveProfile() {
-		const saveButton = this.shadowRoot.getElementById("saveProfile");
-		const saveSpinner = this.shadowRoot.getElementById("saveProfileSpinner");
-		const profileDisplayNameWarning = this.shadowRoot.getElementById(
-			"profileDisplayNameWarning",
-		);
-		saveButton.disabled = true;
-		saveSpinner.style.display = "inline-block";
-		profileDisplayNameWarning.style.display = "none";
-
-		const displayName = this.shadowRoot.getElementById("displayName").value;
-		const imageUpload = this.shadowRoot.getElementById("imageUpload");
-		const formData = new FormData();
-		formData.append("displayname", displayName);
-
-		if (imageUpload.files.length > 0) {
-			const imageFile = imageUpload.files[0];
-			formData.append("image", imageFile);
-		}
-
-		try {
-			const response = await this.apiFetch(
-				"/um/profile",
-				{ method: "PATCH", body: formData },
-				"multipart/form-data",
-			);
-			window.app.userData.username = response.displayname;
-			window.app.userData.profileImage = response.image;
-			console.log("Profile saved");
-		} catch (error) {
-			console.error("Error saving profile:", error);
-			profileDisplayNameWarning.style.display = "block";
-		}
-
-		saveButton.disabled = false;
-		saveSpinner.style.display = "none";
 	}
 
 	validatePasswords() {
