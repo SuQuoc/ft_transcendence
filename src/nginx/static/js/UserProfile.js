@@ -57,7 +57,7 @@ export class UserProfile extends ComponentBaseClass {
 				<form id="profileForm">
 					<div class="mb-3">
 						<label for="displayName" class="form-label">Display Name</label>
-						<div class="input-group">
+						<div class="input-group mb-3">
 							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" disabled>
 							<span class="input-group-text" id="changeDisplayNameButton">Change</span>
 						</div>
@@ -69,25 +69,43 @@ export class UserProfile extends ComponentBaseClass {
 							<input type="email" class="form-control" id="email" disabled>
 							<span id="changeEmailButton" class="input-group-text">Change</span>
 						</div>
+						<div id="oldEmailContainer" hidden>
+							<label for="oldEmailOTP" class="form-label mt-3">OTP sent to old E-Mail</label>
+							<div class="input-group">
+								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<span class="input-group-text" id="requestOldEmailOTP">New OTP</span>
+							</div>
+						</div>
+						<div id="newEmailContainer" hidden>
+							<label for="newEmailOTP" class="form-label mt-3">OTP sent to new E-Mail</label>
+							<div class="input-group">
+								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<span class="input-group-text" id="requestNewEmailOTP">New OTP</span>
+							</div>
+							<div class="d-flex justify-content-between">
+    							<button type="submit" class="btn btn-primary mt-3 me-2" id="saveNewEmailButton" disabled>Change Email</button>
+    							<button type="button" class="btn btn-secondary mt-3" id="cancelEmailButton">Cancel</button>
+							</div>
+						</div>
 					</div>
 				</form>
 				<hr>
 				<form id="passwordForm">
-					<div class="mb-3 input-group">
+					<div class="mb-3 input-group" id="oldPasswordContainer">
 						<label for="oldPassword" class="form-label">Old Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="oldPassword" name="current-password" autocomplete="current-password">
 							<span class="input-group-text" id="oldPasswordToggle">Show</span>
 						</div>
 					</div>
-					<div class="mb-3 input-group">
+					<div class="mb-3 input-group" id="newPasswordContainer">
 						<label for="newPassword" class="form-label">New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="newPassword" name="new-password" autocomplete="new-password">
 							<span class="input-group-text" id="newPasswordToggle">Show</span>
 						</div>
 					</div>
-					<div class="mb-3">
+					<div class="mb-3" id="confirmPasswordContainer">
 						<label for="confirmPassword" class="form-label">Confirm New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
@@ -95,6 +113,13 @@ export class UserProfile extends ComponentBaseClass {
 						</div>
 						<div class="warning-message" id="passwordWarning">Passwords do not match</div>
 						<div class="warning-message" id="changePasswordWarning">Error changing password</div>
+					</div>
+					<div class="mb-3" id="newPasswordOTPContainer" hidden>
+						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+							<span class="input-group-text" id="requestNewEmailOTP">Request new OTP</span>
+						</div>
 					</div>
 					<button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
 					<div class="spinner-border text-light" role="status" id="changePasswordSpinner">
@@ -175,15 +200,33 @@ export class UserProfile extends ComponentBaseClass {
 			.addEventListener("click", this.handleDeleteUser.bind(this));
 		this.shadowRoot
 			.getElementById("changeEmailButton")
-			.addEventListener("click", this.toggleEmail.bind(this));
+			.addEventListener("click", this.emailChange.bind(this));
+		this.shadowRoot
+			.getElementById("requestOldEmailOTP")
+			.addEventListener("click", this.emailRequestOTP.bind(this));
+		this.shadowRoot
+			.getElementById("requestNewEmailOTP")
+			.addEventListener("click", this.emailRequestOTP.bind(this));
+		this.shadowRoot
+			.getElementById("cancelEmailButton")
+			.addEventListener("click", this.emailCancelChange.bind(this));
+		this.shadowRoot
+			.getElementById("oldEmailOTP")
+			.addEventListener("input", this.emailValidateOTP.bind(this));
+		this.shadowRoot
+			.getElementById("newEmailOTP")
+			.addEventListener("input", this.emailValidateOTP.bind(this));
+		this.shadowRoot
+			.getElementById("saveNewEmailButton")
+			.addEventListener("click", this.emailChangeWithOTP.bind(this));
 	}
 
-	toggleEmail() {
+	emailChange() {
 		const email = this.shadowRoot.getElementById("email");
 		const button = this.shadowRoot.getElementById("changeEmailButton");
 		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 		if (email.disabled) {
-			this.currentEmail = email.value;
 			email.disabled = false;
 			button.textContent = "Save";
 		} else {
@@ -192,15 +235,93 @@ export class UserProfile extends ComponentBaseClass {
 				return;
 			}
 			email.classList.remove("warning");
-			if (email.value !== this.currentEmail) {
-				this.apiFetch("/registration/change_username", {
-					method: "POST",
-					body: JSON.stringify({ new_username: email.value }),
-				});
-				window.app.userData.email = email.value;
+			if (email.value !== window.app.userData.email) {
+				this.emailRequestOTP();
 			}
 			email.disabled = true;
 			button.textContent = "Change";
+		}
+	}
+
+	/**
+	* Requests OTP for email change and starts a countdown timer for OTP request buttons.
+	*
+	* This method sends a POST request to the server to request an OTP for changing the email.
+	* It then displays the OTP input fields and starts a countdown timer on the OTP request buttons.
+	*/
+	emailRequestOTP() {
+		const requestOldEmailOTP = this.shadowRoot.getElementById("requestOldEmailOTP");
+		const requestNewEmailOTP = this.shadowRoot.getElementById("requestNewEmailOTP");
+		const oldEmailContainer = this.shadowRoot.getElementById("oldEmailContainer");
+		const newEmailContainer = this.shadowRoot.getElementById("newEmailContainer");
+		const email = this.shadowRoot.getElementById("email");
+		this.apiFetch("/registration/change_username", {
+			method: "POST",
+			body: JSON.stringify({ new_username: email.value }),
+		});
+		oldEmailContainer.removeAttribute("hidden");
+		newEmailContainer.removeAttribute("hidden");
+		let timer = 60;
+		if (this.interval)
+			clearInterval(this.interval);
+		this.interval = setInterval(() => {
+			requestOldEmailOTP.textContent = `${timer}s`;
+			requestNewEmailOTP.textContent = `${timer}s`;
+			if (--timer < 0) {
+				clearInterval(this.interval);
+				requestOldEmailOTP.textContent = "New OTP";
+				requestNewEmailOTP.textContent = "New OTP";
+			}
+		}, 1000);
+		this.shadowRoot.getElementById("oldEmailOTP").focus();
+	}
+
+	emailCancelChange() {
+		const oldEmailContainer = this.shadowRoot.getElementById("oldEmailContainer");
+		const newEmailContainer = this.shadowRoot.getElementById("newEmailContainer");
+		const email = this.shadowRoot.getElementById("email");
+		const requestOldEmailOTP = this.shadowRoot.getElementById("requestOldEmailOTP");
+		const requestNewEmailOTP = this.shadowRoot.getElementById("requestNewEmailOTP");
+		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
+		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		email.disabled = true;
+		email.value = window.app.userData.email;
+		oldEmailContainer.hidden = true;
+		newEmailContainer.hidden = true;
+		requestOldEmailOTP.textContent = "New OTP";
+		requestNewEmailOTP.textContent = "New OTP";
+		oldEmailOTP.value = "";
+		newEmailOTP.value = "";
+	}
+
+	/**
+	 * Validates the OTP input fields for email change.
+	 *
+	 * This method validates the OTP input fields for email change and enables the change email button if the OTPs are valid.
+	 * The OTPs must be 16 digits long.
+	 */
+	emailValidateOTP() {
+		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
+		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		const changeEmailButton = this.shadowRoot.getElementById("saveNewEmailButton");
+		const pattern = /^[0-9]{16}$/;
+		if (pattern.test(oldEmailOTP.value) && pattern.test(newEmailOTP.value)) {
+			changeEmailButton.removeAttribute("disabled");
+		} else {
+			changeEmailButton.setAttribute("disabled", "");
+		}
+	}
+
+	emailChangeWithOTP() {
+		const email = this.shadowRoot.getElementById("email");
+		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
+		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		if (oldEmailOTP.value && newEmailOTP.value) {
+			this.apiFetch("/registration/change_username", {
+				method: "POST",
+				body: JSON.stringify({ new_username: email.value, otp_old_email: oldEmailOTP.value, otp_new_email: newEmailOTP.value }),
+			});
+			window.app.userData.email = email.value;
 		}
 	}
 
