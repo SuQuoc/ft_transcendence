@@ -176,7 +176,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			console.log("tournament end");
 			this.canvas.clearTextForeground();
 			this.canvas.writeTextForeground(data.winner + " won!");
-			this.setGoBackTimeout();
+			//this.setGoBackTimeout(); TODO: !!!
+		}
+		else if (data.type === "free_win") {
+			console.log("free win");
+			if (data.displayname === window.app.userData.username) {
+				console.log("#######################################################################################################################################");
+				this.canvas.clearTextForeground();
+				this.canvas.writeTextForeground("Free win!");
+			}
+			let player_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${data.displayname}"]`);
+			player_element.incrementWins();
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
@@ -184,6 +194,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		else {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);
 		}
+	}
+
+	displayMatchResult(winner, loser) {
+		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
+		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
+		if (winner_element) {
+			winner_element.incrementWins();	
+		} else {console.error("Error: displayMatchResult: winner element not found");}
+		if (loser_element) {
+			loser_element.greyOutPlayer();
+		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
 
