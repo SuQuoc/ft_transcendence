@@ -126,7 +126,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.timeout_id = setTimeout(() => {
 			this.timeout_id = -1;
 			this.handleLeaveLobby();
-		}, 30000);
+		}, 60000);
 	}
 
 
@@ -176,7 +176,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			console.log("tournament end");
 			this.canvas.clearTextForeground();
 			this.canvas.writeTextForeground(data.winner + " won!");
-			//this.setGoBackTimeout(); TODO: !!!
+			this.setGoBackTimeout();
 		}
 		else if (data.type === "free_win") {
 			console.log("free win");
