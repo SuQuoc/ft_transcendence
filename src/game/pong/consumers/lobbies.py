@@ -138,7 +138,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.group_switch(AVA_ROOMS, get_room_group(room_name))
         await self.send_success(room_name)
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
-        # print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
 
 
     async def join_room(self, dict_data):
@@ -192,7 +191,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 else:
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
-            # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
         
         # CHANNELS: Remove user from the tournament room group
         await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)

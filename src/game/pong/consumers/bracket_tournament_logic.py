@@ -49,14 +49,10 @@ async def tournament_loop(room: TournamentRoom, queue):
                     }
                     await send_display_match_result(channel_group, match_result)
             elif message.get("type") == T_DC_IN_GAME:
-                print("DC in game")
                 msg_count += 1
-                disconnectors.append(message.get("id"))
 
-            elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
-                print("DC out game")
+            elif message.get("type") == T_DC_OUT_GAME: # finished their game and dc while waiting
                 disconnectors.append(message.get("id"))
-                print(f"id: {id}")
             queue.task_done() # NOTE: necessary in our case?
         
         
@@ -143,10 +139,8 @@ def remove_duplicates(match_results):
 async def create_tournament_bracket(channel_group, players, room):
     pairs, odd_one = make_random_pairs(players)
     if odd_one:
-        print("\n odd one: ", odd_one, "\n")
         await send_free_win(channel_group, odd_one.name)
 
-    print(f"pairs: {pairs}")
     matches = [
             {
                 "match_id": create_match_config([pair[0].id, pair[1].id],
