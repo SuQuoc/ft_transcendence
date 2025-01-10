@@ -74,8 +74,6 @@ async def tournament_loop(room: TournamentRoom, queue):
         winner = players.pop()
         print("!!!!! Winner is: ", winner.name)
         await send_tournament_end(channel_group, winner.name)
-    else:
-        await send_tournament_end(channel_group, 'No winner all left')
     print("TOURNAMENT TASK FINISHED ==============")
 
 
