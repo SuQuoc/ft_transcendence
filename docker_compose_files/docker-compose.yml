@@ -50,6 +50,8 @@ networks:
     driver: bridge
   network_user_management:
     driver: bridge
+  network_redis_um:
+    driver: bridge
   network_django:
     driver: bridge
 

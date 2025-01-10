@@ -25,22 +25,23 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 # ONLY FOR /profile GET --> fields online and relationship not needed
 class CustomUserProfileSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
-    relationship = serializers.SerializerMethodField(required=False)
+    # relationship = serializers.SerializerMethodField(required=False)
     
     class Meta:
         model = CustomUser
-        fields = ["displayname", "image", "online", "relationship"]
+        fields = ["displayname", "image"]
+        # fields = ["displayname", "image", "online", "relationship"]
     
-    def get_relationship(self, obj):
-        return self.context.get('relationship', None)
+    # def get_relationship(self, obj):
+    #     return self.context.get('relationship', None)
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if self.get_relationship(instance) != "friend":
-            representation.pop('online')
-            representation.pop('relationship')
-
-        return representation
+    #def to_representation(self, instance):
+    #    representation = super().to_representation(instance)
+    #    # if self.get_relationship(instance) != "friend":
+    #    #     representation.pop('online')
+    #    #     representation.pop('relationship')
+#
+    #    return representation
 
 
 
@@ -48,11 +49,11 @@ class UserRelationSerializer(serializers.ModelSerializer):
     # serializerMethodField https://www.youtube.com/watch?v=67mUq2pqF3Y
     relationship = serializers.SerializerMethodField()
     friend_request_id = serializers.SerializerMethodField()
-    online = serializers.SerializerMethodField()
+    # online = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ["user_id", "displayname", "online", "image", "relationship", "friend_request_id"]
+        fields = ["user_id", "displayname", "image", "relationship", "friend_request_id"] # "online",
 
     def get_relationship(self, obj):
         relationships = self.context.get('relationships', {})
@@ -62,17 +63,17 @@ class UserRelationSerializer(serializers.ModelSerializer):
         friend_request_id = self.context.get('friend_requests', {})
         return friend_request_id.get(obj.user_id, None)
 
-    def get_online(self, obj):
-        online_status = self.context.get('online_status', {})
-        return online_status.get(obj.user_id, None)
+    # def get_online(self, obj):
+    #     online_status = self.context.get('online_status', {})
+    #     return online_status.get(obj.user_id, None)
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # if representation.get('relationship') is None: SHOULD NEVER HAPPEN
-        #     representation.pop('relationship')
-        if representation.get('online') is None:
-            representation.pop('online')
-        return representation
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     # if representation.get('relationship') is None: SHOULD NEVER HAPPEN
+    #     #     representation.pop('relationship')
+    #     if representation.get('online') is None:
+    #         representation.pop('online')
+    #     return representation
 
 
 class ImageTooLargeError(APIException):

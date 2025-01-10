@@ -1,5 +1,6 @@
 import Router from './router.js';
 import { EventQueue } from './js/eventQueueClass.js';
+import { OnlineWebSocketClass } from './js/OnlineWebSocketClass.js';
 
 // global
 const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
@@ -13,6 +14,7 @@ window.app = {
 	socket: null,
 	pong_socket: null,
 	match_socket: null,
+	online_socket: new OnlineWebSocketClass(),
 	userData: storedUserData,
 	socket_event_queue: new EventQueue()
 };
@@ -52,12 +54,17 @@ window.addEventListener("DOMContentLoaded", async () => {
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
 	// adding event handlers to add and remove the userprofile sidemenu
-	document.getElementById("userProfileButton").addEventListener('click', handleAddUserProfile);
-	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
-	document.getElementById("userProfile").addEventListener('hidden.bs.offcanvas', handleDeleteUserProfile);
-	document.getElementById("userProfileButton").addEventListener('keydown', (e) => {
+	const userProfileButton = document.getElementById("userProfileButton");
+	const userProfileClose = document.getElementById("userProfileClose");
+	const userProfile = document.getElementById("userProfile");
+	if (!userProfileButton || !userProfileClose || !userProfile) // protect against null values (happens if we show error page)
+		return;
+
+	userProfileButton.addEventListener('click', handleAddUserProfile);
+	userProfileClose.addEventListener('click', handleDeleteUserProfile);
+	userProfile.addEventListener('hidden.bs.offcanvas', handleDeleteUserProfile);
+	userProfileButton.addEventListener('keydown', (e) => {
 		if (e.key === "Enter" || e.key === " ") {
-			let userProfile = document.getElementById("userProfile");
 			let bsOffcanvas = bootstrap.Offcanvas.getInstance(userProfile);
 			if (!bsOffcanvas) {
 				bsOffcanvas = new bootstrap.Offcanvas(userProfile);
@@ -85,5 +92,6 @@ function handleAddUserProfile() {
 /** Deleting the user profile when the user profile is closed */
 function handleDeleteUserProfile() {
 	const userProfileContainer = document.getElementById("userProfileContainer");
-	userProfileContainer.innerHTML = "";
+	if (userProfileContainer.innerHTML != "")
+		userProfileContainer.innerHTML = "";
 };
