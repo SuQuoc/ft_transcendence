@@ -153,18 +153,12 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("oldPasswordToggle")
 			.addEventListener("click", () =>
-				this.togglePasswordVisibility(
-					"oldPassword",
-					"oldPasswordToggle",
-				),
+				this.togglePasswordVisibility("oldPassword", "oldPasswordToggle"),
 			);
 		this.shadowRoot
 			.getElementById("newPasswordToggle")
 			.addEventListener("click", () =>
-				this.togglePasswordVisibility(
-					"newPassword",
-					"newPasswordToggle",
-				),
+				this.togglePasswordVisibility("newPassword", "newPasswordToggle"),
 			);
 		this.shadowRoot
 			.getElementById("confirmPasswordToggle")
@@ -251,9 +245,8 @@ export class UserProfile extends ComponentBaseClass {
 					body: JSON.stringify({ password: password }),
 				});
 				otpSection.style.display = "block";
-				this.shadowRoot.getElementById(
-					"passwordSection",
-				).style.display = "none";
+				this.shadowRoot.getElementById("passwordSection").style.display =
+					"none";
 				this.shadowRoot.getElementById(
 					"requestDeleteUserButton",
 				).style.display = "none";
@@ -281,8 +274,7 @@ export class UserProfile extends ComponentBaseClass {
 		const deleteUserConfirmation = this.shadowRoot.getElementById(
 			"deleteUserConfirmation",
 		);
-		const deleteUserButton =
-			this.shadowRoot.getElementById("deleteUserButton");
+		const deleteUserButton = this.shadowRoot.getElementById("deleteUserButton");
 
 		const requestOTPButton = this.shadowRoot.getElementById(
 			"requestDeleteUserButton",
@@ -294,8 +286,7 @@ export class UserProfile extends ComponentBaseClass {
 		const deleteUserPassword =
 			this.shadowRoot.getElementById("deleteUserPassword");
 		const otpSection = this.shadowRoot.getElementById("otpSection");
-		const passwordSection =
-			this.shadowRoot.getElementById("passwordSection");
+		const passwordSection = this.shadowRoot.getElementById("passwordSection");
 
 		if (deleteUserConfirmation.style.display === "none") {
 			deleteUserConfirmation.style.display = "block";
@@ -322,10 +313,7 @@ export class UserProfile extends ComponentBaseClass {
 			"aria-label",
 			"Request OTP for deleting user",
 		);
-		confirmDeleteUserButton.setAttribute(
-			"aria-label",
-			"Confirm deleting user",
-		);
+		confirmDeleteUserButton.setAttribute("aria-label", "Confirm deleting user");
 		deleteUserPassword.setAttribute("aria-label", "Enter current password");
 		this.shadowRoot
 			.getElementById("deleteUserOTP")
@@ -397,17 +385,14 @@ export class UserProfile extends ComponentBaseClass {
 					window.app.userData.profileImage;
 			}
 			if (!window.app.userData.email) {
-				console.log(
-					"Email not found in global app object, fetching from API",
-				);
-				const email_response = await this.apiFetch(
-					"/registration/get_email",
-					{ method: "GET", cache: "no-store" },
-				);
+				console.log("Email not found in global app object, fetching from API");
+				const email_response = await this.apiFetch("/registration/get_email", {
+					method: "GET",
+					cache: "no-store",
+				});
 				window.app.userData.email = email_response.email;
 			}
-			this.shadowRoot.getElementById("email").value =
-				window.app.userData.email;
+			this.shadowRoot.getElementById("email").value = window.app.userData.email;
 		} catch (error) {
 			console.error("Error loading user data:", error);
 		}
@@ -424,8 +409,7 @@ export class UserProfile extends ComponentBaseClass {
 
 		if (file) {
 			if (!allowedTypes.includes(file.type)) {
-				warningMessage.textContent =
-					"Only JPEG and PNG files are allowed.";
+				warningMessage.textContent = "Only JPEG and PNG files are allowed.";
 				warningMessage.classList.add("alert", "alert-danger");
 				return;
 			}
@@ -438,8 +422,7 @@ export class UserProfile extends ComponentBaseClass {
 
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				this.shadowRoot.getElementById("profileImage").src =
-					e.target.result;
+				this.shadowRoot.getElementById("profileImage").src = e.target.result;
 				window.app.userData.profileImage = e.target.result;
 			};
 			const formData = new FormData();
@@ -460,8 +443,7 @@ export class UserProfile extends ComponentBaseClass {
 
 	async saveProfile() {
 		const saveButton = this.shadowRoot.getElementById("saveProfile");
-		const saveSpinner =
-			this.shadowRoot.getElementById("saveProfileSpinner");
+		const saveSpinner = this.shadowRoot.getElementById("saveProfileSpinner");
 		const profileDisplayNameWarning = this.shadowRoot.getElementById(
 			"profileDisplayNameWarning",
 		);
@@ -503,22 +485,17 @@ export class UserProfile extends ComponentBaseClass {
 			this.shadowRoot.getElementById("confirmPassword").value;
 		const changePasswordButton =
 			this.shadowRoot.getElementById("changePassword");
-		const passwordWarning =
-			this.shadowRoot.getElementById("passwordWarning");
+		const passwordWarning = this.shadowRoot.getElementById("passwordWarning");
 
 		if (newPassword !== confirmPassword) {
-			this.shadowRoot
-				.getElementById("newPassword")
-				.classList.add("warning");
+			this.shadowRoot.getElementById("newPassword").classList.add("warning");
 			this.shadowRoot
 				.getElementById("confirmPassword")
 				.classList.add("warning");
 			passwordWarning.style.display = "block";
 			changePasswordButton.disabled = true;
 		} else {
-			this.shadowRoot
-				.getElementById("newPassword")
-				.classList.remove("warning");
+			this.shadowRoot.getElementById("newPassword").classList.remove("warning");
 			this.shadowRoot
 				.getElementById("confirmPassword")
 				.classList.remove("warning");
