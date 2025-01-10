@@ -1,11 +1,9 @@
 upstream game_container {
    server game:8000;
 }
-
 upstream user_management_container {
     server usermanagement:8000;
 }
-
 upstream registration_container {
     server registration:8000;
 }
@@ -93,7 +91,7 @@ server {
         proxy_pass http://registration_container;
         include /etc/nginx/conf.d/proxysetheader.conf;
     }
-        location /silk/ {
+    location /silk/ {
         proxy_pass http://registration_container/silk/;
         include /etc/nginx/conf.d/proxysetheader.conf;
     }
