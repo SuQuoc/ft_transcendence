@@ -177,7 +177,7 @@ export class FriendList extends ComponentBaseClass {
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
         <span class="friend-status ${window.app.online_socket.online_friends.includes(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
-      <span class="text-white">${itemData.displayname}</span>
+      <span class="text-white text-break lh-1">${itemData.displayname}</span>
     `;
 		item.querySelector('.btn-danger').addEventListener('click', () => {
 			this.changeFriendRequest(itemData.friend_request_id, 'unfriend');
@@ -191,7 +191,7 @@ export class FriendList extends ComponentBaseClass {
 		item.innerHTML = `
 	  		<button class="btn btn-success btn-sm">✓</button>
 	  		<button class="btn btn-danger btn-sm">X</button>
-	  		<span class="text-white">${itemData.displayname}</span>
+	  		<span class="text-white text-break lh-1">${itemData.displayname}</span>
 		`;
 		if (action === 'received') {
 			item.querySelector('.btn-success').addEventListener('click', () => {

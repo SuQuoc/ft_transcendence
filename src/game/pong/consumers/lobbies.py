@@ -178,6 +178,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 else:
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
+        
         # CHANNELS: Remove user from the tournament room group
         await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
         await self.group_send_Room(T_PLAYER_LEFT_ROOM, room)
@@ -308,9 +309,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def free_win(self, event):
         """Sends the winner of the tournament to the client."""
-        id = event.get("winner_id")
-        if id == self.user.id:
-            await self.send(text_data=json.dumps(event))
+        await self.send(text_data=json.dumps(event))
 
     async def match_result(self, event):
         """

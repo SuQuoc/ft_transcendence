@@ -139,135 +139,11 @@ const Router = {
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
 	},
 
-	//opens the window.app.socket if it is closed
-	makeWebSocket: (type) => {
-		if (!window.app.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path =
-				ws_scheme + "://" + window.location.host + "/game/tournament";
-			window.app.socket = new WebSocket(ws_path);
-
-			// add event listeners
-			//window.app.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
-			console.log("socket created");
-		}
-
-		window.app.socket.onopen = () => {
-			console.log("socket opened");
-			window.app.socket.send(
-				JSON.stringify({
-					type: type,
-					displayname: window.app.userData.username,
-				})
-			);
-		};
-	},
-
-	/** closes the window.app.socket if it is open */
-	closeWebSocket: () => {
-		if (window.app.socket) {
-			window.app.socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
-			window.app.socket.close();
-			window.app.socket = null;
-			console.log("socket closed");
-		}
-	},
-
-	//opens the window.app.pong_socket if it is closed
-	/** creates a Websocket connection to backend using a match id */
-	makePongWebSocket: () => {
-		if (!window.app.pong_socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path = ws_scheme + "://" + window.location.host + "/game/match";
-			window.app.pong_socket = new WebSocket(ws_path);
-
-			// add event listeners
-			//window.app.pong_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
-			console.log("pong socket created");
-		}
-
-		window.app.pong_socket.onopen = () => {
-			console.log("pong socket opened");
-			// NOTE: window.app.pong_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
-		};
-	},
-
-	/** closes the window.app.pong_socket if it is open */
-	closePongWebSocket: () => {
-		if (window.app.pong_socket) {
-			window.app.pong_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
-			window.app.pong_socket.close();
-			window.app.pong_socket = null;
-			console.log("pong socket closed");
-		}
-	},
-
-	//opens the window.app.match_socket if it is closed
-	/** creates a Websocket connection to backend using a match id */
-	makeMatchWebSocket: () => {
-		if (!window.app.match_socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path =
-				ws_scheme + "://" + window.location.host + "/game/matchmaking/";
-			window.app.match_socket = new WebSocket(ws_path);
-
-			// add event listeners
-			//window.app.match_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
-			console.log("match socket created");
-		}
-
-		window.app.match_socket.onopen = () => {
-			console.log("match socket opened");
-			// NOTE: window.app.match_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
-		};
-	},
-
-	/** closes the window.app.match_socket if it is open */
-	closeMatchWebSocket: () => {
-		if (window.app.match_socket) {
-			window.app.match_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
-			window.app.match_socket.close();
-			window.app.match_socket = null;
-			console.log("match socket closed");
-		}
-	},
-
-	//opens the window.app.match_socket if it is closed
-	/** creates a Websocket connection to backend using a match id */
-	makeOnlineWebSocket: () => {
-		if (!window.app.online_socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
-			let ws_path =
-				ws_scheme + "://" + window.location.host + "/um/online_status";
-			window.app.online_socket = new WebSocket(ws_path);
-
-			// add event listeners
-			//window.app.online_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect);
-			console.log("online socket created");
-		}
-
-		window.app.online_socket.onopen = () => {
-			console.log("online socket opened");
-			// NOTE: window.app.online_socket.send(JSON.stringify({"type": type, "displayname": window.app.userData.username}));
-		};
-	},
-
-	/** closes the window.app.online_socket if it is open */
-	closeOnlineWebSocket: () => {
-		if (window.app.online_socket) {
-			window.app.online_socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
-			window.app.online_socket.close();
-			window.app.online_socket = null;
-			console.log("online socket closed");
-		}
-	},
-
 	/** Opens and returns a new websocket if the one passed is closed. If it isn't, it is returned instead. */
-	makeAllWebSocket: (socket, endpoint) => {
+	makeWebSocket: (socket, endpoint) => {
 		// function name should be changed
 		if (socket)
-			// needs to happen one level up ??!!!
-			return socket;
+			return socket; // needs to happen one level up ??!!!
 		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
 		let ws_path = ws_scheme + "://" + window.location.host + endpoint;
 		let new_socket = new WebSocket(ws_path);
@@ -285,7 +161,7 @@ const Router = {
 	/** Closes the socket if it is open.
 	 *
 	 * Returns null. */
-	closeAllWebSocket: (socket) => {
+	closeWebSocket: (socket) => {
 		// function name should be changed
 		if (socket) {
 			socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
@@ -347,6 +223,11 @@ const Router = {
 			window.app.online_socket.close();
 			app.userData = {};
 			localStorage.removeItem("userData");
+			
+			// closing the user profile so it's gone when you get to the home page again
+			const closeButton = document.getElementById("userProfileClose");
+			if (closeButton)
+				closeButton.click();
 		}
 
 		Router.hideOrShowNavbarAndFooter(route);
@@ -360,23 +241,23 @@ const Router = {
 				break;
 			case "/tournament":
 				if (addToHistory === true) {
-					Router.closeWebSocket(); //only closes the socket if it is open
-					Router.makeWebSocket("on_tournament_page");
+					window.app.socket = Router.closeWebSocket(window.app.socket);
+					window.app.socket = Router.makeWebSocket(window.app.socket, "/game/tournament");
 				}
 				pageElement = document.createElement("join-tournament-page");
 				break; 
 			case "/tournament-lobby":
 				//protection (what if the socket is not open??!!!!)
-				Router.closePongWebSocket(); //only closes the socket if it is open
-				Router.makePongWebSocket();
+				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
+				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
 				pageElement = new TournamentLobbyPage(tournamentName);
 				break;
 			case "/match":
 				console.log("match page created");
-				Router.closePongWebSocket(); //only closes the socket if it is open
-				Router.makePongWebSocket();
-				Router.closeMatchWebSocket(); //only closes the socket if it is open
-				Router.makeMatchWebSocket();
+				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
+				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
+				window.app.match_socket = Router.closeWebSocket(window.app.match_socket);
+				window.app.match_socket = Router.makeWebSocket(window.app.match_socket, "/game/matchmaking/");
 				pageElement = document.createElement("match-page");
 				break;
 			case "/pong": // needed??!!!
@@ -426,19 +307,15 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (
-			!route.startsWith("/tournament") &&
-			!route.startsWith("/match") &&
-			!route.startsWith("/pong")
-		) {
+		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) {
 			// pong needed??!!!
-			Router.closeWebSocket(); // checks if the socket is open before closing
+			window.app.socket = Router.closeWebSocket(window.app.socket); // checks if the socket is open before closing
 		}
 		if (route !== "/tournament-lobby" && route !== "/match") {
-			Router.closePongWebSocket();
+			window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
 		}
 		if (route !== "/match") {
-			Router.closeMatchWebSocket();
+			window.app.match_socket = Router.closeWebSocket(window.app.match_socket);
 		}
 
 		// adds the route to the history, so the back/forward buttons work
@@ -466,13 +343,6 @@ const Router = {
 		event.preventDefault();
 		Router.go(event.state.route, false);
 	},
-
-	// !!! when the socket closes normally, you also get sent to the home page
-	/** You get sent back to the home poge in case the Socket disconnects unexpectedly */
-	/* handleSocketUnexpectedDisconnect(event) {
-		console.log("socket unexpectdedly disconnected");
-		Router.go("/");
-	} */
 };
 
 export default Router;

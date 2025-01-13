@@ -19,13 +19,19 @@ async def tournament_loop(room: TournamentRoom, queue):
     channel_group = get_room_group(room.name)
     players = room.players
 
-    while len(players) > 1:
-        matches = await create_tournament_bracket(channel_group, players, room)
+    player_num = len(players)
+    while player_num > 1:
+        matches, odd_one = await create_tournament_bracket(channel_group, players, room)
         await send_tournament_bracket(channel_group, matches)
 
         winners = set()
+        disconnectors = []
         msg_count = 0
-        while msg_count != len(players):
+        if odd_one:
+            winners.add(odd_one)
+            msg_count = 1
+
+        while msg_count != player_num:
             message = await queue.get()
             if message.get("type") == T_MATCH_RESULT:
                 msg_count += 1
@@ -43,11 +49,18 @@ async def tournament_loop(room: TournamentRoom, queue):
             elif message.get("type") == T_DC_IN_GAME:
                 msg_count += 1
 
-            elif message.get("type") == T_DC_OUT_GAME: # finished his game and dc while waiting
-                id = message.get("id")
-                winners = {player for player in winners if player.id != id}
-            queue.task_done() # NOTE: necessary in our case?
+            elif message.get("type") == T_DC_OUT_GAME: # finished their game and dc while waiting
+                disconnectors.append(message.get("id"))
+        
+        
+        for disconnector_id in disconnectors:
+            for winner in winners:
+                if winner.id == disconnector_id:
+                    winners.remove(winner)
+                    break
+            
         players = winners
+        player_num = len(players)
 
     if players:
         winner = players.pop()
@@ -80,16 +93,17 @@ def make_random_pairs(players) -> List[tuple]:
         return [], None
 
     random.shuffle(players)
-    if length % 2 != 0:
-        odd_one = players.pop()
     odd_one = None
+    if length % 2 != 0:
+        odd_one = players[-1]
+        length -= 1
     return [tuple(players[i:i+2]) for i in range(0, length, 2)], odd_one
 
 
 async def create_tournament_bracket(channel_group, players, room):
     pairs, odd_one = make_random_pairs(players)
     if odd_one:
-        await send_free_win(channel_group, odd_one.id)
+        await send_free_win(channel_group, odd_one.name)
 
     matches = [
             {
@@ -102,7 +116,8 @@ async def create_tournament_bracket(channel_group, players, room):
             }
             for pair in pairs
         ]
-    return matches
+    print(json.dumps(matches, indent=4))
+    return matches, odd_one
 
 async def send_tournament_bracket(group_name, matches):
     await channel_layer.group_send(
@@ -122,15 +137,15 @@ async def send_tournament_end(group_name, winner):
         })
 
 
-async def send_free_win(group_name, user_id):
+async def send_free_win(group_name, name):
     """
-    Sends a free win message to a user if player count is odd due to disconnections
-    """
+    Sends a free win message to a user if player count is odd due to disconnections outside of a running game
+    """ 
     await channel_layer.group_send(
         group_name,
         {
             "type": T_FREE_WIN,
-            "winner_id": user_id
+            "displayname": name
         })
 
 
