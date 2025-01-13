@@ -133,7 +133,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
         async with self.update_lock:
             available_rooms = cache.get(AVA_ROOMS, {})
-            if self.current_room is not None: # SHOULD NEVER HAPPEN
+            if self.current_room is not None:
                 await self.send_error(Errors.ALREADY_IN_ROOM)
                 return
             
@@ -141,7 +141,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.send_error(Errors.ROOM_DOES_NOT_EXIST)
                 return
             
-            room = await self.add_player_to_room(room_name, available_rooms)
+            await self.add_player_to_room(room_name, available_rooms)
 
        
     async def leave_room(self):
@@ -184,7 +184,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.group_send_Room(T_PLAYER_LEFT_ROOM, room)
         self.current_room = None
 
-        if self.queue: # user is in ongoing tournament
+        if self.queue:
             await self.leave_ongoing_tournament()
             
     async def leave_ongoing_tournament(self):
@@ -337,10 +337,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_ERROR,
             "error": error.value,
         }))
-        print({
-            "type": T_ERROR,
-            "error": error.value,
-        })
 
 
     # Helper----------------------------------------------------------------
@@ -353,14 +349,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             room.add_player(self.user)
             self.current_room = room.name
-            self.group_switch(AVA_ROOMS, get_room_group(room.name))
         except AlreadyInRoom as e:
-            await self.send_error(Errors.ALREADY_IN_ROOM) # NOTE: u cant be in 2 rooms with 1 browser, but with 2 browsers possible
+            await self.send_error(Errors.ALREADY_IN_ROOM)
             return
         
         # CHANNELS: Add user to the room group
-        await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
-        await self.group_add(get_room_group(room.name))
+        await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # NOTE: send all in group the msg before adding the user to group
+        await self.group_switch(AVA_ROOMS, get_room_group(room.name))
         await self.send_success(room.name)
         
         if room.is_full():
@@ -371,21 +366,16 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         else:
             update_or_add_room_to_cache(room.to_dict(), AVA_ROOMS, available_rooms)
             await self.group_send_AvailableTournaments(T_ROOM_SIZE_UPDATE, room)
-            
-            await asyncio.sleep(1) # NOTE: frontend hasnt loaded from JoinTournamentPage to TournamentLobbyPage
         return room
 
     def start_tournament(self, room: TournamentRoom):
-        LobbiesConsumer.room_queues[room.name] = asyncio.Queue() # or a queue for each player?
+        LobbiesConsumer.room_queues[room.name] = asyncio.Queue()
         task = asyncio.create_task(tournament_loop(room, LobbiesConsumer.room_queues[room.name]))
         task.add_done_callback(lambda t: self.cleanup_tournament_task(room.name))
 
     def cleanup_tournament_task(self, room_name):
         queue = LobbiesConsumer.room_queues.pop(room_name, None)
-        # if queue: #just a debug block, delete later
-        #     print("Queue still exists")
-        # else:
-        #     print("Queue deleted")
+        
 
     async def group_remove(self, group_name: str):
         """

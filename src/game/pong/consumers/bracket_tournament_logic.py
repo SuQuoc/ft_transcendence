@@ -10,7 +10,6 @@ from channels.layers import get_channel_layer
 
 channel_layer = get_channel_layer()
 
-#asyncio.create_task()
 async def tournament_loop(room: TournamentRoom, queue):
     """
     Starts the tournament logic in a bracket style
@@ -116,7 +115,6 @@ async def create_tournament_bracket(channel_group, players, room):
             }
             for pair in pairs
         ]
-    print(json.dumps(matches, indent=4))
     return matches, odd_one
 
 async def send_tournament_bracket(group_name, matches):
