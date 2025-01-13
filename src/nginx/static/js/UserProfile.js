@@ -90,7 +90,7 @@ export class UserProfile extends ComponentBaseClass {
 					</div>
 				</form>
 				<hr>
-				<form id="passwordForm">
+				<div id="passwordForm">
 					<div class="mb-3 input-group" id="oldPasswordContainer">
 						<label for="oldPassword" class="form-label">Old Password</label>
 						<div class="input-group">
@@ -118,14 +118,19 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
 						<div class="input-group">
 							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-							<span class="input-group-text" id="requestNewEmailOTP">Request new OTP</span>
+							<span class="input-group-text" id="requestNewEmailOTP">New OTP</span>
 						</div>
 					</div>
-					<button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
-					<div class="spinner-border text-light" role="status" id="changePasswordSpinner">
-						<span class="visually-hidden">Loading...</span>
+				</div>
+				<div id="changePasswordOTPSection" class="d-none mb-3">
+					<label for="changePasswordOTP" class="form-label">Enter OTP</label>
+					<div class="input-group">
+						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9]{16}">
+						<span class="input-group-text" id="changePasswordRequestOTP">New OTP</span>
 					</div>
-				</form>
+					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
+				</div>
+				<button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
 				<hr>
 				<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
 			</div>
@@ -219,6 +224,15 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("saveNewEmailButton")
 			.addEventListener("click", this.emailChangeWithOTP.bind(this));
+		this.shadowRoot
+			.getElementById("changePasswordOTP")
+			.addEventListener("input", this.validatePasswordOTP.bind(this));
+		this.shadowRoot
+			.getElementById("changePasswordOTPCancel")
+			.addEventListener("click", this.cancelChangePasswordOTP.bind(this));
+		this.shadowRoot
+			.getElementById("changePasswordRequestOTP")
+			.addEventListener("click", this.changePasswordGetNewOTP.bind(this));
 	}
 
 	emailChange() {
@@ -312,7 +326,8 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	emailChangeWithOTP() {
+	emailChangeWithOTP(event) {
+		event.preventDefault();
 		const email = this.shadowRoot.getElementById("email");
 		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
 		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
@@ -322,6 +337,7 @@ export class UserProfile extends ComponentBaseClass {
 				body: JSON.stringify({ new_username: email.value, otp_old_email: oldEmailOTP.value, otp_new_email: newEmailOTP.value }),
 			});
 			window.app.userData.email = email.value;
+			this.emailCancelChange();
 		}
 	}
 
@@ -649,18 +665,77 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	// Update the changePassword method to show/hide the spinner and disable/enable the button
+	cancelChangePasswordOTP() {
+		const passwordSection = this.shadowRoot.getElementById("passwordForm");
+		const otpSection = this.shadowRoot.getElementById("changePasswordOTPSection");
+		const oldPassword = this.shadowRoot.getElementById("oldPassword");
+		const newPassword = this.shadowRoot.getElementById("newPassword");
+		const confirmPassword = this.shadowRoot.getElementById("confirmPassword");
+		const otp = this.shadowRoot.getElementById("changePasswordOTP");
+
+		oldPassword.value = "";
+		newPassword.value = "";
+		confirmPassword.value = "";
+		otp.value = "";
+		oldPassword.removeAttribute("disabled");
+		newPassword.removeAttribute("disabled");
+		confirmPassword.removeAttribute("disabled");
+		passwordSection.classList.remove("d-none");
+		otpSection.classList.add("d-none");
+		otp.focus();
+	}
+
+	validatePasswordOTP() {
+		const newPasswordOTP = this.shadowRoot.getElementById("changePasswordOTP");
+		const changePasswordButton = this.shadowRoot.getElementById("changePassword");
+		const pattern = /^[0-9]{16}$/;
+		if (pattern.test(newPasswordOTP.value)) {
+			changePasswordButton.removeAttribute("disabled");
+		} else {
+			changePasswordButton.setAttribute("disabled", "");
+		}
+	}
+
+	changePasswordGetNewOTP() {
+		const newOTPButton = this.shadowRoot.getElementById("changePasswordRequestOTP");
+		if (newOTPButton.hasAttribute("disabled")) {
+			return;
+		}
+		const oldPassword = this.shadowRoot.getElementById("oldPassword").value;
+		const newPassword = this.shadowRoot.getElementById("newPassword").value;
+		this.apiFetch("/registration/change_password", {
+			method: "POST",
+			body: JSON.stringify({
+				current_password: oldPassword,
+				new_password: newPassword,
+			}),
+		});
+		newOTPButton.setAttribute("disabled", "");
+		let timer = 60;
+		newOTPButton.textContent = `${timer}s`;
+		if (this.interval)
+			clearInterval(this.interval);
+		this.interval = setInterval(() => {
+			newOTPButton.textContent = `${timer}s`;
+			if (--timer < 0) {
+				clearInterval(this.interval);
+				newOTPButton.textContent = "New OTP";
+				newOTPButton.removeAttribute("disabled");
+			}
+		}, 1000);
+		this.shadowRoot.getElementById("newPasswordOTP").focus();
+	}
+
 	async changePassword() {
 		const changeButton = this.shadowRoot.getElementById("changePassword");
-		const changeSpinner = this.shadowRoot.getElementById(
-			"changePasswordSpinner",
-		);
 		const changePasswordWarning = this.shadowRoot.getElementById(
 			"changePasswordWarning",
 		);
+		const otpSection = this.shadowRoot.getElementById("changePasswordOTPSection");
+		const passwordSection = this.shadowRoot.getElementById("passwordForm");
 		changeButton.disabled = true;
-		changeSpinner.style.display = "inline-block";
 		changePasswordWarning.style.display = "none";
+		changePasswordWarning.textContent = "";
 
 		const oldPassword = this.shadowRoot.getElementById("oldPassword").value;
 		const newPassword = this.shadowRoot.getElementById("newPassword").value;
@@ -670,25 +745,53 @@ export class UserProfile extends ComponentBaseClass {
 			return;
 		}
 
-		try {
-			await this.apiFetch("/registration/change_password", {
-				method: "POST",
-				body: JSON.stringify({
-					current_password: oldPassword,
-					new_password: newPassword,
-				}),
-			});
-			this.shadowRoot.getElementById("oldPassword").value = "";
-			this.shadowRoot.getElementById("newPassword").value = "";
-			this.shadowRoot.getElementById("confirmPassword").value = "";
-			console.log("Changed password");
-		} catch (error) {
-			changePasswordWarning.textContent = error;
-			changePasswordWarning.style.display = "block";
+		if (otpSection.classList.contains("d-none")) {
+			try {
+				await this.apiFetch("/registration/change_password", {
+					method: "POST",
+					body: JSON.stringify({
+						current_password: oldPassword,
+						new_password: newPassword,
+					}),
+				});
+				this.shadowRoot.getElementById("oldPassword").setAttribute("disabled", "");
+				this.shadowRoot.getElementById("newPassword").setAttribute("disabled", "");
+				this.shadowRoot.getElementById("confirmPassword").setAttribute("disabled", "");
+				passwordSection.classList.add("d-none");
+				otpSection.classList.remove("d-none");
+				this.changePasswordGetNewOTP();
+			} catch (error) {
+				changePasswordWarning.textContent = error;
+				changePasswordWarning.style.display = "block";
+			}
+		} else {
+			const otp = this.shadowRoot.getElementById("changePasswordOTP");
+			otp.classList.remove("warning");
+			if (!otp.value || otp.value.length !== 16) {
+				otp.classList.add("warning");
+				return;
+			}
+			try {
+				await this.apiFetch("/registration/change_password", {
+					method: "POST",
+					body: JSON.stringify({
+						current_password: oldPassword,
+						new_password: newPassword,
+						otp: otp.value,
+					}),
+				});
+				this.shadowRoot.getElementById("oldPassword").value = "";
+				this.shadowRoot.getElementById("newPassword").value = "";
+				this.shadowRoot.getElementById("confirmPassword").value = "";
+				this.shadowRoot.getElementById("changePasswordOTP").value = "";
+				otp.value = "";
+				otpSection.classList.add("d-none");
+				passwordSection.classList.remove("d-none");
+			} catch (error) {
+				changePasswordWarning.textContent = error;
+				changePasswordWarning.style.display = "block";
+			}
 		}
-
-		changeButton.disabled = false;
-		changeSpinner.style.display = "none";
 	}
 }
 

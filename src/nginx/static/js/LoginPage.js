@@ -141,6 +141,7 @@ export class LoginPage extends ComponentBaseClass {
 		const loginError = this.shadowRoot.getElementById("errorMessage");
 		loginButton.style.display = "none";
 		loginSpinner.style.display = "inline-block";
+		loginError.textContent = "";
 
 		const email = this.shadowRoot.getElementById("loginEmail").value;
 		const password = this.shadowRoot.getElementById("loginPassword").value;
