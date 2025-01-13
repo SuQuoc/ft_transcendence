@@ -111,7 +111,6 @@ export class UserProfile extends ComponentBaseClass {
 							<input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
 							<span class="input-group-text" id="confirmPasswordToggle">Show</span>
 						</div>
-						<div class="warning-message" id="passwordWarning">Passwords do not match</div>
 						<div class="warning-message" id="changePasswordWarning">Error changing password</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
@@ -165,6 +164,9 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("changePassword")
 			.addEventListener("click", this.changePassword.bind(this));
+		this.shadowRoot
+			.getElementById("oldPassword")
+			.addEventListener("input", this.validatePasswords.bind(this));
 		this.shadowRoot
 			.getElementById("newPassword")
 			.addEventListener("input", this.validatePasswords.bind(this));
@@ -641,12 +643,16 @@ export class UserProfile extends ComponentBaseClass {
 	}
 
 	validatePasswords() {
+		const passwordWarning = this.shadowRoot.getElementById("changePasswordWarning");
+		passwordWarning.style.display = "none";
 		const newPassword = this.shadowRoot.getElementById("newPassword").value;
 		const confirmPassword =
 			this.shadowRoot.getElementById("confirmPassword").value;
+		if (newPassword === "" && confirmPassword === "") {
+			return;
+		}
 		const changePasswordButton =
 			this.shadowRoot.getElementById("changePassword");
-		const passwordWarning = this.shadowRoot.getElementById("passwordWarning");
 
 		if (newPassword !== confirmPassword) {
 			this.shadowRoot.getElementById("newPassword").classList.add("warning");
@@ -654,13 +660,13 @@ export class UserProfile extends ComponentBaseClass {
 				.getElementById("confirmPassword")
 				.classList.add("warning");
 			passwordWarning.style.display = "block";
+			passwordWarning.textContent = "Passwords do not match";
 			changePasswordButton.disabled = true;
 		} else {
 			this.shadowRoot.getElementById("newPassword").classList.remove("warning");
 			this.shadowRoot
 				.getElementById("confirmPassword")
 				.classList.remove("warning");
-			passwordWarning.style.display = "none";
 			changePasswordButton.disabled = false;
 		}
 	}
