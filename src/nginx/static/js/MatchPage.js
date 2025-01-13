@@ -24,8 +24,8 @@ export class MatchPage extends ComponentBaseClass {
 		
 		// add event listeners
 		this.canvas.addEventListener("gameend", this.handleGameEnd_var);
-		// protection if too fast ??!!
-		window.app.match_socket.addEventListener("message", this.handleReceivedMessage.bind(this));
+		if (window.app.match_socket)
+			window.app.match_socket.addEventListener("message", this.handleReceivedMessage.bind(this));
 	}
 
 	disconnectedCallback() {
@@ -36,7 +36,8 @@ export class MatchPage extends ComponentBaseClass {
 
 		// remove event listeners
 		this.canvas.removeEventListener("gameend", this.handleGameEnd_var);
-		window.app.match_socket.removeEventListener("message", this.handleReceivedMessage_var);
+		if (window.app.match_socket)
+			window.app.match_socket.removeEventListener("message", this.handleReceivedMessage_var);
 	}
 
 
@@ -54,7 +55,7 @@ export class MatchPage extends ComponentBaseClass {
 		console.log("MatchPage: handleReceivedMessage: ", data);
 				
 		if (data.type === "match_found") {
-			// protection if too fast and or if socket open ??!!
+			if (window.app.pong_socket)
 			window.app.pong_socket.send(JSON.stringify({type: "connect_to_match", match_id: data.match_id}));
 		}
 		else if (data.type === "error") {

@@ -18,7 +18,6 @@ class Player {
 		this.ctx = ctx;
 		
 		this.score = 0;
-		//this.direction = "stop";
 	}
 
 	/** Draws the rectangle and sets the new y. Y is the height of the left upper corner of the rectangle.
@@ -45,17 +44,13 @@ class Player {
 	}
 
 	/** Moves the player up by the speed variable set in the constructor.*/
-	moveUp() { // can be optimized by only clearing the part that is needed !!! (tried it and it didn't seem to be better. maybe it can be though)
-		if (this.y - this.speed < 0) { // maybe protect against negative values!!??
+	moveUp() {
+		if (this.y - this.speed < 0) {
 			this.y = 0;
 			this.clear();
 			this.draw(this.y, this.fill_style);
 			return;
 		}
-		
-		/* this.y -= this.speed;
-		this.ctx.clearRect(this.x - 1, this.y + this.height - 1, this.width + 2, this.speed + 2);
-		this.ctx.fillRect(this.x, this.y, this.width, this.speed); */
 		this.clear();
 		this.draw(this.y - this.speed, this.fill_style);
 	}
@@ -63,41 +58,18 @@ class Player {
 	/** Moves the player down by the speed variable set in the constructor.
 	 * @param {number} canvas_height - The height of the **unscaled** canvas.
 	*/
-	moveDown(canvas_height) { // can be optimized by only clearing the part that is needed !!!
+	moveDown(canvas_height) {
 		canvas_height -= this.height; // because the player is drawn from the top left corner
 
-		if (this.y + this.speed > canvas_height) { // maybe protect against negative values!!??
+		if (this.y + this.speed > canvas_height) {
 			this.y = canvas_height;
 			this.clear();
 			this.draw(this.y, this.fill_style);
 			return;
 		}
-		
 		this.clear();
 		this.draw(this.y + this.speed, this.fill_style);
 	}
-
-	/** Moves the player up or down depending on their direction value
-	 * @param {number} canvas_height - The height of the **unscaled** canvas.
-	*/
-/* 	move(canvas_height) {
-		canvas_height -= this.height; // because the player is drawn from the top left corner
-		
-		if (this.direction === "up") {
-			if (this.y - this.speed < 0) { // maybe protect against negative values!!??
-				this.y = 0;
-				return;
-			}
-			this.y -= this.speed;
-		}
-		else if (this.direction === "down") {
-			if (this.y + this.speed > canvas_height) { // maybe protect against negative values!!??
-				this.y = canvas_height;
-				return;
-			}
-			this.y += this.speed;
-		}
-	} */
 }
 
 export { Player };

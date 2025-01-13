@@ -111,7 +111,7 @@ class Ball:
         offset = (self.pos.y + (self.size / 2)) - player.pos.y - (self.size / 2)
         normalized_offset = (offset - player_half) / player_half
 
-        # changing wether it adds or subtracts to the angle depending on which direction the ball comes from
+        # changing whether it adds or subtracts to the angle depending on which direction the ball comes from
         if self.vel.y < 0:
             normalized_offset *= -1
 
@@ -349,20 +349,17 @@ class Pong:
 
             if self.player_scored():
                 self.ball.reset()
-                ### maybe put this in a function and or make it more variable ###
                 wall = self.get_wall(self.ball.vel)
                 self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
-                ################
                 return
             
         # move ball
         self.ball.pos.x = next_pos.x
         self.ball.pos.y = next_pos.y
-        #print(f"calculation time: {time.time() - start_time}")
 
 
     async def start_game_loop(self):
-        import time     #!!
+        import time     #!! why is this here and not at the start of the file??
         import asyncio  #!!
         
         if not self.is_full():
@@ -371,7 +368,7 @@ class Pong:
         wall = self.get_wall(self.ball.vel)
         self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
         
-        self.running = True # NOTE: check if needed at the end of project
+        self.running = True # NOTE: check if needed at the end of project !!
         tick_duration = 0.03
         start_time = time.time()
     
@@ -383,7 +380,6 @@ class Pong:
         await self.send_initial_state(self.get_game_state())
         # game loop
         while True:
-            #print(f"one tick: {time.time() - start_time}")
             start_time = time.time()
             self.update_game_state()
 

@@ -2,6 +2,8 @@ import random # for old version of pong # maybe needed for ball in the new versi
 import json
 import time # temporary !!
 
+# is this file needed ??!! (i think the stuff in here is old and was copied to pong.py at one point)
+
 class Vector:
     def __init__(self, x, y):
         self.x = x

@@ -22,7 +22,6 @@ export class SignupPage extends ComponentBaseClass {
 		this.shadowRoot.getElementById('signupEmail').focus();
 	}
 
-	// !!!! id of button requestOTP should be signupRequestOTP
 	getElementHTML() {
 		const template = document.createElement('template');
 		template.innerHTML = `
@@ -110,7 +109,7 @@ export class SignupPage extends ComponentBaseClass {
 				</form>
 			</div>
         `;
-		// what are the three error divs at the bottom for? are they still in use??!!
+		// what are the three error divs at the bottom for? are they still in use??!! [ask Michi]
 		return template;
 	}
 

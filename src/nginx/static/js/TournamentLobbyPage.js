@@ -61,7 +61,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	sendMatchId(match_id) {
 		if (!window.app.pong_socket) {
 			console.error("pong socket is not open");
-			window.app.router.go("/"); // goes to the home page !!??
+			window.app.router.go("/"); // goes to the home page !!?? [ask Everyone]
 		}
 
 		if (window.app.pong_socket.readyState === WebSocket.OPEN) {
@@ -97,7 +97,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
-	addPlayerElement(player_name) { // needs the avatar too !!!
+	addPlayerElement(player_name) { // needs the avatar too !!! 
 		let element = new TournamentLobbyPlayerElement();
 
 		element.setAttribute('name', player_name);

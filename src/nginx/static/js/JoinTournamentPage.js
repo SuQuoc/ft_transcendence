@@ -213,7 +213,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "create_room",
 											"room_name": tournament_name,
-											"creator_name": window.app.userData.username, // NOTE: this is not used by backend
+											"creator_name": window.app.userData.username, // NOTE: this is not used by backend !! [ask Quocsu]
 											"points_to_win": points_to_win,
 											"max_player_num": number_of_players}));
 		
@@ -225,7 +225,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		if (event.target.tagName !== "BUTTON")
 			return;
 
-		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML; // can be simplified because i am saving the tournament name in the parent div as well as a name !!
+		let tournament_name = event.target.parentElement.querySelector("[name='join_name']").innerHTML;
 		
 		window.app.socket.send(JSON.stringify({"type": "join_room", "room_name": tournament_name}));
 	};
@@ -266,7 +266,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 		else if (data.type === "success") {
 			// going to the tournament lobby
-			window.app.router.go("/tournament-lobby", false, data.room_name); // maybe i need to save the room name locally
+			window.app.router.go("/tournament-lobby", false, data.room_name);
 		}
 		else if (data.type === "tournament_list") {
 			console.log("tournament_list");
@@ -283,7 +283,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			window.app.socket_event_queue.add(event);
 		}
 		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
-			// ignoring these types for now !!!
+			// ignoring these types for now !!! [ask Quocsu] if this is necessary and if we need to ignore more (we should also ignore some types in the tournament lobby)
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);

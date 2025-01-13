@@ -87,7 +87,7 @@ export class FriendList extends ComponentBaseClass {
 			}
 			button.addEventListener('click', (event) => {
 				const clickedButton = event.target;
-				buttons.forEach(btn => btn.classList.remove('active')); // if you press enter when you type a user that doesn't exist in the search bar, you get the error: "Error fetching search results: this.results.forEach is not a function" !!!!
+				buttons.forEach(btn => btn.classList.remove('active'));
 				clickedButton.classList.add('active');
 				clickedButton.setAttribute('aria-current', 'page');
 
