@@ -10,8 +10,6 @@ from .bracket_tournament_logic import tournament_loop
 from pong.um_request import get_displayname
 
 
-# PROVING: global_connection_list = []
-
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
     room_queues = {}
@@ -35,9 +33,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
     
     async def connect(self):
-        # PROVING: connection_id = self.channel_name[-4:]
-        # PROVING: global_connection_list.append(connection_id)
-        # PROVING: print(f"global_list: {global_connection_list}")
         try:
             await self.set_instance_values()
         except Exception as e:
@@ -84,10 +79,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             elif type == T_GET_TOURNAMENT_LIST:
                 await self.get_tournament_list()
 
-            else:
-                print(f"Unknown message type: {type}") # NOTE: what to do?
         except Exception as e:
-            print(f"Exception: {e}") # NOTE: what to do?
+            print(f"Exception: {e}") # NOTE: what to do? # should we log the error differently?
 
 
     ### Client MESSAGES ###
