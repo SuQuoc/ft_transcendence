@@ -178,7 +178,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			this.canvas.writeTextForeground(data.winner + " won!");
 			this.setGoBackTimeout();
 		}
-		// de we need to ignore the room_size_update type or can it be fixed in backend??!!
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
 		}

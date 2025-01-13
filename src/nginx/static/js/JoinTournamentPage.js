@@ -283,7 +283,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			window.app.socket_event_queue.add(event);
 		}
 		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
-			// ignoring these types for now !!! [ask Quocsu] if this is necessary and if we need to ignore more (should we also ignore some types in the tournament lobby?)
+			// ignoring these types for now !!! [ask Quocsu] if this is necessary and if we need to ignore more
 			// do we need to ignore these types??!!
 			console.log("ignoring type: ", data.type);
 		}
