@@ -52,6 +52,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
+        if self.game:
+            self.game.player_gives_up(self.user_id)
         await super().disconnect(close_code)
 
 
@@ -103,14 +105,14 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             # maybe except if 1 client joins and disconnects before the 2nd even joins
 
 
-    async def reconnect_to_match(self, data):
+    """ async def reconnect_to_match(self, data):
         self.match_id = data.get('match_id')
         if not await self.valid_match_id():
             await self.send_error()
             return
 
         self.game_group = f'game_{self.match_id}'
-        await self.channel_layer.group_add(self.game_group, self.channel_name)
+        await self.channel_layer.group_add(self.game_group, self.channel_name) """
 
 
     async def valid_match_id(self):

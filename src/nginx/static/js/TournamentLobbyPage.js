@@ -126,7 +126,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.timeout_id = setTimeout(() => {
 			this.timeout_id = -1;
 			this.handleLeaveLobby();
-		}, 30000);
+		}, 60000);
 	}
 
 
@@ -178,12 +178,32 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			this.canvas.writeTextForeground(data.winner + " won!");
 			this.setGoBackTimeout();
 		}
+		else if (data.type === "free_win") {
+			console.log("free win");
+			if (data.displayname === window.app.userData.username) {
+				this.canvas.clearTextForeground();
+				this.canvas.writeTextForeground("Free win!");
+			}
+			let player_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${data.displayname}"]`);
+			player_element.incrementWins();
+		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
 		}
 		else {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);
 		}
+	}
+
+	displayMatchResult(winner, loser) {
+		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
+		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
+		if (winner_element) {
+			winner_element.incrementWins();	
+		} else {console.error("Error: displayMatchResult: winner element not found");}
+		if (loser_element) {
+			loser_element.greyOutPlayer();
+		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
 
