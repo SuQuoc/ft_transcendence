@@ -59,6 +59,57 @@
 			</form>
 		</div>
 	</main>
+
+
+
+	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
+		<!-- Login Page -->
+		 
+			<div class="p-3 rounded-3 bg-dark">
+				<form id="forgotPasswordForm" class="d-flex flex-column needs-validation gap-3">
+					<h3 class="text-center text-white mb-0">Forgot Password</h3>
+
+					<div>
+						<label for="resetEmail" class="form-label text-white-50">Email address</label>
+						<input name="email" id="resetEmail" type="email" class="form-control mb-1" placeholder="name@example.com" aria-describedby="resetErrorMessage" aria-required="true" autocomplete="email" required>
+						<div class="invalid-feedback mb-1">Please enter your email</div>
+					</div>
+					
+					<div id="resetOtpSection" style="display: none;">
+						<label for="resetOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<div class="input-group mb-1">
+							<input name="otp" id="resetOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
+							<button class="btn btn-custom" type="button" id="resetRequestOTP" disabled>Send OTP</button>
+							<div class="invalid-feedback mb-1">Please enter a valid OTP code</div>
+						</div>
+						<label for="resetNewPassword1" class="form-label text-white-50">New Password</label>
+						<input name="password1" id="resetNewPassword1" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
+						<div class="invalid-feedback mb-1">Please enter a valid password</div>
+						<label for="resetNewPassword2" class="form-label text-white-50">Confirm New Password</label>
+						<input name="password2" id="resetNewPassword2" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
+						<div class="invalid-feedback mb-1">Please enter a valid password</div>
+						<span id="resetErrorMessage" class="text-danger mt-3"></span>
+					</div>
+
+
+					<div>
+						<p class="text-white-50 small mb-1">
+							Back to <a href="/login" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
+							or <a href="/signup" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
+						</p>
+						<button type="submit" class="btn btn-custom w-100" form="forgotPasswordForm" id="resetSubmitButton" disabled>Reset Password</button>
+						<div class="spinner-border text-light" role="status" id="resetSpinner" style="display: none;">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</form>
+			</div>
+
+	</main>
+
+
+
+
 </body>
 
 </html>

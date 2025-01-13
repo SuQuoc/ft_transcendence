@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.13.1-slim-bookworm
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
@@ -18,5 +18,5 @@ COPY ./entrypoint.sh ./entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# TODO: RUN THIS IN PRODUCTION --> CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# FOR PROD --> CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]

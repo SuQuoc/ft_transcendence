@@ -1,5 +1,6 @@
 import Router from './router.js';
 import { EventQueue } from './js/eventQueueClass.js';
+import { OnlineWebSocketClass } from './js/OnlineWebSocketClass.js';
 
 // global
 const storedUserData = JSON.parse(localStorage.getItem('userData')) || {
@@ -13,6 +14,7 @@ window.app = {
 	socket: null,
 	pong_socket: null,
 	match_socket: null,
+	online_socket: new OnlineWebSocketClass(),
 	userData: storedUserData,
 	socket_event_queue: new EventQueue()
 };
@@ -52,8 +54,30 @@ window.addEventListener("DOMContentLoaded", async () => {
 		history.replaceState({route: location.pathname}, "", location.pathname);
 
 	// adding event handlers to add and remove the userprofile sidemenu
-	document.getElementById("userProfileButton").addEventListener('click', handleAddUserProfile);
-	document.getElementById("userProfileClose").addEventListener('click', handleDeleteUserProfile);
+	const userProfileButton = document.getElementById("userProfileButton");
+	const userProfileClose = document.getElementById("userProfileClose");
+	const userProfile = document.getElementById("userProfile");
+	if (!userProfileButton || !userProfileClose || !userProfile) // protect against null values (happens if we show error page)
+		return;
+
+	userProfileButton.addEventListener('click', handleAddUserProfile);
+	userProfileClose.addEventListener('click', handleDeleteUserProfile);
+	userProfile.addEventListener('hidden.bs.offcanvas', handleDeleteUserProfile);
+	userProfileButton.addEventListener('keydown', (e) => {
+		if (e.key === "Enter" || e.key === " ") {
+			let bsOffcanvas = bootstrap.Offcanvas.getInstance(userProfile);
+			if (!bsOffcanvas) {
+				bsOffcanvas = new bootstrap.Offcanvas(userProfile);
+			}
+			if (userProfile.classList.contains('show')) {
+				bsOffcanvas.hide();
+				handleDeleteUserProfile();
+			} else {
+				handleAddUserProfile();
+				bsOffcanvas.show();
+			}
+		}
+	});
 
 	// adds event listeners for routing
 	await app.router.init();
@@ -62,11 +86,12 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 /** Adding the user profile when the user profile button in the navbar is clicked */
 function handleAddUserProfile() {
-	const userProfleContainer = document.getElementById("userProfileContainer");
-	userProfleContainer.appendChild(document.createElement("user-profile"));
+	const userProfileContainer = document.getElementById("userProfileContainer");
+	userProfileContainer.appendChild(document.createElement("user-profile"));
 };
 /** Deleting the user profile when the user profile is closed */
 function handleDeleteUserProfile() {
-	const userProfleContainer = document.getElementById("userProfileContainer");
-	userProfleContainer.innerHTML = "";
+	const userProfileContainer = document.getElementById("userProfileContainer");
+	if (userProfileContainer.innerHTML != "")
+		userProfileContainer.innerHTML = "";
 };

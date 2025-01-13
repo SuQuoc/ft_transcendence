@@ -6,7 +6,7 @@ from .models import CustomUser
 
 
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ['user_id', 'displayname', 'online', 'image', 'created_at', 'updated_at']
+    list_display = ['user_id', 'displayname', 'image', 'created_at', 'updated_at']
     search_fields = ('displayname',)
 
 

@@ -4,10 +4,10 @@ class Background {
 	 * @param {number} canvas_height - The height of the **unscaled** canvas.
 	 * @param {number} y_score - Where the score is on the y axis.
 	 * @param {string} color - The color of the score and dashed line.
-	 * @param {string} font - The size of the font and font of the score.
 	 * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
 	 */
-	constructor(canvas_width, canvas_height, y_score, color, font, ctx) {
+	constructor(canvas_width, canvas_height, y_score, color, ctx) {
+		this.canvas_width = canvas_width;
 		this.canvas_height = canvas_height;
 		this.canvas_middle = canvas_width / 2;
 		
@@ -17,8 +17,47 @@ class Background {
 		this.score.y = y_score;
 
 		this.color = color;
-		this.font = font;
 		this.ctx = ctx;
+
+		this.left_player_name = "";
+		this.right_player_name = "";
+	}
+
+	/** Setting the names of the players.
+	 * 
+	 * If you set them to "", then there will be no names. (It's also the initial value)
+	 */
+	setNames(left_player, right_player) {
+		this.left_player_name = left_player;
+		this.right_player_name = right_player;
+	}
+
+	/** Clears the old name and draws the new one. */
+	drawLeftName() {
+		// clearing the old name
+		this.ctx.clearRect(this.score.x_left - 200, this.canvas_height - 150, 400, 150);
+
+		this.ctx.fillStyle = this.color;
+		this.ctx.font = '25px Arial';
+		this.ctx.textAlign = "center"; // Center the text horizontally
+		this.ctx.fillText(this.left_player_name, this.score.x_left, this.canvas_height - 15);
+	}
+
+	/** Clears the old name and draws the new one. */
+	drawRightName() {
+		// clearing the old name
+		this.ctx.clearRect(this.score.x_right - 200, this.canvas_height - 150, 400, 150);
+
+		this.ctx.fillStyle = this.color;
+		this.ctx.font = '25px Arial';
+		this.ctx.textAlign = "center"; // Center the text horizontally
+		this.ctx.fillText(this.right_player_name, this.score.x_right, this.canvas_height - 15);
+	}
+
+	/** Clears the names of the players */
+	clearNames() {
+		this.ctx.clearRect(this.score.x_left - 200, this.canvas_height - 150, 400, 150);
+		this.ctx.clearRect(this.score.x_right - 200, this.canvas_height - 150, 400, 150);
 	}
 
 	/** Clears the old score and draws the new one.
@@ -29,7 +68,7 @@ class Background {
 		this.ctx.clearRect(this.score.x_left - 50, this.score.y - 50, 100, 50);
 
 		this.ctx.fillStyle = this.color;
-		this.ctx.font = this.font;
+		this.ctx.font = '50px Arial';
 		this.ctx.textAlign = "center"; // Center the text horizontally
 		this.ctx.fillText(score, this.score.x_left, this.score.y);
 	}
@@ -42,13 +81,15 @@ class Background {
 		this.ctx.clearRect(this.score.x_right - 50, this.score.y - 50, 100, 50);
 
 		this.ctx.fillStyle = this.color;
-		this.ctx.font = this.font;
+		this.ctx.font = '50px Arial';
 		this.ctx.textAlign = "center"; // Center the text horizontally
 		this.ctx.fillText(score, this.score.x_right, this.score.y);
 	}
 
-	/** Draws a dashed line in the middle. */
+	/** Clears and draws a dashed line in the middle */
 	drawMiddleLine() {
+		this.ctx.clearRect(this.canvas_middle - 5, 0, 10, this.canvas_height);
+
 		this.ctx.strokeStyle = this.color;
 		this.ctx.beginPath();
 		this.ctx.setLineDash([8, 8]);
@@ -62,9 +103,11 @@ class Background {
 	 * @param {string} right_score - The new score no the right.
 	 */
 	drawBackground(left_score, right_score) {
-		this.drawMiddleLine();
 		this.drawLeftScore(left_score);
 		this.drawRightScore(right_score);
+		this.drawLeftName("");
+		this.drawRightName("");
+		this.drawMiddleLine();
 	}
 }
 

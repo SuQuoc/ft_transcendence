@@ -39,9 +39,12 @@
 <body class="d-flex flex-column vh-100">
  
 	<!-- Main Page -->
-	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
+	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly">
 		<!-- main page content -->
-    <h1><!--# echo var="status" default="Error" -->: <!--# echo var="status_text" default="Something went wrong" --></h1>
+    <div class="d-flex flex-grow-1 align-items-center flex-column">
+      <h1 class="text-white"><!--# echo var="status" default="Error" -->: <!--# echo var="status_text" default="Something went wrong" --></h1>
+      <img src="./media/error_page_images/frustrated_player.webp" alt="frustrated pong player" class="w-50 mt-4"/>
+    </div>
 	</main>
 
 

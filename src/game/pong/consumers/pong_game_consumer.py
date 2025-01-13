@@ -9,6 +9,7 @@ from django.core.cache import cache
 from .Room import Player
 from typing import Dict
 from .utils import Type
+from pong.um_request import get_displayname
 
 class GameMode(Enum):
     NORMAL = 'normal'
@@ -51,6 +52,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
+        if self.game:
+            self.game.player_gives_up(self.user_id)
         await super().disconnect(close_code)
 
 
@@ -67,7 +70,7 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             await self.connect_to_match(text_data_json)
         else:
             return
-    
+        
 
     async def connect_to_match(self, data):
         self.match_id = data.get('match_id')
@@ -78,7 +81,8 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         
         print(f"Match config: {self.match_config}")
         self.game_mode = self.match_config.get('game_mode')
-    
+        self.displayname = get_name_from_match_config(self.match_config, self.user_id)
+
         self.game_group = f'game_{self.match_id}'
         await self.channel_layer.group_add(self.game_group, self.channel_name) # must be here since EACH consumer instance has unique channel_name, regardless if same client connects to N consumers
         
@@ -87,25 +91,28 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             ptw = self.match_config.get('points_to_win')
             if ptw is None:
                 ptw = 5
-            PongGameConsumer.all_games[self.match_id] = Pong(self.game_group, self.user_id, ptw)
+            PongGameConsumer.all_games[self.match_id] = Pong(self.game_group,
+                                                            self.user_id,
+                                                            self.displayname,
+                                                            ptw)
         else:
-            game.add_player(self.user_id)            
+            game.add_player(self.user_id, self.displayname)            
             if game.is_full():
                 game_task = asyncio.create_task(game.start_game_loop())
-                callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
+                # callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
                 # game_task.add_done_callback(lambda t: self.cleanup(callback_match_id)) cool but cant use an async function as callback
             # NOTE: in our case with only 2 players, this is almost always true,
             # maybe except if 1 client joins and disconnects before the 2nd even joins
 
 
-    async def reconnect_to_match(self, data):
+    """ async def reconnect_to_match(self, data):
         self.match_id = data.get('match_id')
         if not await self.valid_match_id():
             await self.send_error()
             return
 
         self.game_group = f'game_{self.match_id}'
-        await self.channel_layer.group_add(self.game_group, self.channel_name)
+        await self.channel_layer.group_add(self.game_group, self.channel_name) """
 
 
     async def valid_match_id(self):
@@ -178,11 +185,12 @@ class PongGameConsumer(AsyncWebsocketConsumer):
         # NOTE: if caller is task callback, 
         # no duplicate msg will be sent to tournament consumer,
         # but sending msg async not  
-        PongGameConsumer.all_games.pop(self.match_id, None) 
+        
         # removes key if it exists, or nothing if not, 
         # since N consumers try to do this
-        async with self.update_lock:
-            cache.delete(self.match_id)
+        if PongGameConsumer.all_games.pop(self.match_id, None): 
+            async with self.update_lock:
+                cache.delete(self.match_id)
         if self.game_mode == GameMode.TOURNAMENT.value:
             await self.forward_match_result(data)
         else:
@@ -203,3 +211,9 @@ class PongGameConsumer(AsyncWebsocketConsumer):
                 'loser_score': data['loser_score']
             }
         )
+
+
+def get_name_from_match_config(match_config, user_id):
+    for i in range(len(match_config['user_id_list'])):
+        if match_config['user_id_list'][i] == user_id:
+            return match_config['user_name_list'][i]

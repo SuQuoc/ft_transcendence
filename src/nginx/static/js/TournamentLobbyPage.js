@@ -7,6 +7,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		super();
 
 		this.tournament_name = tournament_name;
+		this.timeout_id = -1;
 
 		// Binds the method to this class instance so it can be used in the event listener
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
@@ -39,6 +40,9 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	disconnectedCallback() {
 		super.disconnectedCallback();
+
+		if (this.timeout_id > 0)
+			clearTimeout(this.timeout_id);
 
 		// removing event listeners
 		this.leave_button.removeEventListener("click", this.handleLeaveLobby);
@@ -82,13 +86,25 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		}
 	}
 
+	displayMatchResult(winner, loser) {
+		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
+		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
+		if (winner_element) {
+			winner_element.incrementWins();	
+		} else {console.error("Error: displayMatchResult: winner element not found");}
+		if (loser_element) {
+			loser_element.greyOutPlayer();
+		} else {console.error("Error: displayMatchResult: loser element not found");}
+	}
+
 	addPlayerElement(player_name) { // needs the avatar too !!!
 		let element = new TournamentLobbyPlayerElement();
 
 		element.setAttribute('name', player_name);
 		this.player_list.appendChild(element);
 		element.querySelector("[name='lobby_player_name']").innerText = player_name;
-
+		if (player_name === window.app.userData.username)
+			element.makeNameBold();
 		//TODO: change avatar
 	}
 
@@ -106,10 +122,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.current_player_num.innerText = new_player_num;
 	}
 
+	setGoBackTimeout() {
+		this.timeout_id = setTimeout(() => {
+			this.timeout_id = -1;
+			this.handleLeaveLobby();
+		}, 60000);
+	}
+
 
 	/// ----- Event Handlers ----- ///
 
-	handleLeaveLobby(event) {
+	handleLeaveLobby() {
 		window.app.socket.send(JSON.stringify({type: "leave_room"}));
 		window.app.router.go("/tournament", false); // isn't added to the history
 	}
@@ -131,26 +154,38 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			this.initLobby(data.room);
 		}
 		else if (data.type === "tournament_bracket") {
-			// TODO: write clean
 			let match_id = null;
+
 			for (let match of data.matches) {
-				console.log("match: ", match);
-				console.log("match.player1: ", match.player1);
-				console.log("match.player2: ", match.player2);
 				if (match.player1 === window.app.userData.username) {
 					match_id = match.match_id;
-					console.log("username: ", window.app.userData.username);
 					break;
 				}
 				else if (match.player2 === window.app.userData.username) {
 					match_id = match.match_id;
-					console.log("username: ", window.app.userData.username);
 					break;
 				}
 			}
-			console.log("match_id: ", match_id);
-			this.sendMatchId(match_id);
-			
+			if (match_id)
+				this.sendMatchId(match_id);
+		}
+		else if (data.type === "display_match_result") {
+			this.displayMatchResult(data.match_result.winner, data.match_result.loser);
+		}
+		else if (data.type === "tournament_end") {
+			console.log("tournament end");
+			this.canvas.clearTextForeground();
+			this.canvas.writeTextForeground(data.winner + " won!");
+			this.setGoBackTimeout();
+		}
+		else if (data.type === "free_win") {
+			console.log("free win");
+			if (data.displayname === window.app.userData.username) {
+				this.canvas.clearTextForeground();
+				this.canvas.writeTextForeground("Free win!");
+			}
+			let player_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${data.displayname}"]`);
+			player_element.incrementWins();
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
@@ -158,6 +193,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		else {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);
 		}
+	}
+
+	displayMatchResult(winner, loser) {
+		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
+		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
+		if (winner_element) {
+			winner_element.incrementWins();	
+		} else {console.error("Error: displayMatchResult: winner element not found");}
+		if (loser_element) {
+			loser_element.greyOutPlayer();
+		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
 
@@ -202,7 +248,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 					class="d-flex flex-column
 							align-self-start
 							overflow-auto
-							gap-3 row-gap-2
+							w-100 h-100 gap-3 row-gap-2
 						"
 				>
 					<!-- tournament-lobby-player-elements: -->

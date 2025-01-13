@@ -51,7 +51,7 @@ export class PongCanvasElement extends canvasBaseClass {
 		this.canvas.removeEventListener("touchend", this.handleDoubleTap_var);
 		this.canvas.removeEventListener("dblclick", this.handleDoubleClick_var);
 
-		clearInterval(this.interval_id);
+		clearTimeout(this.timeout_id);
 	}
 
 
@@ -70,7 +70,7 @@ export class PongCanvasElement extends canvasBaseClass {
 		let ball_size = 10;
 		let ball_speed = 8; // server is 8
 
-		this.interval_id =	null;
+		this.timeout_id =	null;
 		this.move_to = 	-1; // saves the y-coordinate the player should move to
 
 		this.player_left =	new Player(player_x,
@@ -144,7 +144,7 @@ export class PongCanvasElement extends canvasBaseClass {
 		}
 
 		// making a frame between the states sent by the server
-		setTimeout(() => {
+		this.timeout_id = setTimeout(() => {
 			let state = {
 				ball_pos_x : this.curr_state.ball_pos_x + (this.next_state.ball_pos_x - this.curr_state.ball_pos_x) / 2,
 				ball_pos_y : this.curr_state.ball_pos_y + (this.next_state.ball_pos_y - this.curr_state.ball_pos_y) / 2,
@@ -154,6 +154,7 @@ export class PongCanvasElement extends canvasBaseClass {
 			this.renderForeground(state);
 			this.curr_state = this.next_state;
 			this.next_state = this.sent_state;
+			this.timeout_id = null;
 		}, 15);
 	}
 
@@ -223,21 +224,23 @@ export class PongCanvasElement extends canvasBaseClass {
 			this.writeTextForeground(data.count);
 		}
 		else if (data.type === "initial_state") {
+			this.background.setNames(data.left_player, data.right_player);
 			this.clearTextForeground();
 			this.curr_state = data.game_state;
 			this.next_state = data.game_state;
 			await this.renderForeground(data.game_state);
 		}
 		else if (data.type === "game_end") {
-			console.log("game_end");
-			clearInterval(this.interval_id);
+			clearTimeout(this.timeout_id);
 			this.clearTextForeground();
 			this.writeTextForeground("You " + data.status + "!");
+			console.log("dispatching custom event gameend");
+			this.dispatchEvent(new CustomEvent("gameend", {bubbles: true})); // dispatching a custom event when the game is over so the page it's on can do something
 		}
 		else {
-			console.error("Unknown message type: ", data.type);
+			console.error("Unknown message type: ", data.type, ": ", data);
+
 		}
-			
 	}
 
 	// getElementHTML() is in the canvasBaseClass

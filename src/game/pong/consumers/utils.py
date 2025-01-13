@@ -32,6 +32,7 @@ T_SUCCESS = "success"
 T_ERROR = "error"
 
 T_MATCH_RESULT = "match_result"
+T_DISPLAY_MATCH_RESULT = "display_match_result"
 T_DC_IN_GAME = "dc_in_game"
 T_DC_OUT_GAME = "dc_out_game"
 
@@ -119,12 +120,13 @@ def del_room_from_cache(room_name, cache_name, cached_data: dict=None):
     cache.set(cache_name, cached_data)
 
 
-def create_match_config(user_id_list, game_mode, points_to_win=None):
+def create_match_config(user_id_list, user_name_list, game_mode, points_to_win=None):
     """
     Creates an entry in cache to check which client is allowed to connect to which game
     """
     match_data = {
         "user_id_list": user_id_list,
+        "user_name_list": user_name_list,
         "game_mode": game_mode
     }
 
