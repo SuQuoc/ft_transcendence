@@ -395,7 +395,7 @@ class Pong:
             if self.game_over():
                 self.set_result() # NOTE: must do this before saving to db and sending game end
                 break
-            await asyncio.sleep(tick_duration - (time.time() - start_time)) # NOTE: i think cuz of this there is still a possibility that both are disconnected when checking
+            await asyncio.sleep(tick_duration - (time.time() - start_time))
         
         if self.size > 0:
             # if both players disconnect from game, its not saved and no message is sent

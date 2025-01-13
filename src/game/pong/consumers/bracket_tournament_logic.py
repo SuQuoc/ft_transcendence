@@ -97,7 +97,6 @@ def make_random_pairs(players) -> List[tuple]:
     random.shuffle(players)
     odd_one = None
     if length % 2 != 0:
-        #odd_one = players.pop()
         odd_one = players[-1]
         length -= 1
     return [tuple(players[i:i+2]) for i in range(0, length, 2)], odd_one
