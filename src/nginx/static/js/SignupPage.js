@@ -238,7 +238,7 @@ export class SignupPage extends ComponentBaseClass {
 	async signup(event) {
 		event.preventDefault();
 		const signupButton = this.shadowRoot.getElementById("signupSubmitButton");
-		const signupError = this.shadowRoot.getElementById("signupError");
+		const signupError = this.shadowRoot.getElementById("signupErrorMessagePassword");
 		signupButton.setAttribute("disabled", "");
 		signupError.style.display = "none";
 
