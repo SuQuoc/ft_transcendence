@@ -7,8 +7,7 @@ from .utils import *
 from pong.forms import CreateTournamentForm
 import asyncio
 from .bracket_tournament_logic import tournament_loop
-from pong.um_request import get_displayname
-
+import httpx
 
 # Dependency to other Microservice
 async def get_profile(cookie_dict):
@@ -298,8 +297,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 {
                     "type": type,
                     "displayname": self.user.name,
+                    "image": self.user.image,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
         elif type == T_PLAYER_LEFT_ROOM:
@@ -309,7 +308,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     "type": type,
                     "displayname": self.user.name,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
 
@@ -371,10 +369,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_ERROR,
             "error": error.value,
         }))
-        print({
-            "type": T_ERROR,
-            "error": error.value,
-        })
 
 
     # Helper----------------------------------------------------------------
@@ -387,16 +381,16 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             room.add_player(self.user)
             self.current_room = room.name
-            self.group_switch(AVA_ROOMS, get_room_group(room.name))
         except AlreadyInRoom as e:
             await self.send_error(Errors.ALREADY_IN_ROOM) # NOTE: u cant be in 2 rooms with 1 browser, but with 2 browsers possible
             return
         except Exception as e:
-            print(f"Exception: {e}") # IF CACHE FAILS
+            print(f"Exception: {e}")
+            return
 
-         # CHANNELS: Add user to the room group
+        # CHANNELS: Add user to the room group
         await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
-        await self.group_add(get_room_group(room.name))
+        await self.group_switch(AVA_ROOMS, get_room_group(room.name))
         await self.send_success(room.name)
         
         if room.is_full():

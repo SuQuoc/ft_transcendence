@@ -138,7 +138,6 @@ class TournamentRoom:
             "name": self.name,
             "creator_name": self.creator.name,
             "players": [player.to_data_for_client() for player in self.players],
-            #"player_images": [player.image for player in self.players],
             "points_to_win": self.points_to_win,
             "max_player_num": self.max_player_num,
             "cur_player_num": self.cur_player_num,
