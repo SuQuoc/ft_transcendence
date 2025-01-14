@@ -64,6 +64,7 @@ services:
     networks:
       - network_registration
       - network_django
+      - network_redis_reg
     secrets:
       - public_key.pem
       - private_key.pem
@@ -73,5 +74,10 @@ services:
     image: "redis:alpine"
     expose:
       - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 4
     networks:
-      - network_registration
+      - network_redis_reg

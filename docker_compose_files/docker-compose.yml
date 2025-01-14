@@ -48,6 +48,8 @@ networks:
     driver: bridge
   network_registration:
     driver: bridge
+  network_redis_reg:
+    driver: bridge
   network_user_management:
     driver: bridge
   network_redis_um:
