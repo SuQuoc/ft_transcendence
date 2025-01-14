@@ -31,8 +31,8 @@ class Ball {
 
 	/** Clears the last position that was drawn.*/
 	clear() {
-		this.ctx.clearRect(this.pos.x - 2, this.pos.y - 2, this.size + 5, this.size + 5);
-		// The -2 and +5 are needed, because the canvas makes lines smoother by putting less saturated pixels next to them if they aren't an int.
+		this.ctx.clearRect(this.pos.x - 5, this.pos.y - 5, this.size + 10, this.size + 10);
+		// The -5 and +10 are needed, because the canvas makes lines smoother by putting less saturated pixels next to them if they aren't an int.
 		// Even if the numbers are ints here they will still have this line, because we scale the canvas.
 	}
 
@@ -44,50 +44,6 @@ class Ball {
 		this.clear();
 		this.draw(x, y);
 	}
-
-
-	/** Moves the ball by the velocity. */
-/* 	move() {
-		this.pos.x += this.vel.x
-		this.pos.y += this.vel.y
-	} */
-
-
-	/** Reflect ball if it hits the top or bottom of canvas
-	 * @param {number} canvas_height - The height of the **unscaled** canvas.
-	*/
-/* 	check_wall_collision(canvas_height) {
-		if (this.pos.y <= 0) {
-			this.pos.y = 0
-			this.vel.y *= -1
-		}
-		if (this.pos.y + this.size >= canvas_height) {
-			this.pos.y = canvas_height - this.size
-			this.vel.y *= -1
-		}
-	} */
-		
-
-	/** reflect ball if it hits a player
-	 * @param {Player} player_l - The left player.
-	 * @param {Player} player_r - The right player.
-	 */
-/* 	check_player_collision(player_l, player_r) {
-
-		if (this.pos.x <= player_l.x + player_l.width) {
-			if (this.pos.y + this.size > player_l.y && this.pos.y < player_l.y + player_l.height) {
-				this.pos.x = player_l.x + player_l.width
-				this.vel.x *= -1
-			}
-		}
-		else if (this.pos.x + this.size >= player_r.x) {
-			if (this.pos.y + this.size > player_r.y && this.pos.y < player_r.y + player_r.height) {
-				this.pos.x = player_r.x - this.size
-				this.vel.x *= -1
-			}
-		}
-	} */
-
 }
 
 export { Ball };
