@@ -24,7 +24,7 @@ services:
     networks:
       - network_game
 
-  redis:
+  redis_game:
     container_name: pong_game_redis
     build: ../src/common_files/redis
     environment:
@@ -80,7 +80,7 @@ services:
     depends_on:
       db_game:
         condition: service_healthy
-      redis:
+      redis_game:
         condition: service_healthy
     restart: on-failure
     networks:
