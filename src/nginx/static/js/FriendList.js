@@ -195,7 +195,7 @@ export class FriendList extends ComponentBaseClass {
 		return item;
 	}
 
-	createRequestItem(itemData, action) {
+	createRequestItem(itemData) {
 		const item = document.createElement("li");
 		item.className =
 			"list-group-item d-flex justify-content-start w-100 bg-dark";
@@ -204,14 +204,14 @@ export class FriendList extends ComponentBaseClass {
 	  		<button class="btn btn-danger btn-sm">X</button>
 	  		<span class="text-white">${itemData.displayname}</span>
 		`;
-		if (action === "received") {
+		if (itemData.relationship === "received") {
 			item.querySelector(".btn-success").addEventListener("click", () => {
 				this.changeFriendRequest(itemData.friend_request_id, "accept");
 			});
 			item.querySelector(".btn-danger").addEventListener("click", () => {
 				this.changeFriendRequest(itemData.friend_request_id, "decline");
 			});
-		} else if (action === "requested") {
+		} else if (itemData.relationship === "requested") {
 			item.querySelector(".btn-success").classList.add("disabled");
 			item.querySelector(".btn-danger").classList.add("disabled");
 		}
