@@ -343,10 +343,12 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	//TODO: check if we need error handling here on the FE
-	toggleDisplayname() {
+	async toggleDisplayname() {
 		const displayName = this.shadowRoot.getElementById("displayName");
 		const button = this.shadowRoot.getElementById("changeDisplayNameButton");
+		const warning = this.shadowRoot.getElementById("profileDisplayNameWarning");
+		warning.style.display = "none";
+		displayName.classList.remove("warning");
 		if (displayName.disabled) {
 			this.currentDisplayName = displayName.value;
 			displayName.disabled = false;
@@ -355,54 +357,23 @@ export class UserProfile extends ComponentBaseClass {
 			if (displayName.value !== this.currentDisplayName) {
 				const formData = new FormData();
 				formData.append("displayname", displayName.value);
-				this.apiFetch("/um/profile",{
-					method: "PATCH",
-					body: formData },
-				"multipart/form-data",
-				);
-				window.app.userData.username = displayName.value;
+				try {
+					await this.apiFetch("/um/profile",{
+						method: "PATCH",
+						body: formData },
+						"multipart/form-data",
+					);
+					this.currentDisplayName = displayName.value;
+					window.app.userData.username = displayName.value;
+				} catch (error) {
+					displayName.value = this.currentDisplayName;
+					displayName.classList.add("warning");
+					warning.style.display = "block";
+				}
 			}
 			displayName.disabled = true;
 			button.textContent = "Change";
 		}
-	}
-
-	async saveProfile() {
-		const saveButton = this.shadowRoot.getElementById("saveProfile");
-		const saveSpinner = this.shadowRoot.getElementById("saveProfileSpinner");
-		const profileDisplayNameWarning = this.shadowRoot.getElementById(
-			"profileDisplayNameWarning",
-		);
-		saveButton.disabled = true;
-		saveSpinner.style.display = "inline-block";
-		profileDisplayNameWarning.style.display = "none";
-
-		const displayName = this.shadowRoot.getElementById("displayName").value;
-		const imageUpload = this.shadowRoot.getElementById("imageUpload");
-		const formData = new FormData();
-		formData.append("displayname", displayName);
-
-		if (imageUpload.files.length > 0) {
-			const imageFile = imageUpload.files[0];
-			formData.append("image", imageFile);
-		}
-
-		try {
-			const response = await this.apiFetch(
-				"/um/profile",
-				{ method: "PATCH", body: formData },
-				"multipart/form-data",
-			);
-			window.app.userData.username = response.displayname;
-			window.app.userData.profileImage = response.image;
-			console.log("Profile saved");
-		} catch (error) {
-			console.error("Error saving profile:", error);
-			profileDisplayNameWarning.style.display = "block";
-		}
-
-		saveButton.disabled = false;
-		saveSpinner.style.display = "none";
 	}
 
 	showDeleteError(message) {
