@@ -42,28 +42,22 @@ class CustomUser(models.Model):
                 super().save(*args, **kwargs)
                 return
 
-            # User actually provided a new img
+            # User actually provided a new img or has a non-default
             old_image = CustomUser.objects.get(pk=self.pk).image
-            # print(f"database:")
-            # print_img(old_image)
-            # print(f"self:")
-            # print_img(self.image)
+            print_img(old_image)
 
-            # old image was custom
-            if not old_image.name.endswith(DEFAULT_IMAGE_NAME):
-                old_image.delete(save=False)
-
-            # print(f"before super().save:")
+            # print("new image:")
             # print_img(self.image)
-            super().save(*args, **kwargs)
-            # print(f"\nafter super().save:")
-            # print_img(self.image)
-
-            img = Image.open(self.image.path)
-            if img.height > 220 or img.width > 220:
-                output_size = (220, 220)
-                img.thumbnail(output_size)
-                img.save(self.image.path)
+            super().save(*args, **kwargs) # need to save even if no new img is provided to update other changes
+            if old_image != self.image:
+                if not old_image.name.endswith(DEFAULT_IMAGE_NAME):
+                    old_image.delete(save=False)
+    
+                img = Image.open(self.image.path)
+                if img.height > 220 or img.width > 220:
+                    output_size = (220, 220)
+                    img.thumbnail(output_size)
+                    img.save(self.image.path)
         else:
             super().save(*args, **kwargs)
 
