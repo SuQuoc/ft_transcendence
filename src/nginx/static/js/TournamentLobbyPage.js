@@ -14,10 +14,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		// adding this here to avoid having a gap where the match bracket message can't be recieved
 		window.app.socket.addEventListener("message", this.handleReceivedMessage_var);
-	}
-	
-	connectedCallback() {
-		super.connectedCallback();
 
 		// adding classes
 		this.classList.add("d-flex", "flex-row", "w-100", "h-100");
@@ -32,7 +28,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.leave_button.addEventListener("click", this.handleLeaveLobby);
 
 		// sending a request to the server to get the room info
-		window.app.socket.send(JSON.stringify({type: "get_room_info", room_name: this.tournament_name}));
+		if (window.app.socket)
+			window.app.socket.send(JSON.stringify({type: "get_room_info", room_name: this.tournament_name}));
 
 		// work through events that are in the socket_event_queue
 		this.workThoughEventQueue();
@@ -66,12 +63,10 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 		if (window.app.pong_socket.readyState === WebSocket.OPEN) {
 			window.app.pong_socket.send(JSON.stringify({"type": "connect_to_match", "match_id": match_id}));
-			console.log('pong websocket is open');
 		} else {
 			window.app.pong_socket.addEventListener('open', () => {
 				window.app.pong_socket.send(JSON.stringify({"type": "connect_to_match", "match_id": match_id}));
 			}, { once: true });
-			console.log('pong websocket adding event listener on open')
 		}
 	}
 
@@ -82,7 +77,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		this.current_player_num.innerText = data.cur_player_num;
 
 		for (let i in data.players) {
-			this.addPlayerElement(data.players[i]);
+			this.addPlayerElement(data.players[i].name, data.players[i].image);
 		}
 	}
 
@@ -97,7 +92,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
-	addPlayerElement(player_name) { // needs the avatar too !!!
+	addPlayerElement(player_name, avatar) {
 		let element = new TournamentLobbyPlayerElement();
 
 		element.setAttribute('name', player_name);
@@ -105,7 +100,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		element.querySelector("[name='lobby_player_name']").innerText = player_name;
 		if (player_name === window.app.userData.username)
 			element.makeNameBold();
-		//TODO: change avatar
+		element.querySelector("[name='lobby_player_avatar']").setAttribute('src', avatar);
 	}
 
 	deletePlayerElement(player_name) {
@@ -143,7 +138,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 		console.log("TournamentLobbyPage: handleReceivedMessage: ", data);
 				
 		if (data.type === "player_joined_room") {
-			this.addPlayerElement(data.displayname); // needs the avatar too !!!
+			this.addPlayerElement(data.displayname, data.image);
 			this.current_player_num.innerText = data.cur_player_num;
 		}
 		else if (data.type === "player_left_room") {
@@ -194,18 +189,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);
 		}
 	}
-
-	displayMatchResult(winner, loser) {
-		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
-		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
-		if (winner_element) {
-			winner_element.incrementWins();	
-		} else {console.error("Error: displayMatchResult: winner element not found");}
-		if (loser_element) {
-			loser_element.greyOutPlayer();
-		} else {console.error("Error: displayMatchResult: loser element not found");}
-	}
-
+	
 
 	getElementHTML() {
 		const template = document.createElement('template');

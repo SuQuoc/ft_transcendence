@@ -2,7 +2,7 @@ import json
 
 class Player:
     creation_keys = ["channel_name"]
-    converting_keys = ["name, user_id"]
+    converting_keys = ["name, user_id, image"]
 
     def __init__(self, **kwargs):
         for key in Player.creation_keys:
@@ -12,7 +12,8 @@ class Player:
         self.channel_name   = kwargs.get("channel_name") # TODO: when is this used?
         self.name           = kwargs.get("name")
         self.id             = kwargs.get("id")
-
+        self.image          = kwargs.get("image")
+    
     @staticmethod
     def from_dict(data: dict):
         for key in Player.converting_keys:
@@ -24,7 +25,14 @@ class Player:
         return {
             "channel_name": self.channel_name,
             "name": self.name,
-            "id": self.id
+            "id": self.id,
+            "image": self.image
+        }
+
+    def to_data_for_client(self):
+        return {
+            "name": self.name,
+            "image": self.image
         }
 
     def __eq__(self, other):
@@ -129,7 +137,7 @@ class TournamentRoom:
         return {
             "name": self.name,
             "creator_name": self.creator.name,
-            "players": [player.name for player in self.players],
+            "players": [player.to_data_for_client() for player in self.players],
             "points_to_win": self.points_to_win,
             "max_player_num": self.max_player_num,
             "cur_player_num": self.cur_player_num,
