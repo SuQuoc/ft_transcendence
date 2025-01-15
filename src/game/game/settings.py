@@ -33,8 +33,7 @@ ALLOWED_HOSTS = ['*']
 # add pong and daphne app
 INSTALLED_APPS = [
     'daphne',
-#'pong',
-    'pong.apps.PongConfig',
+    'pong',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     "rest_framework_simplejwt",
-    'sslserver' # NOTE: whats that for?
 ]
 
 MIDDLEWARE = [
