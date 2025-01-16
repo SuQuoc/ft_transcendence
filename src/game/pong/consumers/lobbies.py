@@ -7,8 +7,23 @@ from .utils import *
 from pong.forms import CreateTournamentForm
 import asyncio
 from .bracket_tournament_logic import tournament_loop
-from pong.um_request import get_displayname
+import httpx
 
+# Dependency to other Microservice
+async def get_profile(cookie_dict):
+    if not cookie_dict:
+        raise Exception('No cookie provided')
+    cookie = httpx.Cookies(cookie_dict)
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get("http://usermanagement:8000/um/profile", headers=headers, cookies=cookie_dict) # NOTE: fetches more then just the name
+        if response.status_code != 200:
+            raise Exception('Error getting displayname from UM')
+        print(f"json: {response.json()}")
+        data = response.json()
+        return data.get("displayname"), data.get("image")
 
 # PROVING: global_connection_list = []
 
@@ -29,7 +44,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def set_instance_values(self):
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
-        self.user.name = await get_displayname(self.scope.get("cookies"))
+        name, image = await get_profile(self.scope.get("cookies"))
+        self.user.name = name
+        self.user.image = image
         # Communication between consumers
         self.client_group = f"client_{self.user.id}"
         
@@ -138,7 +155,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         await self.group_switch(AVA_ROOMS, get_room_group(room_name))
         await self.send_success(room_name)
         await self.group_send_AvailableTournaments(T_NEW_ROOM, room)
-        # print(f"ROOM_NAME: {room_name} - {self.user.name} created a room")
 
 
     async def join_room(self, dict_data):
@@ -192,7 +208,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 else:
                     update_or_add_room_to_cache(room.to_dict(), FULL_ROOMS, full_rooms)
             
-            # print(f"ROOM_NAME: {room.name} - {self.user.name} left")
         
         # CHANNELS: Remove user from the tournament room group
         await self.group_switch(get_room_group(self.current_room), AVA_ROOMS)
@@ -282,8 +297,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 {
                     "type": type,
                     "displayname": self.user.name,
+                    "image": self.user.image,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
         elif type == T_PLAYER_LEFT_ROOM:
@@ -293,7 +308,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     "type": type,
                     "displayname": self.user.name,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
 
@@ -326,9 +340,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
 
     async def free_win(self, event):
         """Sends the winner of the tournament to the client."""
-        id = event.get("winner_id")
-        if id == self.user.id:
-            await self.send(text_data=json.dumps(event))
+        await self.send(text_data=json.dumps(event))
 
     async def match_result(self, event):
         """
@@ -357,10 +369,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
             "type": T_ERROR,
             "error": error.value,
         }))
-        print({
-            "type": T_ERROR,
-            "error": error.value,
-        })
 
 
     # Helper----------------------------------------------------------------
@@ -373,16 +381,16 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         try:
             room.add_player(self.user)
             self.current_room = room.name
-            self.group_switch(AVA_ROOMS, get_room_group(room.name))
         except AlreadyInRoom as e:
             await self.send_error(Errors.ALREADY_IN_ROOM) # NOTE: u cant be in 2 rooms with 1 browser, but with 2 browsers possible
             return
         except Exception as e:
-            print(f"Exception: {e}") # IF CACHE FAILS
+            print(f"Exception: {e}")
+            return
 
-         # CHANNELS: Add user to the room group
+        # CHANNELS: Add user to the room group
         await self.group_send_Room(T_PLAYER_JOINED_ROOM, room) # MUST SEND ALL IN GROUP THE MSG BEFORE ADDING THE USER TO GROUP
-        await self.group_add(get_room_group(room.name))
+        await self.group_switch(AVA_ROOMS, get_room_group(room.name))
         await self.send_success(room.name)
         
         if room.is_full():

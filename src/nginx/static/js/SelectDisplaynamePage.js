@@ -170,24 +170,26 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		template.innerHTML = `
 			<scripts-and-styles></scripts-and-styles>
 			<div class="p-3 rounded-3 bg-dark">
-				<form id="displayNameForm">
-					<h3 class="text-center text-white mb-3">We need additional information</h3>
+				<form id="displayNameForm" class="d-flex flex-column gap-3">
+					<h3 class="text-center text-white m-0">We need additional information</h3>
 
-					<label for="displayNameInput"
-							class="form-label text-white">Displayname</label>
-					<input name="displayname"
-							id="displayNameInput"
-							type="text"
-							class="form-control"
-							maxlength="20"
-							required
-							aria-describedby="displayNameWarning"
-					>
-					<div class="form-text text-white-50">Other users can see this name</div>
-					<div id="displayNameWarning" class="form-text text-danger" style="display: none;"></div>
+					<div>
+						<label for="displayNameInput"
+						class="form-label text-white">Displayname</label>
+						<input name="displayname"
+						id="displayNameInput"
+						type="text"
+						class="form-control"
+						maxlength="20"
+						required
+						aria-describedby="displayNameWarning"
+						>
+						<div class="form-text text-white-50">Other users can see this name</div>
+						<div id="displayNameWarning" class="text-danger mt-2" style="display: none;"></div>
+					</div>
 					
 					<button type="submit" class="btn btn-custom w-100" id="displayNameSubmitButton" form="displayNameForm">submit</button>
-					<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
+					<button type="button" class="btn btn-secondary w-100" id="logoutButton" aria-label="Logout">Logout</button>
 					<div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
 						<span class="visually-hidden">Loading...</span>
 					</div>

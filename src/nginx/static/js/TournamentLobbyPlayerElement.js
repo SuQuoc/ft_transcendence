@@ -11,7 +11,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
         this.wins = this.querySelector("[name='lobby_wins']");
 	}
 
-	/// ----- EMethods ----- ///
+	/// ----- Methods ----- ///
 
 	makeNameBold() {
 		this.name.classList.add("fw-bold");
@@ -34,6 +34,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 		const template = document.createElement('template');
 		template.innerHTML = `
 			<img src="/media_url/profile_images/default_avatar.png"
+				onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
 				alt="Profile image"
 				class="rounded-circle lobby-player-avatar"
 				name="lobby_player_avatar"

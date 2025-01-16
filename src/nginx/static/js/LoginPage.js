@@ -38,38 +38,44 @@ export class LoginPage extends ComponentBaseClass {
 		const template = document.createElement("template");
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
-            <div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
+			<div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
 				<h3 class="text-center text-white">Login</h3>
-            	<form id="42LoginForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
-            		<input type="hidden" name="next_step" value="login">
+				<form id="42LoginForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
+					<input type="hidden" name="next_step" value="login">
 					<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
 					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Login with 42</button>
 				</form>
-            	<hr class="text-white-50">
-                <form id="loginForm" class="needs-validation">
-                    <label for="loginEmail" class="form-label text-white-50">Email address</label>
-                    <input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
-                    <div class="invalid-feedback mb-1">Please enter your email</div>
-                    <label for="loginPassword" class="form-label text-white-50">Password</label>
-                    <input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
-                    <div class="invalid-feedback mb-1">Please enter your password</div>
-                    <div id="loginOtpSection" style="display: none;">
-                    	<label for='loginOtpCode' class="form-label text-white-50">OTP Code sent to your E-Mail</label>
-                    	<div class="input-group">
-                    		<input name="otp" id='loginOtpCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
-                    		<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
-                    	</div>
-                    	<span id="otpErrorMessage" class="text-danger mb-3"></span>
-                    </div>
-                    <span id="errorMessage" class="text-danger mb-3"></span>
-                    <p class="text-white-50 small m-0">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
-                    <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
-                    <button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
-                    <div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </form>
-            </div>
+				<hr class="text-white-50">
+				<form id="loginForm" class="d-flex flex-column needs-validation gap-3">
+					<div>
+						<label for="loginEmail" class="form-label text-white-50">Email address</label>
+						<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
+						<div class="invalid-feedback mb-1">Please enter your email</div>
+					</div>
+					<div>
+						<label for="loginPassword" class="form-label text-white-50">Password</label>
+						<input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
+						<div class="invalid-feedback mb-1">Please enter your password</div>
+					</div>
+					<div id="loginOtpSection" style="display: none;">
+						<label for='loginOtpCode' class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<div class="input-group">
+							<input name="otp" id='loginOtpCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
+							<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
+						</div>
+						<span id="otpErrorMessage" class="text-danger"></span>
+					</div>
+					<div>
+						<span id="errorMessage" class="text-danger d-block mb-2"></span>
+						<p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
+						<p class="text-white-50 small mb-1">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
+						<button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
+						<div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</form>
+			</div>
         `;
 		return template;
 	}

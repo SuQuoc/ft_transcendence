@@ -1,6 +1,6 @@
 
 # Check for required environment variables
-echo "IN SCRIOPT"
+echo "IN SCRIPT"
 if [ -z "$REDIS_ADMIN_USER" ] || [ -z "$REDIS_ADMIN_PASSWORD" ] || [ -z "$REDIS_USER" ] || [ -z "$REDIS_PASSWORD" ]; then
     echo "Error: One or more environment variables are not set."
     exit 1
