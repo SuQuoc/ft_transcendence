@@ -23,6 +23,17 @@ export class LoginPage extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("requestOtpButton")
 			.addEventListener("click", this.requestNewOtp.bind(this));
+		this.shadowRoot
+			.getElementById("loginSwitchBackupCode")
+			.addEventListener("change", (event) => {
+				const loginBackupSection = this.shadowRoot.getElementById(
+					"loginBackupSection"
+				);
+				loginBackupSection.style.display = event.target.checked
+					? "block"
+					: "none";
+				this.validateForm();
+			});
 		const formFields = this.root.querySelectorAll("#loginForm > input");
 		if (formFields.length === 0) return;
 		for (const inputField of formFields) {
@@ -64,6 +75,15 @@ export class LoginPage extends ComponentBaseClass {
 							<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
 						</div>
 						<span id="otpErrorMessage" class="text-danger"></span>
+					</div>
+					<div class="form-check form-switch">
+  						<input class="form-check-input" type="checkbox" role="switch" id="loginSwitchBackupCode">
+  						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
+					</div>
+					<div id="loginBackupSection" style="display: none;">
+						<label for='loginBackupCode' class="form-label text-white-50">Your backup code</label>
+						<input name="backup_code" id='loginBackupCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{33}" minlength="33" maxlength="33">
+						<span id="BackupErrorMessage" class="text-danger"></span>
 					</div>
 					<div>
 						<span id="errorMessage" class="text-danger d-block mb-2"></span>
@@ -151,6 +171,32 @@ export class LoginPage extends ComponentBaseClass {
 
 		const email = this.shadowRoot.getElementById("loginEmail").value;
 		const password = this.shadowRoot.getElementById("loginPassword").value;
+
+		if (this.shadowRoot.getElementById("loginSwitchBackupCode").checked) {
+			try {
+				const backupCode = this.shadowRoot.getElementById("loginBackupCode").value;
+				await this.apiFetch("/registration/backup_login", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ username: email, password, backup_code: backupCode }),
+				}, "application/json", false);
+				await app.router.go("/", false);
+				return;
+			} catch (error) {
+				loginError.textContent = error;
+				this.shadowRoot
+					.getElementById("loginEmail")
+					.setAttribute("aria-invalid", "true");
+				this.shadowRoot
+					.getElementById("loginPassword")
+					.setAttribute("aria-invalid", "true");
+				loginButton.style.display = "block";
+				loginSpinner.style.display = "none";
+				return;
+			}
+		}
 
 		if (
 			this.shadowRoot.getElementById("loginOtpSection").style.display === "none"
