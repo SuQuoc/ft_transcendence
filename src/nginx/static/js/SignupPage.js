@@ -238,9 +238,13 @@ export class SignupPage extends ComponentBaseClass {
 	async signup(event) {
 		event.preventDefault();
 		const signupButton = this.shadowRoot.getElementById("signupSubmitButton");
-		const signupError = this.shadowRoot.getElementById("signupErrorMessagePassword");
+		const signupErrorPassword = this.shadowRoot.getElementById("signupErrorMessagePassword");
+		const signupErrorOTP = this.shadowRoot.getElementById("signupOtpErrorMessage");
+		const signupErrorEmail = this.shadowRoot.getElementById("signupErrorMessageEmail");
 		signupButton.setAttribute("disabled", "");
-		signupError.style.display = "none";
+		signupErrorPassword.style.display = "none";
+		signupErrorOTP.style.display = "none";
+		signupErrorEmail.style.display = "none";
 
 		const email = this.shadowRoot.getElementById("signupEmail").value;
 		const password = this.shadowRoot.getElementById("signupPassword1").value;
@@ -296,8 +300,7 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById("signupOtpCode").focus();
 			} catch (error) {
 				console.error("Error during OTP request:", error);
-				this.shadowRoot.getElementById("signupErrorMessageEmail").textContent =
-					error;
+				signupErrorEmail.textContent = error;
 				this.shadowRoot
 					.getElementById("signupEmail")
 					.setAttribute("aria-invalid", "true");
@@ -321,7 +324,8 @@ export class SignupPage extends ComponentBaseClass {
 				app.router.go("/displayname", false);
 			} catch (error) {
 				console.error("Error during signup:", error);
-				signupError.style.display = "block";
+				signupErrorOTP.style.display = "block";
+				signupErrorOTP.textContent = error;
 			} finally {
 				signupButton.removeAttribute("disabled");
 			}
@@ -445,8 +449,8 @@ export class SignupPage extends ComponentBaseClass {
 				throw new Error(errorMessage);
 			}
 		} catch (error) {
-			//this.shadowRoot.getElementById('signupError').textContent = error;
-			//this.shadowRoot.getElementById('signupError').style.display = 'block';
+			this.shadowRoot.getElementById('signupError').textContent = error;
+			this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}
 
@@ -475,8 +479,8 @@ export class SignupPage extends ComponentBaseClass {
 			}
 			this.currentUsername = email;
 		} catch (error) {
-			//this.shadowRoot.getElementById('signupError').textContent = error;
-			//this.shadowRoot.getElementById('signupError').style.display = 'block';
+			this.shadowRoot.getElementById('signupError').textContent = error;
+			this.shadowRoot.getElementById('signupError').style.display = 'block';
 		}
 	}
 }
