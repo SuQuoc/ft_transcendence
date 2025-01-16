@@ -181,7 +181,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			window.app.userData.username = displayname;
 			window.app.router.go("/", false);
 		} catch (error) {
-			this.displayname_warning.innerHTML = "This displayname is already taken";
+			this.displayname_warning.innerHTML = error;
 			this.displayname_warning.setAttribute("aria-invalid", "true");
 			this.displayname_warning.style.display = "";
 			console.error('Error selecting displayname:', error);
