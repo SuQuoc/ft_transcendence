@@ -1,4 +1,3 @@
-import json
 
 class Player:
     creation_keys = ["channel_name"]
@@ -9,7 +8,7 @@ class Player:
             if key not in kwargs:
                 raise ValueError(f"Missing required key for instantiating: {key}")
 
-        self.channel_name   = kwargs.get("channel_name") # TODO: when is this used?
+        self.channel_name   = kwargs.get("channel_name")
         self.name           = kwargs.get("name")
         self.id             = kwargs.get("id")
         self.image          = kwargs.get("image")
@@ -40,7 +39,6 @@ class Player:
         if isinstance(other, Player):
             return self.channel_name == other.channel_name
         raise ValueError("other must be an instance of Player")
-        return False
 
     def __hash__(self):
         return hash(self.channel_name)
@@ -116,7 +114,6 @@ class TournamentRoom:
         return TournamentRoom(**data)
 
     def to_dict(self):
-        # json.dumps(
         return {
             "name": self.name,
             "creator": self.creator.to_dict(),
@@ -133,7 +130,6 @@ class TournamentRoom:
         """
         does the same as to_dict but without sensitive data, only leaves out the channel_name
         """
-        # json.dumps(
         return {
             "name": self.name,
             "creator_name": self.creator.name,
@@ -164,8 +160,6 @@ class TournamentRoom:
         if self.has_player(player.id):
             raise AlreadyInRoom()
 
-        print(f"Adding player {player.name} to room {self.name}")
-
         self.players.append(player)
         self.cur_player_num += 1
         if self.is_full():
@@ -176,10 +170,6 @@ class TournamentRoom:
         if not isinstance(player, Player):
             raise ValueError("player must be an instance of Player")
 
-        # Logic is written so this can NEVER HAPPEN
-        # elif player not in self.players:
-            # return False
-            #raise ValueError(f"Player {player.name} is not in the room - SHOULD NEVER HAPPEN.")
         self.players.remove(player)
         self.cur_player_num -= 1
 

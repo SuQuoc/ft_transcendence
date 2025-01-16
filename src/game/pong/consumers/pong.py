@@ -138,7 +138,6 @@ class Pong:
     def __init__(self, channel_group, player_l_id, player_l_name, points_to_win=1):
         self.channel_group = channel_group # Messaging to Game Consumer
         self.size = 1
-        self.running = False
         self.result = {}
         self.points_to_win = points_to_win
         self.wall_to_be_hit = "x"   # either "x" or "y", used to save which wall will be hit first (gets set in self.calc_next_collision())
@@ -371,7 +370,6 @@ class Pong:
         wall = self.get_wall(self.ball.vel)
         self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
         
-        self.running = True # NOTE: check if needed at the end of project
         tick_duration = 0.03
         start_time = time.time()
     

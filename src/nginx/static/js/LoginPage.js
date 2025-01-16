@@ -10,26 +10,32 @@ export class LoginPage extends ComponentBaseClass {
 
 	connectedCallback() {
 		super.connectedCallback();
-		this.shadowRoot.getElementById('loginEmail').focus();
-		this.shadowRoot.getElementById('loginSubmitButton').addEventListener('click', this.login.bind(this));
-		this.shadowRoot.getElementById('loginForm').addEventListener('submit', this.login.bind(this));
-		this.shadowRoot.getElementById('loginForm').addEventListener('input', this.validateForm.bind(this));
-		this.shadowRoot.getElementById('requestOtpButton').addEventListener('click', this.requestNewOtp.bind(this));
+		this.shadowRoot.getElementById("loginEmail").focus();
+		this.shadowRoot
+			.getElementById("loginSubmitButton")
+			.addEventListener("click", this.login.bind(this));
+		this.shadowRoot
+			.getElementById("loginForm")
+			.addEventListener("submit", this.login.bind(this));
+		this.shadowRoot
+			.getElementById("loginForm")
+			.addEventListener("input", this.validateForm.bind(this));
+		this.shadowRoot
+			.getElementById("requestOtpButton")
+			.addEventListener("click", this.requestNewOtp.bind(this));
 		const formFields = this.root.querySelectorAll("#loginForm > input");
-		if (formFields.length === 0)
-			return;
-		formFields.forEach(inputfield => {
-			inputfield.addEventListener("keydown", (event) => {
-				if (event.key === 'Enter') {
+		if (formFields.length === 0) return;
+		for (const inputField of formFields) {
+			inputField.addEventListener("keydown", (event) => {
+				if (event.key === "Enter") {
 					this.login(event);
 				}
 			});
-		});
-
+		}
 	}
 
-	getElementHTML(){
-		const template = document.createElement('template');
+	getElementHTML() {
+		const template = document.createElement("template");
 		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
 			<div class="p-3 rounded-3 bg-dark" style="max-width: 300px;">
@@ -78,20 +84,19 @@ export class LoginPage extends ComponentBaseClass {
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 		if (!emailPattern.test(email.value)) {
-			email.setAttribute('aria-invalid', 'true');
+			email.setAttribute("aria-invalid", "true");
 			return false;
-		} else {
-			email.removeAttribute('aria-invalid');
-			return true;
 		}
+		email.removeAttribute("aria-invalid");
+		return true;
 	}
 
 	validateForm() {
-		const email = this.shadowRoot.getElementById('loginEmail');
-		const password = this.shadowRoot.getElementById('loginPassword');
-		const otpCode = this.shadowRoot.getElementById('loginOtpCode');
-		const otpSection = this.shadowRoot.getElementById('loginOtpSection');
-		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
+		const email = this.shadowRoot.getElementById("loginEmail");
+		const password = this.shadowRoot.getElementById("loginPassword");
+		const otpCode = this.shadowRoot.getElementById("loginOtpCode");
+		const otpSection = this.shadowRoot.getElementById("loginOtpSection");
+		const loginButton = this.shadowRoot.getElementById("loginSubmitButton");
 
 		const otpPattern = /^[A-Za-z0-9]{16}$/;
 		const emailValid = this.validateEmail(email);
@@ -99,31 +104,34 @@ export class LoginPage extends ComponentBaseClass {
 		let isValid = true;
 
 		if (!email.value || !emailValid) {
-        	email.classList.add('is-invalid');
-        	email.nextElementSibling.textContent = 'Email is required';
-			email.nextElementSibling.classList.add('invalid-feedback');
-        	isValid = false;
-    	} else {
-        	email.classList.remove('is-invalid');
-        	email.nextElementSibling.textContent = '';
-			email.nextElementSibling.classList.remove('invalid-feedback');
-    	}
+			email.classList.add("is-invalid");
+			email.nextElementSibling.textContent = "Email is required";
+			email.nextElementSibling.classList.add("invalid-feedback");
+			isValid = false;
+		} else {
+			email.classList.remove("is-invalid");
+			email.nextElementSibling.textContent = "";
+			email.nextElementSibling.classList.remove("invalid-feedback");
+		}
 
-    	if (!password.value) {
-        	password.classList.add('is-invalid');
-        	password.nextElementSibling.textContent = 'Password is required';
-        	isValid = false;
-    	} else {
-        	password.classList.remove('is-invalid');
-        	password.nextElementSibling.textContent = '';
-    	}
+		if (!password.value) {
+			password.classList.add("is-invalid");
+			password.nextElementSibling.textContent = "Password is required";
+			isValid = false;
+		} else {
+			password.classList.remove("is-invalid");
+			password.nextElementSibling.textContent = "";
+		}
 
-    	if (otpSection.style.display === 'block' && !otpPattern.test(otpCode.value)) {
-        	otpCode.classList.add('is-invalid');
-        	isValid = false;
-    	} else if (otpSection.style.display === 'block') {
-        	otpCode.classList.remove('is-invalid');
-    	}
+		if (
+			otpSection.style.display === "block" &&
+			!otpPattern.test(otpCode.value)
+		) {
+			otpCode.classList.add("is-invalid");
+			isValid = false;
+		} else if (otpSection.style.display === "block") {
+			otpCode.classList.remove("is-invalid");
+		}
 
 		loginButton.disabled = !isValid;
 		return isValid;
@@ -134,73 +142,83 @@ export class LoginPage extends ComponentBaseClass {
 		if (!this.validateForm()) {
 			return;
 		}
-		const loginButton = this.shadowRoot.getElementById('loginSubmitButton');
-		const loginSpinner = this.shadowRoot.getElementById('loginSpinner');
-		const loginError = this.shadowRoot.getElementById('errorMessage');
-		loginButton.style.display = 'none';
-		loginSpinner.style.display = 'inline-block';
+		const loginButton = this.shadowRoot.getElementById("loginSubmitButton");
+		const loginSpinner = this.shadowRoot.getElementById("loginSpinner");
+		const loginError = this.shadowRoot.getElementById("errorMessage");
+		loginButton.style.display = "none";
+		loginSpinner.style.display = "inline-block";
+		loginError.textContent = "";
 
-		const email = this.shadowRoot.getElementById('loginEmail').value;
-		const password = this.shadowRoot.getElementById('loginPassword').value;
+		const email = this.shadowRoot.getElementById("loginEmail").value;
+		const password = this.shadowRoot.getElementById("loginPassword").value;
 
-		if (this.shadowRoot.getElementById('loginOtpSection').style.display === 'none') {
+		if (
+			this.shadowRoot.getElementById("loginOtpSection").style.display === "none"
+		) {
 			try {
-				const loginResponse = await fetch('/registration/basic_login', {
-					method: 'POST',
+				const loginResponse = await fetch("/registration/basic_login", {
+					method: "POST",
 					headers: {
-						'Content-Type': 'application/json'
+						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({ "username": email, password })
+					body: JSON.stringify({ username: email, password }),
 				});
 
 				if (!loginResponse.ok) {
 					const responseData = await loginResponse.text();
-					const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+					const errorMessage = responseData
+						? Object.values(JSON.parse(responseData))[0]
+						: "An unknown error occurred";
 					throw new Error(errorMessage);
 				}
-				this.shadowRoot.getElementById('loginOtpSection').style.display = 'block';
+				this.shadowRoot.getElementById("loginOtpSection").style.display =
+					"block";
 				this.startOtpRequestCooldown();
-				this.shadowRoot.getElementById('loginOtpCode').focus();
+				this.shadowRoot.getElementById("loginOtpCode").focus();
 			} catch (error) {
 				loginError.textContent = error;
-				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
-				loginButton.style.display = 'block';
+				this.shadowRoot
+					.getElementById("loginEmail")
+					.setAttribute("aria-invalid", "true");
+				loginButton.style.display = "block";
 			} finally {
-				loginButton.style.display = 'block';
-				loginSpinner.style.display = 'none';
+				loginButton.style.display = "block";
+				loginSpinner.style.display = "none";
 			}
 		} else {
 			try {
-				const otp = this.shadowRoot.getElementById('loginOtpCode').value;
-				const loginResponse = await fetch('/registration/basic_login', {
-					method: 'POST',
+				const otp = this.shadowRoot.getElementById("loginOtpCode").value;
+				const loginResponse = await fetch("/registration/basic_login", {
+					method: "POST",
 					headers: {
-						'Content-Type': 'application/json'
+						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({ "username": email, password, otp })
+					body: JSON.stringify({ username: email, password, otp }),
 				});
 
 				if (!loginResponse.ok) {
 					const responseData = await loginResponse.text();
-					const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
+					const errorMessage = responseData
+						? Object.values(JSON.parse(responseData))[0]
+						: "An unknown error occurred";
 					throw new Error(errorMessage);
 				}
 				window.app.userData = window.app.userData || {};
 				window.app.userData.email = email;
 
 				// Check if the user already has a displayname
-				const displaynameResponse = await fetch('/um/profile', {
-					method: 'GET',
+				const displaynameResponse = await fetch("/um/profile", {
+					method: "GET",
 					headers: {
-						'Content-Type': 'application/json'
-					}
+						"Content-Type": "application/json",
+					},
 				});
 
 				const displaynameData = await displaynameResponse.json();
 				// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 				if (!displaynameResponse.ok || displaynameData.displayname === "") {
-					await app.router.go('/displayname', false);
-					console.log('displayname not ok:', displaynameResponse);
+					await app.router.go("/displayname", false);
+					console.log("displayname not ok:", displaynameResponse);
 				} else {
 					window.app.userData.username = displaynameData.displayname;
 					if (displaynameData.image) {
@@ -210,55 +228,61 @@ export class LoginPage extends ComponentBaseClass {
 				}
 			} catch (error) {
 				loginError.textContent = error;
-				this.shadowRoot.getElementById('loginEmail').setAttribute('aria-invalid', 'true');
-				this.shadowRoot.getElementById('loginPassword').setAttribute('aria-invalid', 'true');
-				loginButton.style.display = 'block';
+				this.shadowRoot
+					.getElementById("loginEmail")
+					.setAttribute("aria-invalid", "true");
+				this.shadowRoot
+					.getElementById("loginPassword")
+					.setAttribute("aria-invalid", "true");
+				loginButton.style.display = "block";
 			} finally {
-				loginSpinner.style.display = 'none';
+				loginSpinner.style.display = "none";
 			}
 		}
 	}
 
 	async requestNewOtp() {
-		const email = this.shadowRoot.getElementById('loginEmail').value;
-		const password = this.shadowRoot.getElementById('loginPassword').value;
+		const email = this.shadowRoot.getElementById("loginEmail").value;
+		const password = this.shadowRoot.getElementById("loginPassword").value;
 
 		try {
-		  const response = await fetch('/registration/basic_login', {
-			  method: 'POST',
-			  headers: {
-				'Content-Type': 'application/json'
-			  },
-			  body: JSON.stringify({ username: email, password })
-		  });
+			const response = await fetch("/registration/basic_login", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ username: email, password }),
+			});
 
-		  if (!response.ok) {
-			  const responseData = await response.text();
-			  const errorMessage = responseData ? Object.values(JSON.parse(responseData))[0] : 'An unknown error occurred';
-			  throw new Error(errorMessage);
-		  }
-		  this.startOtpRequestCooldown();
+			if (!response.ok) {
+				const responseData = await response.text();
+				const errorMessage = responseData
+					? Object.values(JSON.parse(responseData))[0]
+					: "An unknown error occurred";
+				throw new Error(errorMessage);
+			}
+			this.startOtpRequestCooldown();
 		} catch (error) {
-		  this.shadowRoot.getElementById('otpErrorMessage').textContent = error;
+			this.shadowRoot.getElementById("otpErrorMessage").textContent = error;
 		}
 	}
 
-  startOtpRequestCooldown() {
-    const requestOtpButton = this.shadowRoot.getElementById('requestOtpButton');
-    requestOtpButton.setAttribute('disabled', '');
-    let remainingTime = this.otpRequestCooldown;
+	startOtpRequestCooldown() {
+		const requestOtpButton = this.shadowRoot.getElementById("requestOtpButton");
+		requestOtpButton.setAttribute("disabled", "");
+		let remainingTime = this.otpRequestCooldown;
 
-    this.otpRequestTimer = setInterval(() => {
-      if (remainingTime > 0) {
-        requestOtpButton.textContent = `${remainingTime}s`;
-        remainingTime--;
-      } else {
-        clearInterval(this.otpRequestTimer);
-        requestOtpButton.removeAttribute('disabled');
-        requestOtpButton.textContent = 'New OTP';
-      }
-    }, 1000);
-  }
+		this.otpRequestTimer = setInterval(() => {
+			if (remainingTime > 0) {
+				requestOtpButton.textContent = `${remainingTime}s`;
+				remainingTime--;
+			} else {
+				clearInterval(this.otpRequestTimer);
+				requestOtpButton.removeAttribute("disabled");
+				requestOtpButton.textContent = "New OTP";
+			}
+		}, 1000);
+	}
 }
 
-customElements.define('login-page', LoginPage);
+customElements.define("login-page", LoginPage);
