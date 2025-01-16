@@ -74,12 +74,8 @@ services:
 
   redis_registration:
     container_name: pong_reg_redis
-    build: 
-      context: ../src/common_files/redis
-      dockerfile: Dockerfile_reg
+    build: ../src/common_files/redis
     environment:
-      REDIS_ADMIN_USER: ${REG_REDIS_ADMIN_USER:-redisadmin}
-      REDIS_ADMIN_PASSWORD: ${REG_REDIS_ADMIN_PASSWORD:-redisadminpass}
       REDIS_USER: "${REG_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
     expose:
