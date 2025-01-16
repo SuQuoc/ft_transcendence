@@ -46,9 +46,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REDIS_USER = os.environ.get('REDIS_USER')
+REDIS_PASS = os.environ.get('REDIS_PASSWORD')
+
 #values set for testing now
-CELERY_BROKER_URL = 'redis://redis_registration:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis_registration:6379/0'
+CELERY_BROKER_URL = f"redis://{REDIS_USER}:{REDIS_PASS}@redis_registration:6379/0"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_USER}:{REDIS_PASS}@redis_registration:6379/0"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
@@ -80,7 +83,8 @@ TEMPLATES = [
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis_registration:6379/1',
+        'LOCATION': 'redis://redisuser:redispass@redis_registration:6379/1',
+        #'LOCATION': f"redis://{REDIS_USER}:{REDIS_PASS}@redis_registration:6379/1",
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
