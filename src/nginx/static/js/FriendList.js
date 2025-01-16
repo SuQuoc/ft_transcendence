@@ -95,7 +95,7 @@ export class FriendList extends ComponentBaseClass {
 			}
 			button.addEventListener("click", (event) => {
 				const clickedButton = event.target;
-				for (const btn of clickedButton) {
+				for (const btn of buttons) {
 					btn.classList.remove("active");
 					btn.removeAttribute("aria-current");
 				}
