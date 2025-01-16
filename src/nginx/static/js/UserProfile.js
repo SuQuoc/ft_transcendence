@@ -22,9 +22,8 @@ export class UserProfile extends ComponentBaseClass {
 			}
 
 			.profile-image {
-				width: 100%;
-				max-width: 150px;
-				max-height: 150px;
+				width: 150px;
+				height: 150px;
 				cursor: pointer;
 				display: block;
 				margin: 0 auto 1rem;
