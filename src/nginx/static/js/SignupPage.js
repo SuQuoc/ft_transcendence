@@ -316,6 +316,8 @@ export class SignupPage extends ComponentBaseClass {
 					throw new Error("Signup failed");
 				}
 				window.app.userData.email = email;
+				const responseData = await response.json();
+				window.app.userData.backupCodes = responseData?.backup_codes;
 				app.router.go("/displayname", false);
 			} catch (error) {
 				console.error("Error during signup:", error);

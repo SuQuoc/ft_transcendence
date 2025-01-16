@@ -45,6 +45,11 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			const response = await this.apiFetch('/registration/get_email', {method: 'GET'});
 			if (!response.password_set) {
 				this.showPasswordFields();
+				const backup_codes = await this.apiFetch('/registration/backup_rotate_codes', {method: 'POST'});
+				app.userData.backupCodes = backup_codes.backup_codes;
+			}
+			if (app.userData.backupCodes && app.userData.backupCodes.length > 0) {
+				this.displayBackupCodes(app.userData.backupCodes);
 			}
 			if (response.email) {
 				app.userData.email = response.email;
@@ -52,6 +57,42 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		} catch (error) {
 			console.error('Error getting email and password status:', error);
 		}
+	}
+
+	displayBackupCodes(backupCodes) {
+	  const backupCodesContainer = `
+		<div class="backup-codes text-white" style="max-width:600px;">
+	    	<b class="text-warning">Important: Backup Codes</b>
+	    	<p>Save these backup codes in a safe place. You can use them to access your account if you lose access to your OTP device. Just enter one of them instead of their regular password.</p>
+	    	<ul>
+	    		${backupCodes.map(code => `<li>${code}</li>`).join('')}
+	    	</ul>
+	    	<button id="copyBackupCodesButton" class="btn btn-secondary">Copy to Clipboard</button>
+	    	<button id="downloadBackupCodesButton" class="btn btn-secondary">Download as File</button>
+	    </div>
+		`;
+	  this.shadowRoot.getElementById("displayNameSubmitButton")
+		  .insertAdjacentHTML('beforebegin', backupCodesContainer);
+
+	  this.shadowRoot.getElementById("copyBackupCodesButton").addEventListener("click", () => {
+		  const codesText = backupCodes.join('\n');
+		  navigator.clipboard.writeText(codesText).then(() => {
+			  alert("Backup codes copied to clipboard");
+		  }).catch(err => {
+			  console.error("Failed to copy backup codes: ", err);
+		  });
+	  });
+
+	  this.shadowRoot.getElementById("downloadBackupCodesButton").addEventListener("click", () => {
+		  const codesText = backupCodes.join('\n');
+		  const blob = new Blob([codesText], { type: 'text/plain' });
+		  const url = URL.createObjectURL(blob);
+		  const a = document.createElement('a');
+		  a.href = url;
+		  a.download = 'backup_codes.txt';
+		  a.click();
+		  URL.revokeObjectURL(url);
+	  });
 	}
 
 	showPasswordFields() {
