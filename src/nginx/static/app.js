@@ -42,7 +42,7 @@ import { StatisticsPage } from './js/StatisticsPage.js';
 
 console.log("app.js loaded");
 // it's better to wait for the DOM to load before running any JS
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener('DOMContentLoaded', async () => {
 	//required to parse the parameters received from OAuth callback
 	const queryParams = new URLSearchParams(window.location.search);
 	if (queryParams.has("code") && queryParams.has("state")) {

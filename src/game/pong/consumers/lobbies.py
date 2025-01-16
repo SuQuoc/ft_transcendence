@@ -7,8 +7,25 @@ from .utils import *
 from pong.forms import CreateTournamentForm
 import asyncio
 from .bracket_tournament_logic import tournament_loop
-from pong.um_request import get_displayname
+import httpx
 
+# Dependency to other Microservice
+async def get_profile(cookie_dict):
+    if not cookie_dict:
+        raise Exception('No cookie provided')
+    cookie = httpx.Cookies(cookie_dict)
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get("http://usermanagement:8000/um/profile", headers=headers, cookies=cookie_dict) # NOTE: fetches more then just the name
+        if response.status_code != 200:
+            raise Exception('Error getting displayname from UM')
+        print(f"json: {response.json()}")
+        data = response.json()
+        return data.get("displayname"), data.get("image")
+
+# PROVING: global_connection_list = []
 
 class LobbiesConsumer(AsyncWebsocketConsumer):
     update_lock = asyncio.Lock()
@@ -27,7 +44,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def set_instance_values(self):
         self.user = Player(channel_name=self.channel_name)
         self.user.id = self.scope["user_id"]
-        self.user.name = await get_displayname(self.scope.get("cookies"))
+        name, image = await get_profile(self.scope.get("cookies"))
+        self.user.name = name
+        self.user.image = image
         # Communication between consumers
         self.client_group = f"client_{self.user.id}"
         
@@ -258,8 +277,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 {
                     "type": type,
                     "displayname": self.user.name,
+                    "image": self.user.image,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
         elif type == T_PLAYER_LEFT_ROOM:
@@ -269,7 +288,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                     "type": type,
                     "displayname": self.user.name,
                     "cur_player_num": room.cur_player_num,
-                    # image
                 }
             )
 

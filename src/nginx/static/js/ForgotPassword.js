@@ -2,38 +2,46 @@
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class ForgotPassword extends ComponentBaseClass {
-    constructor() {
-        super(false);
-    }
+	constructor() {
+		super(false);
+	}
 
-    connectedCallback() {
-        super.connectedCallback();
+	connectedCallback() {
+		super.connectedCallback();
 
-        const formElements = this.shadowRoot.querySelectorAll('#forgotPasswordForm input, #forgotPasswordForm button[type="submit"]');
-        formElements.forEach(element => {
-            element.addEventListener('keydown', this.handleKeyDown.bind(this));
-        });
-        this.shadowRoot.getElementById('resetSubmitButton').addEventListener('click', this.resetPassword.bind(this));
-        this.shadowRoot.getElementById('resetRequestOTP').addEventListener('click', this.requestOTP.bind(this));
-        this.shadowRoot.getElementById('forgotPasswordForm').addEventListener('input', this.validateForm.bind(this));
-        this.shadowRoot.getElementById('resetEmail').focus();
-    }
+		const formElements = this.shadowRoot.querySelectorAll(
+			'#forgotPasswordForm input, #forgotPasswordForm button[type="submit"]',
+		);
+		for (const element of formElements) {
+			element.addEventListener("keydown", this.handleKeyDown.bind(this));
+		}
+		this.shadowRoot
+			.getElementById("resetSubmitButton")
+			.addEventListener("click", this.resetPassword.bind(this));
+		this.shadowRoot
+			.getElementById("resetRequestOTP")
+			.addEventListener("click", this.requestOTP.bind(this));
+		this.shadowRoot
+			.getElementById("forgotPasswordForm")
+			.addEventListener("input", this.validateForm.bind(this));
+		this.shadowRoot.getElementById("resetEmail").focus();
+	}
 
-    handleKeyDown(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
+	handleKeyDown(event) {
+		if (event.key === "Enter") {
+			event.preventDefault();
 
-            if (this.validateForm()) {
-                this.resetPassword(event);
-            } else {
-                this.requestOTP(event);
-            }
-        }
-    }
+			if (this.validateForm()) {
+				this.resetPassword(event);
+			} else {
+				this.requestOTP(event);
+			}
+		}
+	}
 
-    getElementHTML() {
-        const template = document.createElement('template');
-        template.innerHTML = `
+	getElementHTML() {
+		const template = document.createElement("template");
+		template.innerHTML = `
             <scripts-and-styles></scripts-and-styles>
             <div class="p-3 rounded-3 bg-dark">
 				<form id="forgotPasswordForm" class="d-flex flex-column needs-validation gap-3">
@@ -74,25 +82,24 @@ export class ForgotPassword extends ComponentBaseClass {
 				</form>
 			</div>
         `;
-        return template;
-    }
+		return template;
+	}
 
-    validateEmail(email) {
+	validateEmail(email) {
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 		if (!emailPattern.test(email.value)) {
-			email.setAttribute('aria-invalid', 'true');
+			email.setAttribute("aria-invalid", "true");
 			return false;
-		} else {
-			email.removeAttribute('aria-invalid');
-			return true;
 		}
+		email.removeAttribute("aria-invalid");
+		return true;
 	}
 
-    validateForm() {
-		const email = this.shadowRoot.getElementById('resetEmail');
-		const otpSection = this.shadowRoot.getElementById('resetOtpSection');
-		const loginButton = this.shadowRoot.getElementById('resetSubmitButton');
+	validateForm() {
+		const email = this.shadowRoot.getElementById("resetEmail");
+		const otpSection = this.shadowRoot.getElementById("resetOtpSection");
+		const loginButton = this.shadowRoot.getElementById("resetSubmitButton");
 
 		const otpPattern = /^[A-Za-z0-9]{16}$/;
 		const emailValid = this.validateEmail(email);
@@ -100,164 +107,196 @@ export class ForgotPassword extends ComponentBaseClass {
 		let isValid = true;
 
 		if (!email.value || !emailValid) {
-        	email.classList.add('is-invalid');
-        	email.nextElementSibling.textContent = 'Email is required';
-			email.nextElementSibling.classList.add('invalid-feedback');
-            isValid = false;
-    	} else {
-        	email.classList.remove('is-invalid');
-        	email.nextElementSibling.textContent = '';
-			email.nextElementSibling.classList.remove('invalid-feedback');
-    	}
-        if (otpSection.style.display === 'none') {
-            loginButton.disabled = !isValid;
-            return isValid;
-        }
+			email.classList.add("is-invalid");
+			email.nextElementSibling.textContent = "Email is required";
+			email.nextElementSibling.classList.add("invalid-feedback");
+			isValid = false;
+		} else {
+			email.classList.remove("is-invalid");
+			email.nextElementSibling.textContent = "";
+			email.nextElementSibling.classList.remove("invalid-feedback");
+		}
+		if (otpSection.style.display === "none") {
+			loginButton.disabled = !isValid;
+			return isValid;
+		}
 
-        const otpCode = this.shadowRoot.getElementById('resetOtpCode');
-        const password1 = this.shadowRoot.getElementById('resetNewPassword1');
-        const password2 = this.shadowRoot.getElementById('resetNewPassword2');
+		const otpCode = this.shadowRoot.getElementById("resetOtpCode");
+		const password1 = this.shadowRoot.getElementById("resetNewPassword1");
+		const password2 = this.shadowRoot.getElementById("resetNewPassword2");
 
-        if (!otpCode.value || !otpPattern.test(otpCode.value)) {
-            otpCode.classList.add('is-invalid');
-            otpCode.parentElement.querySelector('.invalid-feedback').textContent = 'OTP is required';
-            isValid = false;
-        } else {
-            otpCode.classList.remove('is-invalid');
-            otpCode.parentElement.querySelector('.invalid-feedback').textContent = '';
-        }
+		if (!otpCode.value || !otpPattern.test(otpCode.value)) {
+			otpCode.classList.add("is-invalid");
+			otpCode.parentElement.querySelector(".invalid-feedback").textContent =
+				"OTP is required";
+			isValid = false;
+		} else {
+			otpCode.classList.remove("is-invalid");
+			otpCode.parentElement.querySelector(".invalid-feedback").textContent = "";
+		}
 
-    	if (!password1.value) {
-        	password1.classList.add('is-invalid');
-        	password1.nextElementSibling.textContent = 'Password is required';
-        	isValid = false;
-    	} else {
-        	password1.classList.remove('is-invalid');
-        	password1.nextElementSibling.textContent = '';
-    	}
+		if (!password1.value) {
+			password1.classList.add("is-invalid");
+			password1.nextElementSibling.textContent = "Password is required";
+			isValid = false;
+		} else {
+			password1.classList.remove("is-invalid");
+			password1.nextElementSibling.textContent = "";
+		}
 
-        if (!password2.value) {
-        	password2.classList.add('is-invalid');
-        	password2.nextElementSibling.textContent = 'Password is required';
-        	isValid = false;
-    	} else {
-        	password2.classList.remove('is-invalid');
-        	password2.nextElementSibling.textContent = '';
-    	}
+		if (!password2.value) {
+			password2.classList.add("is-invalid");
+			password2.nextElementSibling.textContent = "Password is required";
+			isValid = false;
+		} else {
+			password2.classList.remove("is-invalid");
+			password2.nextElementSibling.textContent = "";
+		}
 
-        if ((password1.value && password2.value) && password1.value !== password2.value) {
-            password1.classList.add('is-invalid');
-            password2.classList.add('is-invalid');
-            password1.nextElementSibling.textContent = 'Passwords do not match';
-            password2.nextElementSibling.textContent = 'Passwords do not match';
-            isValid = false;
-        }
+		if (
+			password1.value &&
+			password2.value &&
+			password1.value !== password2.value
+		) {
+			password1.classList.add("is-invalid");
+			password2.classList.add("is-invalid");
+			password1.nextElementSibling.textContent = "Passwords do not match";
+			password2.nextElementSibling.textContent = "Passwords do not match";
+			isValid = false;
+		}
 
 		loginButton.disabled = !isValid;
 		return isValid;
 	}
 
-    async requestOTP(event) {
-        event.preventDefault();
-        const email = this.shadowRoot.getElementById('resetEmail').value;
-        const resetButton = this.shadowRoot.getElementById('resetRequestOTP');
-        const resetSpinner = this.shadowRoot.getElementById('resetSpinner');
-        const resetError = this.shadowRoot.getElementById('resetErrorMessage');
-        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
-        const submitButton = this.shadowRoot.getElementById('resetSubmitButton');
-        if (otpSection.style.display !== 'none' && resetButton.disabled && submitButton.disabled) return;
+	async requestOTP(event) {
+		event.preventDefault();
+		const email = this.shadowRoot.getElementById("resetEmail").value;
+		const resetButton = this.shadowRoot.getElementById("resetRequestOTP");
+		const resetSpinner = this.shadowRoot.getElementById("resetSpinner");
+		const resetError = this.shadowRoot.getElementById("resetErrorMessage");
+		const otpSection = this.shadowRoot.getElementById("resetOtpSection");
+		const submitButton = this.shadowRoot.getElementById("resetSubmitButton");
+		if (
+			otpSection.style.display !== "none" &&
+			resetButton.disabled &&
+			submitButton.disabled
+		)
+			return;
 
-        resetButton.disabled = true;
-        resetSpinner.style.display = 'inline-block';
-        this.shadowRoot.getElementById('resetErrorMessage').textContent = '';
+		resetButton.disabled = true;
+		resetSpinner.style.display = "inline-block";
+		this.shadowRoot.getElementById("resetErrorMessage").textContent = "";
 
-        try {
-            this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email })}, 'application/json', false);
-            this.startTimer(60, resetButton);
-            this.handleEmailInput();
-        } catch (error) {
-            resetError.textContent = error;
-            this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
-            resetButton.disabled = false;
-        } finally {
-            resetSpinner.style.display = 'none';
-            this.shadowRoot.getElementById('resetOtpCode').focus();
-        }
-    }
+		try {
+			this.apiFetch(
+				"/registration/basic_forgot_password",
+				{ method: "POST", body: JSON.stringify({ username: email }) },
+				"application/json",
+				false,
+			);
+			this.startTimer(60, resetButton);
+			this.handleEmailInput();
+		} catch (error) {
+			resetError.textContent = error;
+			this.shadowRoot
+				.getElementById("resetEmail")
+				.setAttribute("aria-invalid", "true");
+			resetButton.disabled = false;
+		} finally {
+			resetSpinner.style.display = "none";
+			this.shadowRoot.getElementById("resetOtpCode").focus();
+		}
+	}
 
-    async resetPassword(event) {
-        event.preventDefault();
-        const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
-        const resetSpinner = this.shadowRoot.getElementById('resetSpinner');
-        const resetError = this.shadowRoot.getElementById('resetErrorMessage');
-        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
-        if (resetButton.disabled) return;
+	async resetPassword(event) {
+		event.preventDefault();
+		const resetButton = this.shadowRoot.getElementById("resetSubmitButton");
+		const resetSpinner = this.shadowRoot.getElementById("resetSpinner");
+		const resetError = this.shadowRoot.getElementById("resetErrorMessage");
+		const otpSection = this.shadowRoot.getElementById("resetOtpSection");
+		if (resetButton.disabled) return;
 
-        resetButton.disabled = true;
-        resetSpinner.style.display = 'inline-block';
-        resetError.textContent = '';
+		resetButton.disabled = true;
+		resetSpinner.style.display = "inline-block";
+		resetError.textContent = "";
 
-        if (otpSection.style.display === 'none') {
-            this.requestOTP(event);
-            return;
-        } else {
-            const password2 = this.shadowRoot.getElementById('resetNewPassword2').value;
-            const password1 = this.shadowRoot.getElementById('resetNewPassword1').value;
-            if (password1 !== password2) {
-                resetButton.disabled = false;
-                resetSpinner.style.display = 'none';
-                return;
-            }
-            const email = this.shadowRoot.getElementById('resetEmail').value;
-            const otp = this.shadowRoot.getElementById('resetOtpCode').value;
-            try {
-                await this.apiFetch('/registration/basic_forgot_password', {method: 'POST', body: JSON.stringify({ "username": email, otp, "new_password": password1 })}, 'application/json', false);
-                resetError.classList.remove('text-danger');
-                resetError.classList.add('text-success');
-                resetError.textContent = 'Success! Redirecting to login page...';
-                setTimeout(app.router.go, 3000, '/login', false);
-                //app.router.go('/login', false);
-            } catch (error) {
-                resetError.textContent = error;
-                this.shadowRoot.getElementById('resetEmail').setAttribute('aria-invalid', 'true');
-                resetButton.disabled = false;
-            } finally {
-                resetSpinner.style.display = 'none';
-            }
-        }
-    }
+		if (otpSection.style.display === "none") {
+			this.requestOTP(event);
+			return;
+		}
+		const password2 = this.shadowRoot.getElementById("resetNewPassword2").value;
+		const password1 = this.shadowRoot.getElementById("resetNewPassword1").value;
+		if (password1 !== password2) {
+			resetButton.disabled = false;
+			resetSpinner.style.display = "none";
+			return;
+		}
+		const email = this.shadowRoot.getElementById("resetEmail").value;
+		const otp = this.shadowRoot.getElementById("resetOtpCode").value;
+		try {
+			await this.apiFetch(
+				"/registration/basic_forgot_password",
+				{
+					method: "POST",
+					body: JSON.stringify({
+						username: email,
+						otp,
+						new_password: password1,
+					}),
+				},
+				"application/json",
+				false,
+			);
+			resetError.classList.remove("text-danger");
+			resetError.classList.add("text-success");
+			resetError.textContent = "Success! Redirecting to login page...";
+			setTimeout(app.router.go, 3000, "/login", false);
+			//app.router.go('/login', false);
+		} catch (error) {
+			resetError.textContent = error;
+			this.shadowRoot
+				.getElementById("resetEmail")
+				.setAttribute("aria-invalid", "true");
+			resetButton.disabled = false;
+		} finally {
+			resetSpinner.style.display = "none";
+		}
+	}
 
-    handleEmailInput() {
-        const email = this.shadowRoot.getElementById('resetEmail').value;
-        const otpSection = this.shadowRoot.getElementById('resetOtpSection');
-        const resetButton = this.shadowRoot.getElementById('resetSubmitButton');
-        if (email) {
-            otpSection.style.display = '';
-            resetButton.disabled = true;
-        } else {
-            otpSection.style.display = 'none';
-            resetButton.disabled = true;
-        }
-    }
+	handleEmailInput() {
+		const email = this.shadowRoot.getElementById("resetEmail").value;
+		const otpSection = this.shadowRoot.getElementById("resetOtpSection");
+		const resetButton = this.shadowRoot.getElementById("resetSubmitButton");
+		if (email) {
+			otpSection.style.display = "";
+			resetButton.disabled = true;
+		} else {
+			otpSection.style.display = "none";
+			resetButton.disabled = true;
+		}
+	}
 
-    startTimer(duration, button) {
-        let timer = duration, minutes, seconds;
-        this.timer = setInterval(() => {
-            minutes = parseInt(timer / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+	startTimer(duration, button) {
+		let timer = duration;
+		let minutes;
+		let seconds;
+		this.timer = setInterval(() => {
+			minutes = Number.parseInt(timer / 60, 10);
+			seconds = Number.parseInt(timer % 60, 10);
 
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
+			minutes = minutes < 10 ? `0${minutes}` : minutes;
+			seconds = seconds < 10 ? `0${seconds}` : seconds;
 
-            button.textContent = `${minutes}:${seconds}`;
+			button.textContent = `${minutes}:${seconds}`;
 
-            if (--timer < 0) {
-                clearInterval(this.timer);
-                button.textContent = 'Send OTP';
-                button.disabled = false;
-            }
-        }, 1000);
-    }
+			if (--timer < 0) {
+				clearInterval(this.timer);
+				button.textContent = "Send OTP";
+				button.disabled = false;
+			}
+		}, 1000);
+	}
 }
 
-customElements.define('forgot-password', ForgotPassword);
+customElements.define("forgot-password", ForgotPassword);
