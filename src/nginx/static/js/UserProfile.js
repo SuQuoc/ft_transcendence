@@ -271,25 +271,30 @@ export class UserProfile extends ComponentBaseClass {
 		const oldEmailContainer = this.shadowRoot.getElementById("oldEmailContainer");
 		const newEmailContainer = this.shadowRoot.getElementById("newEmailContainer");
 		const email = this.shadowRoot.getElementById("email");
-		this.apiFetch("/registration/change_username", {
-			method: "POST",
-			body: JSON.stringify({ new_username: email.value }),
-		});
-		oldEmailContainer.removeAttribute("hidden");
-		newEmailContainer.removeAttribute("hidden");
-		let timer = 60;
-		if (this.interval)
-			clearInterval(this.interval);
-		this.interval = setInterval(() => {
-			requestOldEmailOTP.textContent = `${timer}s`;
-			requestNewEmailOTP.textContent = `${timer}s`;
-			if (--timer < 0) {
+
+		try {
+			this.apiFetch("/registration/change_username", {
+				method: "POST",
+				body: JSON.stringify({ new_username: email.value }),
+			});
+			oldEmailContainer.removeAttribute("hidden");
+			newEmailContainer.removeAttribute("hidden");
+			let timer = 60;
+			if (this.interval)
 				clearInterval(this.interval);
-				requestOldEmailOTP.textContent = "New OTP";
-				requestNewEmailOTP.textContent = "New OTP";
-			}
-		}, 1000);
-		this.shadowRoot.getElementById("oldEmailOTP").focus();
+			this.interval = setInterval(() => {
+				requestOldEmailOTP.textContent = `${timer}s`;
+				requestNewEmailOTP.textContent = `${timer}s`;
+				if (--timer < 0) {
+					clearInterval(this.interval);
+					requestOldEmailOTP.textContent = "New OTP";
+					requestNewEmailOTP.textContent = "New OTP";
+				}
+			}, 1000);
+			this.shadowRoot.getElementById("oldEmailOTP").focus();
+		} catch (error) {
+			console.error("Error requesting OTP:", error);
+		}
 	}
 
 	emailCancelChange() {
@@ -300,6 +305,8 @@ export class UserProfile extends ComponentBaseClass {
 		const requestNewEmailOTP = this.shadowRoot.getElementById("requestNewEmailOTP");
 		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
 		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		oldEmailOTP.classList.remove("warning");
+		newEmailOTP.classList.remove("warning");
 		email.disabled = true;
 		email.value = window.app.userData.email;
 		oldEmailContainer.hidden = true;
@@ -319,6 +326,8 @@ export class UserProfile extends ComponentBaseClass {
 	emailValidateOTP() {
 		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
 		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		oldEmailOTP.classList.remove("warning");
+		newEmailOTP.classList.remove("warning");
 		const changeEmailButton = this.shadowRoot.getElementById("saveNewEmailButton");
 		const pattern = /^[0-9]{16}$/;
 		if (pattern.test(oldEmailOTP.value) && pattern.test(newEmailOTP.value)) {
@@ -328,18 +337,24 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	emailChangeWithOTP(event) {
+	async emailChangeWithOTP(event) {
 		event.preventDefault();
 		const email = this.shadowRoot.getElementById("email");
 		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
 		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
 		if (oldEmailOTP.value && newEmailOTP.value) {
-			this.apiFetch("/registration/change_username", {
-				method: "POST",
-				body: JSON.stringify({ new_username: email.value, otp_old_email: oldEmailOTP.value, otp_new_email: newEmailOTP.value }),
-			});
-			window.app.userData.email = email.value;
-			this.emailCancelChange();
+			try {
+				await this.apiFetch("/registration/change_username", {
+					method: "POST",
+					body: JSON.stringify({ new_username: email.value, otp_old_email: oldEmailOTP.value, otp_new_email: newEmailOTP.value }),
+				});
+				window.app.userData.email = email.value;
+				this.emailCancelChange();
+			} catch (error) {
+				oldEmailOTP.classList.add("warning");
+				newEmailOTP.classList.add("warning");
+				console.error("Error changing email:", error);
+			}
 		}
 	}
 
