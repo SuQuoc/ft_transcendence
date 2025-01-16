@@ -67,8 +67,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	    	<ul>
 	    		${backupCodes.map(code => `<li>${code}</li>`).join('')}
 	    	</ul>
-	    	<button id="copyBackupCodesButton" class="btn btn-secondary">Copy to Clipboard</button>
-	    	<button id="downloadBackupCodesButton" class="btn btn-secondary">Download as File</button>
+	    	<button id="copyBackupCodesButton" class="btn btn-secondary" type="button">Copy to Clipboard</button>
+	    	<button id="downloadBackupCodesButton" class="btn btn-secondary" type="button">Download as File</button>
 	    </div>
 		`;
 	  this.shadowRoot.getElementById("displayNameSubmitButton")
