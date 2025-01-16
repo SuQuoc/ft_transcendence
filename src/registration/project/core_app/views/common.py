@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .token import DeleteTokenObtainPairSerializer
+from ..models import RegistrationUser
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um, send_delete_request_to_game
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
 from django.conf import settings
@@ -52,6 +53,8 @@ def change_username(request):
     try:
         new_username = request.data.get('new_username')
         if not new_username:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if RegistrationUser.objects.filter(username=new_username).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = request.user
         otp_old = request.data.get('otp_old_email')
