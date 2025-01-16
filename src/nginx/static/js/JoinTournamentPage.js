@@ -213,7 +213,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		// sends the tournament details to the game server
 		window.app.socket.send(JSON.stringify({"type": "create_room",
 											"room_name": tournament_name,
-											"creator_name": window.app.userData.username, // NOTE: this is not used by backend !! [ask Quocsu]
 											"points_to_win": points_to_win,
 											"max_player_num": number_of_players}));
 		
@@ -281,11 +280,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		}
 		else if (data.type === "tournament_bracket") {
 			window.app.socket_event_queue.add(event);
-		}
-		else if (data.type === "join_tournament" || data.type === "player_joined_room") {
-			// ignoring these types for now !!! [ask Quocsu] if this is necessary and if we need to ignore more
-			// do we need to ignore these types??!!
-			console.log("ignoring type: ", data.type);
 		}
 		else if (data.type === "error") {
 			console.error("Error: handleReceivedMessage: ", data.error);
