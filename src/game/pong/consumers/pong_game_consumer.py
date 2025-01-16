@@ -99,8 +99,6 @@ class PongGameConsumer(AsyncWebsocketConsumer):
             game.add_player(self.user_id, self.displayname)            
             if game.is_full():
                 game_task = asyncio.create_task(game.start_game_loop())
-                # callback_match_id = self.match_id # NOTE: just to ensure that the id stays the same NO MATTER WHAT
-                # game_task.add_done_callback(lambda t: self.cleanup(callback_match_id)) cool but cant use an async function as callback
             # NOTE: in our case with only 2 players, this is almost always true,
             # maybe except if 1 client joins and disconnects before the 2nd even joins
 

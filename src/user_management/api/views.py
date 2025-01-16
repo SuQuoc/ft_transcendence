@@ -1,11 +1,8 @@
-from django.http import HttpResponse
 from typing import Optional
 from django.shortcuts import get_object_or_404
-from friends.models import FriendList
 from friends.models import FriendRequest
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -18,8 +15,6 @@ from .serializers import CustomUserProfileSerializer
 from .serializers import UserRelationSerializer
 from .serializers import ImageTooLargeError
 from rest_framework.decorators import api_view
-from rest_framework.views import APIView
-import logging
 
 
 @api_view(['POST'])
@@ -32,7 +27,6 @@ def get_displaynames(request):
         displaynames = {
             str(user.user_id): user.displayname for user in users
         }
-        #logging.warning("displaynames: " + str(displaynames))
         return Response(displaynames, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'get_displaynames': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -74,7 +68,7 @@ class CustomUserProfile(generics.GenericAPIView):
         user = get_user_from_jwt(request)
         serializer = CustomUserEditSerializer(user, data=request.data, partial=True)
         try:
-            serializer.is_valid(raise_exception=True) # will call the validate method in the serializer IF DEFINED
+            serializer.is_valid(raise_exception=True)
         except ImageTooLargeError as e:
             return Response({'error': str(e)}, status=e.status_code)
         except Exception as e:

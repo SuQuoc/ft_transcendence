@@ -10,11 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from datetime import timedelta
-from json import JSONEncoder
 import os
 from pathlib import Path
-from uuid import UUID
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,7 +43,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "api",
     "friends",
-    "channels" # NOTE: maybe unnecessary
 ]
 
 MIDDLEWARE = [
@@ -159,7 +155,6 @@ STATIC_URL = "um/img/"  # had to add um/ before [probably of nginx config] to ha
 STATIC_ROOT = os.path.join(BASE_DIR, 'uploads/')
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-#TODO: check how we use MEDIA_URL and if it works without debug flag
 MEDIA_URL = "media_url/"  # just for the URL in the browser (um/profile_pictures would work) but the folder where the files are is defined in MEDIA_ROOT
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root/')
 

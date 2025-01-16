@@ -1,7 +1,6 @@
 
 
 import json
-import uuid
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .pong import Pong
@@ -52,7 +51,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         MatchmakingConsumer.players.pop(self.channel_name, None)
-        print(f"Player {self.user.name} disconnected")
         await super().disconnect(close_code)
 
     
@@ -60,8 +58,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message_type = text_data_json['type']
 
-        if message_type == 'cancel': # NOTE: not implemented yet, not a must
-            await self.disconnect(1000)
+        # if message_type == 'cancel': # NOTE: not implemented yet, not a must
+        #     await self.disconnect(1000)
             
     
     async def trigger_match_found(self, match_id: str, channel_name):

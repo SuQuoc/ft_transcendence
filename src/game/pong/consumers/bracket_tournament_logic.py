@@ -3,9 +3,6 @@ from django.core.cache import cache
 from .Room import TournamentRoom, Player
 from .utils import get_room_group, T_TOURNAMENT_BRACKET, T_TOURNAMENT_END, T_FREE_WIN, T_MATCH_RESULT, T_DC_IN_GAME, T_DC_OUT_GAME, T_DISPLAY_MATCH_RESULT
 import random
-import uuid
-import json
-import asyncio
 from typing import List
 from .utils import create_match_config
 from .pong_game_consumer import GameMode
@@ -13,7 +10,6 @@ from channels.layers import get_channel_layer
 
 channel_layer = get_channel_layer()
 
-#asyncio.create_task()
 async def tournament_loop(room: TournamentRoom, queue):
     """
     Starts the tournament logic in a bracket style
@@ -48,6 +44,7 @@ async def tournament_loop(room: TournamentRoom, queue):
                         "loser": loser.name
                     }
                     await send_display_match_result(channel_group, match_result)
+            
             elif message.get("type") == T_DC_IN_GAME:
                 msg_count += 1
 
@@ -102,35 +99,6 @@ def make_random_pairs(players) -> List[tuple]:
     return [tuple(players[i:i+2]) for i in range(0, length, 2)], odd_one
 
 
-# TODO: UNUSED
-def remove_duplicates(match_results):
-    """
-    Removes duplicates from a list of dictionaries.
-
-    Args:
-        match_results (list): A list of dictionaries representing match results.
-
-    Returns:
-        list: A list of dictionaries with duplicates removed.
-    """
-    if not match_results:
-        return []
-
-    seen = set()
-    unique_results = []
-
-    for result in match_results:
-        if not isinstance(result, dict):
-            result = json.loads(result)
-
-        winner = result["winner"]
-        if winner not in seen:
-            seen.add(winner)
-            unique_results.append(result)
-    return unique_results
-
-
-
 async def create_tournament_bracket(channel_group, players, room):
     pairs, odd_one = make_random_pairs(players)
     if odd_one:
@@ -141,13 +109,12 @@ async def create_tournament_bracket(channel_group, players, room):
                 "match_id": create_match_config([pair[0].id, pair[1].id],
                                                 [pair[0].name, pair[1].name],
                                                 GameMode.TOURNAMENT.value,
-                                                points_to_win=room.points_to_win), # NOTE: creates a match in cache and stores who can connect
+                                                points_to_win=room.points_to_win),
                 "player1": pair[0].name,
                 "player2": pair[1].name
             }
             for pair in pairs
         ]
-    print(json.dumps(matches, indent=4))
     return matches, odd_one
 
 async def send_tournament_bracket(group_name, matches):
