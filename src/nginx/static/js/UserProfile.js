@@ -58,7 +58,7 @@ export class UserProfile extends ComponentBaseClass {
 					<div class="mb-3">
 						<label for="displayName" class="form-label">Display Name</label>
 						<div class="input-group mb-3">
-							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" pattern="A-Za-z0-9\\-_" disabled>
+							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" pattern="[A-Za-z0-9\\-_]{1,20}" disabled>
 							<span class="input-group-text" id="changeDisplayNameButton">Change</span>
 						</div>
 						<div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
