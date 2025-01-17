@@ -70,7 +70,11 @@ export class UserProfile extends ComponentBaseClass {
 						</div>
 						<span class="warning-message" id="emailWarning" style="display:none;">Choose a different Email address</span>
 						<div id="oldEmailContainer" hidden>
-							<label for="oldEmailOTP" class="form-label mt-3">OTP sent to old E-Mail</label>
+							<div class="form-check form-switch mt-3">
+  								<input class="form-check-input" type="checkbox" role="switch" id="changeUsernameSwitchBackupCode">
+  								<label class="form-check-label text-white" for="changeUsernameSwitchBackupCode">No access to email? Use backup code instead</label>
+							</div>
+							<label for="oldEmailOTP" class="form-label">OTP sent to old E-Mail</label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
 								<span class="input-group-text" id="requestOldEmailOTP">New OTP</span>
@@ -235,6 +239,23 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("changePasswordRequestOTP")
 			.addEventListener("click", this.changePasswordGetNewOTP.bind(this));
+		this.shadowRoot
+			.getElementById("changeUsernameSwitchBackupCode")
+			.addEventListener("change", (event) => {
+				const button = this.shadowRoot.getElementById("requestOldEmailOTP");
+				const label = this.shadowRoot.querySelector("label[for=oldEmailOTP]");
+				const input = this.shadowRoot.querySelector("input#oldEmailOTP");
+				if (event.target.checked) {
+					input.maxLength = 32;
+					input.minLength = 32;
+				} else {
+					input.minLength = 16;
+					input.maxLength = 16;
+				}
+				button.style.display = event.target.checked ? "none" : "block";
+				label.textContent = event.target.checked ? "Backup Code" : "OTP sent to old E-Mail";
+				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[0-9]{16}";
+			});
 	}
 
 	emailChange() {
@@ -334,8 +355,7 @@ export class UserProfile extends ComponentBaseClass {
 		oldEmailOTP.classList.remove("warning");
 		newEmailOTP.classList.remove("warning");
 		const changeEmailButton = this.shadowRoot.getElementById("saveNewEmailButton");
-		const pattern = /^[0-9]{16}$/;
-		if (pattern.test(oldEmailOTP.value) && pattern.test(newEmailOTP.value)) {
+		if (new RegExp(oldEmailOTP.pattern).test(oldEmailOTP.value) && new RegExp(newEmailOTP.pattern).test(newEmailOTP.value)) {
 			changeEmailButton.removeAttribute("disabled");
 		} else {
 			changeEmailButton.setAttribute("disabled", "");
@@ -347,11 +367,16 @@ export class UserProfile extends ComponentBaseClass {
 		const email = this.shadowRoot.getElementById("email");
 		const oldEmailOTP = this.shadowRoot.getElementById("oldEmailOTP");
 		const newEmailOTP = this.shadowRoot.getElementById("newEmailOTP");
+		const toggleSwitch = this.shadowRoot.getElementById("changeUsernameSwitchBackupCode");
 		if (oldEmailOTP.value && newEmailOTP.value) {
 			try {
 				await this.apiFetch("/registration/change_username", {
 					method: "POST",
-					body: JSON.stringify({ new_username: email.value, otp_old_email: oldEmailOTP.value, otp_new_email: newEmailOTP.value }),
+					body: JSON.stringify({
+					    new_username: email.value,
+					    [toggleSwitch.checked ? "backup_code" : "otp_old_email"]: oldEmailOTP.value,
+					    otp_new_email: newEmailOTP.value
+					}),
 				});
 				window.app.userData.email = email.value;
 				this.emailCancelChange();
