@@ -24,12 +24,10 @@ services:
     networks:
       - network_game
 
-  redis:
+  redis_game:
     container_name: pong_game_redis
     build: ../src/common_files/redis
     environment:
-      REDIS_ADMIN_USER: ${GAME_REDIS_ADMIN_USER:-redisadmin}
-      REDIS_ADMIN_PASSWORD: ${GAME_REDIS_ADMIN_PASSWORD:-redisadminpass}
       REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
 
@@ -80,7 +78,7 @@ services:
     depends_on:
       db_game:
         condition: service_healthy
-      redis:
+      redis_game:
         condition: service_healthy
     restart: on-failure
     networks:

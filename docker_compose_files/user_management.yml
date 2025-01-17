@@ -30,8 +30,6 @@ services:
         container_name: pong_um_redis
         build: ../src/common_files/redis
         environment:
-            REDIS_ADMIN_USER: ${UM_REDIS_ADMIN_USER:-redisadmin}
-            REDIS_ADMIN_PASSWORD: ${UM_REDIS_ADMIN_PASSWORD:-redisadminpass}
             REDIS_USER: "${UM_REDIS_USER:-redisuser}"
             REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
         expose:
