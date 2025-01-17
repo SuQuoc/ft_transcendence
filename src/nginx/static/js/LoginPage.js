@@ -81,6 +81,10 @@ export class LoginPage extends ComponentBaseClass {
   						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
 					</div>
 					<div id="loginBackupSection" style="display: none;">
+						<div class="mb-2">
+							<span class="text-warning">What's this?</span><br>
+							<span class="text-white">If you have lost access to your Email address, you can log in with one of your backup codes.</span>
+						</div>
 						<label for='loginBackupCode' class="form-label text-white-50">Your backup code</label>
 						<input name="backup_code" id='loginBackupCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{33}" minlength="33" maxlength="33">
 						<span id="BackupErrorMessage" class="text-danger"></span>
