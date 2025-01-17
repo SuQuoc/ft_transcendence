@@ -90,11 +90,9 @@ def check_one_time_password(related_user, action, password):
         otp = OneTimePassword.objects.get(related_user=related_user, action=action)
         if otp.expire < timezone.now():
             otp.delete()
-            raise Exception (action + ": " + 'otp expired')
-        if otp.action != action:
-            raise Exception (action + ": " + 'wrong action')
+            raise Exception ('otp expired')
         if not otp.check_password(password):
-            raise Exception (action + ': ' + 'wrong password')
+            raise Exception ('wrong otp')
         from ..tasks import delete_otp_task
         delete_otp_task.delay(otp.id)
         return True

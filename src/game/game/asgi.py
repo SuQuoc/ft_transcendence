@@ -21,16 +21,10 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from pong.routing import websocket_urlpatterns
-
 from channels.middleware import BaseMiddleware
-from rest_framework_simplejwt.tokens import UntypedToken, TokenError
-from rest_framework_simplejwt.authentication import JWTStatelessUserAuthentication
-
 from .authenticate import ACCESS
-import json
-
-
-
+from jwt import decode as jwt_decode
+from django.conf import settings
 
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
@@ -39,20 +33,9 @@ class JWTAuthMiddleware(BaseMiddleware):
         
         cookies = self.get_cookies_from_header(scope['headers'])
         token_str = cookies.get(ACCESS)
-        raw_token = token_str.encode('utf-8')
-        # NOTE: the encoding back to bytes was only for testing the JWTStatelessUserAuthentication
-        # if not used encoding unnecessary
-        if not raw_token:
-            await send({
-                'type': 'websocket.close',
-                'code': 4001  # Unauthorized access code, no cookies provided at all, no access cookie provided
-            })
-            return
         
-        from jwt import decode as jwt_decode
-        from django.conf import settings
         try:
-            data = jwt_decode(raw_token, settings.PUBLIC_KEY, algorithms=["RS256"])
+            data = jwt_decode(token_str, settings.PUBLIC_KEY, algorithms=["RS256"])
             scope["user_id"] = data["user_id"] # add user_id to the scope
         except Exception as e:
             print(e)

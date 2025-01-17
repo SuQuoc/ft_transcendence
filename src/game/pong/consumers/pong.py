@@ -138,7 +138,6 @@ class Pong:
     def __init__(self, channel_group, player_l_id, player_l_name, points_to_win=1):
         self.channel_group = channel_group # Messaging to Game Consumer
         self.size = 1
-        self.running = False
         self.result = {}
         self.points_to_win = points_to_win
         self.wall_to_be_hit = "x"   # either "x" or "y", used to save which wall will be hit first (gets set in self.calc_next_collision())
@@ -154,7 +153,7 @@ class Pong:
                             size = 10,
                             speed = 11) # yes, speed is 11 and not 10. 10 feels a bit too slow.
         self.player_l: Player = Player(id = player_l_id,
-                                       name = player_l_name,
+                                        name = player_l_name,
                                         pos_x = 10,
                                         pos_y = self.canvas_height/2 - self.player_height/2,
                                         width = self.player_width,
@@ -174,10 +173,10 @@ class Pong:
         self.size += 1
         
         
-    def rem_player(self, player):
-        if player == self.player_l.id:
+    def rem_player(self, player_id):
+        if player_id == self.player_l.id:
             self.player_l = None
-        elif player == self.player_r.id:
+        elif player_id == self.player_r.id:
             self.player_r = None
         self.size -= 1
 
@@ -368,16 +367,18 @@ class Pong:
         wall = self.get_wall(self.ball.vel)
         self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
         
-        self.running = True # NOTE: check if needed at the end of project !!
         tick_duration = 0.03
         start_time = time.time()
     
+        await self.send_initial_state(self.get_game_state())
         # count down
         for count in [3, 2, 1, 0]:
             await self.send_count_down(count)
             await asyncio.sleep(1)
+        
         # send initial state again, so the ball is in the right position
         await self.send_initial_state(self.get_game_state())
+        
         # game loop
         while True:
             start_time = time.time()
@@ -386,12 +387,14 @@ class Pong:
             game_state = self.get_game_state()
             await self.send_state_update(game_state)
             if self.game_over():
+                self.set_result() # NOTE: must do this before saving to db and sending game end
                 break
             await asyncio.sleep(tick_duration - (time.time() - start_time))
         
-        self.set_result() # NOTE: must do this before saving to db and sending game end
-        await self.save_game_to_db()
-        await self.send_game_end()
+        if self.size > 0:
+            # if both players disconnect from game, its not saved and no message is sent
+            await self.save_game_to_db()
+            await self.send_game_end()
 
 
     def game_over(self):
@@ -399,6 +402,11 @@ class Pong:
             return True
         return False
     
+    def player_gives_up(self, player_id):
+        if player_id == self.player_l.id:
+            self.player_r.score = self.points_to_win
+        elif player_id == self.player_r.id:
+            self.player_l.score = self.points_to_win
 
     def set_result(self):
         if self.player_l.score == self.points_to_win:

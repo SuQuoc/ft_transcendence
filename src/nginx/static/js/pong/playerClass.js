@@ -32,7 +32,7 @@ class Player {
 
 	/** Clears the rectangle on the last positon it was drawn.*/
 	clear() {
-		this.ctx.clearRect(this.x - 2, this.y - 2, this.width + 5, this.height + 5); // the -2 and +5 are because there was a border left (the smaller the canvas the higher these numbers have to be)
+		this.ctx.clearRect(this.x - 5, this.y - 5, this.width + 10, this.height + 10); // the -5 and +10 are because there was a border left (the smaller the canvas the higher these numbers have to be)
 	}
 
 	/** Clears and then draws the rectangle. Y is the height of the left upper corner of the rectangle.

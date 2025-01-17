@@ -44,20 +44,6 @@ class FriendList(models.Model):
     def get_friend_count(self):
         return self.friends.count()
 
-    # Needed ??
-    def get_friends_with_request_ids(self):
-        friends_with_request_id = []
-        for friend in self.friends.all():
-            friend_request = FriendRequest.objects.filter(
-                (Q(sender=self.user) & Q(receiver=friend)) | 
-                (Q(sender=friend) & Q(receiver=self.user)),
-                status=FriendRequest.ACCEPTED
-            ).first()
-            friends_with_request_id.append({
-                'friend': friend,
-                'request_id': friend_request.id if friend_request else None
-            })
-        return friends_with_request_id
 
     def get_friends_request_id(self, friend):
         friend_request = self.get_friends_request(friend)
