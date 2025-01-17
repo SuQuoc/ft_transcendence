@@ -55,15 +55,21 @@ export class FriendSearch extends ComponentBaseClass {
         width: 100%;
         max-width: 400px;
         margin: 0 auto;
-      }
-      </style>
-      <div class="search-container p-3 rounded-3 bg-dark">
-        <div class="input-group mb-3" role="search">
-            <input type="text" class="form-control search-input" placeholder="Search for users..." aria-label="Search">
-            <button class="btn btn-primary search-button">🔍</button>
+        }
+        .cursor-pointer {
+        cursor: pointer;
+        }
+        .underline-on-hover:hover {
+        text-decoration: underline;
+        }
+        </style>
+        <div class="search-container p-3 rounded-3 bg-dark">
+            <div class="input-group mb-3" role="search">
+                <input type="text" class="form-control search-input" placeholder="Search for users..." aria-label="Search">
+                <button class="btn btn-primary search-button">🔍</button>
+            </div>
+            <ul class="search-results list-group bg-dark"></ul>
         </div>
-        <ul class="search-results list-group bg-dark"></ul>
-      </div>
     `;
 		return template;
 	}
@@ -117,7 +123,7 @@ export class FriendSearch extends ComponentBaseClass {
             ${user.relationship === "requested" ? '<button class="btn btn-primary btn-sm disabled">+</button>' : ""}
             ${user.relationship === "received" ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ""}
             ${user.relationship === "stranger" && user.displayname !== window.app.userData.username ? '<button class="btn btn-primary btn-sm">+</button>' : ""}
-            <span class="text-white">${user.displayname}</span>
+            <span class="cursor-pointer underline-on-hover text-white">${user.displayname}</span>
           `;
 			item.classList.add(
 				"list-group-item",
@@ -127,34 +133,44 @@ export class FriendSearch extends ComponentBaseClass {
 				"bg-dark",
 			);
 
-			if (user.relationship === "friend") {
-				item
+    			if (user.relationship === "friend") {
+    				item
 					.querySelector(".btn-danger")
 					.addEventListener("click", () =>
 						this.changeFriendRequest(user.friend_request_id, "unfriend"),
 					);
-			} else if (user.relationship === "received") {
-				item
+    			} else if (user.relationship === "received") {
+    				item
 					.querySelector(".btn-success")
 					.addEventListener("click", () =>
 						this.changeFriendRequest(user.friend_request_id, "accept"),
 					);
-				item
+    				item
 					.querySelector(".btn-danger")
 					.addEventListener("click", () =>
 						this.changeFriendRequest(user.friend_request_id, "decline"),
 					);
-			} else if (
+    			} else if (
 				user.relationship === "stranger" &&
 				user.displayname !== window.app.userData.username
 			) {
-				item
+    				item
 					.querySelector(".btn-primary")
 					.addEventListener("click", () =>
 						this.sendFriendRequest(user.displayname),
 					);
-			}
-			resultsElement.appendChild(item);
+    			}
+            const displaynameElement = item.querySelector("span");
+            if (displaynameElement) {
+                displaynameElement.addEventListener("click", () => {
+                    const userData = {id: user.user_id,
+                        name: user.displayname,
+                        image: user.image,
+                    };
+                    window.app.router.go("/stats", true, userData);
+                });
+            }
+    			resultsElement.appendChild(item);
 		}
 	}
 

@@ -3,12 +3,23 @@ import { StatisticTournamentElement } from "./StatisticTournamentElement.js";
 import { ErrorToastElement } from "./ErrorToastElement.js";
 
 export class StatisticsPage extends ComponentBaseClass {
-	constructor() {
+	/** 
+	 * @param {string} user_data - is used when a user looks up another user. If the user looks up themselves, it should be empty ("").
+	*/
+	constructor(user_data) {
 		super();
 
-		this.root.getElementById("statsProfileImage").src = window.app.userData.profileImage;
-		this.root.getElementById("statsDisplayname").innerText = window.app.userData.username;
-}
+		if (!user_data || user_data === "") {
+			this.user_id = "";
+			this.root.getElementById("statsProfileImage").src = window.app.userData.profileImage;
+			this.root.getElementById("statsDisplayname").innerText = window.app.userData.username;
+		}
+		else {
+			this.user_id = user_data.id;
+			this.root.getElementById("statsProfileImage").src = user_data.image;
+			this.root.getElementById("statsDisplayname").innerText = user_data.name;
+		}
+	}
 
 	async connectedCallback() {
 		super.connectedCallback();
@@ -24,7 +35,7 @@ export class StatisticsPage extends ComponentBaseClass {
 		this.couldnt_fetch_data_toast = new ErrorToastElement("Something went wrong, couldn't fetch data");
 		this.toast_container.append(this.couldnt_fetch_data_toast);
 
-		const stats = await this.fetchStats();
+		const stats = await this.fetchStats(this.user_id);
 		this.setStats(stats);
 	}
 
@@ -37,12 +48,16 @@ export class StatisticsPage extends ComponentBaseClass {
 
 	/// ----- Methods ----- ///
 
-	async fetchStats() {
+	async fetchStats(user_id) {
 		try {
-			const stats = await this.apiFetch('game/get_game_stats/', { method: 'GET' });
+			let stats = null;
+			if (!user_id || user_id === "")
+				stats = await this.apiFetch("game/get_game_stats/", { method: "GET" });
+			else
+				stats = await this.apiFetch(`game/get_game_stats?profile_id=${user_id}`, { method: "GET" });
 			return (stats);
 		} catch (error) {
-			console.error('Error fetching stats:', error.message);
+			console.error("Error fetching stats:", error.message);
 			this.couldnt_fetch_data_toast.show();
 		}
 		return (null);
@@ -55,7 +70,7 @@ export class StatisticsPage extends ComponentBaseClass {
 		const lost_percent = stats.losses / stats.total_matches * 100;
 		const won_percent = stats.wins / stats.total_matches * 100;
 		const lost_bar = this.root.getElementById("statsLostBar");
-		const won_bar = this.root.getElementById('statsWonBar');
+		const won_bar = this.root.getElementById("statsWonBar");
 
 		this.root.getElementById("statsNoGamesPlayed").classList.add("d-none");
 		this.root.getElementById("statsLastGames").classList.remove("d-none");
@@ -65,9 +80,9 @@ export class StatisticsPage extends ComponentBaseClass {
 		this.root.getElementById("statsLostPercent").innerText = parseFloat(lost_percent.toFixed(2)) + "%";
 		this.root.getElementById("statsWonPercent").innerText = parseFloat(won_percent.toFixed(2)) + "%"
 		lost_bar.style.width = lost_percent + "%";
-		lost_bar.setAttribute('aria-valuenow', parseFloat(lost_percent.toFixed(2)));
+		lost_bar.setAttribute("aria-valuenow", parseFloat(lost_percent.toFixed(2)));
 		won_bar.style.width = won_percent + "%";
-		won_bar.setAttribute('aria-valuenow', parseFloat(won_percent.toFixed(2)));
+		won_bar.setAttribute("aria-valuenow", parseFloat(won_percent.toFixed(2)));
 
 		for (let key in stats.last_matches) {
 			const tournament = stats.last_matches[key];
@@ -83,7 +98,7 @@ export class StatisticsPage extends ComponentBaseClass {
 
 
 	getElementHTML() {
-		const template = document.createElement('template');
+		const template = document.createElement("template");
 		template.innerHTML = `
 			<scripts-and-styles style="display: none"></scripts-and-styles>
 			<!-- Toasts -->
