@@ -300,6 +300,7 @@ export class SignupPage extends ComponentBaseClass {
 				this.shadowRoot.getElementById("signupOtpCode").focus();
 			} catch (error) {
 				console.error("Error during OTP request:", error);
+				signupErrorEmail.style.display = "block";
 				signupErrorEmail.textContent = error;
 				this.shadowRoot
 					.getElementById("signupEmail")
