@@ -1,5 +1,4 @@
 services:
-
   db_registration:
     container_name: pong_reg_db
     build: ../src/common_files/postgres
@@ -14,63 +13,13 @@ services:
     volumes:
       - volume_registration:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${REG_POSTGRES_USER:-reg_postgress_user} -d ${REG_POSTGRES_DB:-reg_postgress_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${REG_POSTGRES_USER:-reg_postgress_user} -d ${REG_POSTGRES_DB:-reg_postgress_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
     restart: on-failure
     networks:
       - network_registration
-
-  registration:
-    container_name: pong_reg
-    build: ../src/registration
-    volumes:
-      - ../src/registration:/app
-    expose:
-      - "8000/tcp"
-    environment:
-      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
-      DEBUG: ${DEBUG:-False}
-
-      SECRET_KEY: ${REG_SECRET_KEY:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
-      
-      DB_HOST: "${REG_DB_HOST:-db_registration}"
-      POSTGRES_DB: "${REG_POSTGRES_DB:-reg_postgress_db}"
-      POSTGRES_ACCESS_USER: "${REG_POSTGRES_ACCESS_USER:-reg_postgress_access_user}"
-      POSTGRES_ACCESS_PASSWORD: "${REG_POSTGRES_ACCESS_PASSWORD:-reg_postgress_access_password}"
-      
-      SILK: "${SILK:-False}"
-      MOCK_EMAIL: "${MOCK_EMAIL:-False}"
-      MOCK_OTP: "${MOCK_OTP:-False}"
-      DOMAIN: ${DOMAIN:-localhost}
-      FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
-      FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
-      EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
-      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
-      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
-
-      # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
-      ADMIN_USERNAME: "${REG_ADMIN_USERNAME:-admin}" #[aguilmea] to be deleted
-      ADMIN_EMAIL: "${REG_ADMIN_EMAIL:-email@gmail.com}" #[aguilmea] to be deleted
-      ADMIN_PASSWORD: "${REG_ADMIN_PASSWORD:-password}" #[aguilmea] to be deleted
-
-      REDIS_USER: "${REG_REDIS_USER:-redisuser}"
-      REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
-
-    depends_on:
-      db_registration:
-        condition: service_healthy
-      redis_registration:
-        condition: service_healthy
-    restart: on-failure
-    networks:
-      - network_registration
-      - network_django
-      - network_redis_reg
-    secrets:
-      - public_key.pem
-      - private_key.pem
 
   redis_registration:
     container_name: pong_reg_redis
@@ -87,3 +36,54 @@ services:
       retries: 4
     networks:
       - network_redis_reg
+
+  registration:
+    container_name: pong_reg
+    build: ../src/registration
+    volumes:
+      - ../src/registration:/app
+    expose:
+      - "8000/tcp"
+    environment:
+      SERVER_URL: ${SERVER_URL:-https://localhost:8443}
+      DEBUG: ${DEBUG:-False}
+
+      DJ_SECRET_KEY: ${REG_SECRET_KEY:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+
+      DB_HOST: "db_registration"
+      POSTGRES_DB: "${REG_POSTGRES_DB:-reg_postgress_db}"
+      POSTGRES_ACCESS_USER: "${REG_POSTGRES_ACCESS_USER:-reg_postgress_access_user}"
+      POSTGRES_ACCESS_PASSWORD: "${REG_POSTGRES_ACCESS_PASSWORD:-reg_postgress_access_password}"
+      
+      REDIS_USER: "${REG_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
+
+      # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
+      PYTHONUNBUFFERED: 1
+      DJ_SUDO_USERNAME: "${REG_DJ_SUDO_USERNAME:-admin}" #[aguilmea] to be deleted
+      DJ_SUDO_EMAIL: "${REG_DJ_SUDO_EMAIL:-email@gmail.com}" #[aguilmea] to be deleted
+      DJ_SUDO_PASSWORD: "${REG_DJ_SUDO_PASSWORD:-transcendence}" #[aguilmea] to be deleted
+
+      SILK: "${SILK:-False}"
+      MOCK_EMAIL: "${MOCK_EMAIL:-False}"
+      MOCK_OTP: "${MOCK_OTP:-False}"
+      DOMAIN: ${DOMAIN:-localhost}
+      FT_CLIENT_ID: "${FT_CLIENT_ID:-u-s4t2ud-xxx}"
+      FT_CLIENT_SECRET: "${FT_CLIENT_SECRET:-s-s4t2ud-xxx}"
+      EMAIL_HOST: "${EMAIL_HOST:-smtp.gmail.com}"
+      EMAIL_HOST_USER: "${EMAIL_HOST_USER:-donotuse@gmail.com}"
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD:-donotuse}"
+
+    depends_on:
+      db_registration:
+        condition: service_healthy
+      redis_registration:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - network_registration
+      - network_django
+      - network_redis_reg
+    secrets:
+      - public_key.pem
+      - private_key.pem

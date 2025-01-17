@@ -24,7 +24,7 @@ def non_verified_users_after_one_day():
 
         email_verified=False,
         date_joined__lt=one_day_ago
-    ).exclude(username=os.environ.get("ADMIN_USERNAME"))
+    ).exclude(username=os.environ.get("DJ_SUDO_USERNAME"))
     nb = users_to_delete.count()
     users_to_delete.delete()
     return nb
@@ -34,7 +34,7 @@ def users_without_login_within_one_year():
     from core_app.models import RegistrationUser
     one_year_ago = timezone.now() - timedelta(days=365)
     #one_year_ago = timezone.now() - timedelta(minutes=2) # for testing purpose
-    users_to_delete = RegistrationUser.objects.filter(last_login__lt=one_year_ago).exclude(username=os.environ.get("ADMIN_USERNAME"))
+    users_to_delete = RegistrationUser.objects.filter(last_login__lt=one_year_ago).exclude(username=os.environ.get("DJ_SUDO_USERNAME"))
     nb = users_to_delete.count()
     users_to_delete.delete()
     return nb

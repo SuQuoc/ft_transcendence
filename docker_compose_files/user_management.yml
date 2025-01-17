@@ -1,5 +1,4 @@
 services:
-    # TODO: change _MANAGEMENT ending to _UM
     db_usermanagement:
         container_name: pong_um_db
         build: ../src/common_files/postgres
@@ -14,11 +13,7 @@ services:
         volumes:
             - volume_user_management:/var/lib/postgresql/data
         healthcheck:
-            test:
-                [
-                    "CMD-SHELL",
-                    "pg_isready -U ${UM_POSTGRES_USER:-posty} -d ${UM_POSTGRES_DB:-default_db}",
-                ]
+            test: ["CMD-SHELL", "pg_isready -U ${UM_POSTGRES_USER:-posty} -d ${UM_POSTGRES_DB:-default_db}"]
             interval: 10s
             timeout: 5s
             retries: 4
@@ -34,8 +29,6 @@ services:
             REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
         expose:
             - 6379
-        # entrypoint: ["sh", "/usr/local/bin/generate-redis-conf.sh"]
-        # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
         healthcheck:
             test: ["CMD", "redis-cli", "ping"]
             interval: 5s
@@ -57,15 +50,14 @@ services:
             DEBUG: ${DEBUG:-False}
 
             DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5fdsfdsfdsvcxvsEWvcxvzqca7(sm#(x9nnf*5(kjnk}
-            DJ_ALLOWED_HOSTS: "${UM_DJ_ALLOWED_HOSTS:-localhost}" # TODO: needed?
-            DB_HOST: "${UM_DB_HOST:-db_usermanagement}"
-
-            REDIS_USER: "${UM_REDIS_USER:-redisuser}"
-            REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
-
+            
+            DB_HOST: "db_usermanagement"
             POSTGRES_DB: "${UM_POSTGRES_DB:-default_db}"
             POSTGRES_ACCESS_USER: "${UM_POSTGRES_ACCESS_USER:-accessy}"
             POSTGRES_ACCESS_PASSWORD: "${UM_POSTGRES_ACCESS_PASSWORD:-accesspass}"
+
+            REDIS_USER: "${UM_REDIS_USER:-redisuser}"
+            REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
 
             # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
             POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
