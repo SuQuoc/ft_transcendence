@@ -68,18 +68,24 @@ export class FriendList extends ComponentBaseClass {
         width: 100%;
         max-width: 400px;
         margin: 0 auto;
-      }
-      </style>
-      <div class="container">
-      	<div class="p-3 rounded-3 bg-dark">
+    	}
+		.cursor-pointer {
+        cursor: pointer;
+        }
+        .underline-on-hover:hover {
+        text-decoration: underline;
+        }
+		</style>
+		<div class="container">
+		<div class="p-3 rounded-3 bg-dark">
 			<div class="btn-group w-100 mb-3" role="toolbar" aria-label="Element to switch between friends and requests">
-			  <button type="button" class="btn btn-outline-primary" id="friends-button">Friends</button>
-			  <button type="button" class="btn btn-outline-primary" id="requested-button">Requests</button>
+				<button type="button" class="btn btn-outline-primary" id="friends-button">Friends</button>
+				<button type="button" class="btn btn-outline-primary" id="requested-button">Requests</button>
 			</div>
 			<ul class="list-group bg-dark" id="list"></ul>
 		</div>
-      </div>
-`;
+		</div>
+	`;
 		return template;
 	}
 
@@ -95,7 +101,7 @@ export class FriendList extends ComponentBaseClass {
 			}
 			button.addEventListener("click", (event) => {
 				const clickedButton = event.target;
-				for (const btn of clickedButton) {
+				for (const btn of buttons) {
 					btn.classList.remove("active");
 					btn.removeAttribute("aria-current");
 				}
@@ -203,11 +209,21 @@ export class FriendList extends ComponentBaseClass {
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
         <span class="friend-status ${window.app.online_socket.online_friends.includes(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
-      <span class="text-white text-break lh-1">${itemData.displayname}</span>
+      <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
     `;
 		item.querySelector(".btn-danger").addEventListener("click", () => {
 			this.changeFriendRequest(itemData.friend_request_id, "unfriend");
 		});
+		const displaynameElement = item.querySelector('span[name="displayname"]');
+		if (displaynameElement) {
+			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
+		}
 		return item;
 	}
 
@@ -218,7 +234,7 @@ export class FriendList extends ComponentBaseClass {
 		item.innerHTML = `
 	  		<button class="btn btn-success btn-sm">✓</button>
 	  		<button class="btn btn-danger btn-sm">X</button>
-	  		<span class="text-white text-break lh-1">${itemData.displayname}</span>
+	  		<span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
 		`;
 		if (itemData.relationship === "received") {
 			item.querySelector(".btn-success").addEventListener("click", () => {
@@ -230,6 +246,16 @@ export class FriendList extends ComponentBaseClass {
 		} else if (itemData.relationship === "requested") {
 			item.querySelector(".btn-success").classList.add("disabled");
 			item.querySelector(".btn-danger").classList.add("disabled");
+		}
+		const displaynameElement = item.querySelector('span[name="displayname"]');
+		if (displaynameElement) {
+			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
 		}
 		return item;
 	}
