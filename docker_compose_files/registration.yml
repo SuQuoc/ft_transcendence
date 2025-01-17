@@ -58,11 +58,10 @@ services:
       REDIS_USER: "${REG_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
 
-      # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
       PYTHONUNBUFFERED: 1
-      DJ_SUDO_USERNAME: "${REG_DJ_SUDO_USERNAME:-admin}" #[aguilmea] to be deleted
-      DJ_SUDO_EMAIL: "${REG_DJ_SUDO_EMAIL:-email@gmail.com}" #[aguilmea] to be deleted
-      DJ_SUDO_PASSWORD: "${REG_DJ_SUDO_PASSWORD:-transcendence}" #[aguilmea] to be deleted
+      DJ_SUDO_USERNAME: "${REG_DJ_SUDO_USERNAME:-admin}"
+      DJ_SUDO_EMAIL: "${REG_DJ_SUDO_EMAIL:-email@gmail.com}"
+      DJ_SUDO_PASSWORD: "${REG_DJ_SUDO_PASSWORD:-transcendence}"
 
       SILK: "${SILK:-False}"
       MOCK_EMAIL: "${MOCK_EMAIL:-False}"

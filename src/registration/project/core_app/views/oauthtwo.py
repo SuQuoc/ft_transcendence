@@ -36,7 +36,6 @@ def send_authorization_request(request):
         return Response({'oauthtwo_send_authorization_request error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 #send_authorization_request = conditional_silk_profile(send_authorization_request, name=send_authorization_request)
 
-#TODO: look into making get_ft_email async to speed up signing up/logging in
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
 @permission_classes([AllowAny])

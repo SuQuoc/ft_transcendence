@@ -59,7 +59,7 @@ services:
             REDIS_USER: "${UM_REDIS_USER:-redisuser}"
             REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
 
-            # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
+            # TODO: delete dev vars or keep them but only create admin user if DEBUG = True? [delete for eval] !!
             POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
             POSTGRES_PASSWORD: "${UM_POSTGRES_PASSWORD:-insecurepass}"
             

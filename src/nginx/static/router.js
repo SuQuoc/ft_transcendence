@@ -276,11 +276,6 @@ const Router = {
 				pageElement = fragment;
 				console.log("friends page created");
 				break;
-			case "/logout":
-				//TODO: add API call to registration/logout endpoint
-				//redirect to login page
-				route = "/login";
-				break;
 			default:
 				// homepage
 				pageElement = document.createElement("play-menu-home-page");

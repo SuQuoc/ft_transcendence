@@ -6,9 +6,6 @@ set -e
 python manage.py makemigrations
 python manage.py migrate
 
-#TODO: uncomment when checking for deployment
-#python manage.py collectstatic --noinput
-
 if [ "$DEBUG" = "True" ]; then
     echo "Creating django admin user..."
     cat << EOF | python manage.py shell
