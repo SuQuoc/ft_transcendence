@@ -68,6 +68,7 @@ export class UserProfile extends ComponentBaseClass {
 							<input type="email" class="form-control" id="email" disabled>
 							<span id="changeEmailButton" class="input-group-text">Change</span>
 						</div>
+						<span class="warning-message" id="emailWarning" style="display:none;">Choose a different Email address</span>
 						<div id="oldEmailContainer" hidden>
 							<label for="oldEmailOTP" class="form-label mt-3">OTP sent to old E-Mail</label>
 							<div class="input-group">
@@ -264,15 +265,18 @@ export class UserProfile extends ComponentBaseClass {
 	* This method sends a POST request to the server to request an OTP for changing the email.
 	* It then displays the OTP input fields and starts a countdown timer on the OTP request buttons.
 	*/
-	emailRequestOTP() {
+	async emailRequestOTP() {
 		const requestOldEmailOTP = this.shadowRoot.getElementById("requestOldEmailOTP");
 		const requestNewEmailOTP = this.shadowRoot.getElementById("requestNewEmailOTP");
 		const oldEmailContainer = this.shadowRoot.getElementById("oldEmailContainer");
 		const newEmailContainer = this.shadowRoot.getElementById("newEmailContainer");
 		const email = this.shadowRoot.getElementById("email");
+		const emailWarning = this.shadowRoot.getElementById("emailWarning");
 
+		emailWarning.style.display = "none";
+		email.classList.remove("warning");
 		try {
-			this.apiFetch("/registration/change_username", {
+			await this.apiFetch("/registration/change_username", {
 				method: "POST",
 				body: JSON.stringify({ new_username: email.value }),
 			});
@@ -292,6 +296,8 @@ export class UserProfile extends ComponentBaseClass {
 			}, 1000);
 			this.shadowRoot.getElementById("oldEmailOTP").focus();
 		} catch (error) {
+			email.classList.add("warning");
+			this.shadowRoot.getElementById("emailWarning").style.display = "block";
 			console.error("Error requesting OTP:", error);
 		}
 	}

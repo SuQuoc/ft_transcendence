@@ -63,7 +63,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	  const backupCodesContainer = `
 		<div class="backup-codes text-white" style="max-width:600px;">
 	    	<b class="text-warning">Important: Backup Codes</b>
-	    	<p>Save these backup codes in a safe place. You can use them to access your account if you lose access to your OTP device. Just enter one of them instead of their regular password.</p>
+	    	<p>Save these backup codes in a safe place. You can use them to access your account if you lose access to your OTP device. Just enter one of them on the login page instead of the OTP.</p>
 	    	<ul>
 	    		${backupCodes.map(code => `<li>${code}</li>`).join('')}
 	    	</ul>
