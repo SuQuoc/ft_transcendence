@@ -209,7 +209,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/1")],
+            "hosts": [(f"redis://{REDIS_USER}:{REDIS_PASS}@redis_game:6379/1")],
         },
     },
 }
@@ -218,7 +218,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_USER}:{REDIS_PASS}@redis:6379/0",
+        "LOCATION": f"redis://{REDIS_USER}:{REDIS_PASS}@redis_game:6379/0",
         "TIMEOUT": None,
     }
 }

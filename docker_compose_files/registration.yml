@@ -55,23 +55,35 @@ services:
       ADMIN_EMAIL: "${REG_ADMIN_EMAIL:-email@gmail.com}" #[aguilmea] to be deleted
       ADMIN_PASSWORD: "${REG_ADMIN_PASSWORD:-password}" #[aguilmea] to be deleted
 
+      REDIS_USER: "${REG_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
+
     depends_on:
       db_registration:
         condition: service_healthy
       redis_registration:
-        condition: service_started
+        condition: service_healthy
     restart: on-failure
     networks:
       - network_registration
       - network_django
+      - network_redis_reg
     secrets:
       - public_key.pem
       - private_key.pem
 
   redis_registration:
     container_name: pong_reg_redis
-    image: "redis:alpine"
+    build: ../src/common_files/redis
+    environment:
+      REDIS_USER: "${REG_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${REG_REDIS_PASSWORD:-redispass}"
     expose:
       - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 4
     networks:
-      - network_registration
+      - network_redis_reg
