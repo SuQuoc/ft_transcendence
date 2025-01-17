@@ -18,6 +18,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
 		this.displayname_warning = this.shadowRoot.getElementById("displayNameWarning");
 		this.password_warning = null;
+		this.current_password = "";
 
 		// adding event listeners
 		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
@@ -46,7 +47,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			if (!response.password_set) {
 				this.showPasswordFields();
 				const backup_codes = await this.apiFetch('/registration/backup_rotate_codes', {method: 'POST'});
-				app.userData.backupCodes = backup_codes.backup_codes;
+				app.userData.backupCodes = backup_codes;
 			}
 			if (app.userData.backupCodes && app.userData.backupCodes.length > 0) {
 				this.displayBackupCodes(app.userData.backupCodes);
@@ -168,7 +169,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				return;
 			}
 			try {
-				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: "", new_password: password})});
+				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: this.current_password, new_password: password})});
+				this.current_password = password;
 			} catch (error) {
 				this.password_warning.innerHTML = error;
 				this.password_warning.setAttribute("aria-invalid", "true");

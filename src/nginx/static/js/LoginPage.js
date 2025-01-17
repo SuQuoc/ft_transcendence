@@ -29,9 +29,13 @@ export class LoginPage extends ComponentBaseClass {
 				const loginBackupSection = this.shadowRoot.getElementById(
 					"loginBackupSection"
 				);
+				const loginOTPSection = this.shadowRoot.getElementById("loginOtpSection");
 				loginBackupSection.style.display = event.target.checked
 					? "block"
 					: "none";
+				loginOTPSection.style.display = event.target.checked
+					? "none"
+					: "block";
 				this.validateForm();
 			});
 		const formFields = this.root.querySelectorAll("#loginForm > input");
@@ -76,7 +80,7 @@ export class LoginPage extends ComponentBaseClass {
 						</div>
 						<span id="otpErrorMessage" class="text-danger"></span>
 					</div>
-					<div class="form-check form-switch">
+					<div class="form-check form-switch" id="backupCodeSwitch">
   						<input class="form-check-input" type="checkbox" role="switch" id="loginSwitchBackupCode">
   						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
 					</div>
