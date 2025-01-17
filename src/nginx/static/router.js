@@ -229,8 +229,6 @@ const Router = {
 
 		Router.hideOrShowNavbarAndFooter(route);
 
-		// check for external links maybe??!! (if first character is not a slash)
-
 		// create the new page element depending on the route
 		switch (route) {
 			case "/":

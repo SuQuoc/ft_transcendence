@@ -75,7 +75,7 @@ export class StatisticsPage extends ComponentBaseClass {
 															tournament.winner,
 															tournament.loser_score,
 															tournament.winner_score,
-															tournament.timestamp.split('T')[0]); // maybe put the time as well and not just the date ??!! [ask Everyone]
+															tournament.timestamp.split('T')[0]);
 			element.highlightUser();
 			this.tournament_elements.appendChild(element);
 		}

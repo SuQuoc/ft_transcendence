@@ -1,5 +1,5 @@
-import json
-import time # temporary !!
+import asyncio
+import time
 import math
 from random import choice
 from asgiref.sync import sync_to_async
@@ -358,9 +358,6 @@ class Pong:
 
 
     async def start_game_loop(self):
-        import time     #!! why is this here and not at the start of the file??
-        import asyncio  #!!
-        
         if not self.is_full():
             raise Exception("Not enough players to start game")
         

@@ -35,7 +35,7 @@ class RegistrationUser(AbstractUser):
         self.username = self.username.lower()
         if self.password: 
             validate_password(self.password, user=self)
-            password_changed(self.password, user=self, password_validators=None) # [aguilmea] password validators?????
+            password_changed(self.password, user=self, password_validators=None)
         if self.pk is None:
             super(RegistrationUser, self).save(*args, **kwargs)
         else:
