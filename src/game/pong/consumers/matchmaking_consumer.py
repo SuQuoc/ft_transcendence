@@ -31,26 +31,25 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                         name=displayname,
                         id=user_id
         )
-
-
-        MatchmakingConsumer.players[self.channel_name] = self.user
-        
+        print(f"User {self.user.name} connected to matchmaking")
+        MatchmakingConsumer.players[self.user.id] = self.user
+        print(MatchmakingConsumer.players)
         if len(MatchmakingConsumer.players) == 2:
-            playerL_channel, playerL = MatchmakingConsumer.players.popitem()
-            playerR_channel, playerR = MatchmakingConsumer.players.popitem()
+            _, playerL = MatchmakingConsumer.players.popitem()
+            _, playerR = MatchmakingConsumer.players.popitem()
 
             match_id = create_match_config([playerL.id, playerR.id],
                                            [playerL.name, playerR.name],
                                            GameMode.NORMAL.value)
             
-            await self.trigger_match_found(match_id, playerL_channel)
-            await self.trigger_match_found(match_id, playerR_channel)
-            await self.trigger_disconnection(playerL_channel)
-            await self.trigger_disconnection(playerR_channel)
+            await self.trigger_match_found(match_id, playerL.channel_name)
+            await self.trigger_match_found(match_id, playerR.channel_name)
+            await self.trigger_disconnection(playerL.channel_name)
+            await self.trigger_disconnection(playerR.channel_name)
 
 
     async def disconnect(self, close_code):
-        MatchmakingConsumer.players.pop(self.channel_name, None)
+        MatchmakingConsumer.players.pop(self.user.id, None)
         await super().disconnect(close_code)
 
     
