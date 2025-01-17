@@ -117,13 +117,13 @@ export class SignupPage extends ComponentBaseClass {
                     	</div>
                     	<span id="signupOtpErrorMessage" class="text-danger"></span>
                     </div>
+                    <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
                     <p class="text-white-50 small m-0">Already signed up?
                         <a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
                             Log in
                         </a>
                         here!
                     </p>
-                    <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
                     <button type="submit" class="btn btn-custom w-100" form="signupForm" id="signupSubmitButton" disabled>Sign up</button>
                 </form>
             </div>
