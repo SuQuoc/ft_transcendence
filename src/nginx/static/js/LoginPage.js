@@ -181,7 +181,7 @@ export class LoginPage extends ComponentBaseClass {
 		const password = this.shadowRoot.getElementById("loginPassword").value;
 		const backupCodeSwitch = this.shadowRoot.getElementById("backupCodeSwitch");
 
-		if (backupCodeSwitch.style.display !== "none" && backupCodeSwitch.checked) {
+		if (backupCodeSwitch.style.display !== "none" && this.shadowRoot.getElementById("loginSwitchBackupCode").checked) {
 			try {
 				const backupCode = this.shadowRoot.getElementById("loginBackupCode").value;
 				await this.apiFetch("/registration/backup_login", {

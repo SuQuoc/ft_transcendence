@@ -115,7 +115,6 @@ export class UserProfile extends ComponentBaseClass {
 							<input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
 							<span class="input-group-text" id="confirmPasswordToggle">Show</span>
 						</div>
-						<div class="warning-message" id="changePasswordWarning">Error changing password</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
 						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
@@ -134,6 +133,7 @@ export class UserProfile extends ComponentBaseClass {
 					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
 				</div>
 				<button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
+				<div class="warning-message" id="changePasswordWarning">Error changing password</div>
 				<hr>
 				<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
 			</div>
@@ -695,6 +695,7 @@ export class UserProfile extends ComponentBaseClass {
 		const newPassword = this.shadowRoot.getElementById("newPassword");
 		const confirmPassword = this.shadowRoot.getElementById("confirmPassword");
 		const otp = this.shadowRoot.getElementById("changePasswordOTP");
+		const error = this.shadowRoot.getElementById("changePasswordWarning");
 
 		oldPassword.value = "";
 		newPassword.value = "";
@@ -705,6 +706,7 @@ export class UserProfile extends ComponentBaseClass {
 		confirmPassword.removeAttribute("disabled");
 		passwordSection.classList.remove("d-none");
 		otpSection.classList.add("d-none");
+		error.textContent = "";
 		otp.focus();
 	}
 
