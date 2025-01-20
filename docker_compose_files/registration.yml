@@ -34,7 +34,7 @@ services:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
       DEBUG: ${DEBUG:-False}
 
-      SECRET_KEY: ${REG_SECRET_KEY:-random_for_dev_#^0%uiw_5zqca7(sm#(x9nnf*5(kjnk}
+      SECRET_KEY: ${REG_SECRET_KEY:-gf6y%bw-y#qmxu&@4p#^0%uiw_5zqca7(sm#(x9nnf*5%bw-y#qm(kjnk}
       
       DB_HOST: "${REG_DB_HOST:-db_registration}"
       POSTGRES_DB: "${REG_POSTGRES_DB:-reg_postgress_db}"
