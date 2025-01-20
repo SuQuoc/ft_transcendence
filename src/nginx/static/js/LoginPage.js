@@ -72,6 +72,10 @@ export class LoginPage extends ComponentBaseClass {
 						<input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
 						<div class="invalid-feedback mb-1">Please enter your password</div>
 					</div>
+					<div class="form-check form-switch" id="backupCodeSwitch" style="display: none;">
+  						<input class="form-check-input" type="checkbox" role="switch" id="loginSwitchBackupCode">
+  						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
+					</div>
 					<div id="loginOtpSection" style="display: none;">
 						<label for='loginOtpCode' class="form-label text-white-50">OTP Code sent to your E-Mail</label>
 						<div class="input-group">
@@ -79,10 +83,6 @@ export class LoginPage extends ComponentBaseClass {
 							<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
 						</div>
 						<span id="otpErrorMessage" class="text-danger"></span>
-					</div>
-					<div class="form-check form-switch" id="backupCodeSwitch">
-  						<input class="form-check-input" type="checkbox" role="switch" id="loginSwitchBackupCode">
-  						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
 					</div>
 					<div id="loginBackupSection" style="display: none;">
 						<div class="mb-2">
@@ -179,8 +179,9 @@ export class LoginPage extends ComponentBaseClass {
 
 		const email = this.shadowRoot.getElementById("loginEmail").value;
 		const password = this.shadowRoot.getElementById("loginPassword").value;
+		const backupCodeSwitch = this.shadowRoot.getElementById("backupCodeSwitch");
 
-		if (this.shadowRoot.getElementById("loginSwitchBackupCode").checked) {
+		if (backupCodeSwitch.style.display !== "none" && backupCodeSwitch.checked) {
 			try {
 				const backupCode = this.shadowRoot.getElementById("loginBackupCode").value;
 				await this.apiFetch("/registration/backup_login", {
@@ -227,6 +228,7 @@ export class LoginPage extends ComponentBaseClass {
 				}
 				this.shadowRoot.getElementById("loginOtpSection").style.display =
 					"block";
+				backupCodeSwitch.style.display = "block";
 				this.startOtpRequestCooldown();
 				this.shadowRoot.getElementById("loginOtpCode").focus();
 			} catch (error) {
@@ -235,6 +237,7 @@ export class LoginPage extends ComponentBaseClass {
 					.getElementById("loginEmail")
 					.setAttribute("aria-invalid", "true");
 				loginButton.style.display = "block";
+				backupCodeSwitch.style.display = "none";
 			} finally {
 				loginButton.style.display = "block";
 				loginSpinner.style.display = "none";
