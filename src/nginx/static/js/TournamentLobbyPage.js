@@ -149,20 +149,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			this.initLobby(data.room);
 		}
 		else if (data.type === "tournament_bracket") {
-			let match_id = null;
-
-			for (let match of data.matches) {
-				if (match.player1 === window.app.userData.username) {
-					match_id = match.match_id;
-					break;
-				}
-				else if (match.player2 === window.app.userData.username) {
-					match_id = match.match_id;
-					break;
-				}
-			}
-			if (match_id)
-				this.sendMatchId(match_id);
+			this.sendMatchId(data.match_id);
 		}
 		else if (data.type === "display_match_result") {
 			this.displayMatchResult(data.match_result.winner, data.match_result.loser);
