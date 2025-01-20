@@ -60,7 +60,7 @@ services:
     environment:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
 
-      DJ_SECRET_KEY: ${SECRET_KEY_GAME:-django-insecure-(b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(} # NOTE: old value which was in settings
+      DJ_SECRET_KEY: ${SECRET_KEY_GAME:-b@#c@!w@8s74#%fdsfdsvc-@gf6yxfdsfdsvcu&@4p-!5$)&wuv^e%bw-y#qm(3!(}
       DB_HOST: "${GAME_DB_HOST:-db_game}"
 
       REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
