@@ -18,7 +18,7 @@ def login(request):
         if not user.is_verified():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s)
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes=None, response_body=None)
     except Exception as e:
         return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
