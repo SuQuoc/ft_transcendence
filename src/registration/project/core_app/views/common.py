@@ -61,23 +61,19 @@ def change_username(request):
         otp_new = request.data.get('otp_new_email')
         backup_code = request.data.get('backup_code')
         if not otp_new:
-            if otp_old is not None or backup_code is not None:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
             otp_new = create_one_time_password(user.id, 'change_username_new')
             send_otp_email(new_username, 'change_username_new', otp_new)
             otp_old = create_one_time_password(user.id, 'change_username_old')
             send_otp_email(user.username, 'change_username_old', otp_old)
             return Response(status=status.HTTP_202_ACCEPTED)
-        if otp_old is not None and backup_code is not None:
+        if (otp_old is not None and backup_code is not None) or (otp_old is None and backup_code is None):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if not check_one_time_password(user, 'change_username_new', otp_new):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         if otp_old:
             if not check_one_time_password(user, 'change_username_old', otp_old):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
-        elif not backup_code:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        elif not user.check_backup_code(backup_code):
+        elif backup_code is None or not user.check_backup_code(backup_code):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.username = new_username
         user.ft_userid = None
