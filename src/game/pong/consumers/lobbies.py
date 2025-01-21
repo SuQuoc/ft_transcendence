@@ -310,8 +310,6 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         """Sends the list of matches to the client."""
         self.queue = LobbiesConsumer.room_queues[self.current_room]
         matches = event.get("matches")
-        print(event)
-
         
         for match in matches:
             if match["player1"] == self.user.name or match["player2"] == self.user.name:

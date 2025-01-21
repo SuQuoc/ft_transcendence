@@ -13,7 +13,7 @@ import os
 # https://channels.readthedocs.io/en/latest/tutorial/part_2.html
 import django
 from django.core.asgi import get_asgi_application
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
 django_asgi_app = get_asgi_application()
 
