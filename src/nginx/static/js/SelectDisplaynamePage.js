@@ -18,6 +18,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
 		this.displayname_warning = this.shadowRoot.getElementById("displayNameWarning");
 		this.password_warning = null;
+		this.current_password = "";
 
 		// adding event listeners
 		this.displayname_form.addEventListener("submit", this.handleSubmitDisplaynameVar);
@@ -45,6 +46,11 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			const response = await this.apiFetch('/registration/get_email', {method: 'GET'});
 			if (!response.password_set) {
 				this.showPasswordFields();
+				const backup_codes = await this.apiFetch('/registration/backup_rotate_codes', {method: 'POST'});
+				app.userData.backupCodes = backup_codes;
+			}
+			if (app.userData.backupCodes && app.userData.backupCodes.length > 0) {
+				this.displayBackupCodes(app.userData.backupCodes);
 			}
 			if (response.email) {
 				app.userData.email = response.email;
@@ -52,6 +58,42 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 		} catch (error) {
 			console.error('Error getting email and password status:', error);
 		}
+	}
+
+	displayBackupCodes(backupCodes) {
+	  const backupCodesContainer = `
+		<div class="backup-codes text-white" style="max-width:600px;">
+	    	<b class="text-warning">Important: Backup Codes</b>
+	    	<p>Save these backup codes in a safe place. You can use them to access your account if you lose access to your OTP device. Just enter one of them on the login page instead of the OTP.</p>
+	    	<ul>
+	    		${backupCodes.map(code => `<li>${code}</li>`).join('')}
+	    	</ul>
+	    	<button id="copyBackupCodesButton" class="btn btn-secondary" type="button">Copy to Clipboard</button>
+	    	<button id="downloadBackupCodesButton" class="btn btn-secondary" type="button">Download as File</button>
+	    </div>
+		`;
+	  this.shadowRoot.getElementById("displayNameSubmitButton")
+		  .insertAdjacentHTML('beforebegin', backupCodesContainer);
+
+	  this.shadowRoot.getElementById("copyBackupCodesButton").addEventListener("click", () => {
+		  const codesText = backupCodes.join('\n');
+		  navigator.clipboard.writeText(codesText).then(() => {
+			  alert("Backup codes copied to clipboard");
+		  }).catch(err => {
+			  console.error("Failed to copy backup codes: ", err);
+		  });
+	  });
+
+	  this.shadowRoot.getElementById("downloadBackupCodesButton").addEventListener("click", () => {
+		  const codesText = backupCodes.join('\n');
+		  const blob = new Blob([codesText], { type: 'text/plain' });
+		  const url = URL.createObjectURL(blob);
+		  const a = document.createElement('a');
+		  a.href = url;
+		  a.download = 'backup_codes.txt';
+		  a.click();
+		  URL.revokeObjectURL(url);
+	  });
 	}
 
 	showPasswordFields() {
@@ -127,7 +169,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 				return;
 			}
 			try {
-				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: "", new_password: password})});
+				await this.apiFetch("/registration/change_password", {method: "POST", body: JSON.stringify({ current_password: this.current_password, new_password: password})});
+				this.current_password = password;
 			} catch (error) {
 				this.password_warning.innerHTML = error;
 				this.password_warning.setAttribute("aria-invalid", "true");
@@ -140,7 +183,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			window.app.userData.username = displayname;
 			window.app.router.go("/", false);
 		} catch (error) {
-			this.displayname_warning.innerHTML = "This displayname is already taken";
+			this.displayname_warning.innerHTML = error;
 			this.displayname_warning.setAttribute("aria-invalid", "true");
 			this.displayname_warning.style.display = "";
 			console.error('Error selecting displayname:', error);
