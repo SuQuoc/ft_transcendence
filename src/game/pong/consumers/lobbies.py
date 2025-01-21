@@ -98,6 +98,9 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.get_tournament_list()
 
         except Exception as e:
+            await self.send(text_data=json.dumps({
+                'error': 'An error occurred'
+            }))
             print(f"Exception: {e}") # NOTE: what to do? # should we log the error differently?
 
 

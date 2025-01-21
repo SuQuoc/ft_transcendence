@@ -58,18 +58,25 @@ class PongGameConsumer(AsyncWebsocketConsumer):
 
 
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        type = text_data_json['type']
+        try:
+            text_data_json = json.loads(text_data)
+            type = text_data_json['type']
 
-        if type == Type.MOVE.value:
-            if self.game is None:
+            if type == Type.MOVE.value:
+                if self.game is None:
+                    return
+                # changing the direction of the player that sent the message
+                self.game.change_player_direction(self.user_id, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
+            elif type == Type.CONNECT_TO_MATCH.value:
+                await self.connect_to_match(text_data_json)
+            else:
                 return
-            # changing the direction of the player that sent the message
-            self.game.change_player_direction(self.user_id, text_data_json['move_to']) # maybe raise error if player_id is not in players !!! 
-        elif type == Type.CONNECT_TO_MATCH.value:
-            await self.connect_to_match(text_data_json)
-        else:
-            return
+        
+        except Exception as e:
+            await self.send(text_data=json.dumps({
+                'error': 'An error occurred'
+            }))
+            print(f"Exception: {e}") # NOTE: what to do? # should we log the error differently?
         
 
     async def connect_to_match(self, data):
