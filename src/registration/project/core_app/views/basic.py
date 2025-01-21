@@ -199,6 +199,9 @@ def signup_change_username(request):
         new_username = request.data.get('new_username')
         if not current_username or not new_username:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_s = UserSerializer(data=request.data)
+        if not user_s.is_valid():
+            return Response({'no valid email'}, status=status.HTTP_400_BAD_REQUEST)
         if RegistrationUser.objects.filter(username=new_username).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = RegistrationUser.objects.filter(username=current_username).first()

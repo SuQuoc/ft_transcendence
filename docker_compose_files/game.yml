@@ -8,6 +8,7 @@ services:
       POSTGRES_PASSWORD:  "${GAME_POSTGRES_PASSWORD:-adminpass}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
+      POSTGRES_INITDB_ARGS: "-A scram-sha-256"
     expose:
       - 5432
     volumes:

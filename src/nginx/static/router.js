@@ -1,3 +1,4 @@
+import { StatisticsPage } from "./js/StatisticsPage.js";
 import { TournamentLobbyPage } from "./js/TournamentLobbyPage.js";
 
 const validateToken = async () => {
@@ -203,8 +204,8 @@ const Router = {
 	},
 
 	// changes the page main content and update the URL
-	go: async (route, addToHistory = true, tournamentName = "") => {
-		// the tournamentName is only needed for the tournamentLobbyPage
+	go: async (route, addToHistory = true, data = "") => {
+		// data is only needed for the TournamentLobbyPage and the StatisticsPage
 		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
@@ -244,7 +245,7 @@ const Router = {
 			case "/tournament-lobby":
 				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
 				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
-				pageElement = new TournamentLobbyPage(tournamentName);
+				pageElement = new TournamentLobbyPage(data);
 				break;
 			case "/match":
 				console.log("match page created");
@@ -267,7 +268,7 @@ const Router = {
 				pageElement = document.createElement("select-displayname-page");
 				break;
 			case "/stats":
-				pageElement = document.createElement("statistics-page");
+				pageElement = new StatisticsPage(data);
 				break;
 			case "/friends":
 				const fragment = document.createDocumentFragment();

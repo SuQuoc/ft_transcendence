@@ -124,7 +124,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         
             # Add the new room to the list of available_rooms
             room = TournamentRoom(
-                name            = room_name, 
+                name            = room_name,
                 creator         = self.user.to_dict(),
                 points_to_win   = points_to_win,
                 max_player_num  = max_player_num
@@ -309,7 +309,13 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
     async def tournament_bracket(self, event):
         """Sends the list of matches to the client."""
         self.queue = LobbiesConsumer.room_queues[self.current_room]
-        await self.send(text_data=json.dumps(event))
+        matches = event.get("matches")
+        
+        for match in matches:
+            if match["player1"] == self.user.name or match["player2"] == self.user.name:
+                match["type"] = T_TOURNAMENT_BRACKET
+                await self.send(text_data=json.dumps(match))
+                break
         self.in_game = True
 
     async def tournament_end(self, event):

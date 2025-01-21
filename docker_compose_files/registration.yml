@@ -8,6 +8,7 @@ services:
       POSTGRES_PASSWORD: "${REG_POSTGRES_PASSWORD:-reg_postgress_password}"
       POSTGRES_ACCESS_USER: "${REG_POSTGRES_ACCESS_USER:-reg_postgress_access_user}"
       POSTGRES_ACCESS_PASSWORD: "${REG_POSTGRES_ACCESS_PASSWORD:-reg_postgress_access_password}"
+      POSTGRES_INITDB_ARGS: "-A scram-sha-256"
     expose:
       - 5432
     volumes:

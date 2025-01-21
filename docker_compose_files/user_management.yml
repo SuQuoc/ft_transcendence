@@ -8,6 +8,8 @@ services:
             POSTGRES_PASSWORD: "${UM_POSTGRES_PASSWORD:-insecurepass}"
             POSTGRES_ACCESS_USER: "${UM_POSTGRES_ACCESS_USER:-accessy}"
             POSTGRES_ACCESS_PASSWORD: "${UM_POSTGRES_ACCESS_PASSWORD:-accesspass}"
+            POSTGRES_INITDB_ARGS: "-A scram-sha-256"
+
         expose:
             - 5432
         volumes:

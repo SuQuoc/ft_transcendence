@@ -1,7 +1,7 @@
 @otp_signup = 0000000000000000
 @otp_login = 0000000000000000
 @otp_old_email = 0000000000000000 
-@otp_new_email = 0000000000000000 
+@otp_new_email = 0000000000000000
 
 #######################################
 # change_username without backup_code #
@@ -30,7 +30,13 @@ Content-Type: application/json
 @ACCESS_COOKIE_1 = {{signup_1.response.headers.Set-Cookie}}
 
 ###
-@CODE = {{signup_1.response.body.backup_code}}
+@CODE0 = {{signup_1.response.body.backup_codes.0}}
+@CODE1 = {{signup_1.response.body.backup_codes.1}}
+@CODE2 = {{signup_1.response.body.backup_codes.2}}
+@CODE3 = {{signup_1.response.body.backup_codes.3}}
+@CODE4 = {{signup_1.response.body.backup_codes.4}}
+@CODE5 = {{signup_1.response.body.backup_codes.5}}
+
 
 ###
 
@@ -44,6 +50,7 @@ Cookie: {{ACCESS_COOKIE_1}}
 
 ###
 
+# should fail!!!!!!!!!!!!!!
 POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
@@ -85,13 +92,13 @@ Cookie: {{ACCESS_COOKIE_2}}
 
 {
     "new_username": "{{username2-2}}",
-    "password": "{{current_password2}}",
     "otp_old_email": "{{otp_old_email}}",
     "otp_new_email": "{{otp_new_email}}"
 }
 
 ###
 
+# should fail!!!!!!!!!!!!!!
 POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 
@@ -163,7 +170,8 @@ Cookie: {{ACCESS_COOKIE_3}}
 
 ###
 
-POST {{base_url}}/registration/basic_login
+# should fail!!!!!!!!!!!!!!
+POST {{base_url}}/registration/basic_login 
 Content-Type: application/json
 
 {
@@ -204,13 +212,13 @@ Cookie: {{ACCESS_COOKIE_4}}
 
 {
     "new_username": "{{username2-1}}",
-    "password": "{{current_password2}}",
-    "backup_code": "{{CODE}}",
+    "backup_code": "{{CODE0}}",
     "otp_new_email": "{{otp_new_email}}"
 }
 
 ###
 
+# should fail!!!!!!!!!!!!!!
 POST {{base_url}}/registration/basic_login
 Content-Type: application/json
 

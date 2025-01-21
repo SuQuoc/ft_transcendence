@@ -28,11 +28,7 @@ def login(request):
 def rotate_codes(request):
     try:
         user = request.user
-        if not user.is_verified():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        backup_codes = user.generate_backup_codes()
-        token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes)
+        return Response(user.generate_backup_codes(), status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'login error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error generating new backup codes': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
