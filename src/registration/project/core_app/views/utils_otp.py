@@ -85,7 +85,7 @@ def create_one_time_password(related_user, action):
     except Exception as e:
         raise Exception({'create_one_time_password error': str(e)})
 
-def check_one_time_password(related_user, action, password):
+def check_one_time_password(related_user, action, password, delete=True):
 #    try:
         otp = OneTimePassword.objects.get(related_user=related_user, action=action)
         if otp.expire < timezone.now():
