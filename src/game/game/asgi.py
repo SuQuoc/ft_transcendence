@@ -29,7 +29,6 @@ from django.conf import settings
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         # Extract JWT or other auth token
-        # print(scope)
         
         cookies = self.get_cookies_from_header(scope['headers'])
         token_str = cookies.get(ACCESS)

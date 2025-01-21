@@ -65,7 +65,6 @@ def get_game_stats(request):
         
         
         displaynames = get_displaynames(request, ids)
-        logging.warning("displaynames: " + str(displaynames))
         for match in last_matches_data:
             match["winner"] = str(displaynames.get(str(match['winner']), "[Unknown]"))
             match["loser"] = str(displaynames.get(str(match['loser']), "[Unknown]"))
