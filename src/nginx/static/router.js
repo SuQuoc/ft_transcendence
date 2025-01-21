@@ -142,7 +142,7 @@ const Router = {
 	makeWebSocket: (socket, endpoint) => {
 		if (socket)
 			return socket;
-		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+		let ws_scheme = "wss"; // shouldn't it always be wss with ws-only i get a 400 bad request
 		let ws_path = ws_scheme + "://" + window.location.host + endpoint;
 		let new_socket = new WebSocket(ws_path);
 

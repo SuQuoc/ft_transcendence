@@ -18,7 +18,7 @@ export class OnlineWebSocketClass {
 	/** opens the window.app.socket if it is closed */
 	make (endpoint) {
 		if (!this.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+			let ws_scheme = "wss";
 			let ws_path = ws_scheme + '://' + window.location.host + endpoint;
 			this.socket = new WebSocket(ws_path);
 
