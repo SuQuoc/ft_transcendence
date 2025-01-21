@@ -9,6 +9,7 @@ from .token import DeleteTokenObtainPairSerializer
 from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um, send_delete_request_to_game
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from ..tasks import delete_otp_task
 from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
@@ -79,9 +80,9 @@ def change_username(request):
         user.ft_userid = None
         user.save()
         otp = OneTimePassword.objects.get(related_user=user, action='change_username_new')
-        otp.delete()
+        delete_otp_task.delay(otp.id)
         otp = OneTimePassword.objects.get(related_user=user, action='change_username_old')
-        otp.delete()
+        delete_otp_task.delay(otp.id)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

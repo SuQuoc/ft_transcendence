@@ -94,7 +94,8 @@ def check_one_time_password(related_user, action, password, delete=True):
         if not otp.check_password(password):
             raise Exception ('wrong otp')
         from ..tasks import delete_otp_task
-        delete_otp_task.delay(otp.id)
+        if delete:
+            delete_otp_task.delay(otp.id)
         return True
     except Exception as e:
        return False
