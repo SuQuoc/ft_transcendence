@@ -40,11 +40,12 @@ class CredentialsAuthentication(BaseAuthentication):
 class BackupCodeAuthentication(BaseAuthentication):
     def authenticate(self, request):
         username = request.data.get('username')
+        password = request.data.get('password')
         backup_code = request.data.get('backup_code')
-        if not username or not backup_code:
+        if not username or not backup_code or not password:
             return None
         user = RegistrationUser.objects.filter(username=username).first()
-        if not user or not user.check_backup_code(backup_code):
+        if not user or not user.check_password(password) or not user.check_backup_code(backup_code):
             return None
         return user, None
 
