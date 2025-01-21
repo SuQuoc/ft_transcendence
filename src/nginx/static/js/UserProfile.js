@@ -5,7 +5,7 @@ export class UserProfile extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement("template");
 		template.innerHTML = `
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+		<scripts-and-styles></scripts-and-styles>
 		<style>
 			.form-container {
 				padding: 1rem;
@@ -58,7 +58,7 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="displayName" class="form-label">Display Name</label>
 						<div class="input-group mb-3">
 							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" pattern="[A-Za-z0-9\\-_]{1,20}" disabled>
-							<span class="input-group-text" id="changeDisplayNameButton">Change</span>
+							<span class="input-group-text btn btn-custom" id="changeDisplayNameButton">Change</span>
 						</div>
 						<div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
 					</div>
@@ -66,7 +66,7 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="email" class="form-label">Email address</label>
 						<div class="input-group">
 							<input type="email" class="form-control" id="email" disabled>
-							<span id="changeEmailButton" class="input-group-text">Change</span>
+							<span id="changeEmailButton" class="input-group-text btn btn-custom">Change</span>
 						</div>
 						<span class="warning-message" id="emailWarning" style="display:none;">Choose a different Email address</span>
 						<div id="oldEmailContainer" hidden>
@@ -77,17 +77,17 @@ export class UserProfile extends ComponentBaseClass {
 							<label for="oldEmailOTP" class="form-label">OTP sent to old E-Mail</label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-								<span class="input-group-text" id="requestOldEmailOTP">New OTP</span>
+								<span class="input-group-text btn btn-custom" id="requestOldEmailOTP">New OTP</span>
 							</div>
 						</div>
 						<div id="newEmailContainer" hidden>
 							<label for="newEmailOTP" class="form-label mt-3">OTP sent to new E-Mail</label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-								<span class="input-group-text" id="requestNewEmailOTP">New OTP</span>
+								<span class="input-group-text btn btn-custom" id="requestNewEmailOTP">New OTP</span>
 							</div>
 							<div class="d-flex justify-content-between">
-    							<button type="submit" class="btn btn-primary mt-3 me-2" id="saveNewEmailButton" disabled>Change Email</button>
+    							<button type="submit" class="btn btn-custom mt-3 me-2" id="saveNewEmailButton" disabled>Change Email</button>
     							<button type="button" class="btn btn-secondary mt-3" id="cancelEmailButton">Cancel</button>
 							</div>
 						</div>
@@ -99,28 +99,28 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="oldPassword" class="form-label">Old Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="oldPassword" name="current-password" autocomplete="current-password">
-							<span class="input-group-text" id="oldPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="oldPasswordToggle">Show</span>
 						</div>
 					</div>
 					<div class="mb-3 input-group" id="newPasswordContainer">
 						<label for="newPassword" class="form-label">New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="newPassword" name="new-password" autocomplete="new-password">
-							<span class="input-group-text" id="newPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="newPasswordToggle">Show</span>
 						</div>
 					</div>
 					<div class="mb-3" id="confirmPasswordContainer">
 						<label for="confirmPassword" class="form-label">Confirm New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
-							<span class="input-group-text" id="confirmPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="confirmPasswordToggle">Show</span>
 						</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
 						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
 						<div class="input-group">
 							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-							<span class="input-group-text" id="requestNewEmailOTP">New OTP</span>
+							<span class="input-group-text btn btn-custom" id="requestNewEmailOTP">New OTP</span>
 						</div>
 					</div>
 				</div>
@@ -128,11 +128,11 @@ export class UserProfile extends ComponentBaseClass {
 					<label for="changePasswordOTP" class="form-label">Enter OTP</label>
 					<div class="input-group">
 						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9]{16}">
-						<span class="input-group-text" id="changePasswordRequestOTP">New OTP</span>
+						<span class="input-group-text btn btn-custom" id="changePasswordRequestOTP">New OTP</span>
 					</div>
 					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
 				</div>
-				<button type="submit" class="btn btn-primary" id="changePassword" disabled>Change Password</button>
+				<button type="submit" class="btn btn-custom" id="changePassword" disabled>Change Password</button>
 				<div class="warning-message" id="changePasswordWarning">Error changing password</div>
 				<hr>
 				<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
@@ -143,7 +143,7 @@ export class UserProfile extends ComponentBaseClass {
 					<label for="deleteUserPassword" class="form-label">Enter Current Password</label>
 					<input type="password" class="form-control" id="deleteUserPassword" placeholder="Current password" aria-placeholder="Current Password">
 				</div>
-				<button type="button" class="btn btn-primary" id="requestDeleteUserButton">Delete User</button>
+				<button type="button" class="btn btn-custom" id="requestDeleteUserButton">Delete User</button>
 				<div class="mb-3" id="otpSection" style="display: none;">
 					<label for="deleteUserOTP" class="form-label">Enter OTP</label>
 					<input type="text" class="form-control" id="deleteUserOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16">
