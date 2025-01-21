@@ -63,7 +63,7 @@ class TestInputtingDisplayName:
             login_page.locator("#displayNameInput").fill("displayname") # same displayname as function above
             login_page.locator("#displayNameSubmitButton").click()
             expect(login_page.locator("#displayNameWarning")).to_be_visible()
-            expect(login_page.locator("#displayNameWarning")).to_have_text("This displayname is already taken")
+            expect(login_page.locator("#displayNameWarning")).to_have_text("Error: custom user with this displayname already exists.")
 
             # checking if the warning is gone after changing the displayname
             login_page.locator("#displayNameInput").fill("displayname2")
