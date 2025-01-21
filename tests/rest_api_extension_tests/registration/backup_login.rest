@@ -22,6 +22,7 @@ Content-Type: application/json
 
 @CODE0 = {{signup.response.body.backup_codes.0}}
 @CODE1 = {{signup.response.body.backup_codes.1}}
+@CODE2 = {{signup.response.body.backup_codes.2}}
 
 ###
 
@@ -42,6 +43,18 @@ Content-Type: application/json
 
 {
     "username": "{{username3}}",
+    "password": "wrongpassword",
+    "backup_code": "{{CODE1}}"
+
+}
+
+###
+
+POST {{base_url}}/registration/backup_login
+Content-Type: application/json
+
+{
+    "username": "{{username3}}",
     "password": "{{current_password3}}"
 }
 
@@ -52,7 +65,7 @@ Content-Type: application/json
 
 {
     "username": "{{username3}}",
-    "backup_code": "{{CODE0}}"
+    "backup_code": "{{CODE1}}"
 }
 ###
 
@@ -62,5 +75,5 @@ Content-Type: application/json
 {
     "username": "{{username3}}",
     "password": "{{current_password3}}",
-    "backup_code": "{{CODE1}}"
+    "backup_code": "{{CODE2}}"
 }
