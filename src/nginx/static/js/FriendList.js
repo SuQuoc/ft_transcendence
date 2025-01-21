@@ -51,9 +51,14 @@ export class FriendList extends ComponentBaseClass {
           position: relative;
         }
         .friend-img {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
+		  width: 40px;
+		  height: 40px;
+		  cursor: pointer;
+		  display: block;
+		  margin: 0 auto 1rem;
+		  border-radius: 50%;
+		  object-fit: cover;
+		  object-position: center;
         }
         .list-group-item > .btn {
           margin-right: 0.25rem;

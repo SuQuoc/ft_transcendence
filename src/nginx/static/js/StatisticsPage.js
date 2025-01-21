@@ -110,7 +110,7 @@ export class StatisticsPage extends ComponentBaseClass {
 				<!-- profile picture and displayname -->
 				<div class="d-flex bg-dark rounded-4 mx-4 p-2 gap-1">
 					<img src="/media_url/profile_images/default_avatar.png"
-					class="stats-profile-image"
+					class="big-profile-image m-0 p-0"
 					id="statsProfileImage"
 					alt="Profile Image"
 					onerror='this.src = "/media_url/profile_images/default_avatar.png"'

@@ -45,23 +45,38 @@ body {
 	max-height: 100vh;
 }
 
-.lobby-player-avatar {
-	width: 30px;
-	height: 30px;
-}
-
 .lobby-player-sidebar {
 	width: 225px;
 	border-top: var(--custom-bg-color) 2px solid;
 	border-bottom: var(--custom-bg-color) 2px solid;
 }
 
-.stats-profile-image {
-	width: 100%;
-	max-width: 150px;
-	max-height: 150px;
+.extra-small-profile-image {
+	width: 30px;
+	height: 30px;
 	cursor: pointer;
 	display: block;
+	margin: 0 auto 1rem;
+	border-radius: 50%;
+	object-fit: cover;
+	object-position: center;
+}
+.small-profile-image {
+	width: 40px;
+	height: 40px;
+	cursor: pointer;
+	display: block;
+	margin: 0 auto 1rem;
+	border-radius: 50%;
+	object-fit: cover;
+	object-position: center;
+}
+.big-profile-image {
+	width: 150px;
+	height: 150px;
+	cursor: pointer;
+	display: block;
+	margin: 0 auto 1rem;
 	border-radius: 50%;
 	object-fit: cover;
 	object-position: center;
