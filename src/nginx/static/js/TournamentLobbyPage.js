@@ -58,7 +58,7 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	sendMatchId(match_id) {
 		if (!window.app.pong_socket) {
 			console.error("pong socket is not open");
-			window.app.router.go("/"); // goes to the home page !!??
+			window.app.router.go("/");
 		}
 
 		if (window.app.pong_socket.readyState === WebSocket.OPEN) {

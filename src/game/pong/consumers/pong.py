@@ -1,5 +1,5 @@
-import json
-import time # temporary !!
+import asyncio
+import time
 import math
 from random import choice
 from asgiref.sync import sync_to_async
@@ -111,7 +111,7 @@ class Ball:
         offset = (self.pos.y + (self.size / 2)) - player.pos.y - (self.size / 2)
         normalized_offset = (offset - player_half) / player_half
 
-        # changing wether it adds or subtracts to the angle depending on which direction the ball comes from
+        # changing whether it adds or subtracts to the angle depending on which direction the ball comes from
         if self.vel.y < 0:
             normalized_offset *= -1
 
@@ -348,22 +348,16 @@ class Pong:
 
             if self.player_scored():
                 self.ball.reset()
-                ### maybe put this in a function and or make it more variable ###
                 wall = self.get_wall(self.ball.vel)
                 self.collision = self.calc_next_collision(self.ball.pos, self.ball.vel, wall)
-                ################
                 return
             
         # move ball
         self.ball.pos.x = next_pos.x
         self.ball.pos.y = next_pos.y
-        #print(f"calculation time: {time.time() - start_time}")
 
 
     async def start_game_loop(self):
-        import time     #!!
-        import asyncio  #!!
-        
         if not self.is_full():
             raise Exception("Not enough players to start game")
         
@@ -384,7 +378,6 @@ class Pong:
         
         # game loop
         while True:
-            #print(f"one tick: {time.time() - start_time}")
             start_time = time.time()
             self.update_game_state()
 
@@ -441,12 +434,6 @@ class Pong:
 
 
     async def send_initial_state(self, game_state):
-        print({
-                'type': Type.INITIAL_STATE.value,
-                'game_state': game_state,
-                'left_player': self.player_l.name,
-                'right_player': self.player_r.name,
-            })
         await Pong.CHANNEL_LAYER.group_send(
             self.channel_group,
             {

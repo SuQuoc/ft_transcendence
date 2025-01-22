@@ -98,7 +98,7 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
                 await self.get_tournament_list()
 
         except Exception as e:
-            print(f"Exception: {e}") # NOTE: what to do? # should we log the error differently?
+            print(f"Exception: {e}")
 
 
     ### Client MESSAGES ###

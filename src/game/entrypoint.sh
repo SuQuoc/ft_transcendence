@@ -8,7 +8,6 @@ python manage.py migrate
 
 echo "Running migrations completed."
 
-# python manage.py collectstatic --noinput
 # Creating django admin user
 echo "Current value of DEBUG is $DEBUG"
 if [ "$DEBUG" = "True" ]; then

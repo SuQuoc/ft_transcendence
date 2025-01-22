@@ -29,7 +29,6 @@ from django.conf import settings
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         # Extract JWT or other auth token
-        # print(scope)
         
         cookies = self.get_cookies_from_header(scope['headers'])
         token_str = cookies.get(ACCESS)
@@ -67,24 +66,3 @@ application = ProtocolTypeRouter(
         ),
     }
 )
-
-
-
-# INSTEAD OF AuthMiddlewareStack, we can use our own custom middleware - COPILOT !!!
-
-# custom_auth_middleware.py which we might need later for JWT auth ??
-""" from urllib.parse import parse_qs
-
-class CustomAuthMiddleware:
-    def __init__(self, inner):
-        self.inner = inner
-
-    def __call__(self, scope):
-        query_string = scope["query_string"].decode()
-        query_params = parse_qs(query_string)
-        user_id = query_params.get("user_id", [None])[0]
-        scope["user_id"] = user_id
-        return self.inner(scope)
-
-def CustomAuthMiddlewareStack(inner):
-    return CustomAuthMiddleware(AuthMiddlewareStack(inner)) """

@@ -16,8 +16,8 @@ if [ "$DEBUG" = "True" ]; then
     cat << EOF | python manage.py shell
 from django.contrib.auth import get_user_model
 User = get_user_model()
-if not User.objects.filter(username='$ADMIN_USERNAME').exists():
-    User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')
+if not User.objects.filter(username='$DJ_SUDO_USERNAME').exists():
+    User.objects.create_superuser('$DJ_SUDO_USERNAME', '$DJ_SUDO_EMAIL', '$DJ_SUDO_PASSWORD')
 EOF
     python manage.py runserver 0.0.0.0:8000 &
 else

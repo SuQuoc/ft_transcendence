@@ -14,7 +14,7 @@ for static_dir in STATICFILES_DIRS:
         os.makedirs(static_dir)
 
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('DJ_SECRET_KEY')
 ALLOWED_HOSTS = ['*']
 
 DEBUG = os.environ.get('DEBUG') == 'True'

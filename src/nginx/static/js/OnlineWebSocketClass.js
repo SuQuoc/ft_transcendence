@@ -7,25 +7,23 @@ export class OnlineWebSocketClass {
 
 	addEventListeners () {
 		console.log("this: add event listener: ", this);
-		this.socket.addEventListener("message", this.handleReceivedMessage_var); // probably need to bind this !!
-
+		this.socket.addEventListener("message", this.handleReceivedMessage_var);
 	}
 
 	removeEventListeners () {
 		console.log("this: remove event listener: ", this);
-		this.socket.removeEventListener("message", this.handleReceivedMessage_var); // probably need to bind this !!
+		this.socket.removeEventListener("message", this.handleReceivedMessage_var);
 	}
 
 	/** opens the window.app.socket if it is closed */
 	make (endpoint) {
 		if (!this.socket) {
-			let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			let ws_scheme = "wss";
 			let ws_path = ws_scheme + '://' + window.location.host + endpoint;
 			this.socket = new WebSocket(ws_path);
 
 			// add event listeners
 			this.addEventListeners();
-			//this.socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect); // do we need to make an extra function for unexpected disconnect ???!!!
 			console.log("ONLINE socket created");
 		};
 
