@@ -36,7 +36,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 			<img src="/media_url/profile_images/default_avatar.png"
 				onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
 				alt="Profile image"
-				class="rounded-circle lobby-player-avatar"
+				class="extra-small-profile-image m-0"
 				name="lobby_player_avatar"
 			>
 			<span name="lobby_player_name" class="text-break lh-1">name</span>

@@ -6,9 +6,10 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from ..authenticate import AccessTokenAuthentication, RefreshTokenAuthentication
 from .token import DeleteTokenObtainPairSerializer
-from ..models import RegistrationUser
+from ..models import RegistrationUser, OneTimePassword
 from .utils import generate_response_with_valid_JWT, send_200_with_expired_cookies, send_delete_request_to_um, send_delete_request_to_game
 from .utils_otp import create_one_time_password, send_otp_email, check_one_time_password
+from ..tasks import delete_otp_task
 from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
@@ -61,27 +62,27 @@ def change_username(request):
         otp_new = request.data.get('otp_new_email')
         backup_code = request.data.get('backup_code')
         if not otp_new:
-            if otp_old is not None or backup_code is not None:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
             otp_new = create_one_time_password(user.id, 'change_username_new')
             send_otp_email(new_username, 'change_username_new', otp_new)
             otp_old = create_one_time_password(user.id, 'change_username_old')
             send_otp_email(user.username, 'change_username_old', otp_old)
             return Response(status=status.HTTP_202_ACCEPTED)
-        if otp_old is not None and backup_code is not None:
+        if (otp_old is not None and backup_code is not None) or (otp_old is None and backup_code is None):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if not check_one_time_password(user, 'change_username_new', otp_new):
+        if not check_one_time_password(user, 'change_username_new', otp_new, False):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         if otp_old:
-            if not check_one_time_password(user, 'change_username_old', otp_old):
+            if not check_one_time_password(user, 'change_username_old', otp_old, False):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
-        elif not backup_code:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        elif not user.check_backup_code(backup_code):
+        elif backup_code is None or not user.check_backup_code(backup_code):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         user.username = new_username
         user.ft_userid = None
         user.save()
+        otp = OneTimePassword.objects.get(related_user=user, action='change_username_new')
+        delete_otp_task.delay(otp.id)
+        otp = OneTimePassword.objects.get(related_user=user, action='change_username_old')
+        delete_otp_task.delay(otp.id)
         return Response(status=status.HTTP_200_OK)
     except Exception as e:
         return Response({str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
