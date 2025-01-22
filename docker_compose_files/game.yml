@@ -47,7 +47,7 @@ services:
       - "8000/tcp"
     environment:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
-      DEBUG: "${DEBUG:-True}" # TODO: check why False is not working
+      DEBUG: "${DEBUG:-False}"
 
       DJ_SECRET_KEY: ${SECRET_KEY_GAME:-%-@gf6yxu&v^e%bw-@b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(}
       
@@ -63,9 +63,6 @@ services:
       DJ_SUDO_USERNAME: "${GAME_DJ_SUDO_USERNAME:-admin}"
       DJ_SUDO_EMAIL: "${GAME_DJ_SUDO_EMAIL:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${GAME_DJ_SUDO_PASSWORD:-transcendence}"
-
-      DEBUG: "${DEBUG:-False}"
-
     depends_on:
       db_game:
         condition: service_healthy
