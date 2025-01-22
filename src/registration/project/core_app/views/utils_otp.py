@@ -40,7 +40,7 @@ def send_otp_email(username, action, password):
         message = f"""
         Hello,
 
-        You  have tried to do following action: {action}
+        You have tried to do the following action: {action}
 
         The code is: {password} and is valid for 5 minutes.
 

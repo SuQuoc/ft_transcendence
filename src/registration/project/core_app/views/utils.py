@@ -37,7 +37,7 @@ def generate_response_with_valid_JWT(user, status_code, token_s, backup_codes=No
     response = Response(status=status_code)
     if response_body:
         response.data = response_body
-    if backup_codes:
+    if backup_codes is not None:
         response.data = {'backup_code': backup_codes}
     access_token = token_s.validated_data['access']
     access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']

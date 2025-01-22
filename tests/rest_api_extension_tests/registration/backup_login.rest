@@ -23,6 +23,8 @@ Content-Type: application/json
 @CODE0 = {{signup.response.body.backup_codes.0}}
 @CODE1 = {{signup.response.body.backup_codes.1}}
 @CODE2 = {{signup.response.body.backup_codes.2}}
+@CODE3 = {{signup.response.body.backup_codes.3}}
+@CODE4 = {{signup.response.body.backup_codes.4}}
 
 ###
 

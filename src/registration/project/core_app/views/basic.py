@@ -40,12 +40,10 @@ def login(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         cache_key = f'jwt_{user.id}'
-        backup_codes_key = f'backup_codes_{user.id}'
 
         jwt_response = cache.get(cache_key)
-        backup_codes = cache.get(backup_codes_key)
         if jwt_response:
-            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            response = Response({'status': 'success'}, status=status.HTTP_200_OK)
             access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
             response.set_cookie(
                 key='access',
