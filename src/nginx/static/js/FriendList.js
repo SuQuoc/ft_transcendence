@@ -212,7 +212,7 @@ export class FriendList extends ComponentBaseClass {
       <button class="btn btn-danger btn-sm">X</button>
       <div class="friend-img-container">
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
-        <span class="friend-status ${window.app.online_socket.online_friends.includes(itemData.user_id) ? 'online' : 'offline'}"></span>
+        <span class="friend-status ${window.app.online_socket.online_friends.has(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
       <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
     `;

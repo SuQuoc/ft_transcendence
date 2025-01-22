@@ -80,8 +80,6 @@ class AnswerFriendRequestView(generics.GenericAPIView):
             return Response({"error": e.detail["action"]}, status=e.status_code) # all validation errors return HTTP_400
 
     def act_on_friend_request(self, friend_request: FriendRequest, action: str):
-        channel_layer = get_channel_layer()
-
         if friend_request.status == FriendRequest.PENDING:
             if action == self.serializer_class.ACCEPT:
                 friend_request.accept()
