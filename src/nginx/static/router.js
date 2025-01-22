@@ -133,8 +133,7 @@ const Router = {
 				return;
 			}
 		}
-		getUserData(); // not sure if it needs to be asked here too or if it will fix itself later on ??!!
-		// TODO: we need to get profile image as well
+		getUserData();
 
 		// check initial URL
 		Router.go(location.pathname, false); // we push an initial state to the history in app.js
@@ -142,15 +141,13 @@ const Router = {
 
 	/** Opens and returns a new websocket if the one passed is closed. If it isn't, it is returned instead. */
 	makeWebSocket: (socket, endpoint) => {
-		// function name should be changed
 		if (socket)
-			return socket; // needs to happen one level up ??!!!
-		let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; // shouldn't it always be wss with ws-only i get a 400 bad request
+			return socket;
+		let ws_scheme = "wss"; // shouldn't it always be wss with ws-only i get a 400 bad request
 		let ws_path = ws_scheme + "://" + window.location.host + endpoint;
 		let new_socket = new WebSocket(ws_path);
 
 		// add event listeners
-		//this.new_socket.addEventListener("close", Router.handleSocketUnexpectedDisconnect); // do we need to make an extra function for unexpected disconnect ???!!!
 		console.log("socket created");
 
 		new_socket.onopen = () => {
@@ -233,8 +230,6 @@ const Router = {
 
 		Router.hideOrShowNavbarAndFooter(route);
 
-		// check for external links maybe??!! (if first character is not a slash)
-
 		// create the new page element depending on the route
 		switch (route) {
 			case "/":
@@ -248,7 +243,6 @@ const Router = {
 				pageElement = document.createElement("join-tournament-page");
 				break; 
 			case "/tournament-lobby":
-				//protection (what if the socket is not open??!!!!)
 				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
 				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
 				pageElement = new TournamentLobbyPage(data);
@@ -260,10 +254,6 @@ const Router = {
 				window.app.match_socket = Router.closeWebSocket(window.app.match_socket);
 				window.app.match_socket = Router.makeWebSocket(window.app.match_socket, "/game/matchmaking/");
 				pageElement = document.createElement("match-page");
-				break;
-			case "/pong": // needed??!!!
-				pageElement = document.createElement("pong-page");
-				pageElement.innerHTML = "Pong Game";
 				break;
 			case "/login":
 				pageElement = document.createElement("login-page");
@@ -287,11 +277,6 @@ const Router = {
 				pageElement = fragment;
 				console.log("friends page created");
 				break;
-			case "/logout":
-				//TODO: add API call to registration/logout endpoint
-				//redirect to login page
-				route = "/login";
-				break;
 			default:
 				// homepage
 				pageElement = document.createElement("play-menu-home-page");
@@ -308,8 +293,7 @@ const Router = {
 		}
 
 		// close websocket if we leave tournament pages
-		if (!route.startsWith("/tournament") && !route.startsWith("/match") && !route.startsWith("/pong")) {
-			// pong needed??!!!
+		if (!route.startsWith("/tournament") && !route.startsWith("/match")) {
 			window.app.socket = Router.closeWebSocket(window.app.socket); // checks if the socket is open before closing
 		}
 		if (route !== "/tournament-lobby" && route !== "/match") {

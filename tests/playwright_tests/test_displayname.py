@@ -28,7 +28,6 @@ class TestInputtingDisplayName:
                 expect(page.locator("#navbar")).to_be_visible()
                 # deleting user in next test, because it is needed there
             except:
-                print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
                 expect(page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
             
             finally:
@@ -77,7 +76,6 @@ class TestInputtingDisplayName:
             delete_user(login_page, PASSWORD)
 
         except:
-            print("Test doesnt work after executing it once, cuz we cant delete user from db, will be fixed later") # todo !!!
             expect(login_page.locator("#FAIL")).to_be_visible(timeout=1) # causing an intended failure
 
 

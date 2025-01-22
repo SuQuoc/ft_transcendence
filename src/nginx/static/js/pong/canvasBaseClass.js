@@ -23,7 +23,6 @@ export class canvasBaseClass extends HTMLElement {
 		});
 
 		// add event listeners
-		// maybe should be this or this.canvas not window !!??
 		window.addEventListener("resize", this.handleCanvasResize_var);
 		window.addEventListener("resize", this.handleBackgroundCanvasResize_var);
 	}
@@ -120,7 +119,6 @@ export class canvasBaseClass extends HTMLElement {
 
 	getElementHTML() {
 		const template = document.createElement("template");
-		template.classList.add("w-100", "h-100"); // needed ??!! does this even do anything or is the match page and tournamentLobbyPage overwriting it??
 		template.innerHTML = `
 				<div id="pongCanvasContainer" class="canvas-container d-flex justify-content-center align-items-center w-100 h-100">
 					<canvas id="pongBackgroundCanvas" class="position-absolute bg-dark shadow" width="1000" height="600"></canvas>

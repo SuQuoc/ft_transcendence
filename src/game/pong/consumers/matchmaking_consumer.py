@@ -57,9 +57,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message_type = text_data_json['type']
-
-        # if message_type == 'cancel': # NOTE: not implemented yet, not a must
-        #     await self.disconnect(1000)
             
     
     async def trigger_match_found(self, match_id: str, channel_name):

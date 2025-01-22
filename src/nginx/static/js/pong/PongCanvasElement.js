@@ -139,7 +139,6 @@ export class PongCanvasElement extends canvasBaseClass {
 		if (this.player_left.old_score !== state.score_l || this.player_right.old_score !== state.score_r) {
 			this.player_left.old_score = state.score_l;
 			this.player_right.old_score = state.score_r;
-			// requestAnimationFrame() for drawBackground() ???
 			this.background.drawBackground(state.score_l, state.score_r);
 		}
 

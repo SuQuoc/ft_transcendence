@@ -171,21 +171,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")]
 
-
-# Security settings for development - clarify if needed !!
-# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True  # Set to False for local development
-# CSRF_COOKIE_SECURE = True  # Set to False for local development
-
 # Allauth settings
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 # REST framework settings
 REST_FRAMEWORK = {
-    # "DEFAULT_PARSER_CLASSES": [
-    #   "rest_framework.parsers.JSONParser",
-    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'user_management.authenticate.CookieJWTAuthentication',
     ],
@@ -203,7 +193,6 @@ with open('/run/secrets/public_key.pem', 'r') as f:
 SIMPLE_JWT = {
     'ALGORITHM': 'RS256', # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
     'VERIFYING_KEY': PUBLIC_KEY, # needs to be here for UM to use correct JWT settings, otherwise endpoints will return unauthorized or invalid token
-    # "USER_ID_CLAIM": "user_id",  # just the name of the json key, that others should use to identify the user, could be named to anything u want afaik
 }
 
 if TEST:

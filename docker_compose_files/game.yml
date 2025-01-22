@@ -13,11 +13,8 @@ services:
       - 5432
     volumes:
       - volume_game:/var/lib/postgresql/data
-    # RUN postgres on different port
-    # command: ["postgres", "-p", "5433"]
-    # Now we need add -p "db_port"to the healthckeck
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${GAME_POSTGRES_ACCESS_USER:-game_accessy} -d ${GAME_POSTGRES_DB:-default_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${GAME_POSTGRES_ACCESS_USER:-game_accessy} -d ${GAME_POSTGRES_DB:-default_db}"]
       interval: 10s
       timeout: 5s
       retries: 4
@@ -31,25 +28,16 @@ services:
     environment:
       REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
       REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
-
-      # TODO: make an access user that can be used by the django container and the healthcheck:
-      # to avoid attacks with malicious input on the redis server
-    #command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"] # TODO: do not use sh -c but the command directly like in the offical description of the image
     expose:
       - 6379
-    #entrypoint: ["sh", "/usr/local/bin/generate-redis-conf.sh"]
-    #command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     healthcheck:
       test: [ "CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 2s
       retries: 4
-    # TODO: do we need a volume for redis ?!! only if we want to persist the data on server shutdown
     networks:
       - network_redis_game
 
-  # TODO change the environment variables with env variables and default values
-  # also the django non admin user should be used - see the other .yml files
   game:
     container_name: pong_game
     build: ../src/game
@@ -59,23 +47,23 @@ services:
       - "8000/tcp"
     environment:
       SERVER_URL: ${SERVER_URL:-https://localhost:8443}
+      DEBUG: "${DEBUG:-True}" # TODO: check why False is not working
 
-      DJ_SECRET_KEY: ${SECRET_KEY_GAME:-b@#c@!w@8s74#%fdsfdsvc-@gf6yxfdsfdsvcu&@4p-!5$)&wuv^e%bw-y#qm(3!(}
-      DB_HOST: "${GAME_DB_HOST:-db_game}"
-
-      REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
-      REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
-
+      DJ_SECRET_KEY: ${SECRET_KEY_GAME:-%-@gf6yxu&v^e%bw-@b@#c@!w@8s74#%-@gf6yxu&@4p-!5$)&wuv^e%bw-y#qm(3!(}
+      
+      DB_HOST: "db_game"
       POSTGRES_DB: "${GAME_POSTGRES_DB:-default_db}"
       POSTGRES_ACCESS_USER: "${GAME_POSTGRES_ACCESS_USER:-game_accessy}"
       POSTGRES_ACCESS_PASSWORD: "${GAME_POSTGRES_ACCESS_PASSWORD:-accesspass}"
 
-      # TODO: delete dev vars or keep them but only create admin user if DEBUG = True?
+      REDIS_USER: "${GAME_REDIS_USER:-redisuser}"
+      REDIS_PASSWORD: "${GAME_REDIS_PASSWORD:-redispass}"
+
       PYTHONUNBUFFERED: 1
       DJ_SUDO_USERNAME: "${GAME_DJ_SUDO_USERNAME:-admin}"
       DJ_SUDO_EMAIL: "${GAME_DJ_SUDO_EMAIL:-admin@example.com}"
       DJ_SUDO_PASSWORD: "${GAME_DJ_SUDO_PASSWORD:-transcendence}"
-      DEBUG: "${DEBUG:-True}"
+    
     depends_on:
       db_game:
         condition: service_healthy
