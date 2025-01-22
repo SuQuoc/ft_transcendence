@@ -20,7 +20,6 @@ export class MatchPage extends ComponentBaseClass {
 
 		// getting elements
 		this.canvas = this.root.querySelector("pong-canvas-element");
-		console.log("MatchPage connectedCallback");
 		
 		// add event listeners
 		this.canvas.addEventListener("gameend", this.handleGameEnd_var);
@@ -52,14 +51,10 @@ export class MatchPage extends ComponentBaseClass {
 
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
-		console.log("MatchPage: handleReceivedMessage: ", data);
 				
 		if (data.type === "match_found") {
 			if (window.app.pong_socket)
 			window.app.pong_socket.send(JSON.stringify({type: "connect_to_match", match_id: data.match_id}));
-		}
-		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.error);
 		}
 		else {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);

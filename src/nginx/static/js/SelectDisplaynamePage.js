@@ -186,7 +186,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			this.displayname_warning.innerHTML = error;
 			this.displayname_warning.setAttribute("aria-invalid", "true");
 			this.displayname_warning.style.display = "";
-			console.error('Error selecting displayname:', error);
 		}
 	}
 

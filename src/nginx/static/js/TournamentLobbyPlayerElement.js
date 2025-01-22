@@ -25,7 +25,6 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 	incrementWins() {
 		let wins = parseInt(this.wins.innerText, 10);
         wins += 1;
-		console.log("wins: ", wins);
         this.wins.innerText = wins; 
 	}
 

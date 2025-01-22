@@ -57,7 +57,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	sendMatchId(match_id) {
 		if (!window.app.pong_socket) {
-			console.error("pong socket is not open");
 			window.app.router.go("/");
 		}
 
@@ -105,10 +104,8 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 
 	deletePlayerElement(player_name) {
 		let element = this.player_list.querySelector(`tournament-lobby-player-element[name="${player_name}"]`);
-		if (!element) {
-			console.error("Error: deletePlayerElement: element to delete not found");
+		if (!element)
 			return;
-		}
 		
 		this.player_list.removeChild(element);
 	}
@@ -135,7 +132,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	/** gets called when the websocket receives a message */
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
-		console.log("TournamentLobbyPage: handleReceivedMessage: ", data);
 				
 		if (data.type === "player_joined_room") {
 			this.addPlayerElement(data.displayname, data.image);
@@ -155,22 +151,17 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 			this.displayMatchResult(data.match_result.winner, data.match_result.loser);
 		}
 		else if (data.type === "tournament_end") {
-			console.log("tournament end");
 			this.canvas.clearTextForeground();
 			this.canvas.writeTextForeground(data.winner + " won!");
 			this.setGoBackTimeout();
 		}
 		else if (data.type === "free_win") {
-			console.log("free win");
 			if (data.displayname === window.app.userData.username) {
 				this.canvas.clearTextForeground();
 				this.canvas.writeTextForeground("Free win!");
 			}
 			let player_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${data.displayname}"]`);
 			player_element.incrementWins();
-		}
-		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.error);
 		}
 		else {
 			console.error("Error: handleReceivedMessage: unknown type: ", data.type);

@@ -275,7 +275,6 @@ export class LoginPage extends ComponentBaseClass {
 				// Redirects to the home page if the user already has a displayname or to the select displayname page if they don't
 				if (!displaynameResponse.ok || displaynameData.displayname === "") {
 					await app.router.go("/displayname", false);
-					console.log("displayname not ok:", displaynameResponse);
 				} else {
 					window.app.userData.username = displaynameData.displayname;
 					if (displaynameData.image) {
