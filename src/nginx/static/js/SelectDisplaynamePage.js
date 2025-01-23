@@ -46,6 +46,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			const response = await this.apiFetch('/registration/get_email', {method: 'GET'});
 			if (!response.password_set) {
 				this.showPasswordFields();
+			}
+			if (!app.userData.backupCodes?.length) {
 				const backup_codes = await this.apiFetch('/registration/backup_rotate_codes', {method: 'POST'});
 				app.userData.backupCodes = backup_codes;
 			}
