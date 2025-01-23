@@ -204,14 +204,6 @@ if TEST:
 
 APPEND_SLASH = False
 
-# [aguilmea] to check what
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = True
-# SECURE_SSL_REDIRECT = True
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-
 # REDIS ---------------------------------------------------------
 REDIS_USER = os.environ.get('REDIS_USER')
 REDIS_PASS = os.environ.get('REDIS_PASSWORD')

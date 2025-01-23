@@ -6,9 +6,6 @@ set -e
 python manage.py makemigrations
 python manage.py migrate
 
-#TODO: uncomment when checking for deployment
-#python manage.py collectstatic --noinput
-
 if [ "$TEST" = "True" ]; then 
     echo "Creating test users..."
     python manage.py create_testusers # Run custom command

@@ -194,7 +194,7 @@ PASSWORD_RESET_TIMEOUT = 600
 CORS_ALLOWED_ORIGINS = [
     "https://api.intra.42.fr",
 ]
-APPEND_SLASH=False # [aguilmea] changed temporarly
+APPEND_SLASH=False
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -226,7 +226,7 @@ if DEBUG == True:
         },
     }
 
-CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")] # [aguilmea] added for admin login
+CSRF_TRUSTED_ORIGINS = [os.environ.get("SERVER_URL")] # added for admin login
 
 from celery.schedules import crontab
 
