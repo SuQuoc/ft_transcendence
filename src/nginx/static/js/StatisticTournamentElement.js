@@ -41,21 +41,21 @@ export class StatisticTournamentElement extends HTMLElement {
 				<div class="d-flex align-items-center justify-content-between bg-dark rounded-3 gap-3 p-2">
 					<div class="d-flex flex-column lh-1 text-break">
 						<span name="stats_loser_name" class="text-white">displayname</span>
-						<span class="text-nowrap text-white-50 small">loser</span>
+						<span class="text-nowrap text-secondary small">loser</span>
 					</div>
 					
 					<div class="d-flex">
 						<span name="stats_loser_score" class="text-white fs-4">1</span>
-						<span class="text-white-50 fs-4">/</span>
+						<span class="text-secondary fs-4">/</span>
 						<span name="stats_winner_score" class="text-white fs-4">5</span>
 					</div>
 					
 					<div class="d-flex flex-column lh-1 text-break">
 						<span name="stats_winner_name" class=" ms-auto text-white">displayname</span>
-						<span class="text-nowrap text-white-50 ms-auto small">winner</span>
+						<span class="text-nowrap text-secondary ms-auto small">winner</span>
 					</div>
 				</div>
-				<span name="stats_date" class="text-white-50 ms-2 small">2024-11-17</span>
+				<span name="stats_date" class="text-secondary ms-2 small">2024-11-17</span>
 			</div>
 		`;
 		return template;

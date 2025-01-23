@@ -50,7 +50,7 @@ export class UserProfile extends ComponentBaseClass {
 		</style>
 		<div class="form-container text-white" style="background-color: var(--custom-bg-color); border-radius: 6px;">
 			<div id="userManagement">
-				<img src="/media_url/profile_images/default_avatar.png" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "/media_url/profile_images/default_avatar.png"'>
+				<img src="/media_url/profile_images/default_avatar.png" class="profile-image" id="profileImage" alt="Profile Image" onerror='this.src = "/media_url/profile_images/default_avatar.png"' tabindex="0">
 				<div id="imageWarning" class="mt-2"></div>
 				<input type="file" id="imageUpload" style="display: none;">
 				<form id="profileForm">
@@ -58,7 +58,7 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="displayName" class="form-label">Display Name</label>
 						<div class="input-group mb-3">
 							<input type="text" class="form-control" id="displayName" minlength="1" maxlength="20" pattern="[A-Za-z0-9\\-_]{1,20}" disabled>
-							<span class="input-group-text btn btn-custom" id="changeDisplayNameButton">Change</span>
+							<span class="input-group-text btn btn-custom" id="changeDisplayNameButton" tabindex="0">Change</span>
 						</div>
 						<div class="warning-message" id="profileDisplayNameWarning">Error changing display name</div>
 					</div>
@@ -66,29 +66,29 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="email" class="form-label">Email address</label>
 						<div class="input-group">
 							<input type="email" class="form-control" id="email" disabled>
-							<span id="changeEmailButton" class="input-group-text btn btn-custom">Change</span>
+							<span id="changeEmailButton" class="input-group-text btn btn-custom" tabindex="0">Change</span>
 						</div>
 						<span class="warning-message" id="emailWarning" style="display:none;">Choose a different Email address</span>
 						<div id="oldEmailContainer" hidden>
 							<div class="form-check form-switch mt-3">
   								<input class="form-check-input" type="checkbox" role="switch" id="changeUsernameSwitchBackupCode">
-  								<label class="form-check-label text-white" for="changeUsernameSwitchBackupCode">No access to email? Use backup code instead</label>
+  								<label class="form-check-label text-white" for="changeUsernameSwitchBackupCode" tabindex="0">No access to email? Use backup code instead</label>
 							</div>
 							<label for="oldEmailOTP" class="form-label">OTP sent to old E-Mail</label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-								<span class="input-group-text btn btn-custom" id="requestOldEmailOTP">New OTP</span>
+								<span class="input-group-text btn btn-custom" id="requestOldEmailOTP" tabindex="0">New OTP</span>
 							</div>
 						</div>
 						<div id="newEmailContainer" hidden>
 							<label for="newEmailOTP" class="form-label mt-3">OTP sent to new E-Mail</label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-								<span class="input-group-text btn btn-custom" id="requestNewEmailOTP">New OTP</span>
+								<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 							</div>
 							<div class="d-flex justify-content-between">
     							<button type="submit" class="btn btn-custom mt-3 me-2" id="saveNewEmailButton" disabled>Change Email</button>
-    							<button type="button" class="btn btn-secondary mt-3" id="cancelEmailButton">Cancel</button>
+    							<button type="button" class="btn btn-secondary mt-3" id="cancelEmailButton" tabindex="0">Cancel</button>
 							</div>
 						</div>
 					</div>
@@ -99,28 +99,28 @@ export class UserProfile extends ComponentBaseClass {
 						<label for="oldPassword" class="form-label">Old Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="oldPassword" name="current-password" autocomplete="current-password">
-							<span class="input-group-text btn btn-custom" id="oldPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="oldPasswordToggle" tabindex="0">Show</span>
 						</div>
 					</div>
 					<div class="mb-3 input-group" id="newPasswordContainer">
 						<label for="newPassword" class="form-label">New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="newPassword" name="new-password" autocomplete="new-password">
-							<span class="input-group-text btn btn-custom" id="newPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="newPasswordToggle" tabindex="0">Show</span>
 						</div>
 					</div>
 					<div class="mb-3" id="confirmPasswordContainer">
 						<label for="confirmPassword" class="form-label">Confirm New Password</label>
 						<div class="input-group">
 							<input type="password" class="form-control" id="confirmPassword" name="new-password-confirm" autocomplete="new-password">
-							<span class="input-group-text btn btn-custom" id="confirmPasswordToggle">Show</span>
+							<span class="input-group-text btn btn-custom" id="confirmPasswordToggle" tabindex="0">Show</span>
 						</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
 						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
 						<div class="input-group">
 							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
-							<span class="input-group-text btn btn-custom" id="requestNewEmailOTP">New OTP</span>
+							<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 						</div>
 					</div>
 				</div>
@@ -128,7 +128,7 @@ export class UserProfile extends ComponentBaseClass {
 					<label for="changePasswordOTP" class="form-label">Enter OTP</label>
 					<div class="input-group">
 						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9]{16}">
-						<span class="input-group-text btn btn-custom" id="changePasswordRequestOTP">New OTP</span>
+						<span class="input-group-text btn btn-custom" id="changePasswordRequestOTP" tabindex="0">New OTP</span>
 					</div>
 					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
 				</div>
@@ -481,7 +481,6 @@ export class UserProfile extends ComponentBaseClass {
 			}
 		} catch (error) {
 			this.showDeleteError(error);
-			//TODO: add error message to the page
 			console.error("Error: ", error);
 		}
 	}

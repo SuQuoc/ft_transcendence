@@ -65,7 +65,7 @@ class Background {
 	 */
 	drawLeftScore(score) {
 		// clearing the old score
-		this.ctx.clearRect(this.score.x_left - 50, this.score.y - 50, 100, 50);
+		this.ctx.clearRect(this.score.x_left - 60, this.score.y - 60, 100, 60);
 
 		this.ctx.fillStyle = this.color;
 		this.ctx.font = '50px Arial';
@@ -78,7 +78,7 @@ class Background {
 	 */
 	drawRightScore(score) {
 		// clearing the old score
-		this.ctx.clearRect(this.score.x_right - 50, this.score.y - 50, 100, 50);
+		this.ctx.clearRect(this.score.x_right - 60, this.score.y - 60, 100, 60);
 
 		this.ctx.fillStyle = this.color;
 		this.ctx.font = '50px Arial';

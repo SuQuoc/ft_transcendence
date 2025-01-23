@@ -229,7 +229,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 						required
 						aria-describedby="displayNameWarning"
 						>
-						<div class="form-text text-white-50">Other users can see this name</div>
+						<div class="form-text text-secondary">Other users can see this name</div>
 						<div id="displayNameWarning" class="text-danger mt-2" style="display: none;"></div>
 					</div>
 					

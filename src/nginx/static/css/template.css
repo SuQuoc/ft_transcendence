@@ -1,4 +1,6 @@
 :root {
+	--bs-font-size-base: 1rem;
+	--bs-text-secondary: #a9acad;
 	--custom-bg-color: rgb(52, 52, 56);
 	
 	/* custom colors used primarily for buttons */
@@ -16,8 +18,20 @@
 	--custom-btn-click-color: #0c0d52;
 }
 
+footer > p a {
+	color: var(--custom-btn-text-color) !important;
+}
+
+.text-secondary {
+	color: var(--bs-text-secondary) !important;
+}
+
 body {
 	background: var(--custom-bg-color);
+}
+
+* {
+	font-size: var(--bs-font-size-base);
 }
 
 .bg-custom {

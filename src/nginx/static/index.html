@@ -34,27 +34,24 @@
 <body class="d-flex flex-column h-100">
 	<!-- Navbar -->
 	<nav class="navbar navbar-dark bg-dark px-sm-3 px-2" id="navbar" style="display:none;">
-		<ul class="navbar-nav d-flex flex-row gap-sm-3 gap-2">
-			<a class="nav-link active" href="/" tabindex="1">Home</a>
-			<a class="nav-link" href="/match" tabindex="2">Match</a>
-			<a class="nav-link" href="/tournament" tabindex="3">Tournament</a>
-		</ul>
-
-		<ul class="navbar-nav d-flex flex-row gap-sm-3 gap-2 ms-auto">
-			<a class="nav-link" href="/friends" tabindex="4">Friends</a>
-			<a class="nav-link" href="/stats" tabindex="5">Stats</a>
-
-			<!-- User Profile -->
-			<div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-label="User Profile">
-				<div class="offcanvas-header" data-bs-theme="dark">
-					<h5 class="offcanvas-title text-white">User Profile</h5>
-					<button type="button" class="btn-close" id="userProfileClose" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-				</div>
-				<div class="offcanvas-body pt-0" id="userProfileContainer" tabindex="-1">
-					<!-- user profile placeholder -->
-				</div>
-			</div>
-			<img src="/media_url/profile_images/default_avatar.png"
+		<ul class="navbar-nav d-flex flex-row gap-sm-3 gap-2 w-100">
+            <li>
+			    <a class="nav-link active" href="/" tabindex="1">Home</a>
+            </li>
+            <li>
+			    <a class="nav-link" href="/match" tabindex="2">Match</a>
+            </li>
+            <li>
+			    <a class="nav-link" href="/tournament" tabindex="3">Tournament</a>
+            </li>
+            <li class="ms-auto">
+			    <a class="nav-link" href="/friends" tabindex="4">Friends</a>
+            </li>
+            <li>
+			    <a class="nav-link" href="/stats" tabindex="5">Stats</a>
+            </li>
+            <li>
+                <img src="/media_url/profile_images/default_avatar.png"
 				onerror='this.src = src="/media_url/profile_images/default_avatar.png"'
 				alt="Profile image of your user"
 				class="rounded-circle"
@@ -65,8 +62,18 @@
 				aria-controls="userProfileButton"
 				style="width: 40px; height: 40px; cursor: pointer; object-position: center; object-fit: cover;"
 				tabindex="6"
-			>
+			    >
+            </li>
 		</ul>
+        <div class="offcanvas offcanvas-end bg-dark" id="userProfile" tabindex="-1" aria-label="User Profile">
+				<div class="offcanvas-header" data-bs-theme="dark">
+					<h5 class="offcanvas-title text-white">User Profile</h5>
+					<button type="button" class="btn-close" id="userProfileClose" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				</div>
+				<div class="offcanvas-body pt-0" id="userProfileContainer" tabindex="-1">
+					<!-- user profile placeholder -->
+				</div>
+        </div>
 	</nav>
 
 
@@ -79,8 +86,9 @@
 
 	<!-- Footer -->
 	<footer class="mt-auto bg-dark pt-2" id="footer" style="display:none;">
-        <p class="text-center fst-italic text-white-50">Made with <3 at 42 Vienna by <a href="https://github.com/AnnaFiona">Fiona</a>, <a href="https://github.com/SuQuoc">Quoc Su</a>, <a href="https://github.com/AnnieG84">Annie</a> and <a href="https://github.com/derfleck">Michael</a></p>
-	</footer>
+        <p class="text-center fst-italic text-secondary">Made with <3 at 42 Vienna by <a href="https://github.com/AnnaFiona">Fiona</a>, <a href="https://github.com/SuQuoc">Quoc Su</a>, <a href="https://github.com/AnnieG84">Annie</a> and <a href="https://github.com/derfleck">Michael</a></p>
+	    <p class="text-center fst-italic text-secondary">Change font size to <a href="#" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1rem');" class="btn btn-link p-0">normal</a>, <a href="#" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.1rem');" class="btn btn-link p-0">large</a>, <a href="#" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.2rem');" class="btn btn-link p-0">extra-large</a></p>
+    </footer>
 
 
 	<!-- temporary ###Templates### for making new components -->

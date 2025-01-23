@@ -57,18 +57,18 @@ export class LoginPage extends ComponentBaseClass {
 				<h3 class="text-center text-white">Login</h3>
 				<form id="42LoginForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
 					<input type="hidden" name="next_step" value="login">
-					<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
+					<label for="loginWith42" class="form-label text-secondary">Only for 42 students</label>
 					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Login with 42</button>
 				</form>
-				<hr class="text-white-50">
+				<hr class="text-secondary">
 				<form id="loginForm" class="d-flex flex-column needs-validation gap-3">
 					<div>
-						<label for="loginEmail" class="form-label text-white-50">Email address</label>
+						<label for="loginEmail" class="form-label text-secondary">Email address</label>
 						<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
 						<div class="invalid-feedback mb-1">Please enter your email</div>
 					</div>
 					<div>
-						<label for="loginPassword" class="form-label text-white-50">Password</label>
+						<label for="loginPassword" class="form-label text-secondary">Password</label>
 						<input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
 						<div class="invalid-feedback mb-1">Please enter your password</div>
 					</div>
@@ -77,7 +77,7 @@ export class LoginPage extends ComponentBaseClass {
   						<label class="form-check-label text-white" for="loginSwitchBackupCode">Login with backup code</label>
 					</div>
 					<div id="loginOtpSection" style="display: none;">
-						<label for='loginOtpCode' class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<label for='loginOtpCode' class="form-label text-secondary">OTP Code sent to your E-Mail</label>
 						<div class="input-group">
 							<input name="otp" id='loginOtpCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
 							<button id="requestOtpButton" class="btn btn-custom" type="button">New OTP</button>
@@ -89,14 +89,14 @@ export class LoginPage extends ComponentBaseClass {
 							<span class="text-warning">What's this?</span><br>
 							<span class="text-white">If you have lost access to your Email address, you can log in with one of your backup codes.</span>
 						</div>
-						<label for='loginBackupCode' class="form-label text-white-50">Your backup code</label>
+						<label for='loginBackupCode' class="form-label text-secondary">Your backup code</label>
 						<input name="backup_code" id='loginBackupCode' type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{32}" minlength="32" maxlength="32">
 						<span id="BackupErrorMessage" class="text-danger"></span>
 					</div>
 					<div>
 						<span id="errorMessage" class="text-danger d-block mb-2"></span>
-						<p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
-						<p class="text-white-50 small mb-1">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
+						<p class="text-secondary small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
+						<p class="text-secondary small mb-1">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
 						<button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
 						<div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
 							<span class="visually-hidden">Loading...</span>
