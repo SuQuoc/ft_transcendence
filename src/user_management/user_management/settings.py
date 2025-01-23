@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
 TEST = os.getenv("TEST") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [os.environ.get("DOMAIN"), "usermanagement"]
 
 
 # Application definition
