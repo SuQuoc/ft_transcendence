@@ -477,7 +477,6 @@ export class UserProfile extends ComponentBaseClass {
 					method: "POST",
 					body: JSON.stringify({ password: password, otp: otp }),
 				});
-				console.log("User deleted");
 				await window.app.router.go("/login", true);
 			}
 		} catch (error) {
@@ -603,7 +602,6 @@ export class UserProfile extends ComponentBaseClass {
 					window.app.userData.profileImage;
 			}
 			if (!window.app.userData.email) {
-				console.log("Email not found in global app object, fetching from API");
 				const email_response = await this.apiFetch("/registration/get_email", {
 					method: "GET",
 					cache: "no-store",

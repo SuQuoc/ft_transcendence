@@ -80,14 +80,12 @@ export class ComponentBaseClass extends HTMLElement {
 			if (response.status !== 200) {
 				const errorData = await response.json();
 				if (errorData.detail === "No access token provided") {
-					console.log("No access token provided");
 					return false;
 				}
 				throw new Error(errorData.detail || "Token is invalid");
 			}
 			return true;
 		} catch (error) {
-			console.log("Error validating token, trying to refresh: ", error.message);
 			try {
 				const refreshResponse = await fetch("/registration/refresh_token", {
 					method: "GET",

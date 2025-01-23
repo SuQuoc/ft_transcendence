@@ -15,7 +15,6 @@ const validateToken = async () => {
 		if (response.status !== 200) {
 			const errorData = await response.json();
 			if (errorData.detail === "No access token provided") {
-				console.log("No access token provided");
 				return false;
 			}
 			throw new Error(errorData.detail || "Token is invalid");
@@ -23,8 +22,6 @@ const validateToken = async () => {
 
 		return true;
 	} catch (error) {
-		console.log("Error validating token, trying to refresh: ", error.message);
-
 		try {
 			const refreshResponse = await fetch("/registration/refresh_token", {
 				method: "GET",
@@ -248,7 +245,6 @@ const Router = {
 				pageElement = new TournamentLobbyPage(data);
 				break;
 			case "/match":
-				console.log("match page created");
 				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
 				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
 				window.app.match_socket = Router.closeWebSocket(window.app.match_socket);
@@ -275,13 +271,11 @@ const Router = {
 				fragment.appendChild(document.createElement("friend-list"));
 				fragment.appendChild(document.createElement("friend-search"));
 				pageElement = fragment;
-				console.log("friends page created");
 				break;
 			default:
 				// homepage
 				pageElement = document.createElement("play-menu-home-page");
 				route = "/";
-				console.log("default in router");
 				break;
 		}
 		if (pageElement) {
