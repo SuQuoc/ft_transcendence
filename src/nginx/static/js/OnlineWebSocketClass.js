@@ -1,7 +1,7 @@
 export class OnlineWebSocketClass {
 	constructor () {
 		this.socket = null;
-		this.online_friends = [];
+		this.online_friends = new Set();
 		this.handleReceivedMessage_var = this.handleReceivedMessage.bind(this);
 	}
 
@@ -31,19 +31,17 @@ export class OnlineWebSocketClass {
 			this.removeEventListeners();
 			this.socket.close();
 			this.socket = null;
+			this.online_friends.clear();
 		}
 	}
 
 
 	friendWentOnline (friend_id) {
-		this.online_friends.push(friend_id);
+		this.online_friends.add(friend_id);
 	}
 
 	friendWentOffline (friend_id) {
-		const index = this.online_friends.indexOf(friend_id);
-		if (index > -1) {
-			this.online_friends.splice(index, 1);
-		}
+		this.online_friends.delete(friend_id);
 	}
 
 
