@@ -36,9 +36,9 @@ async def tournament_loop(room: TournamentRoom, queue):
                 msg_count += 1
                 loser = get_loser(players, message.get("loser"))
                 winner = get_winner(players, message.get("winner"))
-                size = len(winners)
+                old_size = len(winners)
                 winners.add(winner)
-                if size == len(winners):
+                if old_size < len(winners):
                     match_result = {
                         "winner": winner.name,
                         "loser": loser.name

@@ -322,7 +322,6 @@ export class FriendList extends ComponentBaseClass {
 
 	handleOnlineSocketMessage(event) {
 		const data = JSON.parse(event.data);
-		console.log("OnlineWebSocket: handleOnlineSocketMessage: ", data);
 
 		if (data.type === "online_status") {
 			if (data.status === "online") {
@@ -331,9 +330,6 @@ export class FriendList extends ComponentBaseClass {
 			else if (data.status === "offline") {
 				this.friendWentOffline(data.sender_id);
 			}
-		}
-		else if (data.type === "error") {
-			console.error("Error: handleOnlineSocketMessage: ", data.error);
 		}
 		else {
 			console.error("Error: handleOnlineSocketMessage: unknown type: ", data.type);
