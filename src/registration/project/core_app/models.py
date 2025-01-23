@@ -153,7 +153,7 @@ class OauthTwo(models.Model):
         return self
 
     def save(self, *args, **kwargs):
-        if not self.pk and self.related_user is not None: # [aguilmea] when do i delete the oauth2 without related_user?
+        if not self.pk and self.related_user is not None:
             OauthTwo.objects.filter(related_user=self.related_user).delete()
         self.state = base64.b64encode(self.state.encode('utf-8')).decode('utf-8')
         #self.state = make_password(self.state)

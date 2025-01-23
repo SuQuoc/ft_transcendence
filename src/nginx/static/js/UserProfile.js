@@ -319,7 +319,6 @@ export class UserProfile extends ComponentBaseClass {
 		} catch (error) {
 			email.classList.add("warning");
 			this.shadowRoot.getElementById("emailWarning").style.display = "block";
-			console.error("Error requesting OTP:", error);
 		}
 	}
 
@@ -383,7 +382,6 @@ export class UserProfile extends ComponentBaseClass {
 			} catch (error) {
 				oldEmailOTP.classList.add("warning");
 				newEmailOTP.classList.add("warning");
-				console.error("Error changing email:", error);
 			}
 		}
 	}

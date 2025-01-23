@@ -22,7 +22,7 @@ class TestProfile:
 
         expect(profile_form_loc).to_be_visible() 
         expect(displayname_loc).to_have_value(USERDISPLAYNAME)
-        """ expect(email_loc).to_have_value(USERMAIL) """ # todo !!! - email is not displayed in profile dropdown when u are logged in and open a new tab
+        """ expect(email_loc).to_have_value(USERMAIL) """
 
 
     def test_userdata_present_after_login(self, login_page: Page):
@@ -48,7 +48,7 @@ class TestProfile:
         page.locator("#userDropdown").click()
 
         expect(page.locator("#displayName")).to_have_value(USER_NEWNAME)
-        # todo !!! - logout and login again to check new displayname """
+    """
 
 
     """ def test_email_change(self, page: Page):
@@ -60,7 +60,7 @@ class TestProfile:
         page.locator("#userDropdown").click()
 
         expect(page.locator("#email")).to_have_value(USER_NEWMAIL)
-        # todo !!! - logout and login again to check new displayname """
+    """
 
 
     def test_image_change(self, page: Page):

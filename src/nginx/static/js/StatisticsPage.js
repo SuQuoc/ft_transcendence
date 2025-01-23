@@ -57,7 +57,6 @@ export class StatisticsPage extends ComponentBaseClass {
 				stats = await this.apiFetch(`game/get_game_stats?profile_id=${user_id}`, { method: "GET" });
 			return (stats);
 		} catch (error) {
-			console.error("Error fetching stats:", error.message);
 			this.couldnt_fetch_data_toast.show();
 		}
 		return (null);

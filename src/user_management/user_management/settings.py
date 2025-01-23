@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
 TEST = os.getenv("TEST") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [os.environ.get("DOMAIN"), "usermanagement"]
 
 
 # Application definition
@@ -203,14 +203,6 @@ if TEST:
 
 
 APPEND_SLASH = False
-
-# [aguilmea] to check what
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = True
-# SECURE_SSL_REDIRECT = True
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
 
 # REDIS ---------------------------------------------------------
 REDIS_USER = os.environ.get('REDIS_USER')

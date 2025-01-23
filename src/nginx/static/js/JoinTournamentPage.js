@@ -67,7 +67,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 		this.create_tournament_form.removeEventListener("submit", this.handleTournamentCreation_var);
 		this.tournament_name_input.removeEventListener("input", this.handleHideTournamentNameError_var);
 		this.input_range.removeEventListener("input", this.handleRangeDisplay_var);
-		console.log("JoinTournamentPage: disconnectedCallback");
 	};
 	
 
@@ -75,7 +74,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 
 	/** handles all known errors recieved from the message event handler */
 	tournamentErrors(error) {
-		console.log("tournamentErrors: error: ", error);
 		this.waitingForPermission(false); // shows the join tournament elements and the create tournament form
 		if (error === "room_name_taken") {
 			this.tournament_name_error.innerText = "Tournament name already taken";
@@ -101,7 +99,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** hides or shows a text that says "no tournaments to join" */
 	noTournamentsToJoin() {
 		const tournament_elements = this.join_tournament_elements.querySelectorAll("join-tournament-element");
-		console.log("tournament_elements: ", tournament_elements);
 
 		if (tournament_elements === null || tournament_elements.length === 0) {
 			this.no_tournaments_to_join.style.display = "";
@@ -132,10 +129,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** creates a new joinTournamentElement and appends it to the joinTournamentElements div */
 	createJoinTournamentElement(tournament_name, creator_name, points_to_win, current_player_num, max_player_num) {
 		let element = new JoinTournamentElement();
-		if (!element) {
-			console.error("Error: createJoinTournamentElement: element could not be created");
+		if (!element)
 			return;
-		}
 
 		element.setAttribute('name', tournament_name);
 		this.join_tournament_elements.appendChild(element);
@@ -152,10 +147,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** deletes a joinTournamentElement */
 	deleteJoinTournamentElement(tournament_name) {
 		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name='${tournament_name}']`);
-		if (!element) {
-			console.error("Error: deleteJoinTournamentElement: element to delete not found");
+		if (!element)
 			return;
-		}
 
 		this.join_tournament_elements.removeChild(element);
 		this.noTournamentsToJoin();
@@ -164,10 +157,8 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** updates the 'current_player_num' of the 'join-tournament-element' with the tournament_name passed */
 	updateCurrentPlayerNum(tournament_name, current_player_num) {
 		let element = this.join_tournament_elements.querySelector(`join-tournament-element[name='${tournament_name}']`);
-		if (!element) {
-			console.error("Error: updateCurrentPlayerNum: element to update not found");
+		if (!element)
 			return;
-		}
 
 		element.querySelector("[name='join_current_player_num']").innerHTML = current_player_num;
 	}
@@ -175,18 +166,15 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** sends a message to the server to get the list of tournaments */
 	getTournamentList() {
 		if (!window.app.socket) {
-			console.error("socket is not open");
 			window.app.router.go("/"); // goes to the home page
 		}
 
 		if (window.app.socket.readyState === WebSocket.OPEN) {
 			window.app.socket.send(JSON.stringify({"type": "get_tournament_list"}));
-			console.log('websocket is open');
 		} else {
 			window.app.socket.addEventListener('open', () => {
 				window.app.socket.send(JSON.stringify({"type": "get_tournament_list"}));
 			}, { once: true });
-			console.log('websocket adding event listener on open')
 		}
 		this.noTournamentsToJoin();
 	}
@@ -216,7 +204,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 											"points_to_win": points_to_win,
 											"max_player_num": number_of_players}));
 		
-		console.log("tournament created");
 		this.waitingForPermission(); // waiting for permission to go to the tournament lobby
 	};
 
@@ -244,15 +231,11 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	/** gets called when the websocket receives a message */
 	handleReceivedMessage(event) {
 		const data = JSON.parse(event.data);
-		
-		console.log("handleReceivedMessage: data: ", data);
-		
+				
 		if (data.type === "room_size_update") {
-			console.log("room_size_update");
 			this.updateCurrentPlayerNum(data.room_name, data.cur_player_num);
 		}
 		else if (data.type === "new_room") {
-			console.log("new_room: ", data.room.name);
 			this.createJoinTournamentElement(data.room.name, // tournament_name
 											data.room.creator_name,
 											data.room.points_to_win,
@@ -260,7 +243,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 											data.room.max_player_num);
 		}
 		else if (data.type === "delete_room") {
-			console.log("delete_room: ", data.room_name);
 			this.deleteJoinTournamentElement(data.room_name);
 		}
 		else if (data.type === "success") {
@@ -268,7 +250,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			window.app.router.go("/tournament-lobby", false, data.room_name);
 		}
 		else if (data.type === "tournament_list") {
-			console.log("tournament_list");
 			for (let tournament_name in data.tournaments) {
 				const tournament = data.tournaments[tournament_name];
 				this.createJoinTournamentElement(tournament_name,
@@ -282,7 +263,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 			window.app.socket_event_queue.add(event);
 		}
 		else if (data.type === "error") {
-			console.error("Error: handleReceivedMessage: ", data.error);
 			this.tournamentErrors(data.error);
 		}
 		else {

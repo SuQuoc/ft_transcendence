@@ -31,9 +31,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                         name=displayname,
                         id=user_id
         )
-        print(f"User {self.user.name} connected to matchmaking")
         MatchmakingConsumer.players[self.user.id] = self.user
-        print(MatchmakingConsumer.players)
         if len(MatchmakingConsumer.players) == 2:
             _, playerL = MatchmakingConsumer.players.popitem()
             _, playerR = MatchmakingConsumer.players.popitem()

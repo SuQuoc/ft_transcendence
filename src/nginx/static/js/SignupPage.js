@@ -306,7 +306,6 @@ export class SignupPage extends ComponentBaseClass {
 					.classList.remove("rounded-end");
 				this.shadowRoot.getElementById("signupOtpCode").focus();
 			} catch (error) {
-				console.error("Error during OTP request:", error);
 				signupErrorEmail.style.display = "block";
 				signupErrorEmail.textContent = error;
 				this.shadowRoot
@@ -331,7 +330,6 @@ export class SignupPage extends ComponentBaseClass {
 				window.app.userData.backupCodes = responseData?.backup_codes;
 				app.router.go("/displayname", false);
 			} catch (error) {
-				console.error("Error during signup:", error);
 				signupErrorOTP.style.display = "block";
 				signupErrorOTP.textContent = error;
 			} finally {

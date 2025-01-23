@@ -13,8 +13,10 @@ RUN apt-get update \
 
 # Copy project files
 COPY ./scripts/entrypoint.sh ./scripts/entrypoint.sh
-COPY ./api ./api
 COPY ./user_management ./user_management
+COPY ./api ./api
+COPY ./friends ./friends
+COPY ./utils_jwt.py ./utils_jwt.py
 COPY ./manage.py ./manage.py
 
 # Install Python dependencies
@@ -22,8 +24,3 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["./scripts/entrypoint.sh"]
-
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "user_management.asgi:application"] # NOTE: FE might not update the small profile pic
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# [aguilmea] for deployment testing
-#CMD ["python", "manage.py", "check", "--deploy"]
