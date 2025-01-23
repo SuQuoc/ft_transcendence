@@ -13,8 +13,10 @@ RUN apt-get update \
 
 # Copy project files
 COPY ./scripts/entrypoint.sh ./scripts/entrypoint.sh
-COPY ./api ./api
 COPY ./user_management ./user_management
+COPY ./api ./api
+COPY ./friends ./friends
+COPY ./utils_jwt.py ./utils_jwt.py
 COPY ./manage.py ./manage.py
 
 # Install Python dependencies
