@@ -49,6 +49,7 @@ services:
             - "8000/tcp"
         environment:
             SERVER_URL: ${SERVER_URL:-https://localhost:8443}
+            DOMAIN: ${DOMAIN:-localhost}
             DEBUG: ${DEBUG:-False}
 
             DJ_SECRET_KEY: ${UM_DJ_SECRET_KEY:-random_for_dev_#^0%uiw_5fdsfdsfdsvcxvsEWvcxvzqca7(sm#(x9nnf*5(kjnk}

@@ -15,7 +15,7 @@ for static_dir in STATICFILES_DIRS:
 
 
 SECRET_KEY = os.environ.get('DJ_SECRET_KEY')
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.environ.get('DOMAIN'), 'registration']
 
 DEBUG = os.environ.get('DEBUG') == 'True'
 SILK = os.environ.get('SILK') == 'True'
