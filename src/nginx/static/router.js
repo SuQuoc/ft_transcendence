@@ -15,7 +15,6 @@ const validateToken = async () => {
 		if (response.status !== 200) {
 			const errorData = await response.json();
 			if (errorData.detail === "No access token provided") {
-				console.log("No access token provided");
 				return false;
 			}
 			throw new Error(errorData.detail || "Token is invalid");
@@ -23,8 +22,6 @@ const validateToken = async () => {
 
 		return true;
 	} catch (error) {
-		console.log("Error validating token, trying to refresh: ", error.message);
-
 		try {
 			const refreshResponse = await fetch("/registration/refresh_token", {
 				method: "GET",
@@ -39,7 +36,6 @@ const validateToken = async () => {
 			}
 			return true;
 		} catch (refreshError) {
-			console.error("Error refreshing token:", refreshError.message);
 			return false;
 		}
 	}
@@ -101,7 +97,6 @@ const checkQueryParams = async () => {
 			return false;
 		}
 	} catch (error) {
-		console.error("Error checking query params: ", error.message);
 		return false;
 	}
 };
@@ -146,13 +141,6 @@ const Router = {
 		let ws_scheme = "wss"; // shouldn't it always be wss with ws-only i get a 400 bad request
 		let ws_path = ws_scheme + "://" + window.location.host + endpoint;
 		let new_socket = new WebSocket(ws_path);
-
-		// add event listeners
-		console.log("socket created");
-
-		new_socket.onopen = () => {
-			console.log("socket opened");
-		};
 		return new_socket;
 	},
 
@@ -162,9 +150,7 @@ const Router = {
 	closeWebSocket: (socket) => {
 		// function name should be changed
 		if (socket) {
-			socket.onopen = null; // removes the onopen event handler (copilot says it prevents memory leaks)
 			socket.close();
-			console.log("socket closed");
 		}
 		return null;
 	},
@@ -206,7 +192,6 @@ const Router = {
 	// changes the page main content and update the URL
 	go: async (route, addToHistory = true, data = "") => {
 		// data is only needed for the TournamentLobbyPage and the StatisticsPage
-		console.log(`Going to ${route}`, " | addToHistory: ", addToHistory);
 		let pageElement = null; // the new page element
 
 		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
@@ -248,7 +233,6 @@ const Router = {
 				pageElement = new TournamentLobbyPage(data);
 				break;
 			case "/match":
-				console.log("match page created");
 				window.app.pong_socket = Router.closeWebSocket(window.app.pong_socket);
 				window.app.pong_socket = Router.makeWebSocket(window.app.pong_socket, "/game/match");
 				window.app.match_socket = Router.closeWebSocket(window.app.match_socket);
@@ -275,13 +259,11 @@ const Router = {
 				fragment.appendChild(document.createElement("friend-list"));
 				fragment.appendChild(document.createElement("friend-search"));
 				pageElement = fragment;
-				console.log("friends page created");
 				break;
 			default:
 				// homepage
 				pageElement = document.createElement("play-menu-home-page");
 				route = "/";
-				console.log("default in router");
 				break;
 		}
 		if (pageElement) {
