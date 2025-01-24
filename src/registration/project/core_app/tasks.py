@@ -18,6 +18,7 @@ from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
 from django.conf import settings
+import base64, logging
 
 @shared_task
 def generate_jwt_task(user_data, request_data):
@@ -77,10 +78,12 @@ def generate_backup_codes_task(user_data):
 
         user = RegistrationUser.objects.get(id=user_data['id'])
         backup_codes = user.generate_backup_codes()
-
         cache_key = f"backup_codes_{user_data['id']}"
         logging.warning(f"Storing backup codes for user {user_data['id']}")
-        cache.set(cache_key, backup_codes, timeout=300)
+        encrypted_codes = []
+        for code in backup_codes:
+            encrypted_codes.append(base64.b64encode(code.encode('utf-8')).decode('utf-8'))
+        cache.set(cache_key, encrypted_codes, timeout=300)
         return True
     except Exception as e:
         logging.warning(f"generate_backup_codes_task error: {str(e)}")

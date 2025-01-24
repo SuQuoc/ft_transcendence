@@ -23,6 +23,7 @@ from django.core.cache import cache
 import os
 from datetime import datetime
 from django.conf import settings
+import base64
 
 @api_view(['POST'])
 @authentication_classes([CredentialsAuthentication])
@@ -133,8 +134,11 @@ def signup(request):
 
         jwt_response = cache.get(cache_key)
         backup_codes = cache.get(backup_codes_key)
+        decrypted_codes = []
+        for code in backup_codes:
+            decrypted_codes.append(base64.b64decode(code.encode('utf-8')).decode('utf-8'))
         if jwt_response:
-            response = Response({'status': 'success', 'backup_codes': backup_codes}, status=status.HTTP_200_OK)
+            response = Response({'status': 'success', 'backup_codes': decrypted_codes}, status=status.HTTP_200_OK)
             access_token_expiration = datetime.now(timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
             response.set_cookie(
 				key='access',
@@ -157,7 +161,7 @@ def signup(request):
             return response
         logging.warning(f"no cached token for user {user.id}")
         token_s = CustomTokenObtainPairSerializer(data=request.data)
-        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, backup_codes)
+        return generate_response_with_valid_JWT(user, status.HTTP_200_OK, token_s, decrypted_codes)
     except ValidationError as e:
         return Response({str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
