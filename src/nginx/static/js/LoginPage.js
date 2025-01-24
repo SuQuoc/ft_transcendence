@@ -9,7 +9,6 @@ export class LoginPage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.shadowRoot.getElementById("loginEmail").focus();
 		this.shadowRoot
 			.getElementById("loginSubmitButton")

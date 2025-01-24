@@ -7,8 +7,6 @@ export class ForgotPassword extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		const formElements = this.shadowRoot.querySelectorAll(
 			'#forgotPasswordForm input, #forgotPasswordForm button[type="submit"]',
 		);

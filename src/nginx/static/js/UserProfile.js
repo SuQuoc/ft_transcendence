@@ -167,7 +167,6 @@ export class UserProfile extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.loadUserData();
 		switch (document.documentElement.style.getPropertyValue("--bs-font-size-base")) {
 			case "1.1rem":

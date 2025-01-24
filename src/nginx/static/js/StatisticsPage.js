@@ -22,8 +22,6 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	async connectedCallback() {
-		super.connectedCallback();
-
 		// adding classes
 		this.classList.add("d-flex", "flex-column", "align-items-center", "w-100");
 		
@@ -40,8 +38,6 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		// remove event listeners
 	}
 
@@ -76,12 +72,12 @@ export class StatisticsPage extends ComponentBaseClass {
 		this.root.getElementById("statsTotalGamesPlayed").innerText = stats.total_matches;
 		this.root.getElementById("statsTotalGamesLost").innerText = stats.losses;
 		this.root.getElementById("statsTotalGamesWon").innerText = stats.wins;
-		this.root.getElementById("statsLostPercent").innerText = parseFloat(lost_percent.toFixed(2)) + "%";
-		this.root.getElementById("statsWonPercent").innerText = parseFloat(won_percent.toFixed(2)) + "%"
+		this.root.getElementById("statsLostPercent").innerText = Number.parseFloat(lost_percent.toFixed(2)) + "%";
+		this.root.getElementById("statsWonPercent").innerText = Number.parseFloat(won_percent.toFixed(2)) + "%"
 		lost_bar.style.width = lost_percent + "%";
-		lost_bar.setAttribute("aria-valuenow", parseFloat(lost_percent.toFixed(2)));
+		lost_bar.setAttribute("aria-valuenow", Number.parseFloat(lost_percent.toFixed(2)));
 		won_bar.style.width = won_percent + "%";
-		won_bar.setAttribute("aria-valuenow", parseFloat(won_percent.toFixed(2)));
+		won_bar.setAttribute("aria-valuenow", Number.parseFloat(won_percent.toFixed(2)));
 
 		for (let key in stats.last_matches) {
 			const tournament = stats.last_matches[key];

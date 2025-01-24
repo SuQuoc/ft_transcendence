@@ -9,7 +9,6 @@ export class SignupPage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.shadowRoot
 			.getElementById("signupForm")
 			.addEventListener("submit", this.signup.bind(this));

@@ -11,8 +11,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// getting elements
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
@@ -34,9 +32,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	}
 	
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
-		// removind event listeners
+		// remove event listeners
 		this.displayname_form.removeEventListener("submit", this.handleSubmitDisplaynameVar);
 		this.input_field.removeEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
 	}

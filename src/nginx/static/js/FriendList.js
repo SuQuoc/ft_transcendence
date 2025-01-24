@@ -125,8 +125,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// adding event listener
 		if (window.app.online_socket.socket)
 			window.app.online_socket.socket.addEventListener('message', this.handleOnlineSocketMessage_var);
@@ -136,8 +134,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		// removing event listener
 		if (window.app.online_socket.socket)
 			window.app.online_socket.socket.removeEventListener('message', this.handleOnlineSocketMessage_var);

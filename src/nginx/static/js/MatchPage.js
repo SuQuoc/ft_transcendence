@@ -13,8 +13,6 @@ export class MatchPage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// adding classes
 		this.classList.add("d-flex", "w-100", "h-100");
 
@@ -28,8 +26,6 @@ export class MatchPage extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		if (this.timeout_id > 0)
 			clearTimeout(this.timeout_id);
 

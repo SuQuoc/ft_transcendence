@@ -49,8 +49,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// calling the method to set the initial position of the display
 		setTimeout(() => { // needs to happen in setTimeout, to give the browser enough time to render everything before we can calculate the correct position
 			this.handleRangeDisplay({target: this.input_range});
@@ -58,8 +56,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-		
 		// removing event listeners
 		if (window.app.socket)
 			window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);

@@ -75,7 +75,6 @@ export class FriendSearch extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.shadowRoot
 			.querySelector(".search-button")
 			.addEventListener("click", () => this.performSearch());
