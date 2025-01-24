@@ -84,8 +84,6 @@ def generate_backup_codes_task(user_data):
         encrypted_codes = []
         for code in backup_codes:
             encrypted_codes.append(base64.b64encode(code.encode('utf-8')).decode('utf-8'))
-        logging.error(f"ANNIE backup codes: {backup_codes} (type: {type(backup_codes)})")
-        logging.error(f"First element type: {type(backup_codes[0])}")
         cache.set(cache_key, encrypted_codes, timeout=300)
         return True
     except Exception as e:
