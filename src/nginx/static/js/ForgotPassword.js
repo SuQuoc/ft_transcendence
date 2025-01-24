@@ -64,8 +64,8 @@ export class ForgotPassword extends ComponentBaseClass {
 						<label for="resetNewPassword2" class="form-label text-secondary">Confirm New Password</label>
 						<input name="password2" id="resetNewPassword2" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
 						<div class="invalid-feedback mb-1">Please enter a valid password</div>
-						<span id="resetErrorMessage" class="text-danger mt-3"></span>
 					</div>
+					<span id="resetErrorMessage" class="text-danger"></span>
 
 					<div>
 						<p class="text-secondary small mb-1">
@@ -187,7 +187,7 @@ export class ForgotPassword extends ComponentBaseClass {
 		this.shadowRoot.getElementById("resetErrorMessage").textContent = "";
 
 		try {
-			this.apiFetch(
+			await this.apiFetch(
 				"/registration/basic_forgot_password",
 				{ method: "POST", body: JSON.stringify({ username: email }) },
 				"application/json",
