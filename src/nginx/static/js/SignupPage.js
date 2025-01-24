@@ -116,9 +116,9 @@ export class SignupPage extends ComponentBaseClass {
                     	</div>
                     	<span id="signupOtpErrorMessage" class="text-danger"></span>
                     </div>
-                    <p class="text-secondary small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
+                    <p class="text-secondary small m-0"><a href="#" onclick="app.router.go('/forgot-password');" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
                     <p class="text-secondary small m-0">Already signed up?
-                        <a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
+                        <a href="#" onclick="app.router.go('/login');" id="signupGoToLogin" class="text-decoration-none text-white">
                             Log in
                         </a>
                         here!

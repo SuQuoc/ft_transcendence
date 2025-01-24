@@ -94,8 +94,8 @@ export class LoginPage extends ComponentBaseClass {
 					</div>
 					<div>
 						<span id="errorMessage" class="text-danger d-block mb-2"></span>
-						<p class="text-secondary small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
-						<p class="text-secondary small mb-1">No account yet? <a href="/signup" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
+						<p class="text-secondary small m-0"><a href="#" onclick="app.router.go('/forgot-password');" class="text-decoration-none text-white" id="forgotPassword">Forgot Password?</a></p>
+						<p class="text-secondary small mb-1">No account yet? <a href="#" onclick="app.router.go('/signup');" class="text-decoration-none text-white" id="loginGoToSignup">Sign up</a> here!</p>
 						<button type="submit" class="btn btn-custom w-100" form="loginForm" disabled id="loginSubmitButton">Log in</button>
 						<div class="spinner-border text-light" role="status" id="loginSpinner" style="display: none;">
 							<span class="visually-hidden">Loading...</span>

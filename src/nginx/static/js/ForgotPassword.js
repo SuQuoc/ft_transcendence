@@ -69,8 +69,8 @@ export class ForgotPassword extends ComponentBaseClass {
 
 					<div>
 						<p class="text-secondary small mb-1">
-							Back to <a href="/login" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
-							or <a href="/signup" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
+							Back to <a href="#" onclick="app.router.go('/login');" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
+							or <a href="#" onclick="app.router.go('/signup');" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
 						</p>
 						<button type="submit" class="btn btn-custom w-100" form="forgotPasswordForm" id="resetSubmitButton" disabled>Reset Password</button>
 						<div class="spinner-border text-light" role="status" id="resetSpinner" style="display: none;">
