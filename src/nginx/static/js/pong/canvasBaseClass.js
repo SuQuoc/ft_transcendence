@@ -114,7 +114,7 @@ export class canvasBaseClass extends HTMLElement {
 		}
 
 		this.scaleCanvas(this.bg_ctx, this.bg_canvas.width, this.width_unscaled);
-		this.background.drawBackground(this.player_left.score, this.player_right.score);
+		this.background.drawBackground();
 	}
 
 	getElementHTML() {
