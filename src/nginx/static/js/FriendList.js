@@ -22,7 +22,7 @@ export class FriendList extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement("template");
 		template.innerHTML = `
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+      <scripts-and-styles></scripts-and-styles>
       <style>
         .friend-status {
           display: inline-block;
@@ -84,8 +84,8 @@ export class FriendList extends ComponentBaseClass {
 		<div class="container">
 		<div class="p-3 rounded-3 bg-dark">
 			<div class="btn-group w-100 mb-3" role="toolbar" aria-label="Element to switch between friends and requests">
-				<button type="button" class="btn btn-outline-primary" id="friends-button">Friends</button>
-				<button type="button" class="btn btn-outline-primary" id="requested-button">Requests</button>
+				<button type="button" class="btn btn-custom" id="friends-button">Friends</button>
+				<button type="button" class="btn btn-custom" id="requested-button">Requests</button>
 			</div>
 			<ul class="list-group bg-dark" id="list"></ul>
 		</div>
