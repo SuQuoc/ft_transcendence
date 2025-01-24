@@ -252,7 +252,7 @@ export class UserProfile extends ComponentBaseClass {
 				}
 				button.style.display = event.target.checked ? "none" : "block";
 				label.textContent = event.target.checked ? "Backup Code" : "OTP sent to old E-Mail";
-				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[0-9]{16}";
+				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[A-Za-z0-9]{16}";
 			});
 		this.shadowRoot
 			.getElementById("changeFontSize")
@@ -731,7 +731,7 @@ export class UserProfile extends ComponentBaseClass {
 	validatePasswordOTP() {
 		const newPasswordOTP = this.shadowRoot.getElementById("changePasswordOTP");
 		const changePasswordButton = this.shadowRoot.getElementById("changePassword");
-		const pattern = /^[0-9]{16}$/;
+		const pattern = /^[0-9A-Za-z]{16}$/;
 		if (pattern.test(newPasswordOTP.value)) {
 			changePasswordButton.removeAttribute("disabled");
 		} else {
