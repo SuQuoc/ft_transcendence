@@ -334,7 +334,8 @@ class LobbiesConsumer(AsyncWebsocketConsumer):
         shared queue for tournament task
         """
         
-        await self.queue.put(event)
+        if self.queue:
+            await self.queue.put(event)
         self.in_game = False
 
     async def display_match_result(self, event):
