@@ -76,14 +76,14 @@ export class UserProfile extends ComponentBaseClass {
 							</div>
 							<label for="oldEmailOTP" class="form-label">OTP sent to old E-Mail</label>
 							<div class="input-group">
-								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 								<span class="input-group-text btn btn-custom" id="requestOldEmailOTP" tabindex="0">New OTP</span>
 							</div>
 						</div>
 						<div id="newEmailContainer" hidden>
 							<label for="newEmailOTP" class="form-label mt-3">OTP sent to new E-Mail</label>
 							<div class="input-group">
-								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 								<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 							</div>
 							<div class="d-flex justify-content-between">
