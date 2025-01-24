@@ -137,10 +137,11 @@ export class UserProfile extends ComponentBaseClass {
 				<hr>
 				<label for="changeFontSize" class="form-label">Change Font Size</label>
 				<div class="btn-group w-100" id="changeFontSize">
-					<a href="#" class="btn btn-custom active" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1rem');">Regular</a>
+					<a href="#" class="btn btn-custom" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1rem');">Regular</a>
 					<a href="#" class="btn btn-custom" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.1rem');">Large</a>
 					<a href="#" class="btn btn-custom" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.2rem');">Extra-large</a>
 				</div>
+				<hr>
 				<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
 			</div>
 			<button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
@@ -168,6 +169,16 @@ export class UserProfile extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.loadUserData();
+		switch (document.documentElement.style.getPropertyValue("--bs-font-size-base")) {
+			case "1.1rem":
+				this.shadowRoot.getElementById("changeFontSize").querySelectorAll("a")[1].classList.add("active");
+				break;
+			case "1.2rem":
+				this.shadowRoot.getElementById("changeFontSize").querySelectorAll("a")[2].classList.add("active");
+				break;
+			default:
+				this.shadowRoot.getElementById("changeFontSize").querySelector("a").classList.add("active");
+		}
 		this.addMultipleEventListeners(["oldPassword", "newPassword", "confirmPassword"], ["input"], this.validatePasswords.bind(this));
 		this.addMultipleEventListeners(["changeDisplayNameButton"], ["click", "keydown"], (event) => this.toggleDisplayname(event));
 		this.addMultipleEventListeners(["changePassword"], ["click", "keydown"], (event) => this.changePassword(event));
