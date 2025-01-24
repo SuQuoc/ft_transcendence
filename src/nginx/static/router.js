@@ -321,7 +321,9 @@ const Router = {
 
 	handlePopstate(event) {
 		event.preventDefault();
-		Router.go(event.state.route, false);
+		if (event.state && event.state.route !== undefined && event.state.route !== null) {
+			Router.go(event.state.route, false);
+		}
 	},
 };
 

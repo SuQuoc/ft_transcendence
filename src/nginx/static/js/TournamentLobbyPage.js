@@ -82,12 +82,10 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	displayMatchResult(winner, loser) {
 		let winner_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${winner}"]`);
 		let loser_element = this.player_list.querySelector(`tournament-lobby-player-element[name="${loser}"]`);
-		if (winner_element) {
+		if (winner_element)
 			winner_element.incrementWins();	
-		} else {console.error("Error: displayMatchResult: winner element not found");}
-		if (loser_element) {
+		if (loser_element)
 			loser_element.greyOutPlayer();
-		} else {console.error("Error: displayMatchResult: loser element not found");}
 	}
 
 	addPlayerElement(player_name, avatar) {

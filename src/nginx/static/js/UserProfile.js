@@ -76,14 +76,14 @@ export class UserProfile extends ComponentBaseClass {
 							</div>
 							<label for="oldEmailOTP" class="form-label">OTP sent to old E-Mail</label>
 							<div class="input-group">
-								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<input type="text" class="form-control" id="oldEmailOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 								<span class="input-group-text btn btn-custom" id="requestOldEmailOTP" tabindex="0">New OTP</span>
 							</div>
 						</div>
 						<div id="newEmailContainer" hidden>
 							<label for="newEmailOTP" class="form-label mt-3">OTP sent to new E-Mail</label>
 							<div class="input-group">
-								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+								<input type="text" class="form-control" id="newEmailOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 								<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 							</div>
 							<div class="d-flex justify-content-between">
@@ -117,9 +117,9 @@ export class UserProfile extends ComponentBaseClass {
 						</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
-						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
+						<label for="newPasswordOTP" class="form-label">OTP sent to E-Mail</label>
 						<div class="input-group">
-							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 							<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 						</div>
 					</div>
@@ -127,7 +127,7 @@ export class UserProfile extends ComponentBaseClass {
 				<div id="changePasswordOTPSection" class="d-none mb-3">
 					<label for="changePasswordOTP" class="form-label">Enter OTP</label>
 					<div class="input-group">
-						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9]{16}">
+						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9A-Za-z]{16}">
 						<span class="input-group-text btn btn-custom" id="changePasswordRequestOTP" tabindex="0">New OTP</span>
 					</div>
 					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
@@ -252,7 +252,7 @@ export class UserProfile extends ComponentBaseClass {
 				}
 				button.style.display = event.target.checked ? "none" : "block";
 				label.textContent = event.target.checked ? "Backup Code" : "OTP sent to old E-Mail";
-				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[0-9]{16}";
+				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[A-Za-z0-9]{16}";
 			});
 		this.shadowRoot
 			.getElementById("changeFontSize")
@@ -714,6 +714,7 @@ export class UserProfile extends ComponentBaseClass {
 		const confirmPassword = this.shadowRoot.getElementById("confirmPassword");
 		const otp = this.shadowRoot.getElementById("changePasswordOTP");
 		const error = this.shadowRoot.getElementById("changePasswordWarning");
+		const newOTPButton = this.shadowRoot.getElementById("changePasswordRequestOTP");
 
 		oldPassword.value = "";
 		newPassword.value = "";
@@ -725,13 +726,14 @@ export class UserProfile extends ComponentBaseClass {
 		passwordSection.classList.remove("d-none");
 		otpSection.classList.add("d-none");
 		error.textContent = "";
+		newOTPButton.removeAttribute("disabled");
 		otp.focus();
 	}
 
 	validatePasswordOTP() {
 		const newPasswordOTP = this.shadowRoot.getElementById("changePasswordOTP");
 		const changePasswordButton = this.shadowRoot.getElementById("changePassword");
-		const pattern = /^[0-9]{16}$/;
+		const pattern = /^[0-9A-Za-z]{16}$/;
 		if (pattern.test(newPasswordOTP.value)) {
 			changePasswordButton.removeAttribute("disabled");
 		} else {
@@ -739,14 +741,14 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	changePasswordGetNewOTP() {
+	async changePasswordGetNewOTP() {
 		const newOTPButton = this.shadowRoot.getElementById("changePasswordRequestOTP");
 		if (newOTPButton.hasAttribute("disabled")) {
 			return;
 		}
 		const oldPassword = this.shadowRoot.getElementById("oldPassword").value;
 		const newPassword = this.shadowRoot.getElementById("newPassword").value;
-		this.apiFetch("/registration/change_password", {
+		await this.apiFetch("/registration/change_password", {
 			method: "POST",
 			body: JSON.stringify({
 				current_password: oldPassword,
@@ -774,9 +776,7 @@ export class UserProfile extends ComponentBaseClass {
 			return;
 		}
 		const changeButton = this.shadowRoot.getElementById("changePassword");
-		const changePasswordWarning = this.shadowRoot.getElementById(
-			"changePasswordWarning",
-		);
+		const changePasswordWarning = this.shadowRoot.getElementById("changePasswordWarning");
 		const otpSection = this.shadowRoot.getElementById("changePasswordOTPSection");
 		const passwordSection = this.shadowRoot.getElementById("passwordForm");
 		changeButton.disabled = true;
@@ -793,16 +793,9 @@ export class UserProfile extends ComponentBaseClass {
 
 		if (otpSection.classList.contains("d-none")) {
 			try {
-				await this.apiFetch("/registration/change_password", {
-					method: "POST",
-					body: JSON.stringify({
-						current_password: oldPassword,
-						new_password: newPassword,
-					}),
-				});
+				await this.changePasswordGetNewOTP();
 				passwordSection.classList.add("d-none");
 				otpSection.classList.remove("d-none");
-				this.changePasswordGetNewOTP();
 			} catch (error) {
 				changePasswordWarning.textContent = error;
 				changePasswordWarning.style.display = "block";
