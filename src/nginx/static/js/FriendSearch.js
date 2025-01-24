@@ -122,7 +122,7 @@ export class FriendSearch extends ComponentBaseClass {
             ${user.relationship === "requested" ? '<button class="btn btn-primary btn-sm disabled">+</button>' : ""}
             ${user.relationship === "received" ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ""}
             ${user.relationship === "stranger" && user.displayname !== window.app.userData.username ? '<button class="btn btn-primary btn-sm">+</button>' : ""}
-            <span class="cursor-pointer underline-on-hover text-white">${user.displayname}</span>
+            <span class="cursor-pointer underline-on-hover text-white" tabindex="0">${user.displayname}</span>
           `;
 			item.classList.add(
 				"list-group-item",
@@ -162,6 +162,16 @@ export class FriendSearch extends ComponentBaseClass {
             const displaynameElement = item.querySelector("span");
             if (displaynameElement) {
                 displaynameElement.addEventListener("click", () => {
+                    const userData = {id: user.user_id,
+                        name: user.displayname,
+                        image: user.image,
+                    };
+                    window.app.router.go("/stats", true, userData);
+                });
+				displaynameElement.addEventListener("keydown", (event) => {
+					if (event.key !== "Enter" && event.key !== " ") {
+						return;
+					}
                     const userData = {id: user.user_id,
                         name: user.displayname,
                         image: user.image,

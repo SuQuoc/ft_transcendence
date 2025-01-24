@@ -63,12 +63,12 @@ export class LoginPage extends ComponentBaseClass {
 				<form id="loginForm" class="d-flex flex-column needs-validation gap-3">
 					<div>
 						<label for="loginEmail" class="form-label text-secondary">Email address</label>
-						<input name="email" id="loginEmail" type="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
+						<input name="email" id="loginEmail" type="email" autocomplete="email" class="form-control" placeholder="name@example.com" aria-describedby="errorMessage" aria-required="true" required>
 						<div class="invalid-feedback mb-1">Please enter your email</div>
 					</div>
 					<div>
 						<label for="loginPassword" class="form-label text-secondary">Password</label>
-						<input name="password" id="loginPassword" type="password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
+						<input name="password" id="loginPassword" type="password" autocomplete="current-password" class="form-control" aria-describedby="errorMessage" aria-required="true" required>
 						<div class="invalid-feedback mb-1">Please enter your password</div>
 					</div>
 					<div class="form-check form-switch" id="backupCodeSwitch" style="display: none;">

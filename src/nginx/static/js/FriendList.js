@@ -210,7 +210,7 @@ export class FriendList extends ComponentBaseClass {
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
 		<span class="friend-status ${window.app?.online_socket?.online_friends?.has(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
-      <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
+      <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1" tabindex="0">${itemData.displayname}</span>
     `;
 		item.querySelector(".btn-danger").addEventListener("click", () => {
 			this.changeFriendRequest(itemData.friend_request_id, "unfriend");
@@ -218,6 +218,16 @@ export class FriendList extends ComponentBaseClass {
 		const displaynameElement = item.querySelector('span[name="displayname"]');
 		if (displaynameElement) {
 			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
+			displaynameElement.addEventListener("keydown", (event) => {
+				if (event.key !== "Enter" && event.key !== " ") {
+					return;
+				}
 				const userData = {id: itemData.user_id,
 					name: itemData.displayname,
 					image: itemData.image,
@@ -235,7 +245,7 @@ export class FriendList extends ComponentBaseClass {
 		item.innerHTML = `
 	  		<button class="btn btn-success btn-sm">✓</button>
 	  		<button class="btn btn-danger btn-sm">X</button>
-	  		<span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
+	  		<span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1" tabindex="0">${itemData.displayname}</span>
 		`;
 		if (itemData.relationship === "received") {
 			item.querySelector(".btn-success").addEventListener("click", () => {
@@ -251,6 +261,16 @@ export class FriendList extends ComponentBaseClass {
 		const displaynameElement = item.querySelector('span[name="displayname"]');
 		if (displaynameElement) {
 			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
+			displaynameElement.addEventListener("keydown", (event) => {
+				if (event.key !== "Enter" && event.key !== " ") {
+					return;
+				}
 				const userData = {id: itemData.user_id,
 					name: itemData.displayname,
 					image: itemData.image,
