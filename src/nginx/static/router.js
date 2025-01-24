@@ -189,9 +189,23 @@ const Router = {
 		}
 	},
 
-	// changes the page main content and update the URL
+	/** Changes which navbar element has the active class if "route" is a valid href link of one of the elements. If not it does nothing. */
+	changeActiveNav: (route) => {
+		const active = document.querySelector(`nav a[href="${route}"]`);
+		if (!active)
+			return;
+
+		const elements = document.querySelectorAll("nav a.active");
+		elements.forEach(element => {
+			element.classList.remove("active");
+		});
+
+		active.classList.add("active");
+	},
+
+	/** Changes the page main content and updates the URL.
+	 * @param data only needed for the TournamentLobbyPage and the StatisticsPage */
 	go: async (route, addToHistory = true, data = "") => {
-		// data is only needed for the TournamentLobbyPage and the StatisticsPage
 		let pageElement = null; // the new page element
 
 		if (route !== "/login" && route !== "/signup" && route !== "/forgot-password") {
@@ -214,6 +228,7 @@ const Router = {
 		}
 
 		Router.hideOrShowNavbarAndFooter(route);
+		Router.changeActiveNav(route);
 
 		// create the new page element depending on the route
 		switch (route) {
