@@ -135,6 +135,12 @@ export class UserProfile extends ComponentBaseClass {
 				<button type="submit" class="btn btn-custom" id="changePassword" disabled>Change Password</button>
 				<div class="warning-message" id="changePasswordWarning">Error changing password</div>
 				<hr>
+				<label for="changeFontSize" class="form-label">Change Font Size</label>
+				<div class="btn-group w-100" id="changeFontSize">
+					<a href="#" class="btn btn-custom active" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1rem');">Regular</a>
+					<a href="#" class="btn btn-custom" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.1rem');">Large</a>
+					<a href="#" class="btn btn-custom" onclick="document.documentElement.style.setProperty('--bs-font-size-base', '1.2rem');">Extra-large</a>
+				</div>
 				<button type="button" class="btn btn-secondary mt-3" id="logoutButton" aria-label="Logout">Logout</button>
 			</div>
 			<button type="button" class="btn btn-danger mt-3" id="deleteUserButton" aria-label="Delete User">Delete User</button>
@@ -162,47 +168,47 @@ export class UserProfile extends ComponentBaseClass {
 	connectedCallback() {
 		super.connectedCallback();
 		this.loadUserData();
-		this.shadowRoot
-			.getElementById("changeDisplayNameButton")
-			.addEventListener("click", this.toggleDisplayname.bind(this));
-		this.shadowRoot
-			.getElementById("changePassword")
-			.addEventListener("click", this.changePassword.bind(this));
-		this.shadowRoot
-			.getElementById("oldPassword")
-			.addEventListener("input", this.validatePasswords.bind(this));
-		this.shadowRoot
-			.getElementById("newPassword")
-			.addEventListener("input", this.validatePasswords.bind(this));
-		this.shadowRoot
-			.getElementById("confirmPassword")
-			.addEventListener("input", this.validatePasswords.bind(this));
-		this.shadowRoot
-			.getElementById("profileImage")
-			.addEventListener("click", () =>
-				this.shadowRoot.getElementById("imageUpload").click(),
-			);
-		this.shadowRoot
-			.getElementById("imageUpload")
-			.addEventListener("change", this.handleImageUpload.bind(this));
-		this.shadowRoot
-			.getElementById("oldPasswordToggle")
-			.addEventListener("click", () =>
-				this.togglePasswordVisibility("oldPassword", "oldPasswordToggle"),
-			);
-		this.shadowRoot
-			.getElementById("newPasswordToggle")
-			.addEventListener("click", () =>
-				this.togglePasswordVisibility("newPassword", "newPasswordToggle"),
-			);
-		this.shadowRoot
-			.getElementById("confirmPasswordToggle")
-			.addEventListener("click", () =>
-				this.togglePasswordVisibility(
-					"confirmPassword",
-					"confirmPasswordToggle",
-				),
-			);
+		this.addMultipleEventListeners(["oldPassword", "newPassword", "confirmPassword"], ["input"], this.validatePasswords.bind(this));
+		this.addMultipleEventListeners(["changeDisplayNameButton"], ["click", "keydown"], (event) => this.toggleDisplayname(event));
+		this.addMultipleEventListeners(["changePassword"], ["click", "keydown"], (event) => this.changePassword(event));
+		this.addMultipleEventListeners(["profileImage"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.shadowRoot.getElementById("imageUpload").click()});
+		this.addMultipleEventListeners(["imageUpload"], ["change"], this.handleImageUpload.bind(this));
+		this.addMultipleEventListeners(["changeEmailButton"], ["click", "keydown"], (event) => this.emailChange(event));
+		this.addMultipleEventListeners(["oldEmailOTP", "newEmailOTP"], ["input"], this.emailValidateOTP.bind(this));
+		this.addMultipleEventListeners(["oldPasswordToggle"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.togglePasswordVisibility("oldPassword", "oldPasswordToggle");
+		});
+		this.addMultipleEventListeners(["newPasswordToggle"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.togglePasswordVisibility("newPassword", "newPasswordToggle");
+		});
+		this.addMultipleEventListeners(["confirmPasswordToggle"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.togglePasswordVisibility("confirmPassword", "confirmPasswordToggle");
+		});
+		this.addMultipleEventListeners(["requestOldEmailOTP", "requestNewEmailOTP"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.emailRequestOTP();
+		});
+		this.addMultipleEventListeners(["changePasswordRequestOTP"], ["click", "keydown"], (event) => {
+			if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			this.changePasswordGetNewOTP();
+		});
 		this.shadowRoot
 			.getElementById("logoutButton")
 			.addEventListener("click", this.handleLogout.bind(this));
@@ -210,23 +216,8 @@ export class UserProfile extends ComponentBaseClass {
 			.getElementById("deleteUserButton")
 			.addEventListener("click", this.handleDeleteUser.bind(this));
 		this.shadowRoot
-			.getElementById("changeEmailButton")
-			.addEventListener("click", this.emailChange.bind(this));
-		this.shadowRoot
-			.getElementById("requestOldEmailOTP")
-			.addEventListener("click", this.emailRequestOTP.bind(this));
-		this.shadowRoot
-			.getElementById("requestNewEmailOTP")
-			.addEventListener("click", this.emailRequestOTP.bind(this));
-		this.shadowRoot
 			.getElementById("cancelEmailButton")
 			.addEventListener("click", this.emailCancelChange.bind(this));
-		this.shadowRoot
-			.getElementById("oldEmailOTP")
-			.addEventListener("input", this.emailValidateOTP.bind(this));
-		this.shadowRoot
-			.getElementById("newEmailOTP")
-			.addEventListener("input", this.emailValidateOTP.bind(this));
 		this.shadowRoot
 			.getElementById("saveNewEmailButton")
 			.addEventListener("click", this.emailChangeWithOTP.bind(this));
@@ -236,9 +227,6 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot
 			.getElementById("changePasswordOTPCancel")
 			.addEventListener("click", this.cancelChangePasswordOTP.bind(this));
-		this.shadowRoot
-			.getElementById("changePasswordRequestOTP")
-			.addEventListener("click", this.changePasswordGetNewOTP.bind(this));
 		this.shadowRoot
 			.getElementById("changeUsernameSwitchBackupCode")
 			.addEventListener("change", (event) => {
@@ -256,9 +244,23 @@ export class UserProfile extends ComponentBaseClass {
 				label.textContent = event.target.checked ? "Backup Code" : "OTP sent to old E-Mail";
 				input.pattern = event.target.checked ? "[A-Za-z0-9]{32}" : "[0-9]{16}";
 			});
+		this.shadowRoot
+			.getElementById("changeFontSize")
+			.addEventListener("click", (event) => {
+				if (event.target.tagName === "A") {
+					const buttons = this.shadowRoot.getElementById("changeFontSize").querySelectorAll("a");
+					for (const button of buttons) {
+						button.classList.remove("active")
+					}
+					event.target.classList.add("active");
+				}
+			});
 	}
 
-	emailChange() {
+	emailChange(event) {
+		if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+			return;
+		}
 		const email = this.shadowRoot.getElementById("email");
 		const button = this.shadowRoot.getElementById("changeEmailButton");
 		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -294,6 +296,10 @@ export class UserProfile extends ComponentBaseClass {
 		const email = this.shadowRoot.getElementById("email");
 		const emailWarning = this.shadowRoot.getElementById("emailWarning");
 
+		if (requestOldEmailOTP.hasAttribute("disabled") || requestNewEmailOTP.hasAttribute("disabled")) {
+			return;
+		}
+
 		emailWarning.style.display = "none";
 		email.classList.remove("warning");
 		try {
@@ -303,6 +309,8 @@ export class UserProfile extends ComponentBaseClass {
 			});
 			oldEmailContainer.removeAttribute("hidden");
 			newEmailContainer.removeAttribute("hidden");
+			requestOldEmailOTP.setAttribute("disabled", "");
+			requestNewEmailOTP.setAttribute("disabled", "");
 			let timer = 60;
 			if (this.interval)
 				clearInterval(this.interval);
@@ -313,6 +321,8 @@ export class UserProfile extends ComponentBaseClass {
 					clearInterval(this.interval);
 					requestOldEmailOTP.textContent = "New OTP";
 					requestNewEmailOTP.textContent = "New OTP";
+					requestOldEmailOTP.removeAttribute("disabled");
+					requestNewEmailOTP.removeAttribute("disabled");
 				}
 			}, 1000);
 			this.shadowRoot.getElementById("oldEmailOTP").focus();
@@ -386,7 +396,10 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	async toggleDisplayname() {
+	async toggleDisplayname(event) {
+		if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+			return;
+		}
 		const displayName = this.shadowRoot.getElementById("displayName");
 		const button = this.shadowRoot.getElementById("changeDisplayNameButton");
 		const warning = this.shadowRoot.getElementById("profileDisplayNameWarning");
@@ -746,7 +759,10 @@ export class UserProfile extends ComponentBaseClass {
 		this.shadowRoot.getElementById("newPasswordOTP").focus();
 	}
 
-	async changePassword() {
+	async changePassword(event) {
+		if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") {
+			return;
+		}
 		const changeButton = this.shadowRoot.getElementById("changePassword");
 		const changePasswordWarning = this.shadowRoot.getElementById(
 			"changePasswordWarning",
@@ -774,9 +790,6 @@ export class UserProfile extends ComponentBaseClass {
 						new_password: newPassword,
 					}),
 				});
-				this.shadowRoot.getElementById("oldPassword").setAttribute("disabled", "");
-				this.shadowRoot.getElementById("newPassword").setAttribute("disabled", "");
-				this.shadowRoot.getElementById("confirmPassword").setAttribute("disabled", "");
 				passwordSection.classList.add("d-none");
 				otpSection.classList.remove("d-none");
 				this.changePasswordGetNewOTP();

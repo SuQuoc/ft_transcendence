@@ -58,6 +58,16 @@ export class ComponentBaseClass extends HTMLElement {
 		window.app.router.go(url, this.addToHistory);
 	}
 
+	//Helper to add multiple different types of event listeners to multiple elements
+	addMultipleEventListeners(elements, events, handler) {
+		for (const element of elements) {
+			const target = this.shadowRoot.getElementById(element);
+			for (const event of events) {
+				target.addEventListener(event, handler);
+			}
+		}
+	}
+
 	// the method where the HTML of the component is defined, must be overridden
 	getElementHTML() {
 		throw new Error("Must override method getElementHTML");
