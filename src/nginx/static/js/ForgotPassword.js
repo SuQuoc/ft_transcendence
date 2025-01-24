@@ -7,8 +7,6 @@ export class ForgotPassword extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		const formElements = this.shadowRoot.querySelectorAll(
 			'#forgotPasswordForm input, #forgotPasswordForm button[type="submit"]',
 		);
@@ -48,31 +46,31 @@ export class ForgotPassword extends ComponentBaseClass {
 					<h3 class="text-center text-white mb-0">Forgot Password</h3>
 
 					<div>
-						<label for="resetEmail" class="form-label text-white-50">Email address</label>
+						<label for="resetEmail" class="form-label text-secondary">Email address</label>
 						<input name="email" id="resetEmail" type="email" class="form-control mb-1" placeholder="name@example.com" aria-describedby="resetErrorMessage" aria-required="true" autocomplete="email" required>
 						<div class="invalid-feedback mb-1">Please enter your email</div>
 					</div>
 					
 					<div id="resetOtpSection" style="display: none;">
-						<label for="resetOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<label for="resetOtpCode" class="form-label text-secondary">OTP Code sent to your E-Mail</label>
 						<div class="input-group mb-1">
 							<input name="otp" id="resetOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
 							<button class="btn btn-custom" type="button" id="resetRequestOTP" disabled>Send OTP</button>
 							<div class="invalid-feedback mb-1">Please enter a valid OTP code</div>
 						</div>
-						<label for="resetNewPassword1" class="form-label text-white-50 mt-2">New Password</label>
+						<label for="resetNewPassword1" class="form-label text-secondary mt-2">New Password</label>
 						<input name="password1" id="resetNewPassword1" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
 						<div class="invalid-feedback mb-1">Please enter a valid password</div>
-						<label for="resetNewPassword2" class="form-label text-white-50">Confirm New Password</label>
+						<label for="resetNewPassword2" class="form-label text-secondary">Confirm New Password</label>
 						<input name="password2" id="resetNewPassword2" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
 						<div class="invalid-feedback mb-1">Please enter a valid password</div>
-						<span id="resetErrorMessage" class="text-danger mt-3"></span>
 					</div>
+					<span id="resetErrorMessage" class="text-danger"></span>
 
 					<div>
-						<p class="text-white-50 small mb-1">
-							Back to <a href="/login" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
-							or <a href="/signup" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
+						<p class="text-secondary small mb-1">
+							Back to <a href="#" onclick="app.router.go('/login');" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
+							or <a href="#" onclick="app.router.go('/signup');" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
 						</p>
 						<button type="submit" class="btn btn-custom w-100" form="forgotPasswordForm" id="resetSubmitButton" disabled>Reset Password</button>
 						<div class="spinner-border text-light" role="status" id="resetSpinner" style="display: none;">
@@ -189,7 +187,7 @@ export class ForgotPassword extends ComponentBaseClass {
 		this.shadowRoot.getElementById("resetErrorMessage").textContent = "";
 
 		try {
-			this.apiFetch(
+			await this.apiFetch(
 				"/registration/basic_forgot_password",
 				{ method: "POST", body: JSON.stringify({ username: email }) },
 				"application/json",

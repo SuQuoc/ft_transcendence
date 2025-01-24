@@ -9,7 +9,7 @@ export class FriendSearch extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement("template");
 		template.innerHTML = `
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+      <scripts-and-styles></scripts-and-styles>
       <style>
         .friend-status {
           display: inline-block;
@@ -66,7 +66,7 @@ export class FriendSearch extends ComponentBaseClass {
         <div class="search-container p-3 rounded-3 bg-dark">
             <div class="input-group mb-3" role="search">
                 <input type="text" class="form-control search-input" placeholder="Search for users..." aria-label="Search">
-                <button class="btn btn-primary search-button">🔍</button>
+                <button class="btn btn-custom search-button">🔍</button>
             </div>
             <ul class="search-results list-group bg-dark"></ul>
         </div>
@@ -75,7 +75,6 @@ export class FriendSearch extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.shadowRoot
 			.querySelector(".search-button")
 			.addEventListener("click", () => this.performSearch());
@@ -123,7 +122,7 @@ export class FriendSearch extends ComponentBaseClass {
             ${user.relationship === "requested" ? '<button class="btn btn-primary btn-sm disabled">+</button>' : ""}
             ${user.relationship === "received" ? '<button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">X</button>' : ""}
             ${user.relationship === "stranger" && user.displayname !== window.app.userData.username ? '<button class="btn btn-primary btn-sm">+</button>' : ""}
-            <span class="cursor-pointer underline-on-hover text-white">${user.displayname}</span>
+            <span class="cursor-pointer underline-on-hover text-white" tabindex="0">${user.displayname}</span>
           `;
 			item.classList.add(
 				"list-group-item",
@@ -163,6 +162,16 @@ export class FriendSearch extends ComponentBaseClass {
             const displaynameElement = item.querySelector("span");
             if (displaynameElement) {
                 displaynameElement.addEventListener("click", () => {
+                    const userData = {id: user.user_id,
+                        name: user.displayname,
+                        image: user.image,
+                    };
+                    window.app.router.go("/stats", true, userData);
+                });
+				displaynameElement.addEventListener("keydown", (event) => {
+					if (event.key !== "Enter" && event.key !== " ") {
+						return;
+					}
                     const userData = {id: user.user_id,
                         name: user.displayname,
                         image: user.image,

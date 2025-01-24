@@ -18,8 +18,8 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 	}
 
 	greyOutPlayer() {
-		this.name.classList.add("text-white-50");
-		this.wins.classList.add("text-white-50");
+		this.name.classList.add("text-secondary");
+		this.wins.classList.add("text-secondary");
 	}
 
 	incrementWins() {
@@ -40,7 +40,7 @@ export class TournamentLobbyPlayerElement extends HTMLElement {
 			>
 			<span name="lobby_player_name" class="text-break lh-1">name</span>
 			<div class="d-flex flex-column align-items-center ms-auto lh-1">
-				<span class="text-white-50 extra-small">wins</span>
+				<span class="text-secondary extra-small">wins</span>
 				<span name="lobby_wins" class="fs-5">0</span>
 			</div>
 		`;

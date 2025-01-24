@@ -36,8 +36,6 @@ export class TournamentLobbyPage extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		if (this.timeout_id > 0)
 			clearTimeout(this.timeout_id);
 
