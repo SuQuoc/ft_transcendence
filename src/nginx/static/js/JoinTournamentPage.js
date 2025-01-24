@@ -163,6 +163,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	getTournamentList() {
 		if (!window.app.socket) {
 			window.app.router.go("/"); // goes to the home page
+			return;
 		}
 
 		if (window.app.socket.readyState === WebSocket.OPEN) {

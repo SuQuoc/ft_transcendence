@@ -1,4 +1,3 @@
-// Update the SignupPage class
 import { ComponentBaseClass } from "./componentBaseClass.js";
 
 export class SignupPage extends ComponentBaseClass {
@@ -453,8 +452,8 @@ export class SignupPage extends ComponentBaseClass {
 				throw new Error(errorMessage);
 			}
 		} catch (error) {
-			this.shadowRoot.getElementById('signupError').textContent = error;
-			this.shadowRoot.getElementById('signupError').style.display = 'block';
+			this.shadowRoot.getElementById('signupErrorMessagePassword').textContent = error;
+			this.shadowRoot.getElementById('signupErrorMessagePassword').style.display = 'block';
 		}
 	}
 
@@ -488,8 +487,8 @@ export class SignupPage extends ComponentBaseClass {
 			}
 			this.currentUsername = email.value;
 		} catch (error) {
-			this.shadowRoot.getElementById('signupError').textContent = error;
-			this.shadowRoot.getElementById('signupError').style.display = 'block';
+			this.shadowRoot.getElementById('signupErrorMessageEmail').textContent = error;
+			this.shadowRoot.getElementById('signupErrorMessageEmail').style.display = 'block';
 		}
 	}
 }
