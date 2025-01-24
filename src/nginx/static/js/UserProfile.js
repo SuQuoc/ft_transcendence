@@ -714,6 +714,7 @@ export class UserProfile extends ComponentBaseClass {
 		const confirmPassword = this.shadowRoot.getElementById("confirmPassword");
 		const otp = this.shadowRoot.getElementById("changePasswordOTP");
 		const error = this.shadowRoot.getElementById("changePasswordWarning");
+		const newOTPButton = this.shadowRoot.getElementById("changePasswordRequestOTP");
 
 		oldPassword.value = "";
 		newPassword.value = "";
@@ -725,6 +726,7 @@ export class UserProfile extends ComponentBaseClass {
 		passwordSection.classList.remove("d-none");
 		otpSection.classList.add("d-none");
 		error.textContent = "";
+		newOTPButton.removeAttribute("disabled");
 		otp.focus();
 	}
 
@@ -739,14 +741,14 @@ export class UserProfile extends ComponentBaseClass {
 		}
 	}
 
-	changePasswordGetNewOTP() {
+	async changePasswordGetNewOTP() {
 		const newOTPButton = this.shadowRoot.getElementById("changePasswordRequestOTP");
 		if (newOTPButton.hasAttribute("disabled")) {
 			return;
 		}
 		const oldPassword = this.shadowRoot.getElementById("oldPassword").value;
 		const newPassword = this.shadowRoot.getElementById("newPassword").value;
-		this.apiFetch("/registration/change_password", {
+		await this.apiFetch("/registration/change_password", {
 			method: "POST",
 			body: JSON.stringify({
 				current_password: oldPassword,
@@ -774,9 +776,7 @@ export class UserProfile extends ComponentBaseClass {
 			return;
 		}
 		const changeButton = this.shadowRoot.getElementById("changePassword");
-		const changePasswordWarning = this.shadowRoot.getElementById(
-			"changePasswordWarning",
-		);
+		const changePasswordWarning = this.shadowRoot.getElementById("changePasswordWarning");
 		const otpSection = this.shadowRoot.getElementById("changePasswordOTPSection");
 		const passwordSection = this.shadowRoot.getElementById("passwordForm");
 		changeButton.disabled = true;
@@ -793,16 +793,9 @@ export class UserProfile extends ComponentBaseClass {
 
 		if (otpSection.classList.contains("d-none")) {
 			try {
-				await this.apiFetch("/registration/change_password", {
-					method: "POST",
-					body: JSON.stringify({
-						current_password: oldPassword,
-						new_password: newPassword,
-					}),
-				});
+				await this.changePasswordGetNewOTP();
 				passwordSection.classList.add("d-none");
 				otpSection.classList.remove("d-none");
-				this.changePasswordGetNewOTP();
 			} catch (error) {
 				changePasswordWarning.textContent = error;
 				changePasswordWarning.style.display = "block";
