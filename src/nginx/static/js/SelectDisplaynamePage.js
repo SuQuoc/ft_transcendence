@@ -11,8 +11,6 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// getting elements
 		this.displayname_form = this.shadowRoot.getElementById("displayNameForm");
 		this.input_field = this.shadowRoot.getElementById("displayNameInput");
@@ -34,9 +32,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 	}
 	
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
-		// removind event listeners
+		// remove event listeners
 		this.displayname_form.removeEventListener("submit", this.handleSubmitDisplaynameVar);
 		this.input_field.removeEventListener("input", this.handleHidingDisplaynameTakenWarningVar);
 	}
@@ -46,6 +42,8 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 			const response = await this.apiFetch('/registration/get_email', {method: 'GET'});
 			if (!response.password_set) {
 				this.showPasswordFields();
+			}
+			if (!app.userData.backupCodes?.length) {
 				const backup_codes = await this.apiFetch('/registration/backup_rotate_codes', {method: 'POST'});
 				app.userData.backupCodes = backup_codes;
 			}
@@ -226,7 +224,7 @@ export class SelectDisplaynamePage extends ComponentBaseClass {
 						required
 						aria-describedby="displayNameWarning"
 						>
-						<div class="form-text text-white-50">Other users can see this name</div>
+						<div class="form-text text-secondary">Other users can see this name</div>
 						<div id="displayNameWarning" class="text-danger mt-2" style="display: none;"></div>
 					</div>
 					

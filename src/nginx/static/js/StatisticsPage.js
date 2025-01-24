@@ -22,8 +22,6 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	async connectedCallback() {
-		super.connectedCallback();
-
 		// adding classes
 		this.classList.add("d-flex", "flex-column", "align-items-center", "w-100");
 		
@@ -40,8 +38,6 @@ export class StatisticsPage extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		// remove event listeners
 	}
 
@@ -76,12 +72,12 @@ export class StatisticsPage extends ComponentBaseClass {
 		this.root.getElementById("statsTotalGamesPlayed").innerText = stats.total_matches;
 		this.root.getElementById("statsTotalGamesLost").innerText = stats.losses;
 		this.root.getElementById("statsTotalGamesWon").innerText = stats.wins;
-		this.root.getElementById("statsLostPercent").innerText = parseFloat(lost_percent.toFixed(2)) + "%";
-		this.root.getElementById("statsWonPercent").innerText = parseFloat(won_percent.toFixed(2)) + "%"
+		this.root.getElementById("statsLostPercent").innerText = Number.parseFloat(lost_percent.toFixed(2)) + "%";
+		this.root.getElementById("statsWonPercent").innerText = Number.parseFloat(won_percent.toFixed(2)) + "%"
 		lost_bar.style.width = lost_percent + "%";
-		lost_bar.setAttribute("aria-valuenow", parseFloat(lost_percent.toFixed(2)));
+		lost_bar.setAttribute("aria-valuenow", Number.parseFloat(lost_percent.toFixed(2)));
 		won_bar.style.width = won_percent + "%";
-		won_bar.setAttribute("aria-valuenow", parseFloat(won_percent.toFixed(2)));
+		won_bar.setAttribute("aria-valuenow", Number.parseFloat(won_percent.toFixed(2)));
 
 		for (let key in stats.last_matches) {
 			const tournament = stats.last_matches[key];
@@ -99,7 +95,7 @@ export class StatisticsPage extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement("template");
 		template.innerHTML = `
-			<scripts-and-styles style="display: none"></scripts-and-styles>
+			<scripts-and-styles></scripts-and-styles>
 			<!-- Toasts -->
 			<div class="toast-container d-flex flex-column gap-1 position-fixed bottom-0 end-0 p-3">
 				<!-- Error toasts will be added here -->
@@ -119,13 +115,13 @@ export class StatisticsPage extends ComponentBaseClass {
 							<span id="statsDisplayname" class="text-break text-white fs-4 lh-1">displayname</span>
 						</div>
 
-						<hr class="w-75 text-white-50 m-0">
+						<hr class="w-75 text-secondary m-0">
 
 						<!-- total games -->
 						<div class="d-flex flex-column align-items-center justify-content-around h-50">
 							<div class="d-flex flex-column align-items-center">
 								<span id="statsTotalGamesPlayed" class="text-white fs-1 lh-1">0</span>
-								<span class="text-nowrap text-white-50">Total Games played</span>
+								<span class="text-nowrap text-secondary">Total Games played</span>
 							</div>
 						</div>
 					</div>
@@ -134,7 +130,7 @@ export class StatisticsPage extends ComponentBaseClass {
 				<!-- lost/won percentage bar -->
 				<div class="d-flex align-items-center bg-dark w-75 rounded-3 gap-2 p-2">
 					<div class="d-flex flex-column align-items-center lh-1">
-						<span class="text-white-50 mx-auto small">lost</span>
+						<span class="text-secondary mx-auto small">lost</span>
 						<span id="statsTotalGamesLost" class="text-white fs-4">0</span>
 					</div>
 
@@ -164,16 +160,16 @@ export class StatisticsPage extends ComponentBaseClass {
 					</div>
 
 					<div class="d-flex flex-column align-items-center lh-1">
-						<span class="text-white-50 mx-auto small">won</span>
+						<span class="text-secondary mx-auto small">won</span>
 						<span id="statsTotalGamesWon" class="text-white fs-4">0</span>
 					</div>
 				</div>
 			</div>
 
-			<hr class="w-75 text-white-50 m-0">
+			<hr class="w-75 text-secondary m-0">
 			
 			<div id="statsTournamentElements" class="d-flex flex-column m-4 gap-2 w-75">
-				<div id="statsNoGamesPlayed" class="text-center text-dark fw-bold fs-1 w-100">No games played yet</div>
+				<div id="statsNoGamesPlayed" class="text-center text-white fw-bold fs-1 w-100">No games played yet</div>
 				<span id="statsLastGames" class="d-none text-white">Last Games:</span>
 				<!-- Stat Tournament elements will be added here -->
 			</div>

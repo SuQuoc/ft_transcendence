@@ -49,8 +49,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// calling the method to set the initial position of the display
 		setTimeout(() => { // needs to happen in setTimeout, to give the browser enough time to render everything before we can calculate the correct position
 			this.handleRangeDisplay({target: this.input_range});
@@ -58,8 +56,6 @@ export class JoinTournamentPage extends ComponentBaseClass {
 	};
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-		
 		// removing event listeners
 		if (window.app.socket)
 			window.app.socket.removeEventListener("message", this.handleReceivedMessage_var);
@@ -293,7 +289,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					id="joinTournamentElements"
 				>
 					<!-- No tournaments to join (should only appear when there are no tournaments available -->
-					<div id="joinNoTournaments" class="text-center text-dark fw-bold fs-1 w-100">No tournaments to join</div>
+					<div id="joinNoTournaments" class="text-center text-white fw-bold fs-1 w-100">No tournaments to join</div>
 					
 					<!-- Join Tournament elements will be added here -->
 				</div>
@@ -304,7 +300,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 					<h3 class="text-center text-white fs-4 fw-semibold">Create a Tournament</h3>
 						
 						<!-- Tournament name -->
-						<label for="createNameInput" class="form-label text-white-50">Tournament Name:</label>
+						<label for="createNameInput" class="form-label text-secondary">Tournament Name:</label>
 						<input name="create_name"
 							id="createNameInput"
 							type="text"
@@ -316,7 +312,7 @@ export class JoinTournamentPage extends ComponentBaseClass {
 						<div id="createTournamentNameError" class="text-danger" style="display: none"></div>
 						
 						<!-- Number of Players -->
-						<label for="createNumberOfPlayers" class="form-label text-white-50 mt-2">Number of Players:</label>
+						<label for="createNumberOfPlayers" class="form-label text-secondary mt-2">Number of Players:</label>
 						<div class="d-flex justify-content-around  mb-3" id="createNumberOfPlayers" role="group">
 							<input
 								type="radio"
@@ -352,9 +348,9 @@ export class JoinTournamentPage extends ComponentBaseClass {
 						
 						<!-- Points required to win one round -->
 						<div class="d-flex flex-column mb-3">
-							<label for="createPointsToWin" class="form-label text-nowrap text-white-50 mb-4">Points to win one game:</label>
+							<label for="createPointsToWin" class="form-label text-nowrap text-secondary mb-4">Points to win one game:</label>
 							<div id="createDisplayLane" class="position-absolute mt-4">
-								<div id="createPointsToWinDisplay" class="text-white-50 d-inline-block">5</div>
+								<div id="createPointsToWinDisplay" class="text-secondary d-inline-block">5</div>
 							</div>
 							<input type="range"
 								class="form-range range-input-slider"

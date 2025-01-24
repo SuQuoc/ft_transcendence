@@ -14,16 +14,16 @@ export class JoinTournamentElement extends HTMLElement {
 			<div class="bg-dark d-flex flex-row align-items-center rounded-3 gap-3 p-2">
 				<div class="d-flex flex-column lh-1 text-break">
 					<span name="join_name" class="text-white">tournament name</span>
-					<span name="join_creator" class="text-white-50 small">creator name</span>
+					<span name="join_creator" class="text-secondary small">creator name</span>
 				</div>
 				<div class="d-flex flex-column align-items-center ms-auto lh-1">
-					<span class="text-white-50 extra-small">PTW</span>
+					<span class="text-secondary extra-small">PTW</span>
 					<span name="join_points_to_win" class="text-white fs-5">5</span>
 				</div>
 				
 				<div class="d-flex">
 					<span name="join_current_player_num" class="text-white fs-4">1</span>
-					<span class="text-white-50 fs-4">/</span>
+					<span class="text-secondary fs-4">/</span>
 					<span name="join_max_player_num" class="text-white fs-4">4</span>
 				</div>
 				<button type="button" name="join_tournament_button" class="btn btn-custom py-1 px-3">Join</button>

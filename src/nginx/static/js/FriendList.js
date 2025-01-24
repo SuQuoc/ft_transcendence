@@ -22,7 +22,7 @@ export class FriendList extends ComponentBaseClass {
 	getElementHTML() {
 		const template = document.createElement("template");
 		template.innerHTML = `
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+      <scripts-and-styles></scripts-and-styles>
       <style>
         .friend-status {
           display: inline-block;
@@ -84,8 +84,8 @@ export class FriendList extends ComponentBaseClass {
 		<div class="container">
 		<div class="p-3 rounded-3 bg-dark">
 			<div class="btn-group w-100 mb-3" role="toolbar" aria-label="Element to switch between friends and requests">
-				<button type="button" class="btn btn-outline-primary" id="friends-button">Friends</button>
-				<button type="button" class="btn btn-outline-primary" id="requested-button">Requests</button>
+				<button type="button" class="btn btn-custom" id="friends-button">Friends</button>
+				<button type="button" class="btn btn-custom" id="requested-button">Requests</button>
 			</div>
 			<ul class="list-group bg-dark" id="list"></ul>
 		</div>
@@ -125,8 +125,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
-
 		// adding event listener
 		if (window.app.online_socket.socket)
 			window.app.online_socket.socket.addEventListener('message', this.handleOnlineSocketMessage_var);
@@ -136,8 +134,6 @@ export class FriendList extends ComponentBaseClass {
 	}
 
 	disconnectedCallback() {
-		super.disconnectedCallback();
-
 		// removing event listener
 		if (window.app.online_socket.socket)
 			window.app.online_socket.socket.removeEventListener('message', this.handleOnlineSocketMessage_var);
@@ -214,7 +210,7 @@ export class FriendList extends ComponentBaseClass {
         <img src="${itemData.image}" alt="Profile image of ${itemData.displayname}" class="friend-img" onerror='this.style.display = "none"'>
 		<span class="friend-status ${window.app?.online_socket?.online_friends?.has(itemData.user_id) ? 'online' : 'offline'}"></span>
       </div>
-      <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
+      <span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1" tabindex="0">${itemData.displayname}</span>
     `;
 		item.querySelector(".btn-danger").addEventListener("click", () => {
 			this.changeFriendRequest(itemData.friend_request_id, "unfriend");
@@ -222,6 +218,16 @@ export class FriendList extends ComponentBaseClass {
 		const displaynameElement = item.querySelector('span[name="displayname"]');
 		if (displaynameElement) {
 			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
+			displaynameElement.addEventListener("keydown", (event) => {
+				if (event.key !== "Enter" && event.key !== " ") {
+					return;
+				}
 				const userData = {id: itemData.user_id,
 					name: itemData.displayname,
 					image: itemData.image,
@@ -239,7 +245,7 @@ export class FriendList extends ComponentBaseClass {
 		item.innerHTML = `
 	  		<button class="btn btn-success btn-sm">✓</button>
 	  		<button class="btn btn-danger btn-sm">X</button>
-	  		<span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1">${itemData.displayname}</span>
+	  		<span name="displayname" class="cursor-pointer underline-on-hover text-white text-break lh-1" tabindex="0">${itemData.displayname}</span>
 		`;
 		if (itemData.relationship === "received") {
 			item.querySelector(".btn-success").addEventListener("click", () => {
@@ -255,6 +261,16 @@ export class FriendList extends ComponentBaseClass {
 		const displaynameElement = item.querySelector('span[name="displayname"]');
 		if (displaynameElement) {
 			displaynameElement.addEventListener("click", () => {
+				const userData = {id: itemData.user_id,
+					name: itemData.displayname,
+					image: itemData.image,
+				};
+				window.app.router.go("/stats", true, userData);
+			});
+			displaynameElement.addEventListener("keydown", (event) => {
+				if (event.key !== "Enter" && event.key !== " ") {
+					return;
+				}
 				const userData = {id: itemData.user_id,
 					name: itemData.displayname,
 					image: itemData.image,

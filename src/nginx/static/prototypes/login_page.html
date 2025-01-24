@@ -32,26 +32,26 @@
 			<form id="loginForm">
 				<!-- Email -->
 				<h3 class="text-center text-white">Login</h3>
-				<label for="loginEmail" class="form-label text-white-50">Email adress</label>
+				<label for="loginEmail" class="form-label text-secondary">Email adress</label>
 				<input name="email"
 					id="loginEmail"
 					type="email"
 					class="form-control"
 					placeholder="name@example.com"
 					aria-describedby="loginEmailHelp">
-				<div class="form-text text-white-50 mb-3" id="loginEmailHelp">We'll never share your email with a
+				<div class="form-text text-secondary mb-3" id="loginEmailHelp">We'll never share your email with a
 					third party.....</div>
 				<!-- first Password -->
-				<label for="loginPassword" class="form-label text-white-50">Password</label>
+				<label for="loginPassword" class="form-label text-secondary">Password</label>
 				<input name="password"
 					id="loginPassword"
 					type="password"
 					class="form-control mb-3">
 				<!-- change to signup page -->
-				<p class="text-white-50 small m-0">No account yet? 
+				<p class="text-secondary small m-0">No account yet?
 					<!-- the link may be wrong if the port changes. it also only works if the server is running -->
 					<a href="https://localhost:8000/prototypes/signup_page.html" class="text-decoration-none text-white">
-						Sign up 
+						Sign up
 					</a>
 					here!
 				</p>
@@ -64,28 +64,28 @@
 
 	<main id="mainContent" class="d-flex flex-grow-1 align-items-center justify-content-evenly flex-wrap">
 		<!-- Login Page -->
-		 
+
 			<div class="p-3 rounded-3 bg-dark">
 				<form id="forgotPasswordForm" class="d-flex flex-column needs-validation gap-3">
 					<h3 class="text-center text-white mb-0">Forgot Password</h3>
 
 					<div>
-						<label for="resetEmail" class="form-label text-white-50">Email address</label>
+						<label for="resetEmail" class="form-label text-secondary">Email address</label>
 						<input name="email" id="resetEmail" type="email" class="form-control mb-1" placeholder="name@example.com" aria-describedby="resetErrorMessage" aria-required="true" autocomplete="email" required>
 						<div class="invalid-feedback mb-1">Please enter your email</div>
 					</div>
-					
+
 					<div id="resetOtpSection" style="display: none;">
-						<label for="resetOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+						<label for="resetOtpCode" class="form-label text-secondary">OTP Code sent to your E-Mail</label>
 						<div class="input-group mb-1">
 							<input name="otp" id="resetOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Z0-9]{16}" minlength="16" maxlength="16" autocomplete="one-time-code">
 							<button class="btn btn-custom" type="button" id="resetRequestOTP" disabled>Send OTP</button>
 							<div class="invalid-feedback mb-1">Please enter a valid OTP code</div>
 						</div>
-						<label for="resetNewPassword1" class="form-label text-white-50">New Password</label>
+						<label for="resetNewPassword1" class="form-label text-secondary">New Password</label>
 						<input name="password1" id="resetNewPassword1" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
 						<div class="invalid-feedback mb-1">Please enter a valid password</div>
-						<label for="resetNewPassword2" class="form-label text-white-50">Confirm New Password</label>
+						<label for="resetNewPassword2" class="form-label text-secondary">Confirm New Password</label>
 						<input name="password2" id="resetNewPassword2" type="password" class="form-control mb-1" aria-required="true" autocomplete="new-password">
 						<div class="invalid-feedback mb-1">Please enter a valid password</div>
 						<span id="resetErrorMessage" class="text-danger mt-3"></span>
@@ -93,7 +93,7 @@
 
 
 					<div>
-						<p class="text-white-50 small mb-1">
+						<p class="text-secondary small mb-1">
 							Back to <a href="/login" class="text-decoration-none text-white" id="forgotPasswordGoToLogin">Log in</a>
 							or <a href="/signup" class="text-decoration-none text-white" id="forgotPasswordGoToSignup">Sign up</a>
 						</p>

@@ -9,7 +9,6 @@ export class SignupPage extends ComponentBaseClass {
 	}
 
 	connectedCallback() {
-		super.connectedCallback();
 		this.shadowRoot
 			.getElementById("signupForm")
 			.addEventListener("submit", this.signup.bind(this));
@@ -54,13 +53,13 @@ export class SignupPage extends ComponentBaseClass {
             	<h3 class="text-center text-white">Signup</h3>
             	<form id="42SignupForm" method="post" enctype="application/x-www-form-urlencoded" target="_self" action="/registration/oauthtwo_send_authorization_request">
             		<input type="hidden" name="next_step" value="signup">
-					<label for="loginWith42" class="form-label text-white-50">Only for 42 students</label>
+					<label for="loginWith42" class="form-label text-secondary">Only for 42 students</label>
 					<button id="loginWith42" class="btn btn-custom w-100 mb-3" type="submit">Sign up with 42</button>
 				</form>
-            	<hr class="text-white-50">
+            	<hr class="text-secondary">
                 <form id="signupForm">
                     <div id="signupEmailSection">
-                    	<label for="signupEmail" class="form-label text-white-50">Email address</label>
+                    	<label for="signupEmail" class="form-label text-secondary">Email address</label>
 						<div class="input-group mb-3">
 							<input name="email"
 								id="signupEmail"
@@ -77,7 +76,7 @@ export class SignupPage extends ComponentBaseClass {
 					</div>
                     <span id="signupErrorMessageEmail" class="text-danger mb-3" style="display:block;"></span>
                     <div id="signupPasswordSection">
-						<label for="signupPassword1" class="form-label text-white-50">Password</label>
+						<label for="signupPassword1" class="form-label text-secondary">Password</label>
                     	<div class="input-group">
 							<input name="password"
 								id="signupPassword1"
@@ -92,7 +91,7 @@ export class SignupPage extends ComponentBaseClass {
 							/>
 							<button id="signupChangePassword1Button" class="btn btn-custom d-none" type="button">Change</button>
 						</div>
-						<label for="signupPassword2" class="form-label text-white-50">Repeat password</label>
+						<label for="signupPassword2" class="form-label text-secondary">Repeat password</label>
 						<div class="input-group mb-3">
 							<input name="password2"
 								id="signupPassword2"
@@ -110,16 +109,16 @@ export class SignupPage extends ComponentBaseClass {
                     	<span id="signupErrorMessagePassword" class="text-danger mb-3"></span>
 					</div>
                     <div id="signupOtpSection" style="display: none;">
-                    	<label for="signupOtpCode" class="form-label text-white-50">OTP Code sent to your E-Mail</label>
+                    	<label for="signupOtpCode" class="form-label text-secondary">OTP Code sent to your E-Mail</label>
                     	<div class="input-group mb-3">
                     		<input name="otp" id="signupOtpCode" type="text" class="form-control" aria-required="true" pattern="[A-Za-z0-9]{16}" minlength="16" maxlength="16">
                     		<button id="signupRequestOtpButton" class="btn btn-custom" type="button" disabled>New OTP</button>
                     	</div>
                     	<span id="signupOtpErrorMessage" class="text-danger"></span>
                     </div>
-                    <p class="text-white-50 small m-0"><a href="/forgot-password" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
-                    <p class="text-white-50 small m-0">Already signed up?
-                        <a href="/login" id="signupGoToLogin" class="text-decoration-none text-white">
+                    <p class="text-secondary small m-0"><a href="#" onclick="app.router.go('/forgot-password');" class="text-decoration-none text-white" id="signupForgotPassword">Forgot Password?</a></p>
+                    <p class="text-secondary small m-0">Already signed up?
+                        <a href="#" onclick="app.router.go('/login');" id="signupGoToLogin" class="text-decoration-none text-white">
                             Log in
                         </a>
                         here!
