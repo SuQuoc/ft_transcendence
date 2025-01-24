@@ -396,7 +396,6 @@ export class SignupPage extends ComponentBaseClass {
 			"signupChangePassword2Button",
 		);
 
-		//TODO: add check for length, at least 8 characters
 		if (password1.disabled && password2.disabled) {
 			password1.disabled = false;
 			password2.disabled = false;

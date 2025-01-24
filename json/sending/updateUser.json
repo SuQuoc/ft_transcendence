@@ -1,6 +1,0 @@
-{
-	"uid": 1234, //mandatory
-	"email": "test@test.at", //optional
-	"pw" : "asdfas", //optional
-	"display": "displayname" //optional
-}
