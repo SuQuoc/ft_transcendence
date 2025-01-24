@@ -117,9 +117,9 @@ export class UserProfile extends ComponentBaseClass {
 						</div>
 					</div>
 					<div class="mb-3" id="newPasswordOTPContainer" hidden>
-						<label for="newPasswordOTP" class="form-label">OTP sent E-Mail</label>
+						<label for="newPasswordOTP" class="form-label">OTP sent to E-Mail</label>
 						<div class="input-group">
-							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9]{16}" minlength="16" maxlength="16">
+							<input type="text" class="form-control" id="newPasswordOTP" pattern="[0-9A-Za-z]{16}" minlength="16" maxlength="16">
 							<span class="input-group-text btn btn-custom" id="requestNewEmailOTP" tabindex="0">New OTP</span>
 						</div>
 					</div>
@@ -127,7 +127,7 @@ export class UserProfile extends ComponentBaseClass {
 				<div id="changePasswordOTPSection" class="d-none mb-3">
 					<label for="changePasswordOTP" class="form-label">Enter OTP</label>
 					<div class="input-group">
-						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9]{16}">
+						<input type="text" class="form-control" id="changePasswordOTP" placeholder="OTP" aria-placeholder="OTP" maxlength="16" pattern="[0-9A-Za-z]{16}">
 						<span class="input-group-text btn btn-custom" id="changePasswordRequestOTP" tabindex="0">New OTP</span>
 					</div>
 					<button type="button" class="btn btn-danger mt-3" id="changePasswordOTPCancel">Cancel</button>
