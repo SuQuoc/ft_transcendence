@@ -77,8 +77,7 @@ def generate_backup_codes_task(user_data):
         from core_app.serializers import UserSerializer
         
         user = RegistrationUser.objects.get(id=user_data['id'])
-        backup_codes = user.generate_backup_codes()
-        
+        backup_codes = user.generate_backup_codes()  
         cache_key = f"backup_codes_{user_data['id']}"
         logging.warning(f"Storing backup codes for user {user_data['id']}")
         encrypted_codes = []
@@ -88,5 +87,4 @@ def generate_backup_codes_task(user_data):
         return True
     except Exception as e:
         logging.warning(f"generate_backup_codes_task error: {str(e)}")
-
         return False
