@@ -15,6 +15,8 @@ class Background {
 		this.score.x_left = canvas_width / 4; // the x coordinate of the left score
 		this.score.x_right = this.score.x_left * 3; // the x coordinate of the right score
 		this.score.y = y_score;
+		this.score.left = 0;
+		this.score.right = 0;
 
 		this.color = color;
 		this.ctx = ctx;
@@ -100,9 +102,11 @@ class Background {
 
 	/** Draws the left score, the right score and the line in the middle.
 	 * @param {string} left_score - The new score on the left.
-	 * @param {string} right_score - The new score no the right.
+	 * @param {string} right_score - The new score on the right.
 	 */
-	drawBackground(left_score, right_score) {
+	drawBackground(left_score = this.score.left, right_score = this.score.right) {
+		this.score.left = left_score;
+		this.score.right = right_score;
 		this.drawLeftScore(left_score);
 		this.drawRightScore(right_score);
 		this.drawLeftName("");

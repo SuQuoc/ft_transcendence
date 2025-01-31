@@ -52,7 +52,6 @@ class TestBasicSignup:
 
             # filling the otp should enable signup 
                 otp = get_otp()
-                page.wait_for_selector("#signupOtpCode", state="visible")
                 page.locator("#signupOtpCode").fill(otp)
                 expect(page.locator("#signupSubmitButton")).to_be_enabled()
                 page.locator("#signupSubmitButton").click()

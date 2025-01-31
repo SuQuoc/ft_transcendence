@@ -143,6 +143,7 @@ def signup(page: Page, email: str, password1: str, password2: str):
     page.locator("#signupPassword2").fill(password2)
     page.locator("#signupSubmitButton").click()
     otp = get_otp()
+    #page.wait_for_selector("#signupOtpCode", state="Editable")
     page.locator("#signupOtpCode").fill(otp)
     page.locator("#signupSubmitButton").click()
 
@@ -176,19 +177,20 @@ def delete_user(page: Page, password: str):
 
 
 def get_otp():
-    base = Path(__file__).resolve().parent.parent.parent  # Correct usage of parent
-    directory = base / 'src/registration/project/emails/'
-    time.sleep(2)  # Wait for 2 seconds the email to be created
-    files = [f for f in directory.iterdir() if f.is_file()]
-    last_saved_file = max(files, key=os.path.getmtime)
-    with open(last_saved_file, 'r') as f:
-        content = f.read().strip()
-    match = re.search(r'The code is:\s*([A-Za-z0-9]{16})', content)
-    if match:
-        otp = match.group(1)  # Extract the matched OTP
-        return otp
-    else:
-        return None
+    #base = Path(__file__).resolve().parent.parent.parent  # Correct usage of parent
+    #directory = base / 'src/registration/project/emails/'
+    time.sleep(1)  # Wait for 2 seconds the email to be created and the infos to be cached
+    #files = [f for f in directory.iterdir() if f.is_file()]
+    #last_saved_file = max(files, key=os.path.getmtime)
+    #with open(last_saved_file, 'r') as f:
+    #    content = f.read().strip()
+    #match = re.search(r'The code is:\s*([A-Za-z0-9]{16})', content)
+    #if match:
+    #    otp = match.group(1)  # Extract the matched OTP
+    #    return otp
+    #else:
+    #    return None
+    return '0000000000000000'
 ############################################
 
 

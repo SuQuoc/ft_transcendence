@@ -236,10 +236,8 @@ const Router = {
 				pageElement = document.createElement("play-menu-home-page");
 				break;
 			case "/tournament":
-				if (addToHistory === true) {
-					window.app.socket = Router.closeWebSocket(window.app.socket);
-					window.app.socket = Router.makeWebSocket(window.app.socket, "/game/tournament");
-				}
+				window.app.socket = Router.closeWebSocket(window.app.socket);
+				window.app.socket = Router.makeWebSocket(window.app.socket, "/game/tournament");
 				pageElement = document.createElement("join-tournament-page");
 				break; 
 			case "/tournament-lobby":
@@ -323,7 +321,9 @@ const Router = {
 
 	handlePopstate(event) {
 		event.preventDefault();
-		Router.go(event.state.route, false);
+		if (event.state && event.state.route !== undefined && event.state.route !== null) {
+			Router.go(event.state.route, false);
+		}
 	},
 };
 
