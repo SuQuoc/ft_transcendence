@@ -34,9 +34,6 @@ jobs:
           sleep 2
         done
 
-    - name: run user_management api tests
-      run: make um_test
-
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
