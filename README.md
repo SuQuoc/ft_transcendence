@@ -196,7 +196,7 @@ make build_up
 
 6. **Access the Application**
 - Open your browser and navigate to `https://localhost:8443`
-- Accept the self-signed certificate warning
+- Accept the missing certificate warning if you have not imported the generated SSL root certificate in your browser. In Firefox you can import the certificate under Settings / Privacy & Security / View Certficates. Click on Import and then choose src/common_files/ssl_certs/root-ca.crt.
 
 #### Testing
 
@@ -261,7 +261,7 @@ repo_root/docker_compose_files/.env
 ##### Server Configuration
 | Variable | Default | Purpose |
 |----------|----------|----------|
-| `SERVER_URL` | https://localhost:8000 | Server URL (must match domain) |
+| `SERVER_URL` | https://localhost:8443 | Server URL (must match domain) |
 | `DOMAIN` | localhost | Domain name |
 | `DEBUG` | False | Debug mode flag |
 | `DB_PORT` | 5432 | Database port |
