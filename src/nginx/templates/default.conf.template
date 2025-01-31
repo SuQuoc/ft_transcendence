@@ -107,4 +107,14 @@ server {
         }
         rewrite ^/callback$ https://$host:${SSL_PORT} last;
     }
+
+	location /registration/api/schema/ {
+    	proxy_pass http://registration_container/registration/api/schema/;
+    	include /etc/nginx/conf.d/proxysetheader.conf;
+	}
+
+	location /static/drf-spectacular/ {
+		proxy_pass http://registration_container/static/drf-spectacular/;
+		include /etc/nginx/conf.d/proxysetheader.conf;
+	}
 }
