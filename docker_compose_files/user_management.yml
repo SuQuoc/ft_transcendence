@@ -43,7 +43,6 @@ services:
         container_name: pong_um
         build: ../src/user_management
         volumes:
-            - ../src/user_management:/user_management
             - volume_images:/user_management/media_root
         expose:
             - "8000/tcp"
@@ -58,13 +57,13 @@ services:
             POSTGRES_DB: "${UM_POSTGRES_DB:-default_db}"
             POSTGRES_ACCESS_USER: "${UM_POSTGRES_ACCESS_USER:-accessy}"
             POSTGRES_ACCESS_PASSWORD: "${UM_POSTGRES_ACCESS_PASSWORD:-accesspass}"
+            POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
+            POSTGRES_PASSWORD: "${UM_POSTGRES_PASSWORD:-insecurepass}"
+
 
             REDIS_USER: "${UM_REDIS_USER:-redisuser}"
             REDIS_PASSWORD: "${UM_REDIS_PASSWORD:-redispass}"
 
-            # TODO: delete dev vars or keep them but only create admin user if DEBUG = True? [delete for eval] !!
-            POSTGRES_USER: "${UM_POSTGRES_USER:-posty}"
-            POSTGRES_PASSWORD: "${UM_POSTGRES_PASSWORD:-insecurepass}"
             
             PYTHONUNBUFFERED: 1
             DJ_SUDO_USERNAME: "${UM_DJ_SUDO_USERNAME:-admin}"
@@ -82,4 +81,3 @@ services:
             - network_redis_um
         secrets:
             - public_key.pem
-            - private_key.pem # TODO: !!! delete this line [for eval]

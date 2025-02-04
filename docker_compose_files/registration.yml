@@ -41,8 +41,6 @@ services:
   registration:
     container_name: pong_reg
     build: ../src/registration
-    volumes:
-      - ../src/registration:/app
     expose:
       - "8000/tcp"
     environment:
